@@ -11,11 +11,14 @@
 #define M_SQRT_PI_2  0.886226925452758014   /* sqrt(pi)/2     */
 
 static inline double stirlingseries(const double z);
+static inline double Aratio(const int n, const double alpha, const double beta);
+static inline double Analphabeta(const int n, const double alpha, const double beta);
 static inline double lambda(const double x);
 static inline double lambda2(const double x, const double l1, const double l2);
 
 double * plan_leg2cheb(const int normleg, const int normcheb, const int n);
 double * plan_cheb2leg(const int normcheb, const int normleg, const int n);
 double * plan_ultra2ultra(const int normultra1, const int normultra2, const int n, const double lambda1, const double lambda2);
+double * plan_jac2jac(const int normjac1, const int normjac2, const int n, const double alpha, const double beta, const double gamma);
 
 #endif //TRANSFORMS_H

@@ -34,19 +34,32 @@ static inline double stirlingseries(const double z) {
         return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917 + iz*(0.0007840392217200666 + iz*(6.972813758365857e-5 + iz*(-0.0005921664373536939 + iz*(-5.171790908260592e-5 + iz*(0.0008394987206720873 + iz*(7.204895416020011e-5 + iz*(-0.0019144384985654776 + iz*(-0.00016251626278391583 + iz*(0.00640336283380807 + iz*(0.0005401647678926045 + iz*(-0.02952788094569912 + iz*(-0.002481743600264998)))))))))))))))));
 }
 
+static inline double Aratio(const int n, const double alpha, const double beta) {
+    return exp((0.5*n + alpha + 0.25)*log1p(-beta/(n + alpha + beta + 1.0)) + (0.5*n + beta + 0.25)*log1p(-alpha/(n + alpha + beta + 1.0)) + (0.5*n + 0.25)*log1p(alpha/(n + 1.0))+(0.5*n + 0.25)*log1p(beta/(n + 1.0)));
+}
+
+static inline double Analphabeta(const int n, const double alpha, const double beta) {
+    if (n == 0 && alpha + beta == -1.0)
+        return tgamma(alpha + 1.0)*tgamma(beta + 1.0);
+    double t = fmin(fmin(fmin(alpha, beta), alpha + beta), 0.0);
+    if (n + t >= 7.979120323411497)
+        return pow(2.0, alpha + beta + 1.0)/(2.0*n + alpha + beta + 1.0)*stirlingseries(n + alpha + 1.0)*Aratio(n, alpha, beta)/stirlingseries(n + alpha + beta + 1.0)*stirlingseries(n + beta + 1.0)/stirlingseries(n+1.0);
+    return (n + 1.0)*(n + alpha + beta + 1.0)/(n + alpha + 1.0)/(n + beta + 1.0)*Analphabeta(n+1, alpha, beta)*((2.0*n + alpha + beta + 3.0)/(2.0*n + alpha + beta + 1.0));
+}
+
 static inline double lambda(const double x) {
     if (x > 9.84475) {
         double xp = x + 0.25;
         double invxp2 = 1.0/(xp*xp);
         return (1.0 + invxp2*(-1.5625e-02 + invxp2*(2.5634765625e-03 + invxp2*(-1.2798309326171875e-03 + invxp2*(1.343511044979095458984375e-03 + invxp2*(-2.432896639220416545867919921875e-03 + invxp2*6.7542375336415716446936130523681640625e-03))))))/sqrt(xp);
     }
-    return (x+1.0)*lambda(x+1.0)/(x+0.5);
+    return (x + 1.0)*lambda(x + 1.0)/(x + 0.5);
 }
 
 static inline double lambda2(const double x, const double l1, const double l2) {
-    if (fmin(x+l1, x+l2) >= 8.979120323411497)
-        return exp(l2-l1+(x-0.5)*log1p((l1-l2)/(x+l2)))*pow(x+l1, l1)/pow(x+l2, l2)*stirlingseries(x+l1)/stirlingseries(x+l2);
-    return (x+l2)/(x+l1)*lambda2(x+1.0, l1, l2);
+    if (fmin(x + l1, x + l2) >= 8.979120323411497)
+        return exp(l2 - l1 + (x - 0.5)*log1p((l1 - l2)/(x + l2)))*pow(x + l1, l1)/pow(x + l2, l2)*stirlingseries(x + l1)/stirlingseries(x + l2);
+    return (x + l2)/(x + l1)*lambda2(x + 1.0, l1, l2);
 }
 
 #define A(i,j) A[(i)+n*(j)]
@@ -116,6 +129,39 @@ double * plan_ultra2ultra(const int normultra1, const int normultra2, const int 
     for (int j = 0; j < n; j++)
         for (int i = j; i >= 0; i -= 2)
             A(i,j) = sclrow[i]*scl*(i+l2)*lam1[(j-i)/2]*lam2[(j+i)/2]*sclcol[j];
+    free(lam1);
+    free(lam2);
+    free(sclrow);
+    free(sclcol);
+    return A;
+}
+
+double * plan_jac2jac(const int normjac1, const int normjac2, const int n, const double alpha, const double beta, const double gamma) {
+    double * A = (double *) calloc(n * n, sizeof(double));
+    double * lam1 = (double *) calloc(n, sizeof(double));
+    double * lam2 = (double *) calloc(2*n, sizeof(double));
+    double * sclrow = (double *) calloc(n, sizeof(double));
+    double * sclcol = (double *) calloc(n, sizeof(double));
+    for (int i = 0; i < n; i++) {
+        lam1[i] = lambda2((double) i, alpha - gamma, 1.0);
+        sclrow[i] = (2.0*i + gamma + beta + 1.0)*lambda2((double) i, gamma + beta + 1.0, beta + 1.0);
+        sclcol[i] = lambda2((double) i, beta + 1.0, alpha + beta + 1.0)/tgamma(alpha - gamma);
+    }
+    for (int i = 0; i < 2*n; i++)
+        lam2[i] = lambda2((double) i, alpha + beta + 1.0, gamma + beta + 2.0);
+    if (beta + gamma == -1.0)
+        sclrow[0] = 1.0/tgamma(beta + 1.0);
+    if (alpha + beta == -1.0) {
+        lam2[0] = 1.0/(sclrow[0]*lam1[0]);
+        sclcol[0] = 1.0;
+    }
+    for (int i = 0; i < n; i++) {
+        sclrow[i] *= normjac2 ? sqrt(Analphabeta(i, gamma, beta)) : 1.0;
+        sclcol[i] /= normjac1 ? sqrt(Analphabeta(i, alpha, beta)) : 1.0;
+    }
+    for (int j = 0; j < n; j++)
+        for (int i = j; i >= 0; i--)
+            A(i,j) = sclrow[i]*lam1[j-i]*lam2[j+i]*sclcol[j];
     free(lam1);
     free(lam2);
     free(sclrow);

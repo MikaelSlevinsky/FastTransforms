@@ -24,7 +24,7 @@ int main(void) {
 
                 cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
 
-                printf("\t\t Normalization of SRC:TRG = %d:%d. The relative Frobenius norm error is: %17.16e.\n", normleg, normcheb, vecnorm_2arg(B, C, n, n)/vecnorm_1arg(C, n, n));
+                printf("\t\tNormalization of SRC:TRG = %d:%d. The relative Frobenius norm error is: %17.16e.\n", normleg, normcheb, vecnorm_2arg(B, C, n, n)/vecnorm_1arg(C, n, n));
 
                 free(A);
                 free(B);
@@ -52,10 +52,72 @@ int main(void) {
 
                 cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
 
-                printf("\t\t Normalization of SRC:TRG = %d:%d. The relative Frobenius norm error is: %17.16e.\n", normultra1, normultra2, vecnorm_2arg(B, C, n, n)/vecnorm_1arg(C, n, n));
+                printf("\t\tNormalization of SRC:TRG = %d:%d. The relative Frobenius norm error is: %17.16e.\n", normultra1, normultra2, vecnorm_2arg(B, C, n, n)/vecnorm_1arg(C, n, n));
 
                 free(A);
                 free(B);
+            }
+        }
+        free(C);
+    }
+
+    double alpha, beta, gamma;
+
+    printf("\n\nTesting the accuracy of Jacobi--Jacobi transforms.\n");
+    for (int n = 64; n < N; n *= 2) {
+
+        printf("\tTransform dimensions: %d x %d.\n", n, n);
+
+        C = (double *) calloc(n * n, sizeof(double));
+        for (int i = 0; i < n; i++)
+            C[i+n*i] = 1.0;
+
+        for (int cases = 0; cases < 4; cases++) {
+            switch (cases) {
+                case 0:
+                {
+                    alpha = 0.0;
+                    beta = -0.5;
+                    gamma = -0.5;
+                    break;
+                }
+                case 1:
+                {
+                    alpha = 0.1;
+                    beta = 0.2;
+                    gamma = 0.3;
+                    break;
+                }
+                case 2:
+                {
+                    alpha = 1.0;
+                    beta = 0.5;
+                    gamma = 0.5;
+                    break;
+                }
+                case 3:
+                {
+                    alpha = -0.25;
+                    beta = -0.75;
+                    gamma = 0.25;
+                    break;
+                }
+            }
+            printf("\t\tJacobi parameters (%1.2f, %1.2f) → (%1.2f, %1.2f): \n", alpha, beta, gamma, beta);
+
+            for (int normjac1 = 0; normjac1 <= 1; normjac1++) {
+                for (int normjac2 = 0; normjac2 <= 1; normjac2++) {
+
+                    A = plan_jac2jac(normjac1, normjac2, n, alpha, beta, gamma);
+                    B = plan_jac2jac(normjac2, normjac1, n, gamma, beta, alpha);
+
+                    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
+
+                    printf("\t\t\tNormalization of SRC:TRG = %d:%d. The relative Frobenius norm error is: %17.16e.\n", normjac1, normjac2, vecnorm_2arg(B, C, n, n)/vecnorm_1arg(C, n, n));
+
+                    free(A);
+                    free(B);
+                }
             }
         }
         free(C);
