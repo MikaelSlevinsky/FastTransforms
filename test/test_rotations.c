@@ -1,7 +1,7 @@
 #include "../src/rotations.h"
 #include "utilities.h"
 
-const int N = 2049;
+const int N = 1025;
 
 int main(void) {
     static double * A, * B;
@@ -21,19 +21,64 @@ int main(void) {
 
         nrm = 0.0;
         for (int m = 2; m < n; m++) {
-            for (int i = 0; i < n-m; i++) {
-                A[i] = 1.0;
-                B[i] = 1.0;
-            }
-            for (int i = n-m; i < n; i++) {
-                A[i] = 0.0;
-                B[i] = 0.0;
-            }
-            kernel1_sph_hi2lo(RP, A, m);
-            kernel1_sph_lo2hi(RP, A, m);
+            for (int i = 0; i < n-m; i++)
+                A[i] = B[i] = 1.0;
+            for (int i = n-m; i < n; i++)
+                A[i] = B[i] = 0.0;
+            kernel1_sph_hi2lo(RP, m, A);
+            kernel1_sph_lo2hi(RP, m, A);
             nrm += pow(vecnorm_2arg(A, B, n, 1)/vecnorm_1arg(B, n, 1), 2);
         }
         printf("\t\tThe 2-norm relative error in the rotations: %17.16e.\n", sqrt(nrm));
+
+        free(A);
+        free(B);
+
+        A = (double *) calloc(2*n, sizeof(double));
+        B = (double *) calloc(2*n, sizeof(double));
+
+        nrm = 0.0;
+        for (int m = 2; m < n; m++) {
+            for (int i = 0; i < n-m; i++) {
+                A[i] = B[i] = 1.0;
+                A[i+n] = B[i+n] = 1.0/(i+1);
+            }
+            for (int i = n-m; i < n; i++)
+                A[i] = A[i+n] = B[i] = B[i+n] = 0.0;
+            kernel1_sph_hi2lo(RP, m, A);
+            kernel1_sph_hi2lo(RP, m, A+n);
+            kernel2_sph_lo2hi(RP, m, A, A+n);
+            nrm += pow(vecnorm_2arg(A, B, n, 2)/vecnorm_1arg(B, n, 2), 2);
+            kernel2_sph_hi2lo(RP, m, A, A+n);
+            kernel1_sph_lo2hi(RP, m, A);
+            kernel1_sph_lo2hi(RP, m, A+n);
+            nrm += pow(vecnorm_2arg(A, B, n, 2)/vecnorm_1arg(B, n, 2), 2);
+            kernel2_sph_lo2hi(RP, m, A, A+n);
+            kernel2_sph_hi2lo(RP, m, A, A+n);
+            nrm += pow(vecnorm_2arg(A, B, n, 2)/vecnorm_1arg(B, n, 2), 2);
+        }
+        printf("\t\tThe 2-norm relative error in the rotations: %17.16e.\n", sqrt(nrm));
+
+        nrm = 0.0;
+        for (int m = 2; m < n; m++) {
+            for (int i = 0; i < n-m; i++) {
+                A[i] = B[i] = 1.0;
+                A[i+n] = B[i+n] = 1.0/(i+1);
+            }
+            for (int i = n-m; i < n; i++)
+                A[i] = A[i+n] = B[i] = B[i+n] = 0.0;
+            kernel2_sph_hi2lo(RP, m, A, A+n);
+            kernel2x4_sph_lo2hi(RP, m, A, A+n);
+            nrm += pow(vecnorm_2arg(A, B, n, 2)/vecnorm_1arg(B, n, 2), 2);
+            kernel2x4_sph_hi2lo(RP, m, A, A+n);
+            kernel2_sph_lo2hi(RP, m, A, A+n);
+            nrm += pow(vecnorm_2arg(A, B, n, 2)/vecnorm_1arg(B, n, 2), 2);
+            kernel2x4_sph_hi2lo(RP, m, A, A+n);
+            kernel2x4_sph_lo2hi(RP, m, A, A+n);
+            nrm += pow(vecnorm_2arg(A, B, n, 2)/vecnorm_1arg(B, n, 2), 2);
+        }
+        printf("\t\tThe 2-norm relative error in the rotations: %17.16e.\n", sqrt(nrm));
+
         free(A);
         free(B);
         free(RP);

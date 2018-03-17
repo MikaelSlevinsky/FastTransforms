@@ -13,7 +13,7 @@ int main(void) {
     int N, M, NLOOPS;
 
     printf("err1 = [\n");
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 6; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
 
@@ -34,10 +34,10 @@ int main(void) {
     printf("];\n");
 
     printf("t1 = [\n");
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 6; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NLOOPS = 1 + pow(4096/N, 2);
 
         A = sphones(N, M);
         B = sphones(N, M);
@@ -69,7 +69,7 @@ int main(void) {
 
 
     printf("err2 = [\n");
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 6; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
 
@@ -91,10 +91,10 @@ int main(void) {
     printf("];\n");
 
     printf("t2 = [\n");
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 6; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NLOOPS = 1 + pow(4096/N, 2);
 
         A = sphrand(N, M);
         P = plan_sph2fourier(N);

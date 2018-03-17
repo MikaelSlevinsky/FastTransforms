@@ -5,13 +5,13 @@
 void execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M) {
     #pragma omp parallel for schedule(dynamic)
     for (int m = 2; m <= M/2; m++)
-        kernel2_sph_hi2lo(RP, A+(RP->n)*(2*m-1), A+(RP->n)*(2*m), m);
+        kernel2x4_sph_hi2lo(RP, m, A+(RP->n)*(2*m-1), A+(RP->n)*(2*m));
 }
 
 void execute_sph_lo2hi(const RotationPlan * RP, double * A, const int M) {
     #pragma omp parallel for schedule(dynamic)
     for (int m = 2; m <= M/2; m++)
-        kernel2_sph_lo2hi(RP, A+(RP->n)*(2*m-1), A+(RP->n)*(2*m), m);
+        kernel2x4_sph_lo2hi(RP, m, A+(RP->n)*(2*m-1), A+(RP->n)*(2*m));
 }
 
 SphericalHarmonicPlan * plan_sph2fourier(const int n) {
