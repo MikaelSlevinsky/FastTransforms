@@ -4,7 +4,7 @@
 const int N = 1025;
 
 int main(void) {
-    static double * A, * B;
+    double * A, * B;
     RotationPlan * RP;
     double nrm;
 

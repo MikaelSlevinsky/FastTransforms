@@ -5,8 +5,8 @@ int main(void) {
     struct timeval start, end;
     double delta;
 
-    static double * A;
-    static double * B;
+    double * A;
+    double * B;
     RotationPlan * RP;
     SphericalHarmonicPlan * P;
 

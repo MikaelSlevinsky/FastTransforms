@@ -5,7 +5,7 @@
 const int N = 4097;
 
 int main(void) {
-    static double * A, * B, * C;
+    double * A, * B, * C;
 
     printf("\n\nTesting the accuracy of Chebyshev--Legendre transforms.\n");
     for (int n = 64; n < N; n *= 2) {
