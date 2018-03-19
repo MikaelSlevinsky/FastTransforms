@@ -88,9 +88,8 @@ void kernel2x4_sph_hi2lo(const RotationPlan * RP, const int m, double * A, doubl
             }
         }
         else if ((n-j-2)%4 == 3) {
-            apply_givens_2x1(s, c, n, n-3-j, j, A, B);
             apply_givens_2x1(s, c, n, n-4-j, j, A, B);
-            apply_givens_2x1(s, c, n, n-5-j, j, A, B);
+            apply_givens_2x2(s, c, n, n-5-j, j, A, B);
             for (int l = n-8-j; l > 0; l -= 4) {
                 apply_givens_2x2(s, c, n, l  , j, A, B);
                 apply_givens_2x2(s, c, n, l-1, j, A, B);
@@ -131,9 +130,8 @@ void kernel2x4_sph_lo2hi(const RotationPlan * RP, const int m, double * A, doubl
                 apply_givens_t_2x2(s, c, n, l-1, j, A, B);
                 apply_givens_t_2x2(s, c, n, l  , j, A, B);
             }
-            apply_givens_t_2x1(s, c, n, n-5-j, j, A, B);
+            apply_givens_t_2x2(s, c, n, n-5-j, j, A, B);
             apply_givens_t_2x1(s, c, n, n-4-j, j, A, B);
-            apply_givens_t_2x1(s, c, n, n-3-j, j, A, B);
         }
     }
 }

@@ -14,7 +14,7 @@ int main(void) {
 
         RP = plan_rotsphere(n);
 
-        printf("\t\tThe 2-norm relative error in sqrt(s^2+c^2) is: %17.16e.\n", rotnorm(RP)/sqrt(n*(n+1)/2));
+        printf("\t\tThe 2-norm relative error in sqrt(s^2+c^2): %17.16e.\n", rotnorm(RP)/sqrt(n*(n+1)/2));
 
         A = (double *) calloc(n, sizeof(double));
         B = (double *) calloc(n, sizeof(double));
