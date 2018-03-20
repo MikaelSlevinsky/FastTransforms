@@ -3,14 +3,14 @@
 #include "drivers.h"
 
 void execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M) {
-    #pragma omp parallel for schedule(dynamic)
-    for (int m = 2; m <= M/2; m++)
+    #pragma omp parallel
+    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
         kernel2x4_sph_hi2lo(RP, m, A+(RP->n)*(2*m-1), A+(RP->n)*(2*m));
 }
 
 void execute_sph_lo2hi(const RotationPlan * RP, double * A, const int M) {
-    #pragma omp parallel for schedule(dynamic)
-    for (int m = 2; m <= M/2; m++)
+    #pragma omp parallel
+    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
         kernel2x4_sph_lo2hi(RP, m, A+(RP->n)*(2*m-1), A+(RP->n)*(2*m));
 }
 
