@@ -1,10 +1,11 @@
 # FastTransforms
 
-This library provides computational kernels and driver routines for two-
-dimensional harmonic polynomial transforms. The algorithms are backward stable
-with a runtime complexity of O(n<sup>3</sup>), where n is the polynomial
+This library provides computational kernels and driver routines for
+two-dimensional harmonic polynomial transforms. The algorithms are backward
+stable with a runtime complexity of O(n<sup>3</sup>), where n is the polynomial
 degree, and are parallelized by OpenMP.
 
+If you feel you need help getting started, please do not hesitate to e-mail me.
 If you use this library for your research, please cite the references.
 
 # References:

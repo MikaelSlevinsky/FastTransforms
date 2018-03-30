@@ -26,13 +26,16 @@ void kernel2_sph_lo2hi(const RotationPlan * RP, const int m, double * A, double 
 void kernel2x4_sph_hi2lo(const RotationPlan * RP, const int m, double * A, double * B);
 void kernel2x4_sph_lo2hi(const RotationPlan * RP, const int m, double * A, double * B);
 
-static inline void apply_givens_1x1(const double * s, const double * c, const int n, const int l, const int m, double * A);
-static inline void apply_givens_t_1x1(const double * s, const double * c, const int n, const int l, const int m, double * A);
+void kernel1_tri_hi2lo(const RotationPlan * RP, const int m, double * A);
+void kernel1_tri_lo2hi(const RotationPlan * RP, const int m, double * A);
 
-static inline void apply_givens_2x1(const double * s, const double * c, const int n, const int l, const int m, double * A, double * B);
-static inline void apply_givens_t_2x1(const double * s, const double * c, const int n, const int l, const int m, double * A, double * B);
+static inline void apply_givens_1x1(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A);
+static inline void apply_givens_t_1x1(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A);
 
-static inline void apply_givens_2x2(const double * s, const double * c, const int n, const int l, const int m, double * A, double * B);
-static inline void apply_givens_t_2x2(const double * s, const double * c, const int n, const int l, const int m, double * A, double * B);
+static inline void apply_givens_2x1(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A, double * B);
+static inline void apply_givens_t_2x1(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A, double * B);
+
+static inline void apply_givens_2x2(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A, double * B);
+static inline void apply_givens_t_2x2(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A, double * B);
 
 #endif //ROTATIONS_H

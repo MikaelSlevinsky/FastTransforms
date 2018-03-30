@@ -13,7 +13,7 @@ else
 endif
 
 OBJ = src/transforms.c src/rotations.c src/drivers.c
-CFLAGS = -std=c11 -Ofast -march=native
+CFLAGS = -Ofast -march=native
 LIBFLAGS = -shared -fPIC -lm -lgomp
 
 ifeq ($(USE_SYSTEM_BLAS),0)

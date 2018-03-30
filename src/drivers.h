@@ -14,6 +14,12 @@
 #include "rotations.h"
 #include "transforms.h"
 
+void execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M);
+void execute_sph_lo2hi(const RotationPlan * RP, double * A, const int M);
+
+void execute_tri_hi2lo(const RotationPlan * RP, double * A, const int M);
+void execute_tri_lo2hi(const RotationPlan * RP, double * A, const int M);
+
 typedef struct {
     RotationPlan * RP;
     double * P1;
@@ -21,9 +27,6 @@ typedef struct {
     double * P1inv;
     double * P2inv;
 } SphericalHarmonicPlan;
-
-void execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M);
-void execute_sph_lo2hi(const RotationPlan * RP, double * A, const int M);
 
 SphericalHarmonicPlan * plan_sph2fourier(const int n);
 

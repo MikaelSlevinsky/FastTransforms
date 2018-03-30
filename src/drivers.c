@@ -14,6 +14,18 @@ void execute_sph_lo2hi(const RotationPlan * RP, double * A, const int M) {
         kernel2x4_sph_lo2hi(RP, m, A+(RP->n)*(2*m-1), A+(RP->n)*(2*m));
 }
 
+void execute_tri_hi2lo(const RotationPlan * RP, double * A, const int M) {
+    #pragma omp parallel
+    for (int m = 1 + omp_get_thread_num(); m < M; m += omp_get_num_threads())
+        kernel1_tri_hi2lo(RP, m, A+(RP->n)*m);
+}
+
+void execute_tri_lo2hi(const RotationPlan * RP, double * A, const int M) {
+    #pragma omp parallel
+    for (int m = 1 + omp_get_thread_num(); m < M; m += omp_get_num_threads())
+        kernel1_tri_lo2hi(RP, m, A+(RP->n)*m);
+}
+
 SphericalHarmonicPlan * plan_sph2fourier(const int n) {
     SphericalHarmonicPlan * P = malloc(sizeof(SphericalHarmonicPlan));
     P->RP = plan_rotsphere(n);
