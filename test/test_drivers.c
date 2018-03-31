@@ -23,9 +23,8 @@ int main(void) {
 
         execute_sph_hi2lo(RP, A, M);
         execute_sph_lo2hi(RP, A, M);
-        printf("%17.16e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
-        printf("%17.16e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
-        //printf("%17.16e\n", vecnorm_2arg(A, B, N, M)/sqrt(N*(N+1.0)/2.0));
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         free(A);
         free(B);
@@ -69,7 +68,7 @@ int main(void) {
 
 
     printf("err2 = [\n");
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 7; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
 
@@ -80,9 +79,8 @@ int main(void) {
         execute_sph2fourier(P, A, N, M);
         execute_fourier2sph(P, A, N, M);
 
-        printf("%17.16e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
-        printf("%17.16e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
-        //printf("%17.16e\n", vecnorm_2arg(A, B, N, M)/sqrt(N*(N+1.0)/2.0));
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         free(A);
         free(B);
@@ -91,7 +89,7 @@ int main(void) {
     printf("];\n");
 
     printf("t2 = [\n");
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 7; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
         NLOOPS = 1 + pow(4096/N, 2);
@@ -139,8 +137,8 @@ int main(void) {
         execute_tri_hi2lo(RP, A, M);
         execute_tri_lo2hi(RP, A, M);
 
-        printf("%17.16e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
-        printf("%17.16e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         free(A);
         free(B);
@@ -160,8 +158,8 @@ int main(void) {
         execute_tri2cheb(Q, A, N, M);
         execute_cheb2tri(Q, A, N, M);
 
-        printf("%17.16e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
-        printf("%17.16e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         free(A);
         free(B);
