@@ -115,15 +115,23 @@ void alternate_sign(double * A, const int N) {
 }
 
 void chebyshev_normalization(double * A, const int N, const int M) {
+    A[0] *= M_1_PI;
     for (int i = 1; i < N; i++)
-        A[i] *= M_SQRT2;
+        A[i] *= M_SQRT2*M_1_PI;
     for (int j = 1; j < M; j++)
-        A[j*N] /= M_SQRT2;
+        A[j*N] *= M_SQRT2*M_1_PI;
+    for (int i = 1; i < N; i++)
+        for (int j = 1; j < M; j++)
+            A[i+j*N] *= M_2_PI;
 }
 
 void chebyshev_normalization_t(double * A, const int N, const int M) {
+    A[0] *= M_PI;
     for (int i = 1; i < N; i++)
-        A[i] /= M_SQRT2;
+        A[i] *= M_SQRT1_2*M_PI;
     for (int j = 1; j < M; j++)
-        A[j*N] *= M_SQRT2;
+        A[j*N] *= M_SQRT1_2*M_PI;
+    for (int i = 1; i < N; i++)
+        for (int j = 1; j < M; j++)
+            A[i+j*N] *= M_PI_2;
 }
