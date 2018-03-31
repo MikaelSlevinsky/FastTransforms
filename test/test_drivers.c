@@ -122,5 +122,52 @@ int main(void) {
     }
     printf("];\n");
 
+    double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
+    //double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
+
+    TriangularHarmonicPlan * Q;
+
+    printf("err3 = [\n");
+    for (int i = 0; i < 6; i++) {
+        N = 64*pow(2, i);
+        M = N;
+
+        A = triones(N, M);
+        B = copyA(A, N, M);
+        RP = plan_rottriangle(N, alpha, beta, gamma);
+
+        execute_tri_hi2lo(RP, A, M);
+        execute_tri_lo2hi(RP, A, M);
+
+        printf("%17.16e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%17.16e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        free(A);
+        free(B);
+        free(RP);
+    }
+    printf("];\n");
+
+    printf("err4 = [\n");
+    for (int i = 0; i < 6; i++) {
+        N = 64*pow(2, i);
+        M = N;
+
+        A = trirand(N, M);
+        B = copyA(A, N, M);
+        Q = plan_tri2cheb(N, alpha, beta, gamma);
+
+        execute_tri2cheb(Q, A, N, M);
+        execute_cheb2tri(Q, A, N, M);
+
+        printf("%17.16e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%17.16e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        free(A);
+        free(B);
+        free(Q);
+    }
+    printf("];\n");
+
     return 0;
 }

@@ -53,3 +53,77 @@ void execute_fourier2sph(const SphericalHarmonicPlan * P, double * A, const int 
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M-1)/4, 1.0, P->P1inv, N, A+4*N, 4*N);
     execute_sph_lo2hi(P->RP, A, M);
 }
+
+TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma) {
+    TriangularHarmonicPlan * P = malloc(sizeof(TriangularHarmonicPlan));
+    P->RP = plan_rottriangle(n, alpha, beta, gamma);
+    P->P1 = plan_jac2jac(1, 1, n, beta + gamma + 1.0, alpha, -0.5);
+    P->P2 = plan_jac2jac(1, 1, n, alpha, -0.5, -0.5);
+    P->P3 = plan_jac2jac(1, 1, n, gamma, beta, -0.5);
+    P->P4 = plan_jac2jac(1, 1, n, beta, -0.5, -0.5);
+    P->P1inv = plan_jac2jac(1, 1, n, -0.5, alpha, beta + gamma + 1.0);
+    P->P2inv = plan_jac2jac(1, 1, n, -0.5, -0.5, alpha);
+    P->P3inv = plan_jac2jac(1, 1, n, -0.5, beta, gamma);
+    P->P4inv = plan_jac2jac(1, 1, n, -0.5, -0.5, beta);
+    P->alpha = alpha;
+    P->beta = beta;
+    P->gamma = gamma;
+    return P;
+}
+
+void execute_tri2cheb(const TriangularHarmonicPlan * P, double * A, const int N, const int M) {
+    execute_tri_hi2lo(P->RP, A, M);
+    if (P->beta+P->gamma != -1.5)
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1, N, A, N);
+    if (P->alpha != -0.5) {
+        alternate_sign(A, N*M);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P2, N, A, N);
+        alternate_sign(A, N*M);
+    }
+    if (P->gamma != -0.5)
+        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P3, N, A, N);
+    if (P->beta != -0.5) {
+        alternate_sign(A, N*M);
+        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P4, N, A, N);
+        alternate_sign(A, N*M);
+    }
+    chebyshev_normalization(A, N, M);
+}
+
+void execute_cheb2tri(const TriangularHarmonicPlan * P, double * A, const int N, const int M) {
+    chebyshev_normalization_t(A, N, M);
+    if (P->beta != -0.5) {
+        alternate_sign(A, N*M);
+        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P4inv, N, A, N);
+        alternate_sign(A, N*M);
+    }
+    if (P->gamma != -0.5)
+        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P3inv, N, A, N);
+    if (P->alpha != -0.5) {
+        alternate_sign(A, N*M);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P2inv, N, A, N);
+        alternate_sign(A, N*M);
+    }
+    if (P->beta+P->gamma != -1.5)
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1inv, N, A, N);
+    execute_tri_lo2hi(P->RP, A, M);
+}
+
+void alternate_sign(double * A, const int N) {
+    for (int i = 0; i < N; i += 2)
+        A[i] = -A[i];
+}
+
+void chebyshev_normalization(double * A, const int N, const int M) {
+    for (int i = 1; i < N; i++)
+        A[i] *= M_SQRT2;
+    for (int j = 1; j < M; j++)
+        A[j*N] /= M_SQRT2;
+}
+
+void chebyshev_normalization_t(double * A, const int N, const int M) {
+    for (int i = 1; i < N; i++)
+        A[i] /= M_SQRT2;
+    for (int j = 1; j < M; j++)
+        A[j*N] *= M_SQRT2;
+}

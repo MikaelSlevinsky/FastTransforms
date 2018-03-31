@@ -77,6 +77,22 @@ double * sphrand(int n, int m) {
     return A;
 }
 
+double * triones(int n, int m) {
+    double * A = (double *) calloc(n * m, sizeof(double));
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m-i; j++)
+            A(i,j) = 1.0;
+    return A;
+}
+
+double * trirand(int n, int m) {
+    double * A = (double *) calloc(n * m, sizeof(double));
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m-i; j++)
+            A(i,j) = 2.0*(((double) rand())/RAND_MAX)-1.0;
+    return A;
+}
+
 double * copyA(double * A, int n, int m) {
     double * B = (double *) calloc(n * m, sizeof(double));
     for (int i = 0; i < n*m; i++)
