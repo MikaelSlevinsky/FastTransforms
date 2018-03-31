@@ -5,8 +5,8 @@ int main(void) {
     struct timeval start, end;
     double delta;
 
-    double * A;
-    double * B;
+    static double * A;
+    static double * B;
     RotationPlan * RP;
     SphericalHarmonicPlan * P;
 
@@ -68,7 +68,7 @@ int main(void) {
 
 
     printf("err2 = [\n");
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 8; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
 
@@ -89,7 +89,7 @@ int main(void) {
     printf("];\n");
 
     printf("t2 = [\n");
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 8; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
         NLOOPS = 1 + pow(4096/N, 2);
