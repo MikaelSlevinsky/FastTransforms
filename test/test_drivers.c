@@ -18,7 +18,7 @@ int main(void) {
         M = 2*N-1;
 
         A = sphones(N, M);
-        B = sphones(N, M);
+        B = copyA(A, N, M);
         RP = plan_rotsphere(N);
 
         execute_sph_hi2lo(RP, A, M);
@@ -39,7 +39,6 @@ int main(void) {
         NLOOPS = 1 + pow(4096/N, 2);
 
         A = sphones(N, M);
-        B = sphones(N, M);
         RP = plan_rotsphere(N);
 
         gettimeofday(&start, NULL);
@@ -61,7 +60,6 @@ int main(void) {
         printf("  %.6f\n", delta/NLOOPS);
 
         free(A);
-        free(B);
         free(RP);
     }
     printf("];\n");
@@ -120,8 +118,8 @@ int main(void) {
     }
     printf("];\n");
 
-    double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
-    //double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
+    //double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
+    double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 
     TriangularHarmonicPlan * Q;
 
@@ -146,8 +144,41 @@ int main(void) {
     }
     printf("];\n");
 
-    printf("err4 = [\n");
+    printf("t3 = [\n");
     for (int i = 0; i < 6; i++) {
+        N = 64*pow(2, i);
+        M = N;
+        NLOOPS = 1 + pow(4096/N, 2);
+
+        A = triones(N, M);
+        RP = plan_rottriangle(N, alpha, beta, gamma);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_tri_hi2lo(RP, A, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("%d  %.6f", N, delta/NLOOPS);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_tri_lo2hi(RP, A, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("  %.6f\n", delta/NLOOPS);
+
+        free(A);
+        free(RP);
+    }
+    printf("];\n");
+
+
+    printf("err4 = [\n");
+    for (int i = 0; i < 8; i++) {
         N = 64*pow(2, i);
         M = N;
 
@@ -163,6 +194,38 @@ int main(void) {
 
         free(A);
         free(B);
+        free(Q);
+    }
+    printf("];\n");
+
+    printf("t4 = [\n");
+    for (int i = 0; i < 8; i++) {
+        N = 64*pow(2, i);
+        M = N;
+        NLOOPS = 1 + pow(4096/N, 2);
+
+        A = trirand(N, M);
+        Q = plan_tri2cheb(N, alpha, beta, gamma);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_tri2cheb(Q, A, N, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("%d  %.6f", N, delta/NLOOPS);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_cheb2tri(Q, A, N, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("  %.6f\n", delta/NLOOPS);
+
+        free(A);
         free(Q);
     }
     printf("];\n");

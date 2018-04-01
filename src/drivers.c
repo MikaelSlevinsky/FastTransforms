@@ -73,7 +73,7 @@ TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const do
 
 void execute_tri2cheb(const TriangularHarmonicPlan * P, double * A, const int N, const int M) {
     execute_tri_hi2lo(P->RP, A, M);
-    if (P->beta+P->gamma != -1.5)
+    if (P->beta + P->gamma != -1.5)
         cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1, N, A, N);
     if (P->alpha != -0.5) {
         alternate_sign(A, N*M);
@@ -104,7 +104,7 @@ void execute_cheb2tri(const TriangularHarmonicPlan * P, double * A, const int N,
         cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P2inv, N, A, N);
         alternate_sign(A, N*M);
     }
-    if (P->beta+P->gamma != -1.5)
+    if (P->beta + P->gamma != -1.5)
         cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1inv, N, A, N);
     execute_tri_lo2hi(P->RP, A, M);
 }
