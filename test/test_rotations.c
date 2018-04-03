@@ -1,4 +1,4 @@
-#include "../src/rotations.h"
+#include "fasttransforms.h"
 #include "utilities.h"
 
 const int N = 1025;

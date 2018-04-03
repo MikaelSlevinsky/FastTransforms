@@ -1,6 +1,6 @@
 // Driver routines for synthesis and analysis of harmonic polynomial transforms.
 
-#include "drivers.h"
+#include "fasttransforms.h"
 
 void execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M) {
     #pragma omp parallel
@@ -109,12 +109,12 @@ void execute_cheb2tri(const TriangularHarmonicPlan * P, double * A, const int N,
     execute_tri_lo2hi(P->RP, A, M);
 }
 
-void alternate_sign(double * A, const int N) {
+static void alternate_sign(double * A, const int N) {
     for (int i = 0; i < N; i += 2)
         A[i] = -A[i];
 }
 
-void chebyshev_normalization(double * A, const int N, const int M) {
+static void chebyshev_normalization(double * A, const int N, const int M) {
     A[0] *= M_1_PI;
     for (int i = 1; i < N; i++)
         A[i] *= M_SQRT2*M_1_PI;
@@ -125,7 +125,7 @@ void chebyshev_normalization(double * A, const int N, const int M) {
             A[i+j*N] *= M_2_PI;
 }
 
-void chebyshev_normalization_t(double * A, const int N, const int M) {
+static void chebyshev_normalization_t(double * A, const int N, const int M) {
     A[0] *= M_PI;
     for (int i = 1; i < N; i++)
         A[i] *= M_SQRT1_2*M_PI;

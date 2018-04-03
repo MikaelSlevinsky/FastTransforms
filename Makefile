@@ -13,7 +13,7 @@ else
 endif
 
 OBJ = src/transforms.c src/rotations.c src/drivers.c
-CFLAGS = -Ofast -march=native
+CFLAGS = -Ofast -march=native -I./src
 LIBFLAGS = -shared -fPIC -lm -lgomp -fopenmp
 LIBDIR = .
 LIB = fasttransforms

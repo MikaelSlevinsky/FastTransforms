@@ -6,7 +6,7 @@ If you feel you need help getting started, please do not hesitate to e-mail me. 
 
 ## Performance Benchmark
 
-The table below shows the current timings and accuracies for transforming spherical harmonic coefficients drawn from U(-1,1) to bivariate Fourier series and back. The timings are reported in seconds, executed on a Macbook Pro (Mid 2014) with a 2.8 GHz Intel Core i7 processor with 8 threads on 4 logical cores and 16 GB 1600 MHz DDR3 RAM. The error is measured in the relative 2- and ∞-norms, treating the matrices of coefficients as vectors.
+The table below shows the current timings and accuracies for transforming orthonormal spherical harmonic coefficients drawn from U(-1,1) to bivariate Fourier series and back. The timings are reported in seconds, compiled by GNU GCC 7.3.0 with the flags `-Ofast -march=native`, and executed on a MacBook Pro (Mid 2014) with a 2.8 GHz Intel Core i7 processor with 8 threads on 4 logical cores, 1 MB of L2 cache, 6 MB of L3 cache, and 16 GB 1600 MHz DDR3 RAM. The error is measured in the relative 2- and ∞-norms, treating the matrices of coefficients as vectors.
 
 | Degree            | 63       | 127      | 255      | 511      | 1023     | 2047     | 4095     | 8191     |
 | ----------------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: |

@@ -1,6 +1,6 @@
 // Computational routines for the harmonic polynomial connection problem.
 
-#include "rotations.h"
+#include "fasttransforms.h"
 
 #define s(l,m) s[l+(m)*(2*n+1-(m))/2]
 #define c(l,m) c[l+(m)*(2*n+1-(m))/2]

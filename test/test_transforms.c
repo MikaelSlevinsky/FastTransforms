@@ -1,5 +1,4 @@
-#include <cblas.h>
-#include "../src/transforms.h"
+#include "fasttransforms.h"
 #include "utilities.h"
 
 const int N = 4097;

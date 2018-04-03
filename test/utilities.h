@@ -8,7 +8,7 @@
 #include <math.h>
 #include <float.h>
 #include <sys/time.h>
-#include "../src/rotations.h"
+#include "fasttransforms.h"
 
 void printmat(char * MAT, double * A, int n, int m);
 double vecnorm_1arg(double * A, int n, int m);
