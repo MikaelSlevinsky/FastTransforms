@@ -9,8 +9,8 @@ RotationPlan * plan_rotsphere(const int n) {
     double * s = (double *) malloc(n*(n+1)/2 * sizeof(double));
     double * c = (double *) malloc(n*(n+1)/2 * sizeof(double));
     double nums, numc, den;
-    for (int l = 0; l < n; l++)
-        for (int m = 0; m < n-l; m++) {
+    for (int m = 0; m < n; m++)
+        for (int l = 0; l < n-m; l++) {
             nums = (l+1)*(l+2);
             numc = (2*m+2)*(2*l+2*m+5);
             den = (l+2*m+3)*(l+2*m+4);
@@ -28,8 +28,8 @@ RotationPlan * plan_rottriangle(const int n, const double alpha, const double be
     double * s = (double *) malloc(n*(n+1)/2 * sizeof(double));
     double * c = (double *) malloc(n*(n+1)/2 * sizeof(double));
     double nums, numc, den;
-    for (int l = 0; l < n; l++)
-        for (int m = 0; m < n-l; m++) {
+    for (int m = 0; m < n; m++)
+        for (int l = 0; l < n-m; l++) {
             nums = (l+1)*(l+alpha+1);
             numc = (2*m+beta+gamma+2)*(2*l+2*m+alpha+beta+gamma+4);
             den = (l+2*m+beta+gamma+3)*(l+2*m+alpha+beta+gamma+3);
