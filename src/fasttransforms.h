@@ -94,6 +94,7 @@ static inline void apply_givens_t_2x2(const int inc, const double * s, const dou
 
 void execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M);
 void execute_sph_lo2hi(const RotationPlan * RP, double * A, const int M);
+void cache_oblivious_execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M);
 
 void execute_tri_hi2lo(const RotationPlan * RP, double * A, const int M);
 void execute_tri_lo2hi(const RotationPlan * RP, double * A, const int M);

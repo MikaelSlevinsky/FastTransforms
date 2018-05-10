@@ -8,6 +8,44 @@ void execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M) {
         kernel2_sph_hi2lo(RP, m, A+(RP->n)*(2*m-1), A+(RP->n)*(2*m));
 }
 
+#define s(l,m) s[l+(m)*(2*n+1-(m))/2]
+#define c(l,m) c[l+(m)*(2*n+1-(m))/2]
+
+static inline void apply_givens_2x1(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A, double * B) {
+    register double s1, c1;
+    register double a1, a2;
+    s1 = s(l, m);
+    c1 = c(l, m);
+
+    a1 = A[l];
+    a2 = A[l+inc];
+
+    A[l    ] = c1*a1 + s1*a2;
+    A[l+inc] = c1*a2 - s1*a1;
+
+    a1 = B[l];
+    a2 = B[l+inc];
+
+    B[l    ] = c1*a1 + s1*a2;
+    B[l+inc] = c1*a2 - s1*a1;
+}
+
+void cache_oblivious_execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M) {
+    int n = RP->n;
+    for (int step = 4; step <= (M+1)/2; step *= 2) {
+        for (int m = step/2; m <= M/2; m += step)
+            for (int mu = m; mu < m+step/2; mu += 2)
+                for (int j = m-2; j >= m-step/2; j -= 2)
+                    for (int l = n-3-j; l >= 0; l--)
+                        apply_givens_2x1(2, RP->s, RP->c, n, l, j, A+n*(2*mu-1), A+n*(2*mu));
+        for (int m = step/2+1; m <= M/2; m += step)
+            for (int mu = m; mu < m+step/2; mu += 2)
+                for (int j = m-2; j >= m-step/2; j -= 2)
+                    for (int l = n-3-j; l >= 0; l--)
+                        apply_givens_2x1(2, RP->s, RP->c, n, l, j, A+n*(2*mu-1), A+n*(2*mu));
+    }
+}
+
 void execute_sph_lo2hi(const RotationPlan * RP, double * A, const int M) {
     #pragma omp parallel
     for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
