@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include <math.h>
+#include <immintrin.h>
 #include <cblas.h>
 
 #ifdef _OPENMP
@@ -17,6 +18,34 @@
 #define M_SQRT_PI    1.772453850905516027   /* sqrt(pi)       */
 #define M_1_SQRT_PI  0.564189583547756287   /* 1/sqrt(pi)     */
 #define M_SQRT_PI_2  0.886226925452758014   /* sqrt(pi)/2     */
+
+
+#define VECTOR_SIZE_2 2
+typedef double double2 __attribute__ ((vector_size (VECTOR_SIZE_2*8)));
+#define vall2(x) ((double2) _mm_set1_pd(x))
+#define vload2(v) ((double2) _mm_loadu_pd(v))
+#define vstore2(u, v) (_mm_storeu_pd(u, v))
+#define vread2(a, b) ((double2) _mm_set_pd(a, b))
+#define vwrite2(a, b, v) { \
+                         _mm_storeh_pd(&a, v); \
+                         _mm_storel_pd(&b, v); \
+                        }
+
+#define VECTOR_SIZE_4 4
+typedef double double4 __attribute__ ((vector_size (VECTOR_SIZE_4*8)));
+#define vall4(x) ((double4) _mm256_set1_pd(x))
+#define vload4(v) ((double4) _mm256_loadu_pd(v))
+#define vstore4(u, v) (_mm256_storeu_pd(u, v))
+#define vread4(a, b, c, d) ((double4) _mm256_set_pd(a, b, c, d))
+#define vwrite4(a, b, c, d, v) { \
+                               __m128d t1 = ((__m128d) _mm256_extractf128_pd(v, 1)); \
+                               _mm_storeh_pd(&a, t1); \
+                               _mm_storel_pd(&b, t1); \
+                               __m128d t2 = ((__m128d) _mm256_extractf128_pd(v, 0)); \
+                               _mm_storeh_pd(&c, t2); \
+                               _mm_storel_pd(&d, t2); \
+                              }
+
 
 static inline double stirlingseries(const double z);
 static inline double Aratio(const int n, const double alpha, const double beta);
