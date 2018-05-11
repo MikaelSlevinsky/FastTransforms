@@ -6,6 +6,7 @@ int main(void) {
     double delta;
 
     static double * A;
+    static double * Ac;
     static double * B;
     RotationPlan * RP;
     SphericalHarmonicPlan * P;
@@ -18,27 +19,49 @@ int main(void) {
         M = 2*N-1;
 
         A = sphones(N, M);
+        Ac = copyA(A, N, M);
         B = copyA(A, N, M);
         RP = plan_rotsphere(N);
 
         execute_sph_hi2lo(RP, A, M);
         execute_sph_lo2hi(RP, A, M);
+
+        printf("%d  %1.2e  ", N, vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_sph_hi2lo_SSE(RP, A, Ac, M);
+        execute_sph_lo2hi(RP, A, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_sph_hi2lo(RP, A, M);
+        execute_sph_lo2hi_SSE(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_sph_hi2lo_SSE(RP, A, Ac, M);
+        execute_sph_lo2hi_SSE(RP, A, Ac, M);
+
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         free(A);
+        free(Ac);
         free(B);
         free(RP);
     }
     printf("];\n");
 
     printf("t1 = [\n");
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 8; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
         NLOOPS = 1 + pow(4096/N, 2);
 
         A = sphones(N, M);
+        B = sphones(N, M);
         RP = plan_rotsphere(N);
 
         gettimeofday(&start, NULL);
@@ -57,9 +80,28 @@ int main(void) {
         gettimeofday(&end, NULL);
 
         delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("  %.6f", delta/NLOOPS);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_sph_hi2lo_SSE(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("  %.6f", N, delta/NLOOPS);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_sph_lo2hi_SSE(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
         printf("  %.6f\n", delta/NLOOPS);
 
         free(A);
+        free(B);
         free(RP);
     }
     printf("];\n");

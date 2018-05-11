@@ -45,253 +45,123 @@ RotationPlan * plan_rottriangle(const int n, const double alpha, const double be
 
 // Convert a single vector of spherical harmonics of order m to 0/1.
 
-void kernel1_sph_hi2lo(const RotationPlan * RP, const int m, double * A) {
+void kernel_sph_hi2lo(const RotationPlan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = m-2; j >= 0; j -= 2)
         for (int l = n-3-j; l >= 0; l--)
-            apply_givens_1x1(2, RP->s, RP->c, n, l, j, A);
+            apply_givens(2, RP->s, RP->c, n, l, j, A);
 }
 
 // Convert a single vector of spherical harmonics of order 0/1 to m.
 
-void kernel1_sph_lo2hi(const RotationPlan * RP, const int m, double * A) {
+void kernel_sph_lo2hi(const RotationPlan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = m%2; j < m-1; j += 2)
         for (int l = 0; l <= n-3-j; l++)
-            apply_givens_t_1x1(2, RP->s, RP->c, n, l, j, A);
+            apply_givens_t(2, RP->s, RP->c, n, l, j, A);
 }
 
 // Convert a pair of vectors of spherical harmonics of order m to 0/1.
+// The pair of vectors are stored in A in row-major ordering.
 
-void kernel2_sph_hi2lo(const RotationPlan * RP, const int m, double * A, double * B) {
+void kernel_sph_hi2lo_SSE(const RotationPlan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = m-2; j >= 0; j -= 2)
         for (int l = n-3-j; l >= 0; l--)
-            apply_givens_2x1(2, RP->s, RP->c, n, l, j, A, B);
+            apply_givens_SSE(2, RP->s, RP->c, n, l, j, A);
 }
 
 // Convert a pair of vectors of spherical harmonics of order 0/1 to m.
+// The pair of vectors are stored in A in row-major ordering.
 
-void kernel2_sph_lo2hi(const RotationPlan * RP, const int m, double * A, double * B) {
+void kernel_sph_lo2hi_SSE(const RotationPlan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = m%2; j < m-1; j += 2)
         for (int l = 0; l <= n-3-j; l++)
-            apply_givens_t_2x1(2, RP->s, RP->c, n, l, j, A, B);
-}
-
-// Convert a pair of vectors of spherical harmonics of order m to 0/1.
-
-void kernel2x4_sph_hi2lo(const RotationPlan * RP, const int m, double * A, double * B) {
-    const double * s = RP->s, * c = RP->c;
-    const int n = RP->n;
-    for (int j = m-2; j >= 0; j -= 2) {
-        if ((n-j-2)%4 == 0) {
-            for (int l = n-5-j; l > 0; l -= 4) {
-                apply_givens_2x2(2, s, c, n, l  , j, A, B);
-                apply_givens_2x2(2, s, c, n, l-1, j, A, B);
-            }
-        }
-        else if ((n-j-2)%4 == 1) {
-            apply_givens_2x1(2, s, c, n, n-3-j, j, A, B);
-            for (int l = n-6-j; l > 0; l -= 4) {
-                apply_givens_2x2(2, s, c, n, l  , j, A, B);
-                apply_givens_2x2(2, s, c, n, l-1, j, A, B);
-            }
-        }
-        else if ((n-j-2)%4 == 2) {
-            apply_givens_2x1(2, s, c, n, n-3-j, j, A, B);
-            apply_givens_2x1(2, s, c, n, n-4-j, j, A, B);
-            for (int l = n-7-j; l > 0; l -= 4) {
-                apply_givens_2x2(2, s, c, n, l  , j, A, B);
-                apply_givens_2x2(2, s, c, n, l-1, j, A, B);
-            }
-        }
-        else if ((n-j-2)%4 == 3) {
-            apply_givens_2x1(2, s, c, n, n-4-j, j, A, B);
-            apply_givens_2x2(2, s, c, n, n-5-j, j, A, B);
-            for (int l = n-8-j; l > 0; l -= 4) {
-                apply_givens_2x2(2, s, c, n, l  , j, A, B);
-                apply_givens_2x2(2, s, c, n, l-1, j, A, B);
-            }
-        }
-    }
-}
-
-// Convert a pair of vectors of spherical harmonics of order 0/1 to m.
-
-void kernel2x4_sph_lo2hi(const RotationPlan * RP, const int m, double * A, double * B) {
-    const double * s = RP->s, * c = RP->c;
-    const int n = RP->n;
-    for (int j = m%2; j < m-1; j += 2) {
-        if ((n-j-2)%4 == 0) {
-            for (int l = 1; l <= n-5-j; l += 4) {
-                apply_givens_t_2x2(2, s, c, n, l-1, j, A, B);
-                apply_givens_t_2x2(2, s, c, n, l  , j, A, B);
-            }
-        }
-        else if ((n-j-2)%4 == 1) {
-            for (int l = 1; l <= n-6-j; l += 4) {
-                apply_givens_t_2x2(2, s, c, n, l-1, j, A, B);
-                apply_givens_t_2x2(2, s, c, n, l  , j, A, B);
-            }
-            apply_givens_t_2x1(2, s, c, n, n-3-j, j, A, B);
-        }
-        else if ((n-j-2)%4 == 2) {
-            for (int l = 1; l <= n-7-j; l += 4) {
-                apply_givens_t_2x2(2, s, c, n, l-1, j, A, B);
-                apply_givens_t_2x2(2, s, c, n, l  , j, A, B);
-            }
-            apply_givens_t_2x1(2, s, c, n, n-4-j, j, A, B);
-            apply_givens_t_2x1(2, s, c, n, n-3-j, j, A, B);
-        }
-        else if ((n-j-2)%4 == 3) {
-            for (int l = 1; l <= n-8-j; l += 4) {
-                apply_givens_t_2x2(2, s, c, n, l-1, j, A, B);
-                apply_givens_t_2x2(2, s, c, n, l  , j, A, B);
-            }
-            apply_givens_t_2x2(2, s, c, n, n-5-j, j, A, B);
-            apply_givens_t_2x1(2, s, c, n, n-4-j, j, A, B);
-        }
-    }
+            apply_givens_t_SSE(2, RP->s, RP->c, n, l, j, A);
 }
 
 // Convert a single vector of triangular harmonics of order m to 0.
 
-void kernel1_tri_hi2lo(const RotationPlan * RP, const int m, double * A) {
+void kernel_tri_hi2lo(const RotationPlan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = m-1; j >= 0; j -= 1)
         for (int l = n-2-j; l >= 0; l--)
-            apply_givens_1x1(1, RP->s, RP->c, n, l, j, A);
+            apply_givens(1, RP->s, RP->c, n, l, j, A);
 }
 
 // Convert a single vector of triangular harmonics of order 0 to m.
 
-void kernel1_tri_lo2hi(const RotationPlan * RP, const int m, double * A) {
+void kernel_tri_lo2hi(const RotationPlan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = 0; j < m; j += 1)
         for (int l = 0; l <= n-2-j; l++)
-            apply_givens_t_1x1(1, RP->s, RP->c, n, l, j, A);
+            apply_givens_t(1, RP->s, RP->c, n, l, j, A);
 }
 
 
-static inline void apply_givens_1x1(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A) {
-    register double s1, c1;
-    register double a1, a2;
-    s1 = s(l, m);
-    c1 = c(l, m);
+static inline void apply_givens(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A) {
+    double s1 = s(l, m);
+    double c1 = c(l, m);
 
-    a1 = A[l];
-    a2 = A[l+inc];
+    double a1 = A[l];
+    double a2 = A[l+inc];
 
     A[l    ] = c1*a1 + s1*a2;
     A[l+inc] = c1*a2 - s1*a1;
 }
 
-static inline void apply_givens_t_1x1(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A) {
-    register double s1, c1;
-    register double a1, a2;
-    s1 = s(l, m);
-    c1 = c(l, m);
+static inline void apply_givens_t(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A) {
+    double s1 = s(l, m);
+    double c1 = c(l, m);
 
-    a1 = A[l];
-    a2 = A[l+inc];
+    double a1 = A[l];
+    double a2 = A[l+inc];
 
     A[l    ] = c1*a1 - s1*a2;
     A[l+inc] = c1*a2 + s1*a1;
 }
 
-static inline void apply_givens_2x1(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A, double * B) {
-    register double s1, c1;
-    register double a1, a2;
-    s1 = s(l, m);
-    c1 = c(l, m);
+static inline void apply_givens_SSE(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A) {
+    double2 s1 = vall2(s(l, m));
+    double2 c1 = vall2(c(l, m));
 
-    a1 = A[l];
-    a2 = A[l+inc];
+    double2 a1 = vload2(A+2*l      );
+    double2 a2 = vload2(A+2*(l+inc));
 
-    A[l    ] = c1*a1 + s1*a2;
-    A[l+inc] = c1*a2 - s1*a1;
-
-    a1 = B[l];
-    a2 = B[l+inc];
-
-    B[l    ] = c1*a1 + s1*a2;
-    B[l+inc] = c1*a2 - s1*a1;
+    vstore2(A+2*l,       c1*a1 + s1*a2);
+    vstore2(A+2*(l+inc), c1*a2 - s1*a1);
 }
 
-static inline void apply_givens_t_2x1(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A, double * B) {
-    register double s1, c1;
-    register double a1, a2;
-    s1 = s(l, m);
-    c1 = c(l, m);
+static inline void apply_givens_t_SSE(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A) {
+    double2 s1 = vall2(s(l, m));
+    double2 c1 = vall2(c(l, m));
 
-    a1 = A[l];
-    a2 = A[l+inc];
+    double2 a1 = vload2(A+2*l      );
+    double2 a2 = vload2(A+2*(l+inc));
 
-    A[l    ] = c1*a1 - s1*a2;
-    A[l+inc] = c1*a2 + s1*a1;
-
-    a1 = B[l];
-    a2 = B[l+inc];
-
-    B[l    ] = c1*a1 - s1*a2;
-    B[l+inc] = c1*a2 + s1*a1;
+    vstore2(A+2*l,       c1*a1 - s1*a2);
+    vstore2(A+2*(l+inc), c1*a2 + s1*a1);
 }
 
-static inline void apply_givens_2x2(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A, double * B) {
-    register double s1, s2, c1, c2;
-    register double a1, a2, a3, t;
-    s1 = s(l  , m);
-    c1 = c(l  , m);
-    s2 = s(l+inc, m);
-    c2 = c(l+inc, m);
+static inline void apply_givens_AVX(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A) {
+    double4 s1 = vall4(s(l, m));
+    double4 c1 = vall4(c(l, m));
 
-    a1 = A[l];
-    a2 = A[l+inc];
-    a3 = A[l+2*inc];
+    double4 a1 = vload4(A+4*l      );
+    double4 a2 = vload4(A+4*(l+inc));
 
-    t = c2*a2 + s2*a3;
-
-    A[l      ] = c1*a1 + s1*t ;
-    A[l+inc  ] = c1*t  - s1*a1;
-    A[l+2*inc] = c2*a3 - s2*a2;
-
-    a1 = B[l];
-    a2 = B[l+inc];
-    a3 = B[l+2*inc];
-
-    t = c2*a2 + s2*a3;
-
-    B[l      ] = c1*a1 + s1*t ;
-    B[l+inc  ] = c1*t  - s1*a1;
-    B[l+2*inc] = c2*a3 - s2*a2;
+    vstore4(A+4*l,       c1*a1 + s1*a2);
+    vstore4(A+4*(l+inc), c1*a2 - s1*a1);
 }
 
-static inline void apply_givens_t_2x2(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A, double * B) {
-    register double s1, s2, c1, c2;
-    register double a1, a2, a3, t;
-    s1 = s(l  , m);
-    c1 = c(l  , m);
-    s2 = s(l+inc, m);
-    c2 = c(l+inc, m);
+static inline void apply_givens_t_AVX(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A) {
+    double4 s1 = vall4(s(l, m));
+    double4 c1 = vall4(c(l, m));
 
-    a1 = A[l];
-    a2 = A[l+inc];
-    a3 = A[l+2*inc];
+    double4 a1 = vload4(A+4*l      );
+    double4 a2 = vload4(A+4*(l+inc));
 
-    t = c1*a2 + s1*a1;
-
-    A[l      ] = c1*a1 - s1*a2;
-    A[l+inc  ] = c2*t  - s2*a3;
-    A[l+2*inc] = c2*a3 + s2*t ;
-
-    a1 = B[l];
-    a2 = B[l+inc];
-    a3 = B[l+2*inc];
-
-    t = c1*a2 + s1*a1;
-
-    B[l      ] = c1*a1 - s1*a2;
-    B[l+inc  ] = c2*t  - s2*a3;
-    B[l+2*inc] = c2*a3 + s2*t ;
+    vstore4(A+4*l,       c1*a1 - s1*a2);
+    vstore4(A+4*(l+inc), c1*a2 + s1*a1);
 }

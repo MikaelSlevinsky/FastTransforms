@@ -18,6 +18,9 @@
 *.obj
 *.elf
 
+# Assembly
+*.s
+
 # Linker output
 *.ilk
 *.map
