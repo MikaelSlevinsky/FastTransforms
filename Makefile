@@ -12,16 +12,16 @@ else
 	endif
 endif
 
-OBJ = src/transforms.c src/rotations.c src/drivers.c
-CFLAGS = -Ofast -march=native -I./src
+OBJ = src/transforms.c src/rotations.c src/drivers.c src/permute.c
+CFLAGS = -Ofast -march=native -mtune=native -I./src
 LIBFLAGS = -shared -fPIC -lm -lgomp -fopenmp
 LIBDIR = .
 LIB = fasttransforms
 
 ifeq ($(USE_SYSTEM_BLAS),0)
-CFLAGS += -I/Applications/julia/deps/openblas -L/Applications/julia/deps/openblas -lopenblas
+	CFLAGS += -I/Applications/julia/deps/openblas -L/Applications/julia/deps/openblas -lopenblas
 else
-CFLAGS += -I/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers -lblas
+	CFLAGS += -I/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers -lblas
 endif
 
 all:
@@ -31,13 +31,20 @@ all:
 lib:
 	gcc-7 $(CFLAGS) $(LIBFLAGS) $(OBJ) -o lib$(LIB).$(SLIB)
 
+assembly:
+	gcc-7 -S $(CFLAGS) -mavx512f test/test_assembly.c -o test_assembly.s
+
 tests:
 	make test_transforms
+	make test_permute
 	make test_rotations
 	make test_drivers
 
 test_transforms:
 	gcc-7 test/utilities.c test/test_transforms.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_transforms
+
+test_permute:
+	gcc-7 test/utilities.c test/test_permute.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_permute
 
 test_rotations:
 	gcc-7 test/utilities.c test/test_rotations.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_rotations
@@ -46,7 +53,8 @@ test_drivers:
 	gcc-7 test/utilities.c test/test_drivers.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_drivers
 
 clean:
-	rm lib$(LIB).$(SLIB)
-	rm test_transforms
-	rm test_rotations
-	rm test_drivers
+	rm -f lib$(LIB).$(SLIB)
+	rm -f test_transforms
+	rm -f test_permute
+	rm -f test_rotations
+	rm -f test_drivers

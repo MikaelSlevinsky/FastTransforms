@@ -3,27 +3,87 @@
 #include "fasttransforms.h"
 
 void execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M) {
+    int N = RP->n;
     #pragma omp parallel
-    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
-        kernel2_sph_hi2lo(RP, m, A+(RP->n)*(2*m-1), A+(RP->n)*(2*m));
+    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+        kernel_sph_hi2lo(RP, m, A + N*(2*m-1));
+        kernel_sph_hi2lo(RP, m, A + N*(2*m));
+    }
 }
 
 void execute_sph_lo2hi(const RotationPlan * RP, double * A, const int M) {
+    int N = RP->n;
+    #pragma omp parallel
+    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+        kernel_sph_lo2hi(RP, m, A + N*(2*m-1));
+        kernel_sph_lo2hi(RP, m, A + N*(2*m));
+    }
+}
+
+void execute_sph_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    local_transpose_SSE(A, B, N, M);
     #pragma omp parallel
     for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
-        kernel2_sph_lo2hi(RP, m, A+(RP->n)*(2*m-1), A+(RP->n)*(2*m));
+        kernel_sph_hi2lo_SSE(RP, m, B + N*(2*m-1));
+    local_reverse_transpose_SSE(A, B, N, M);
+}
+
+void execute_sph_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    local_transpose_SSE(A, B, N, M);
+    #pragma omp parallel
+    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
+        kernel_sph_lo2hi_SSE(RP, m, B + N*(2*m-1));
+    local_reverse_transpose_SSE(A, B, N, M);
 }
 
 void execute_tri_hi2lo(const RotationPlan * RP, double * A, const int M) {
     #pragma omp parallel
     for (int m = 1 + omp_get_thread_num(); m < M; m += omp_get_num_threads())
-        kernel1_tri_hi2lo(RP, m, A+(RP->n)*m);
+        kernel_tri_hi2lo(RP, m, A+(RP->n)*m);
 }
 
 void execute_tri_lo2hi(const RotationPlan * RP, double * A, const int M) {
     #pragma omp parallel
     for (int m = 1 + omp_get_thread_num(); m < M; m += omp_get_num_threads())
-        kernel1_tri_lo2hi(RP, m, A+(RP->n)*m);
+        kernel_tri_lo2hi(RP, m, A+(RP->n)*m);
+}
+
+void execute_tri_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    permute_tri_SSE(A, B, N, M);
+    #pragma omp parallel
+    for (int m = 2*omp_get_thread_num(); m < M; m += 2*omp_get_num_threads())
+        kernel_tri_hi2lo_SSE(RP, m, B+N*m);
+    permute_t_tri_SSE(A, B, N, M);
+}
+
+void execute_tri_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    permute_tri_SSE(A, B, N, M);
+    #pragma omp parallel
+    for (int m = 2*omp_get_thread_num(); m < M; m += 2*omp_get_num_threads())
+        kernel_tri_lo2hi_SSE(RP, m, B+N*m);
+    permute_t_tri_SSE(A, B, N, M);
+}
+
+void execute_tri_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    permute_tri_AVX(A, B, N, M);
+    #pragma omp parallel
+    for (int m = 4*omp_get_thread_num(); m < M; m += 4*omp_get_num_threads())
+        kernel_tri_hi2lo_AVX(RP, m, B+N*m);
+    permute_t_tri_AVX(A, B, N, M);
+}
+
+void execute_tri_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    permute_tri_AVX(A, B, N, M);
+    #pragma omp parallel
+    for (int m = 4*omp_get_thread_num(); m < M; m += 4*omp_get_num_threads())
+        kernel_tri_lo2hi_AVX(RP, m, B+N*m);
+    permute_t_tri_AVX(A, B, N, M);
 }
 
 SphericalHarmonicPlan * plan_sph2fourier(const int n) {

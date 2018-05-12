@@ -25,26 +25,18 @@ typedef double double2 __attribute__ ((vector_size (VECTOR_SIZE_2*8)));
 #define vall2(x) ((double2) _mm_set1_pd(x))
 #define vload2(v) ((double2) _mm_loadu_pd(v))
 #define vstore2(u, v) (_mm_storeu_pd(u, v))
-#define vread2(a, b) ((double2) _mm_set_pd(a, b))
-#define vwrite2(a, b, v) { \
-                         _mm_storeh_pd(&a, v); \
-                         _mm_storel_pd(&b, v); \
-                        }
 
 #define VECTOR_SIZE_4 4
 typedef double double4 __attribute__ ((vector_size (VECTOR_SIZE_4*8)));
 #define vall4(x) ((double4) _mm256_set1_pd(x))
 #define vload4(v) ((double4) _mm256_loadu_pd(v))
 #define vstore4(u, v) (_mm256_storeu_pd(u, v))
-#define vread4(a, b, c, d) ((double4) _mm256_set_pd(a, b, c, d))
-#define vwrite4(a, b, c, d, v) { \
-                               __m128d t1 = ((__m128d) _mm256_extractf128_pd(v, 1)); \
-                               _mm_storeh_pd(&a, t1); \
-                               _mm_storel_pd(&b, t1); \
-                               __m128d t2 = ((__m128d) _mm256_extractf128_pd(v, 0)); \
-                               _mm_storeh_pd(&c, t2); \
-                               _mm_storel_pd(&d, t2); \
-                              }
+
+//#define VECTOR_SIZE_8 8
+//typedef double double8 __attribute__ ((vector_size (VECTOR_SIZE_8*8)));
+//#define vall8(x) ((double8) _mm512_set1_pd(x))
+//#define vload8(v) ((double8) _mm512_loadu_pd(v))
+//#define vstore8(u, v) (_mm512_storeu_pd(u, v))
 
 
 static inline double stirlingseries(const double z);
@@ -70,33 +62,47 @@ RotationPlan * plan_rotspinsphere(const int n, const int m1, const int m2);
 RotationPlan * plan_rotdisk(const int n);
 RotationPlan * plan_rottriangle(const int n, const double alpha, const double beta, const double gamma);
 
-void kernel1_sph_hi2lo(const RotationPlan * RP, const int m, double * A);
-void kernel1_sph_lo2hi(const RotationPlan * RP, const int m, double * A);
+void kernel_sph_hi2lo(const RotationPlan * RP, const int m, double * A);
+void kernel_sph_lo2hi(const RotationPlan * RP, const int m, double * A);
 
-void kernel2_sph_hi2lo(const RotationPlan * RP, const int m, double * A, double * B);
-void kernel2_sph_lo2hi(const RotationPlan * RP, const int m, double * A, double * B);
+void kernel_sph_hi2lo_SSE(const RotationPlan * RP, const int m, double * A);
+void kernel_sph_lo2hi_SSE(const RotationPlan * RP, const int m, double * A);
 
-void kernel2x4_sph_hi2lo(const RotationPlan * RP, const int m, double * A, double * B);
-void kernel2x4_sph_lo2hi(const RotationPlan * RP, const int m, double * A, double * B);
+void kernel_tri_hi2lo(const RotationPlan * RP, const int m, double * A);
+void kernel_tri_lo2hi(const RotationPlan * RP, const int m, double * A);
 
-void kernel1_tri_hi2lo(const RotationPlan * RP, const int m, double * A);
-void kernel1_tri_lo2hi(const RotationPlan * RP, const int m, double * A);
+void kernel_tri_hi2lo_SSE(const RotationPlan * RP, const int m, double * A);
+void kernel_tri_lo2hi_SSE(const RotationPlan * RP, const int m, double * A);
 
-static inline void apply_givens_1x1(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A);
-static inline void apply_givens_t_1x1(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A);
+void kernel_tri_hi2lo_AVX(const RotationPlan * RP, const int m, double * A);
+void kernel_tri_lo2hi_AVX(const RotationPlan * RP, const int m, double * A);
 
-static inline void apply_givens_2x1(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A, double * B);
-static inline void apply_givens_t_2x1(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A, double * B);
+static inline void apply_givens(const double S, const double C, double * X, double * Y);
+static inline void apply_givens_t(const double S, const double C, double * X, double * Y);
 
-static inline void apply_givens_2x2(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A, double * B);
-static inline void apply_givens_t_2x2(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A, double * B);
+static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y);
+static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y);
 
+static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y);
+static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y);
+
+//static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y);
+//static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y);
 
 void execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M);
 void execute_sph_lo2hi(const RotationPlan * RP, double * A, const int M);
 
+void execute_sph_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, const int M);
+void execute_sph_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, const int M);
+
 void execute_tri_hi2lo(const RotationPlan * RP, double * A, const int M);
 void execute_tri_lo2hi(const RotationPlan * RP, double * A, const int M);
+
+void execute_tri_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, const int M);
+void execute_tri_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, const int M);
+
+void execute_tri_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M);
+void execute_tri_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, const int M);
 
 typedef struct {
     RotationPlan * RP;
@@ -135,5 +141,17 @@ static void alternate_sign(double * A, const int N);
 
 static void chebyshev_normalization(double * A, const int N, const int M);
 static void chebyshev_normalization_t(double * A, const int N, const int M);
+
+void local_transpose_SSE(const double * A, double * B, const int N, const int M);
+void local_reverse_transpose_SSE(double * A, const double * B, const int N, const int M);
+void local_even_transpose_SSE(const double * B, double * D, const int N, const int M);
+void local_even_reverse_transpose_SSE(double * B, const double * D, const int N, const int M);
+void local_odd_transpose_SSE(const double * C, double * E, const int N, const int M);
+void local_odd_reverse_transpose_SSE(double * C, const double * E, const int N, const int M);
+
+void permute_tri_SSE(const double * A, double * B, const int N, const int M);
+void permute_t_tri_SSE(double * A, const double * B, const int N, const int M);
+void permute_tri_AVX(const double * A, double * B, const int N, const int M);
+void permute_t_tri_AVX(double * A, const double * B, const int N, const int M);
 
 #endif //FASTTRANSFORMS_H
