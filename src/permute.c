@@ -45,3 +45,28 @@ void local_odd_reverse_transpose_SSE(double * C, const double * E, const int N, 
         for (int i = 0; i < 2*N; i++)
             C[i+j*N] = E[(2*i)%(2*N)+(2*i)/(2*N)+j*N];
 }
+
+
+void permute_tri_SSE(const double * A, double * B, const int N, const int M) {
+    for (int j = 0; j < M; j += 2)
+        for (int i = 0; i < 2*N; i++)
+            B[(2*i)%(2*N)+(2*i)/(2*N)+j*N] = A[i+j*N];
+}
+
+void permute_t_tri_SSE(double * A, const double * B, const int N, const int M) {
+    for (int j = 0; j < M; j += 2)
+        for (int i = 0; i < 2*N; i++)
+            A[i+j*N] = B[(2*i)%(2*N)+(2*i)/(2*N)+j*N];
+}
+
+void permute_tri_AVX(const double * A, double * B, const int N, const int M) {
+    for (int j = 0; j < M; j += 4)
+        for (int i = 0; i < 4*N; i++)
+            B[(4*i)%(4*N)+(4*i)/(4*N)+j*N] = A[i+j*N];
+}
+
+void permute_t_tri_AVX(double * A, const double * B, const int N, const int M) {
+    for (int j = 0; j < M; j += 4)
+        for (int i = 0; i < 4*N; i++)
+            A[i+j*N] = B[(4*i)%(4*N)+(4*i)/(4*N)+j*N];
+}

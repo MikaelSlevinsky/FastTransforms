@@ -12,7 +12,7 @@ else
 	endif
 endif
 
-OBJ = src/transforms.c src/rotations.c src/drivers.c src/transpose.c
+OBJ = src/transforms.c src/rotations.c src/drivers.c src/permute.c
 CFLAGS = -Ofast -march=native -mtune=native -I./src
 LIBFLAGS = -shared -fPIC -lm -lgomp -fopenmp
 LIBDIR = .
@@ -36,15 +36,15 @@ assembly:
 
 tests:
 	make test_transforms
-	make test_transpose
+	make test_permute
 	make test_rotations
 	make test_drivers
 
 test_transforms:
 	gcc-7 test/utilities.c test/test_transforms.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_transforms
 
-test_transpose:
-	gcc-7 test/utilities.c test/test_transpose.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_transpose
+test_permute:
+	gcc-7 test/utilities.c test/test_permute.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_permute
 
 test_rotations:
 	gcc-7 test/utilities.c test/test_rotations.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_rotations
@@ -55,6 +55,6 @@ test_drivers:
 clean:
 	rm -f lib$(LIB).$(SLIB)
 	rm -f test_transforms
-	rm -f test_transpose
+	rm -f test_permute
 	rm -f test_rotations
 	rm -f test_drivers

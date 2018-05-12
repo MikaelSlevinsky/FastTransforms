@@ -71,6 +71,12 @@ void kernel_sph_lo2hi_SSE(const RotationPlan * RP, const int m, double * A);
 void kernel_tri_hi2lo(const RotationPlan * RP, const int m, double * A);
 void kernel_tri_lo2hi(const RotationPlan * RP, const int m, double * A);
 
+void kernel_tri_hi2lo_SSE(const RotationPlan * RP, const int m, double * A);
+void kernel_tri_lo2hi_SSE(const RotationPlan * RP, const int m, double * A);
+
+void kernel_tri_hi2lo_AVX(const RotationPlan * RP, const int m, double * A);
+void kernel_tri_lo2hi_AVX(const RotationPlan * RP, const int m, double * A);
+
 static inline void apply_givens(const double S, const double C, double * X, double * Y);
 static inline void apply_givens_t(const double S, const double C, double * X, double * Y);
 
@@ -91,6 +97,12 @@ void execute_sph_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, cons
 
 void execute_tri_hi2lo(const RotationPlan * RP, double * A, const int M);
 void execute_tri_lo2hi(const RotationPlan * RP, double * A, const int M);
+
+void execute_tri_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, const int M);
+void execute_tri_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, const int M);
+
+void execute_tri_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M);
+void execute_tri_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, const int M);
 
 typedef struct {
     RotationPlan * RP;
@@ -136,5 +148,10 @@ void local_even_transpose_SSE(const double * B, double * D, const int N, const i
 void local_even_reverse_transpose_SSE(double * B, const double * D, const int N, const int M);
 void local_odd_transpose_SSE(const double * C, double * E, const int N, const int M);
 void local_odd_reverse_transpose_SSE(double * C, const double * E, const int N, const int M);
+
+void permute_tri_SSE(const double * A, double * B, const int N, const int M);
+void permute_t_tri_SSE(double * A, const double * B, const int N, const int M);
+void permute_tri_AVX(const double * A, double * B, const int N, const int M);
+void permute_t_tri_AVX(double * A, const double * B, const int N, const int M);
 
 #endif //FASTTRANSFORMS_H

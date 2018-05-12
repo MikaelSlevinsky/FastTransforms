@@ -171,16 +171,54 @@ int main(void) {
         M = N;
 
         A = triones(N, M);
+        Ac = copyA(A, N, M);
         B = copyA(A, N, M);
         RP = plan_rottriangle(N, alpha, beta, gamma);
 
         execute_tri_hi2lo(RP, A, M);
         execute_tri_lo2hi(RP, A, M);
 
+        printf("%d  %1.2e  ", N, vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_tri_hi2lo_SSE(RP, A, Ac, M);
+        execute_tri_lo2hi(RP, A, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_tri_hi2lo(RP, A, M);
+        execute_tri_lo2hi_SSE(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_tri_hi2lo_SSE(RP, A, Ac, M);
+        execute_tri_lo2hi_SSE(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_tri_hi2lo_AVX(RP, A, Ac, M);
+        execute_tri_lo2hi(RP, A, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_tri_hi2lo(RP, A, M);
+        execute_tri_lo2hi_AVX(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_tri_hi2lo_AVX(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX(RP, A, Ac, M);
+
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         free(A);
+        free(Ac);
         free(B);
         free(RP);
     }
@@ -193,6 +231,7 @@ int main(void) {
         NLOOPS = 1 + pow(4096/N, 2);
 
         A = triones(N, M);
+        B = triones(N, M);
         RP = plan_rottriangle(N, alpha, beta, gamma);
 
         gettimeofday(&start, NULL);
@@ -211,9 +250,46 @@ int main(void) {
         gettimeofday(&end, NULL);
 
         delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("  %.6f", delta/NLOOPS);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_tri_hi2lo_SSE(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("  %.6f", N, delta/NLOOPS);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_tri_lo2hi_SSE(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("  %.6f", delta/NLOOPS);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_tri_hi2lo_AVX(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("  %.6f", N, delta/NLOOPS);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_tri_lo2hi_AVX(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
         printf("  %.6f\n", delta/NLOOPS);
 
         free(A);
+        free(B);
         free(RP);
     }
     printf("];\n");

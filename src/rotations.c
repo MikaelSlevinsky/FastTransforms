@@ -85,7 +85,7 @@ void kernel_sph_lo2hi_SSE(const RotationPlan * RP, const int m, double * A) {
 
 void kernel_tri_hi2lo(const RotationPlan * RP, const int m, double * A) {
     int n = RP->n;
-    for (int j = m-1; j >= 0; j -= 1)
+    for (int j = m-1; j >= 0; j--)
         for (int l = n-2-j; l >= 0; l--)
             apply_givens(RP->s(l, j), RP->c(l, j), A+l, A+l+1);
 }
@@ -94,9 +94,65 @@ void kernel_tri_hi2lo(const RotationPlan * RP, const int m, double * A) {
 
 void kernel_tri_lo2hi(const RotationPlan * RP, const int m, double * A) {
     int n = RP->n;
-    for (int j = 0; j < m; j += 1)
+    for (int j = 0; j < m; j++)
         for (int l = 0; l <= n-2-j; l++)
             apply_givens_t(RP->s(l, j), RP->c(l, j), A+l, A+l+1);
+}
+
+// Convert two vectors of triangular harmonics of order m and m+1 to 0.
+
+void kernel_tri_hi2lo_SSE(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int l = n-2-m; l >= 0; l--)
+        apply_givens(RP->s(l, m), RP->c(l, m), A+2*l+1, A+2*(l+1)+1);
+    for (int j = m-1; j >= 0; j--)
+        for (int l = n-2-j; l >= 0; l--)
+            apply_givens_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+1));
+}
+
+// Convert two vectors of triangular harmonics of order 0 to m and m+1.
+
+void kernel_tri_lo2hi_SSE(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int j = 0; j < m; j++)
+        for (int l = 0; l <= n-2-j; l++)
+            apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+1));
+    for (int l = 0; l <= n-2-m; l++)
+        apply_givens_t(RP->s(l, m), RP->c(l, m), A+2*l+1, A+2*(l+1)+1);
+}
+
+// Convert four vectors of triangular harmonics of order m, m+1, m+2, m+3 to 0.
+
+void kernel_tri_hi2lo_AVX(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int l = n-2-m; l >= 0; l--)
+        apply_givens(RP->s(l, m), RP->c(l, m), A+4*l+1, A+4*(l+1)+1);
+    for (int l = n-4-m; l >= 0; l--)
+        apply_givens(RP->s(l, m+2), RP->c(l, m+2), A+4*l+3, A+4*(l+1)+3);
+    for (int l = n-3-m; l >= 0; l--)
+        apply_givens_SSE(RP->s(l, m+1), RP->c(l, m+1), A+4*l+2, A+4*(l+1)+2);
+    for (int l = n-2-m; l >= 0; l--)
+        apply_givens_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+1)+2);
+    for (int j = m-1; j >= 0; j--)
+        for (int l = n-2-j; l >= 0; l--)
+            apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+1));
+}
+
+// Convert four vectors of triangular harmonics of order 0 to m, m+1, m+2, m+3.
+
+void kernel_tri_lo2hi_AVX(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int j = 0; j < m; j++)
+        for (int l = 0; l <= n-2-j; l++)
+            apply_givens_t_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+1));
+    for (int l = 0; l <= n-2-m; l++)
+        apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+1)+2);
+    for (int l = 0; l <= n-3-m; l++)
+        apply_givens_t_SSE(RP->s(l, m+1), RP->c(l, m+1), A+4*l+2, A+4*(l+1)+2);
+    for (int l = 0; l <= n-4-m; l++)
+        apply_givens_t(RP->s(l, m+2), RP->c(l, m+2), A+4*l+3, A+4*(l+1)+3);
+    for (int l = 0; l <= n-2-m; l++)
+        apply_givens_t(RP->s(l, m), RP->c(l, m), A+4*l+1, A+4*(l+1)+1);
 }
 
 
