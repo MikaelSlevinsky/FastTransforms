@@ -71,14 +71,17 @@ void kernel_sph_lo2hi_SSE(const RotationPlan * RP, const int m, double * A);
 void kernel_tri_hi2lo(const RotationPlan * RP, const int m, double * A);
 void kernel_tri_lo2hi(const RotationPlan * RP, const int m, double * A);
 
-static inline void apply_givens(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A);
-static inline void apply_givens_t(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A);
+static inline void apply_givens(const double S, const double C, double * X, double * Y);
+static inline void apply_givens_t(const double S, const double C, double * X, double * Y);
 
-static inline void apply_givens_SSE(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A);
-static inline void apply_givens_t_SSE(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A);
+static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y);
+static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y);
 
-static inline void apply_givens_AVX(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A);
-static inline void apply_givens_t_AVX(const int inc, const double * s, const double * c, const int n, const int l, const int m, double * A);
+static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y);
+static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y);
+
+//static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y);
+//static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y);
 
 void execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M);
 void execute_sph_lo2hi(const RotationPlan * RP, double * A, const int M);
