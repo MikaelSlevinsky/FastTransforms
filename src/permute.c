@@ -118,6 +118,18 @@ void swap_AVX(double * A, double * B, const int N){
         tmp = A_AVX[i];
         vstore4((A+i*4), B_AVX[i]);
         vstore4((B+i*4), tmp);
+        
+        if(N%2 != 0){
+            float tmpf = 0.0;
+            
+            tmpf = A[2*N-2];
+            A[2*N-2] = B[2*N-2];
+            B[2*N-2] = tmpf;
+            
+            tmpf = A[2*N-1];
+            A[2*N-1] = B[2*N-1];
+            B[2*N-1] = tmpf; 
+        }
     }
 }
 
