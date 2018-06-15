@@ -46,14 +46,10 @@ void local_odd_reverse_transpose_SSE(double * C, const double * E, const int N, 
             C[i+j*N] = E[(2*i)%(2*N)+(2*i)/(2*N)+j*N];
 }
 
-// Not sure why he skips the first column in his permutes. 
-// Breaks compatibility with even number of columns.
-// I'll leave it in but comment it out. Set j = 1. 
-
 void permute_AVX(const double * A, double * B, const int N, const int M) {
     //for (int i = 0; i < N; i++)
     //    B[i] = A[i];
-    for (int j = 0; j < M; j += 4)
+    for (int j = 1; j < M; j += 4)
         for (int i = 0; i < 4*N; i++)
             B[(4*i)%(4*N)+(4*i)/(4*N)+j*N] = A[i+j*N];
 }
