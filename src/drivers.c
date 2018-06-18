@@ -40,22 +40,24 @@ void execute_sph_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, cons
 
 void execute_sph_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    two_warp(N, M, A)
+    two_warp(N, M, A);
     permute_sph_AVX(A, B, N, M);
     #pragma omp parallel
     for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
         kernel_sph_hi2lo_AVX(RP, m, B + N*(2*m-1));
     permute_t_sph_AVX(A, B, N, M);
+    two_warp(N, M, A);
 }
 
 void execute_sph_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    two_warp(N, M, A)
+    two_warp(N, M, A);
     permute_sph_AVX(A, B, N, M);
     #pragma omp parallel
     for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
         kernel_sph_lo2hi_AVX(RP, m, B + N*(2*m-1));
     permute_t_AVX(A, B, N, M);
+    two_warp(N, M, A);
 }
 
 
