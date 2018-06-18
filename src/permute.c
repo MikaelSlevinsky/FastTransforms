@@ -102,28 +102,41 @@ void swap(double * A, double * B, const int M){
 }
 
 void swap_SSE(double * A, double * B, const int M){
-    __m128d *A_SSE = (__m128d*) A;
-    __m128d *B_SSE = (__m128d*) B;
-    __m128d tmp = _mm_set1_pd(0.0);
+    __m128d tmp1;
+    __m128d tmp2;
     for(int i = 0; i < M; i++){
         
-        tmp = A_SSE[i];
-        vstore2((A+i*2), B_SSE[i]);
-        vstore2((B+i*2), tmp);
+        tmp1 = vload2(A+2*i);
+        tmp2 = vload2(B+2*i);
+        vstore2((A+i*2), tmp2);
+        vstore2((B+i*2), tmp1);
     }
 }
 
 // Note : Call gcc with -mavx flag for this feature
-void swap_AVX(double * A, double * B, const int M){
-    __m256d *A_AVX = (__m256d*) A;
-    __m256d *B_AVX = (__m256d*) B;
-    __m256d tmp = _mm256_set1_pd(0.0);
-    for(int i = 0; i < M/2; i++){
+void swap_AVX(double * A, double * B, const int N){
+    __m256d tmp1;
+    __m256d tmp2;
+    for(int i = 0; i < N/2; i++){
         
-        tmp = A_AVX[i];
-        vstore4((A+i*4), B_AVX[i]);
-        vstore4((B+i*4), tmp);
+        tmp1 = vload4(A+i*4);
+        tmp2 = vload4(B+i*4);
+        vstore4((A+i*4), tmp2);
+        vstore4((B+i*4), tmp1);
+        
     }
+    if(N%2 != 0){
+        double tmpd = 0.0;
+            
+        tmpd = A[2*N-2];
+        A[2*N-2] = B[2*N-2];
+        B[2*N-2] = tmpd;
+            
+        tmpd = A[2*N-1];
+        A[2*N-1] = B[2*N-1];
+        B[2*N-1] = tmpd; 
+    }
+    
 }
 
 void two_warp(const int M, const int N, double * A){
