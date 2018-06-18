@@ -10,7 +10,6 @@ void local_transpose_SSE(const double * A, double * B, const int N, const int M)
             B[(2*i)%(2*N)+(2*i)/(2*N)+j*N] = A[i+j*N];
 }
 
-
 void local_reverse_transpose_SSE(double * A, const double * B, const int N, const int M) {
     for (int i = 0; i < N; i++)
         A[i] = B[i];
@@ -47,22 +46,18 @@ void local_odd_reverse_transpose_SSE(double * C, const double * E, const int N, 
             C[i+j*N] = E[(2*i)%(2*N)+(2*i)/(2*N)+j*N];
 }
 
-// Not sure why he skips the first column in his permutes. 
-// Breaks compatibility with even number of columns.
-// I'll leave it in but comment it out. Set j = 1. 
-
-void permute_AVX(const double * A, double * B, const int N, const int M) {
-    //for (int i = 0; i < N; i++)
-    //    B[i] = A[i];
-    for (int j = 0; j < M; j += 4)
+void permute_sph_AVX(const double * A, double * B, const int N, const int M) {
+    for (int i = 0; i < N; i++)
+        B[i] = A[i];
+    for (int j = 1; j < M; j += 4)
         for (int i = 0; i < 4*N; i++)
             B[(4*i)%(4*N)+(4*i)/(4*N)+j*N] = A[i+j*N];
 }
 
-void permute_t_AVX(double * A, const double * B, const int N, const int M) {
-    //for (int i = 0; i < N; i++)
-    //    B[i] = A[i];
-    for (int j = 0; j < M; j += 4)
+void permute_t_sph_AVX(double * A, const double * B, const int N, const int M) {
+    for (int i = 0; i < N; i++)
+        B[i] = A[i];
+    for (int j = 1; j < M; j += 4)
         for (int i = 0; i < 4*N; i++)
             A[i+j*N] = B[(4*i)%(4*N)+(4*i)/(4*N)+j*N];
 }
@@ -125,6 +120,7 @@ void swap_AVX(double * A, double * B, const int N){
         vstore4((B+i*4), tmp1);
         
     }
+    
     if(N%2 != 0){
         double tmpd = 0.0;
             
@@ -139,14 +135,16 @@ void swap_AVX(double * A, double * B, const int N){
     
 }
 
-void two_warp(const int M, const int N, double * A){
-    for (int i = 0; i < N; i+=8){
-        swap_AVX(A+(2+i)*M, A+(4+i)*M, M);     
+//swap_AVX(A+(i+2)*M, A+(i+4)*M, M);
+//will give 0,1 ordering, instead of 0,2
+void two_warp(const int N, const int M, double * A){
+    for (int i = 1; i < M; i+=8){
+        swap_AVX(A+(i+2)*N, A+(i+4)*N, N);     
     }
 }
 
-void four_warp(const int M, const int N, double * A){
-    for (int i = 0; i < N; i+=16){
+void four_warp(const int N, const int M, double * A){
+    for (int i = 1; i < M; i+=16){
             
         swap_AVX(A+(i+2)*M, A+(i+4)*M, M);
         swap_AVX(A+(i+4)*M, A+(i+8)*M, M);
