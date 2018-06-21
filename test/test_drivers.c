@@ -59,7 +59,7 @@ int main(void) {
         B = copyA(A, N, M);
         RP = plan_rotsphere(N);
 
-        execute_sph_hi2lo_AVX(RP, A, Ac, M);
+        execute_sph_hi2lo(RP, A, M);
         execute_sph_lo2hi_AVX(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
@@ -73,7 +73,7 @@ int main(void) {
     printf("];\n");
 
     printf("t1 = [\n");
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 0; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
         NLOOPS = 1 + pow(4096/N, 2);
