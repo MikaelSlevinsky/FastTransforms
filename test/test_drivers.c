@@ -14,7 +14,7 @@ int main(void) {
     int N, M, NLOOPS;
 
     printf("err1 = [\n");
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 3; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
 
@@ -71,9 +71,9 @@ int main(void) {
         free(RP);
     }
     printf("];\n");
-/*
+
     printf("t1 = [\n");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 1; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
         NLOOPS = 1 + pow(4096/N, 2);
@@ -116,7 +116,36 @@ int main(void) {
         gettimeofday(&end, NULL);
 
         delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-        printf("  %.6f\n", delta/NLOOPS);
+        printf("  %.6f", delta/NLOOPS);
+
+        free(A);
+        free(B);
+        free(RP);
+
+        M = 2*N+1;
+        NLOOPS = 1 + pow(4096/N, 2);
+
+        A = sphones(N, M);
+        B = sphones(N, M);
+        RP = plan_rotsphere(N);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_sph_hi2lo_AVX(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("%d  %.6f", N, delta/NLOOPS);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_sph_lo2hi_AVX(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("%d  %.6f\n", N, delta/NLOOPS);
 
         free(A);
         free(B);
@@ -124,7 +153,7 @@ int main(void) {
     }
     printf("];\n");
 
-
+/*
     printf("err2 = [\n");
     for (int i = 0; i < 8; i++) {
         N = 64*pow(2, i);
