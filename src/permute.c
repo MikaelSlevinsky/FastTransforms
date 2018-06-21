@@ -56,7 +56,7 @@ void permute_sph_AVX(const double * A, double * B, const int N, const int M) {
 
 void permute_t_sph_AVX(double * A, const double * B, const int N, const int M) {
     for (int i = 0; i < N; i++)
-        B[i] = A[i];
+        A[i] = B[i];
     for (int j = 1; j < M; j += 4)
         for (int i = 0; i < 4*N; i++)
             A[i+j*N] = B[(4*i)%(4*N)+(4*i)/(4*N)+j*N];
@@ -139,16 +139,16 @@ void swap_AVX(double * A, double * B, const int N){
 //will give 0,1 ordering, instead of 0,2
 void two_warp(const int N, const int M, double * A){
     for (int i = 1; i < M; i+=8){
-        swap_AVX(A+(i+2)*N, A+(i+4)*N, N);     
+        swap_SSE(A+(i+2)*N, A+(i+4)*N, N);     
     }
 }
 
 void four_warp(const int N, const int M, double * A){
     for (int i = 1; i < M; i+=16){
             
-        swap_AVX(A+(i+2)*M, A+(i+4)*M, M);
-        swap_AVX(A+(i+4)*M, A+(i+8)*M, M);
-        swap_AVX(A+(i+6)*M, A+(i+12)*M, M);
-        swap_AVX(A+(i+10)*M, A+(i+12)*M, M);
+        swap_SSE(A+(i+2)*M, A+(i+4)*M, M);
+        swap_SSE(A+(i+4)*M, A+(i+8)*M, M);
+        swap_SSE(A+(i+6)*M, A+(i+12)*M, M);
+        swap_SSE(A+(i+10)*M, A+(i+12)*M, M);
     }
 }

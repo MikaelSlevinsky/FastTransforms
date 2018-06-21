@@ -14,7 +14,7 @@ int main(void) {
     int N, M, NLOOPS;
 
     printf("err1 = [\n");
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 1; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
 
@@ -51,9 +51,27 @@ int main(void) {
         free(Ac);
         free(B);
         free(RP);
+
+        M = 2*N+1;
+
+        A = sphones(N, M);
+        Ac = copyA(A, N, M);
+        B = copyA(A, N, M);
+        RP = plan_rotsphere(N);
+
+        execute_sph_hi2lo_AVX(RP, A, Ac, M);
+        execute_sph_lo2hi_AVX(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        free(A);
+        free(Ac);
+        free(B);
+        free(RP);
     }
     printf("];\n");
-
+/*
     printf("t1 = [\n");
     for (int i = 0; i < 8; i++) {
         N = 64*pow(2, i);
@@ -347,6 +365,6 @@ int main(void) {
         free(Q);
     }
     printf("];\n");
-
+*/
     return 0;
 }
