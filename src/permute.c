@@ -86,9 +86,9 @@ void permute_t_tri_AVX(double * A, const double * B, const int N, const int M) {
             A[i+j*N] = B[(4*i)%(4*N)+(4*i)/(4*N)+j*N];
 }
 
-void swap(double * A, double * B, const int M){
+void swap(double * A, double * B, const int N){
     double tmp = 0.0;
-    for(int i = 0; i < 2*M; i++){
+    for(int i = 0; i < 2*N; i++){
 
         tmp = A[i];
         A[i] = B[i];
@@ -96,10 +96,10 @@ void swap(double * A, double * B, const int M){
     }
 }
 
-void swap_SSE(double * A, double * B, const int M){
+void swap_SSE(double * A, double * B, const int N){
     __m128d tmp1;
     __m128d tmp2;
-    for(int i = 0; i < M; i++){
+    for(int i = 0; i < N; i++){
         
         tmp1 = vload2(A+2*i);
         tmp2 = vload2(B+2*i);
