@@ -73,7 +73,7 @@ int main(void) {
     printf("];\n");
 
     printf("t1 = [\n");
-    for (int i = 0; i < 0; i++) {
+    for (int i = 3; i <6; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
         NLOOPS = 1 + pow(4096/N, 2);
