@@ -136,7 +136,7 @@ int main(void) {
         gettimeofday(&end, NULL);
 
         delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-        printf("%d  %.6f", N, delta/NLOOPS);
+        printf(" %.6f", delta/NLOOPS);
 
         gettimeofday(&start, NULL);
         for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
@@ -145,7 +145,7 @@ int main(void) {
         gettimeofday(&end, NULL);
 
         delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-        printf("%d  %.6f\n", N, delta/NLOOPS);
+        printf(" %.6f\n", delta/NLOOPS);
 
         free(A);
         free(B);
