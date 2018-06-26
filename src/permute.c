@@ -137,8 +137,6 @@ void swap_AVX(double * A, double * B, const int N){
     
 }
 
-//swap_AVX(A+(i+2)*M, A+(i+4)*M, M);
-//will give 0,1 ordering, instead of 0,2
 void two_warp(const int N, const int M, double * A){
 
     #pragma omp parallel for
