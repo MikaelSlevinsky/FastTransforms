@@ -49,8 +49,7 @@ void local_odd_reverse_transpose_SSE(double * C, const double * E, const int N, 
 void permute_sph_AVX(const double * A, double * B, const int N, const int M) {
     local_transpose_SSE(A, B, N, M%8);
         
-    int j;
-    #pragma omp parallel for private(j)
+    #pragma omp parallel for
     for (int j = M%8; j < M; j += 4)
         for (int i = 0; i < 4*N; i++)
             B[(4*i)%(4*N)+(4*i)/(4*N)+j*N] = A[i+j*N];
@@ -59,8 +58,7 @@ void permute_sph_AVX(const double * A, double * B, const int N, const int M) {
 void permute_t_sph_AVX(double * A, const double * B, const int N, const int M) {
     local_reverse_transpose_SSE(A, B, N, M%8);
         
-    int j;
-    #pragma omp parallel for private(j)
+    #pragma omp parallel for
     for (int j = M%8; j < M; j += 4)
         for (int i = 0; i < 4*N; i++)
             A[i+j*N] = B[(4*i)%(4*N)+(4*i)/(4*N)+j*N];
@@ -142,9 +140,8 @@ void swap_AVX(double * A, double * B, const int N){
 //swap_AVX(A+(i+2)*M, A+(i+4)*M, M);
 //will give 0,1 ordering, instead of 0,2
 void two_warp(const int N, const int M, double * A){
-    int i;
 
-    #pragma omp parallel for private(i)
+    #pragma omp parallel for
     for (int i = M%8; i < M; i+= 8){
         swap_AVX(A+(i+2)*N, A+(i+4)*N, N);   
     }
