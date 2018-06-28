@@ -14,7 +14,7 @@ int main(void) {
     int N, M, NLOOPS;
 
     printf("err1 = [\n");
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 3; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
 
@@ -45,6 +45,12 @@ int main(void) {
         execute_sph_lo2hi_SSE(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_sph_hi2lo_AVX(RP, A, Ac, M);
+        execute_sph_lo2hi_AVX(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         free(A);
@@ -55,7 +61,7 @@ int main(void) {
     printf("];\n");
 
     printf("t1 = [\n");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 4; i <6; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
         NLOOPS = 1 + pow(4096/N, 2);
@@ -66,7 +72,7 @@ int main(void) {
 
         gettimeofday(&start, NULL);
         for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            execute_sph_hi2lo(RP, A, M);
+            //execute_sph_hi2lo(RP, A, M);
         }
         gettimeofday(&end, NULL);
 
@@ -75,7 +81,7 @@ int main(void) {
 
         gettimeofday(&start, NULL);
         for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            execute_sph_lo2hi(RP, A, M);
+            //execute_sph_lo2hi(RP, A, M);
         }
         gettimeofday(&end, NULL);
 
@@ -89,7 +95,7 @@ int main(void) {
         gettimeofday(&end, NULL);
 
         delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-        printf("  %.6f", N, delta/NLOOPS);
+        printf("  %.6f", delta/NLOOPS);
 
         gettimeofday(&start, NULL);
         for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
@@ -98,7 +104,25 @@ int main(void) {
         gettimeofday(&end, NULL);
 
         delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-        printf("  %.6f\n", delta/NLOOPS);
+        printf("  %.6f", delta/NLOOPS);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_sph_hi2lo_AVX(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf(" %.6f", delta/NLOOPS);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_sph_lo2hi_AVX(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf(" %.6f\n", delta/NLOOPS);
 
         free(A);
         free(B);
@@ -106,7 +130,7 @@ int main(void) {
     }
     printf("];\n");
 
-
+/*
     printf("err2 = [\n");
     for (int i = 0; i < 8; i++) {
         N = 64*pow(2, i);
@@ -347,6 +371,6 @@ int main(void) {
         free(Q);
     }
     printf("];\n");
-
+*/
     return 0;
 }

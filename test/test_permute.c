@@ -76,8 +76,31 @@ int main(void) {
 
         free(A);
         free(B);
-    }
 
+        M = 2*N+1;
+
+        A = (double *) calloc(N * M, sizeof(double));
+        B = (double *) calloc(N * M, sizeof(double));
+        for (int i = 0; i < N * M; i++)
+            A[i] = (double) i;
+
+        permute_sph_AVX(A, B, N, M);
+
+        printmat("A", A, N, M);
+        printmat("B", B, N, M);
+
+        free(A);
+
+        A = (double *) calloc(N * M, sizeof(double));
+
+        permute_t_sph_AVX(A, B, N, M);
+
+        printmat("A", A, N, M);
+
+        free(A);
+        free(B);
+    }
+/*
     printf("t1 = [\n");
     for (int i = 0; i < 8; i++) {
         N = 64*pow(2, i);
@@ -191,6 +214,6 @@ int main(void) {
         free(B);
     }
     printf("];\n");
-
+*/
     return 0;
 }
