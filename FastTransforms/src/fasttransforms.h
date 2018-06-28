@@ -157,7 +157,6 @@ void swap_AVX(double * A, double * B, const int N);
 
 void permute_sph_SSE(const double * A, double * B, const int N, const int M);
 void permute_t_sph_SSE(double * A, const double * B, const int N, const int M);
-
 void permute_sph_AVX(const double * A, double * B, const int N, const int M);
 void permute_t_sph_AVX(double * A, const double * B, const int N, const int M);
 

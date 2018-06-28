@@ -58,7 +58,6 @@ void permute_t_tri_AVX(double * A, const double * B, const int N, const int M) {
             A[i+j*N] = B[(4*i)%(4*N)+(4*i)/(4*N)+j*N];
 }
 
-
 void swap(double * A, double * B, const int N) {
     double tmp;
     for (int i = 0; i < 2*N; i++) {
@@ -67,7 +66,6 @@ void swap(double * A, double * B, const int N) {
         B[i] = tmp;
     }
 }
-
 
 void swap_SSE(double * A, double * B, const int N) {
     __m128d tmp;
@@ -105,6 +103,9 @@ void two_warp(double * A, const int N, const int M) {
 
 void four_warp(double * A, const int N, const int M) {
     for (int i = 1; i < M; i += 16) {
+        swap_AVX(A+(i+2)*M, A+(i+4)*M, M);
+        swap_AVX(A+(i+4)*M, A+(i+8)*M, M);
+        swap_AVX(A+(i+6)*M, A+(i+12)*M, M);
+        swap_AVX(A+(i+10)*M, A+(i+12)*M, M);
     }
 }
-    
