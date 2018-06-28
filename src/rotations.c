@@ -81,7 +81,6 @@ void kernel_sph_lo2hi_SSE(const RotationPlan * RP, const int m, double * A) {
             apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+2));
 }
 
-
 // Convert four vectors of spherical harmonics of order m, m, m+2, m+2 to 0/1.
 // The four vectors are stored in A in row-major ordering.
 
@@ -105,6 +104,7 @@ void kernel_sph_lo2hi_AVX(const RotationPlan * RP, const int m, double * A) {
     for (int l = 0; l <= n-3-m; l++)
         apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+2)+2);
 }
+
 
 // Convert a single vector of triangular harmonics of order m to 0.
 

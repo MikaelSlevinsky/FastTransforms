@@ -34,6 +34,7 @@ void permute_t_sph_AVX(double * A, const double * B, const int N, const int M) {
             A[i+j*N] = B[(4*i)%(4*N)+(4*i)/(4*N)+j*N];
 }
 
+
 void permute_tri_SSE(const double * A, double * B, const int N, const int M) {
     for (int j = 0; j < M; j += 2)
         for (int i = 0; i < 2*N; i++)
@@ -68,7 +69,6 @@ void swap(double * A, double * B, const int N) {
     }
 }
 
-
 void swap_SSE(double * A, double * B, const int N) {
     __m128d tmp;
     for (int i = 0; i < N; i++) {
@@ -97,6 +97,7 @@ void swap_AVX(double * A, double * B, const int N) {
     }
 }
 
+
 void two_warp(double * A, const int N, const int M) {
     #pragma omp parallel for
     for (int i = M%8; i < M; i += 8)
@@ -111,4 +112,3 @@ void four_warp(double * A, const int N, const int M) {
         swap_AVX(A+(i+10)*N, A+(i+12)*N, N);
     }
 }
-    
