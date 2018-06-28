@@ -29,10 +29,10 @@ all:
 	make tests
 
 lib:
-	gcc-7 $(CFLAGS) $(LIBFLAGS) $(OBJ) -o lib$(LIB).$(SLIB)
+	gcc-8 $(CFLAGS) $(LIBFLAGS) $(OBJ) -o lib$(LIB).$(SLIB)
 
 assembly:
-	gcc-7 -S $(CFLAGS) -mavx512f test/test_assembly.c -o test_assembly.s
+	gcc-8 -S $(CFLAGS) -mavx512f test/test_assembly.c -o test_assembly.s
 
 tests:
 	make test_transforms
@@ -41,16 +41,16 @@ tests:
 	make test_drivers
 
 test_transforms:
-	gcc-7 test/utilities.c test/test_transforms.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_transforms
+	gcc-8 test/utilities.c test/test_transforms.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_transforms
 
 test_permute:
-	gcc-7 test/utilities.c test/test_permute.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_permute
+	gcc-8 test/utilities.c test/test_permute.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_permute
 
 test_rotations:
-	gcc-7 test/utilities.c test/test_rotations.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_rotations
+	gcc-8 test/utilities.c test/test_rotations.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_rotations
 
 test_drivers:
-	gcc-7 test/utilities.c test/test_drivers.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_drivers
+	gcc-8 test/utilities.c test/test_drivers.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -o test_drivers
 
 clean:
 	rm -f lib$(LIB).$(SLIB)

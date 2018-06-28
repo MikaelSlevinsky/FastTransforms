@@ -148,19 +148,15 @@ static void alternate_sign(double * A, const int N);
 static void chebyshev_normalization(double * A, const int N, const int M);
 static void chebyshev_normalization_t(double * A, const int N, const int M);
 
-void two_warp(const int N, const int M, double * A);
-void four_warp(const int N, const int M, double * A);
+void two_warp(double * A, const int N, const int M);
+void four_warp(double * A, const int N, const int M);
 
 void swap(double * A, double * B, const int N);
 void swap_SSE(double * A, double * B, const int N);
 void swap_AVX(double * A, double * B, const int N);
 
-void local_transpose_SSE(const double * A, double * B, const int N, const int M);
-void local_reverse_transpose_SSE(double * A, const double * B, const int N, const int M);
-void local_even_transpose_SSE(const double * B, double * D, const int N, const int M);
-void local_even_reverse_transpose_SSE(double * B, const double * D, const int N, const int M);
-void local_odd_transpose_SSE(const double * C, double * E, const int N, const int M);
-void local_odd_reverse_transpose_SSE(double * C, const double * E, const int N, const int M);
+void permute_sph_SSE(const double * A, double * B, const int N, const int M);
+void permute_t_sph_SSE(double * A, const double * B, const int N, const int M);
 void permute_sph_AVX(const double * A, double * B, const int N, const int M);
 void permute_t_sph_AVX(double * A, const double * B, const int N, const int M);
 
