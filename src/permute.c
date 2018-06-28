@@ -105,7 +105,7 @@ void two_warp(double * A, const int N, const int M) {
 
 void four_warp(double * A, const int N, const int M) {
     for (int i = 1; i < M; i += 16) {
-         swap_AVX(A+(i+2)*M, A+(i+4)*M, M);
+        swap_AVX(A+(i+2)*M, A+(i+4)*M, M);
         swap_AVX(A+(i+4)*M, A+(i+8)*M, M);
         swap_AVX(A+(i+6)*M, A+(i+12)*M, M);
         swap_AVX(A+(i+10)*M, A+(i+12)*M, M);
