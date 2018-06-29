@@ -59,6 +59,18 @@ void permute_t_tri_AVX(double * A, const double * B, const int N, const int M) {
             A[i+j*N] = B[(4*i)%(4*N)+(4*i)/(4*N)+j*N];
 }
 
+void permute_tri_AVX512(const double * A, double * B, const int N, const int M) {
+    for (int j = 0; j < M; j += 8)
+        for (int i = 0; i < 8*N; i++)
+            B[(8*i)%(8*N)+(8*i)/(8*N)+j*N] = A[i+j*N];
+}
+
+void permute_t_tri_AVX512(double * A, const double * B, const int N, const int M) {
+    for (int j = 0; j < M; j += 8)
+        for (int i = 0; i < 8*N; i++)
+            A[i+j*N] = B[(8*i)%(8*N)+(8*i)/(8*N)+j*N];
+}
+
 
 void swap(double * A, double * B, const int N) {
     double tmp;

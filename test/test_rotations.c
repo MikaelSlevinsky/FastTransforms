@@ -1,7 +1,7 @@
 #include "fasttransforms.h"
 #include "utilities.h"
 
-const int N = 1025;
+const int N = 257;
 
 int main(void) {
     double * A, * Ac, * B;

@@ -12,7 +12,7 @@ int main(void) {
     SphericalHarmonicPlan * P;
 
     int N, M, NLOOPS;
-
+/*
     printf("err1 = [\n");
     for (int i = 0; i < 3; i++) {
         N = 64*pow(2, i);
@@ -113,7 +113,7 @@ int main(void) {
         gettimeofday(&end, NULL);
 
         delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-        printf(" %.6f", delta/NLOOPS);
+        printf("  %.6f", delta/NLOOPS);
 
         gettimeofday(&start, NULL);
         for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
@@ -122,14 +122,14 @@ int main(void) {
         gettimeofday(&end, NULL);
 
         delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-        printf(" %.6f\n", delta/NLOOPS);
+        printf("  %.6f\n", delta/NLOOPS);
 
         free(A);
         free(B);
         free(RP);
     }
     printf("];\n");
-
+*/
 /*
     printf("err2 = [\n");
     for (int i = 0; i < 8; i++) {
@@ -183,14 +183,14 @@ int main(void) {
         free(P);
     }
     printf("];\n");
-
+*/
     //double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
     double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 
     TriangularHarmonicPlan * Q;
 
     printf("err3 = [\n");
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 4; i++) {
         N = 64*pow(2, i);
         M = N;
 
@@ -217,26 +217,26 @@ int main(void) {
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
-        execute_tri_hi2lo_SSE(RP, A, Ac, M);
+        execute_tri_hi2lo_AVX(RP, A, Ac, M);
         execute_tri_lo2hi_SSE(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
-        execute_tri_hi2lo_AVX(RP, A, Ac, M);
-        execute_tri_lo2hi(RP, A, M);
+        execute_tri_hi2lo_SSE(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
-        execute_tri_hi2lo(RP, A, M);
+        execute_tri_hi2lo_AVX512(RP, A, Ac, M);
         execute_tri_lo2hi_AVX(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         execute_tri_hi2lo_AVX(RP, A, Ac, M);
-        execute_tri_lo2hi_AVX(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX512(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
@@ -249,7 +249,7 @@ int main(void) {
     printf("];\n");
 
     printf("t3 = [\n");
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 8; i++) {
         N = 64*pow(2, i);
         M = N;
         NLOOPS = 1 + pow(4096/N, 2);
@@ -283,7 +283,7 @@ int main(void) {
         gettimeofday(&end, NULL);
 
         delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-        printf("  %.6f", N, delta/NLOOPS);
+        printf("  %.6f", delta/NLOOPS);
 
         gettimeofday(&start, NULL);
         for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
@@ -301,11 +301,29 @@ int main(void) {
         gettimeofday(&end, NULL);
 
         delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-        printf("  %.6f", N, delta/NLOOPS);
+        printf("  %.6f", delta/NLOOPS);
 
         gettimeofday(&start, NULL);
         for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
             execute_tri_lo2hi_AVX(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("  %.6f", delta/NLOOPS);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_tri_hi2lo_AVX512(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+        printf("  %.6f", delta/NLOOPS);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_tri_lo2hi_AVX512(RP, A, B, M);
         }
         gettimeofday(&end, NULL);
 
@@ -318,7 +336,7 @@ int main(void) {
     }
     printf("];\n");
 
-
+/*
     printf("err4 = [\n");
     for (int i = 0; i < 8; i++) {
         N = 64*pow(2, i);

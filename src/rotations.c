@@ -154,10 +154,9 @@ void kernel_tri_hi2lo_AVX(const RotationPlan * RP, const int m, double * A) {
         apply_givens(RP->s(l, m), RP->c(l, m), A+4*l+1, A+4*(l+1)+1);
     for (int l = n-4-m; l >= 0; l--)
         apply_givens(RP->s(l, m+2), RP->c(l, m+2), A+4*l+3, A+4*(l+1)+3);
-    for (int l = n-3-m; l >= 0; l--)
-        apply_givens_SSE(RP->s(l, m+1), RP->c(l, m+1), A+4*l+2, A+4*(l+1)+2);
-    for (int l = n-2-m; l >= 0; l--)
-        apply_givens_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+1)+2);
+    for (int j = m+1; j >= m; j--)
+        for (int l = n-2-j; l >= 0; l--)
+            apply_givens_SSE(RP->s(l, j), RP->c(l, j), A+4*l+2, A+4*(l+1)+2);
     for (int j = m-1; j >= 0; j--)
         for (int l = n-2-j; l >= 0; l--)
             apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+1));
@@ -170,14 +169,65 @@ void kernel_tri_lo2hi_AVX(const RotationPlan * RP, const int m, double * A) {
     for (int j = 0; j < m; j++)
         for (int l = 0; l <= n-2-j; l++)
             apply_givens_t_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+1));
-    for (int l = 0; l <= n-2-m; l++)
-        apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+1)+2);
-    for (int l = 0; l <= n-3-m; l++)
-        apply_givens_t_SSE(RP->s(l, m+1), RP->c(l, m+1), A+4*l+2, A+4*(l+1)+2);
+    for (int j = m; j <= m+1; j++)
+        for (int l = 0; l <= n-2-j; l++)
+            apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+4*l+2, A+4*(l+1)+2);
     for (int l = 0; l <= n-4-m; l++)
         apply_givens_t(RP->s(l, m+2), RP->c(l, m+2), A+4*l+3, A+4*(l+1)+3);
     for (int l = 0; l <= n-2-m; l++)
         apply_givens_t(RP->s(l, m), RP->c(l, m), A+4*l+1, A+4*(l+1)+1);
+}
+
+// Convert four vectors of triangular harmonics of order m, m+1, m+2, m+3, m+4, m+5, m+6, m+7 to 0.
+
+void kernel_tri_hi2lo_AVX512(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int l = n-2-m; l >= 0; l--)
+        apply_givens(RP->s(l, m), RP->c(l, m), A+8*l+1, A+8*(l+1)+1);
+    for (int l = n-4-m; l >= 0; l--)
+        apply_givens(RP->s(l, m+2), RP->c(l, m+2), A+8*l+3, A+8*(l+1)+3);
+    for (int l = n-6-m; l >= 0; l--)
+        apply_givens(RP->s(l, m+4), RP->c(l, m+4), A+8*l+5, A+8*(l+1)+5);
+    for (int l = n-8-m; l >= 0; l--)
+        apply_givens(RP->s(l, m+6), RP->c(l, m+6), A+8*l+7, A+8*(l+1)+7);
+    for (int j = m+1; j >= m; j--)
+        for (int l = n-2-j; l >= 0; l--)
+            apply_givens_SSE(RP->s(l, j), RP->c(l, j), A+8*l+2, A+8*(l+1)+2);
+    for (int j = m+5; j >= m+4; j--)
+        for (int l = n-2-j; l >= 0; l--)
+            apply_givens_SSE(RP->s(l, j), RP->c(l, j), A+8*l+6, A+8*(l+1)+6);
+    for (int j = m+3; j >= m; j--)
+        for (int l = n-2-j; l >= 0; l--)
+            apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+8*l+4, A+8*(l+1)+4);
+    for (int j = m-1; j >= 0; j--)
+        for (int l = n-2-j; l >= 0; l--)
+            apply_givens_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+1));
+}
+
+// Convert four vectors of triangular harmonics of order 0 to m, m+1, m+2, m+3, m+4, m+5, m+6, m+7.
+
+void kernel_tri_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int j = 0; j < m; j++)
+        for (int l = 0; l <= n-2-j; l++)
+            apply_givens_t_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+1));
+    for (int j = m; j <= m+3; j++)
+        for (int l = 0; l <= n-2-j; l++)
+            apply_givens_t_AVX(RP->s(l, j), RP->c(l, j), A+8*l+4, A+8*(l+1)+4);
+    for (int j = m+4; j <= m+5; j++)
+        for (int l = 0; l <= n-2-j; l++)
+            apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+8*l+6, A+8*(l+1)+6);
+    for (int j = m; j <= m+1; j++)
+        for (int l = 0; l <= n-2-j; l++)
+            apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+8*l+2, A+8*(l+1)+2);
+    for (int l = 0; l <= n-8-m; l++)
+        apply_givens_t(RP->s(l, m+6), RP->c(l, m+6), A+8*l+7, A+8*(l+1)+7);
+    for (int l = 0; l <= n-6-m; l++)
+        apply_givens_t(RP->s(l, m+4), RP->c(l, m+4), A+8*l+5, A+8*(l+1)+5);
+    for (int l = 0; l <= n-4-m; l++)
+        apply_givens_t(RP->s(l, m+2), RP->c(l, m+2), A+8*l+3, A+8*(l+1)+3);
+    for (int l = 0; l <= n-2-m; l++)
+        apply_givens_t(RP->s(l, m), RP->c(l, m), A+8*l+1, A+8*(l+1)+1);
 }
 
 
@@ -197,69 +247,74 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
     Y[0] = y;
 }
 
-static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
-    double2 s = vall2(S);
-    double2 c = vall2(C);
+#if __SSE2__
+    static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
+        double2 s = vall2(S);
+        double2 c = vall2(C);
 
-    double2 x = vload2(X);
-    double2 y = vload2(Y);
+        double2 x = vload2(X);
+        double2 y = vload2(Y);
 
-    vstore2(X, c*x + s*y);
-    vstore2(Y, c*y - s*x);
-}
+        vstore2(X, c*x + s*y);
+        vstore2(Y, c*y - s*x);
+    }
 
-static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y) {
-    double2 s = vall2(S);
-    double2 c = vall2(C);
+    static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y) {
+        double2 s = vall2(S);
+        double2 c = vall2(C);
 
-    double2 x = vload2(X);
-    double2 y = vload2(Y);
+        double2 x = vload2(X);
+        double2 y = vload2(Y);
 
-    vstore2(X, c*x - s*y);
-    vstore2(Y, c*y + s*x);
-}
+        vstore2(X, c*x - s*y);
+        vstore2(Y, c*y + s*x);
+    }
+#endif
 
-static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
-    double4 s = vall4(S);
-    double4 c = vall4(C);
+#if __AVX__
+    static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
+        double4 s = vall4(S);
+        double4 c = vall4(C);
 
-    double4 x = vload4(X);
-    double4 y = vload4(Y);
+        double4 x = vload4(X);
+        double4 y = vload4(Y);
 
-    vstore4(X, c*x + s*y);
-    vstore4(Y, c*y - s*x);
-}
+        vstore4(X, c*x + s*y);
+        vstore4(Y, c*y - s*x);
+    }
 
-static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y) {
-    double4 s = vall4(S);
-    double4 c = vall4(C);
+    static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y) {
+        double4 s = vall4(S);
+        double4 c = vall4(C);
 
-    double4 x = vload4(X);
-    double4 y = vload4(Y);
+        double4 x = vload4(X);
+        double4 y = vload4(Y);
 
-    vstore4(X, c*x - s*y);
-    vstore4(Y, c*y + s*x);
-}
-/*
-static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {
-    double8 s = vall8(S);
-    double8 c = vall8(C);
+        vstore4(X, c*x - s*y);
+        vstore4(Y, c*y + s*x);
+    }
+#endif
 
-    double8 x = vload8(X);
-    double8 y = vload8(Y);
+#if __AVX512F__
+    static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {
+        double8 s = vall8(S);
+        double8 c = vall8(C);
 
-    vstore8(X, c*x + s*y);
-    vstore8(Y, c*y - s*x);
-}
+        double8 x = vload8(X);
+        double8 y = vload8(Y);
 
-static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y) {
-    double8 s = vall8(S);
-    double8 c = vall8(C);
+        vstore8(X, c*x + s*y);
+        vstore8(Y, c*y - s*x);
+    }
 
-    double8 x = vload8(X);
-    double8 y = vload8(Y);
+    static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y) {
+        double8 s = vall8(S);
+        double8 c = vall8(C);
 
-    vstore8(X, c*x - s*y);
-    vstore8(Y, c*y + s*x);
-}
-*/
+        double8 x = vload8(X);
+        double8 y = vload8(Y);
+
+        vstore8(X, c*x - s*y);
+        vstore8(Y, c*y + s*x);
+    }
+#endif
