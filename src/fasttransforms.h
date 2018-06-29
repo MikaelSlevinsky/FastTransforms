@@ -20,24 +20,27 @@
 #define M_SQRT_PI_2  0.886226925452758014   /* sqrt(pi)/2     */
 
 
-#define VECTOR_SIZE_2 2
-typedef double double2 __attribute__ ((vector_size (VECTOR_SIZE_2*8)));
-#define vall2(x) ((double2) _mm_set1_pd(x))
-#define vload2(v) ((double2) _mm_loadu_pd(v))
-#define vstore2(u, v) (_mm_storeu_pd(u, v))
-
-#define VECTOR_SIZE_4 4
-typedef double double4 __attribute__ ((vector_size (VECTOR_SIZE_4*8)));
-#define vall4(x) ((double4) _mm256_set1_pd(x))
-#define vload4(v) ((double4) _mm256_loadu_pd(v))
-#define vstore4(u, v) (_mm256_storeu_pd(u, v))
-
-//#define VECTOR_SIZE_8 8
-//typedef double double8 __attribute__ ((vector_size (VECTOR_SIZE_8*8)));
-//#define vall8(x) ((double8) _mm512_set1_pd(x))
-//#define vload8(v) ((double8) _mm512_loadu_pd(v))
-//#define vstore8(u, v) (_mm512_storeu_pd(u, v))
-
+#if __SSE2__
+    #define VECTOR_SIZE_2 2
+    typedef double double2 __attribute__ ((vector_size (VECTOR_SIZE_2*8)));
+    #define vall2(x) ((double2) _mm_set1_pd(x))
+    #define vload2(v) ((double2) _mm_loadu_pd(v))
+    #define vstore2(u, v) (_mm_storeu_pd(u, v))
+#endif
+#if __AVX__
+    #define VECTOR_SIZE_4 4
+    typedef double double4 __attribute__ ((vector_size (VECTOR_SIZE_4*8)));
+    #define vall4(x) ((double4) _mm256_set1_pd(x))
+    #define vload4(v) ((double4) _mm256_loadu_pd(v))
+    #define vstore4(u, v) (_mm256_storeu_pd(u, v))
+#endif
+#if __AVX512F__
+    #define VECTOR_SIZE_8 8
+    typedef double double8 __attribute__ ((vector_size (VECTOR_SIZE_8*8)));
+    #define vall8(x) ((double8) _mm512_set1_pd(x))
+    #define vload8(v) ((double8) _mm512_loadu_pd(v))
+    #define vstore8(u, v) (_mm512_storeu_pd(u, v))
+#endif
 
 static inline double stirlingseries(const double z);
 static inline double Aratio(const int n, const double alpha, const double beta);
@@ -80,6 +83,9 @@ void kernel_tri_lo2hi_SSE(const RotationPlan * RP, const int m, double * A);
 void kernel_tri_hi2lo_AVX(const RotationPlan * RP, const int m, double * A);
 void kernel_tri_lo2hi_AVX(const RotationPlan * RP, const int m, double * A);
 
+void kernel_tri_hi2lo_AVX512(const RotationPlan * RP, const int m, double * A);
+void kernel_tri_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A);
+
 static inline void apply_givens(const double S, const double C, double * X, double * Y);
 static inline void apply_givens_t(const double S, const double C, double * X, double * Y);
 
@@ -89,8 +95,8 @@ static inline void apply_givens_t_SSE(const double S, const double C, double * X
 static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y);
 static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y);
 
-//static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y);
-//static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y);
+static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y);
+static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y);
 
 void execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M);
 void execute_sph_lo2hi(const RotationPlan * RP, double * A, const int M);
@@ -109,6 +115,9 @@ void execute_tri_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, cons
 
 void execute_tri_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M);
 void execute_tri_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, const int M);
+
+void execute_tri_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, const int M);
+void execute_tri_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, const int M);
 
 typedef struct {
     RotationPlan * RP;
@@ -164,5 +173,7 @@ void permute_tri_SSE(const double * A, double * B, const int N, const int M);
 void permute_t_tri_SSE(double * A, const double * B, const int N, const int M);
 void permute_tri_AVX(const double * A, double * B, const int N, const int M);
 void permute_t_tri_AVX(double * A, const double * B, const int N, const int M);
+void permute_tri_AVX512(const double * A, double * B, const int N, const int M);
+void permute_t_tri_AVX512(double * A, const double * B, const int N, const int M);
 
 #endif //FASTTRANSFORMS_H

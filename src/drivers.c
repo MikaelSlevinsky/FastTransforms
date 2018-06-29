@@ -117,6 +117,24 @@ void execute_tri_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, cons
     permute_t_tri_AVX(A, B, N, M);
 }
 
+void execute_tri_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    permute_tri_AVX512(A, B, N, M);
+    #pragma omp parallel
+    for (int m = 8*omp_get_thread_num(); m < M; m += 8*omp_get_num_threads())
+        kernel_tri_hi2lo_AVX512(RP, m, B+N*m);
+    permute_t_tri_AVX512(A, B, N, M);
+}
+
+void execute_tri_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    permute_tri_AVX512(A, B, N, M);
+    #pragma omp parallel
+    for (int m = 8*omp_get_thread_num(); m < M; m += 8*omp_get_num_threads())
+        kernel_tri_lo2hi_AVX512(RP, m, B+N*m);
+    permute_t_tri_AVX512(A, B, N, M);
+}
+
 SphericalHarmonicPlan * plan_sph2fourier(const int n) {
     SphericalHarmonicPlan * P = malloc(sizeof(SphericalHarmonicPlan));
     P->RP = plan_rotsphere(n);
