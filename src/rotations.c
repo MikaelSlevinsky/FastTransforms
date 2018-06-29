@@ -269,7 +269,18 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
         vstore2(X, c*x - s*y);
         vstore2(Y, c*y + s*x);
     }
+#else
+    static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
+        apply_givens(S, C, X, Y);
+        apply_givens(S, C, X+1, Y+1);
+    }
+
+    static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y) {
+        apply_givens_t(S, C, X, Y);
+        apply_givens_t(S, C, X+1, Y+1);
+    }
 #endif
+
 
 #if __AVX__
     static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
@@ -292,6 +303,16 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
 
         vstore4(X, c*x - s*y);
         vstore4(Y, c*y + s*x);
+    }
+#else
+    static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
+        apply_givens_SSE(S, C, X, Y);
+        apply_givens_SSE(S, C, X+2, Y+2);
+    }
+
+    static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y) {
+        apply_givens_t_SSE(S, C, X, Y);
+        apply_givens_t_SSE(S, C, X+2, Y+2);
     }
 #endif
 
@@ -316,5 +337,15 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
 
         vstore8(X, c*x - s*y);
         vstore8(Y, c*y + s*x);
+    }
+#else
+    static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {
+        apply_givens_AVX(S, C, X, Y);
+        apply_givens_AVX(S, C, X+4, Y+4);
+    }
+
+    static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y) {
+        apply_givens_t_AVX(S, C, X, Y);
+        apply_givens_t_AVX(S, C, X+4, Y+4);
     }
 #endif

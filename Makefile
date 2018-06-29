@@ -12,10 +12,6 @@ else
 	endif
 endif
 
-CC = /usr/local/opt/llvm/bin/clang
-
-AVX512 = -mavx512f -mavx512cd -mavx512vl -mavx512bw -mavx512dq
-
 OBJ = src/transforms.c src/rotations.c src/drivers.c src/permute.c
 CFLAGS = -Ofast $(AVX512) -march=native -mtune=native -I./src
 LIBFLAGS = -shared -fPIC -lm -lgomp -fopenmp
