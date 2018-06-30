@@ -68,6 +68,54 @@ void execute_sph_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, cons
     two_warp(A, N, M);
 }
 
+void execute_sph_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    int M_star = M%16;
+    four_warp(A, N, M);
+    two_warp(A, N, M_star);
+    permute_sph_AVX512(A, B, N, M);
+    for (int m = 2; m <= (M_star%8)/2; m++)
+        kernel_sph_hi2lo_SSE(RP, m, B + N*(2*m-1));
+    
+    #pragma omp parallel
+    for (int m = (M_star%8+1)/2 + 4*omp_get_thread_num(); m <= M_star/2; m += 4*omp_get_num_threads()) {
+        kernel_sph_hi2lo_AVX(RP, m, B + N*(2*m-1));
+        kernel_sph_hi2lo_AVX(RP, m+1, B + N*(2*m+3));
+    }
+    #pragma omp parallel
+    for (int m = (M_star+1)/2 + 8*omp_get_thread_num(); m <= M/2; m += 8*omp_get_num_threads()) {
+        kernel_sph_hi2lo_AVX512(RP, m, B + N*(2*m-1));
+        kernel_sph_hi2lo_AVX512(RP, m+1, B + N*(2*m+7));
+    }
+    permute_t_sph_AVX512(A, B, N, M);
+    two_warp(A, N, M_star);
+    reverse_four_warp(A, N, M);
+}
+
+void execute_sph_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    int M_star = M%16;
+    four_warp(A, N, M);
+    two_warp(A, N, M_star);
+    permute_sph_AVX512(A, B, N, M);
+    for (int m = 2; m <= (M_star%8)/2; m++)
+        kernel_sph_lo2hi_SSE(RP, m, B + N*(2*m-1));
+    
+    #pragma omp parallel
+    for (int m = (M_star%8+1)/2 + 4*omp_get_thread_num(); m <= M_star/2; m += 4*omp_get_num_threads()) {
+        kernel_sph_lo2hi_AVX(RP, m, B + N*(2*m-1));
+        kernel_sph_lo2hi_AVX(RP, m+1, B + N*(2*m+3));
+    }
+    #pragma omp parallel
+    for (int m = (M_star+1)/2 + 8*omp_get_thread_num(); m <= M/2; m += 8*omp_get_num_threads()) {
+        kernel_sph_lo2hi_AVX512(RP, m, B + N*(2*m-1));
+        kernel_sph_lo2hi_AVX512(RP, m+1, B + N*(2*m+7));
+    }
+    permute_t_sph_AVX512(A, B, N, M);
+    two_warp(A, N, M_star);
+    reverse_four_warp(A, N, M);
+}
+
 
 void execute_tri_hi2lo(const RotationPlan * RP, double * A, const int M) {
     #pragma omp parallel
