@@ -124,7 +124,7 @@ void kernel_sph_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A) {
     for (int j = m%2; j < m-1; j += 2)
         for (int l = 0; l <= n-3-j; l++)
             apply_givens_t_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+2));
-    for(int j = m+2; j >= m; j -= 2)
+    for(int j = m; j >= m+2; j -= 2)
         for (int l = n-3-j; l >= 0; l--)
             apply_givens_t_AVX(RP->s(l, m), RP->c(l, m), A+8*l+4, A+8*(l+2)+4);
     for (int l = 0; l <= n-7-m; l++)
