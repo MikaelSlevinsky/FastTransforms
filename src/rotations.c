@@ -249,25 +249,19 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
 
 #if __SSE2__
     static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
-        double2 s = vall2(S);
-        double2 c = vall2(C);
-
         double2 x = vload2(X);
         double2 y = vload2(Y);
 
-        vstore2(X, c*x + s*y);
-        vstore2(Y, c*y - s*x);
+        vstore2(X, C*x + S*y);
+        vstore2(Y, C*y - S*x);
     }
 
     static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y) {
-        double2 s = vall2(S);
-        double2 c = vall2(C);
-
         double2 x = vload2(X);
         double2 y = vload2(Y);
 
-        vstore2(X, c*x - s*y);
-        vstore2(Y, c*y + s*x);
+        vstore2(X, C*x - S*y);
+        vstore2(Y, C*y + S*x);
     }
 #else
     static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
@@ -284,25 +278,19 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
 
 #if __AVX__
     static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
-        double4 s = vall4(S);
-        double4 c = vall4(C);
-
         double4 x = vload4(X);
         double4 y = vload4(Y);
 
-        vstore4(X, c*x + s*y);
-        vstore4(Y, c*y - s*x);
+        vstore4(X, C*x + S*y);
+        vstore4(Y, C*y - S*x);
     }
 
     static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y) {
-        double4 s = vall4(S);
-        double4 c = vall4(C);
-
         double4 x = vload4(X);
         double4 y = vload4(Y);
 
-        vstore4(X, c*x - s*y);
-        vstore4(Y, c*y + s*x);
+        vstore4(X, C*x - S*y);
+        vstore4(Y, C*y + S*x);
     }
 #else
     static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
@@ -318,25 +306,19 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
 
 #if __AVX512F__
     static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {
-        double8 s = vall8(S);
-        double8 c = vall8(C);
-
         double8 x = vload8(X);
         double8 y = vload8(Y);
 
-        vstore8(X, c*x + s*y);
-        vstore8(Y, c*y - s*x);
+        vstore8(X, C*x + S*y);
+        vstore8(Y, C*y - S*x);
     }
 
     static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y) {
-        double8 s = vall8(S);
-        double8 c = vall8(C);
-
         double8 x = vload8(X);
         double8 y = vload8(Y);
 
-        vstore8(X, c*x - s*y);
-        vstore8(Y, c*y + s*x);
+        vstore8(X, C*x - S*y);
+        vstore8(Y, C*y + S*x);
     }
 #else
     static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {

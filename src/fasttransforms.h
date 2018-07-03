@@ -121,6 +121,7 @@ void execute_tri_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, c
 
 typedef struct {
     RotationPlan * RP;
+    double * B;
     double * P1;
     double * P2;
     double * P1inv;

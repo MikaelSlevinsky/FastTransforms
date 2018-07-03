@@ -1,6 +1,38 @@
-export VECLIB_MAXIMUM_THREADS=18
-export OMP_NUM_THREADS=18
-USE_SYSTEM_BLAS := 1
+LIB = fasttransforms
+LIBDIR = .
+LIBFLAGS = -shared -fPIC -fopenmp
 
+ifeq ($(OS), Windows_NT)
+	SLIB = dll
+else
+	UNAME = $(shell uname)
+	ifeq ($(UNAME), Darwin)
+		SLIB = dylib
+	else
+		SLIB = so
+	endif
+endif
+
+OBJ = src/transforms.c src/rotations.c src/drivers.c src/permute.c
+
+#CC = gcc-7
 CC = /usr/local/opt/llvm/bin/clang
+
 AVX512 = -mavx512f
+BLAS = APPLEBLAS
+#BLAS = OPENBLAS
+
+CFLAGS = -Ofast $(AVX512) -march=native -mtune=native -I./src
+
+ifeq ($(CC),/usr/local/opt/llvm/bin/clang)
+	CFLAGS += -I/usr/local/opt/llvm/include
+    LDFLAGS += -L/usr/local/opt/llvm/lib
+endif
+
+ifeq ($(BLAS),APPLEBLAS)
+	CFLAGS += -I/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
+else
+	CFLAGS += -I/Applications/julia/deps/openblas
+    LDFLAGS += -L/Applications/julia/deps/openblas
+endif
+LDLIBS = -lblas
