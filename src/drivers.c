@@ -76,9 +76,7 @@ void execute_sph_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, c
     permute_sph_AVX512(A, B, N, M);
     for (int m = 2; m <= (M_star%8)/2; m++)
         kernel_sph_hi2lo_SSE(RP, m, B + N*(2*m-1));
-    
-    #pragma omp parallel
-    for (int m = (M_star%8+1)/2 + 4*omp_get_thread_num(); m <= M_star/2; m += 4*omp_get_num_threads()) {
+    for (int m = (M_star%8+1)/2; m <= M_star/2; m += 4) {
         kernel_sph_hi2lo_AVX(RP, m, B + N*(2*m-1));
         kernel_sph_hi2lo_AVX(RP, m+1, B + N*(2*m+3));
     }
@@ -100,9 +98,7 @@ void execute_sph_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, c
     permute_sph_AVX512(A, B, N, M);
     for (int m = 2; m <= (M_star%8)/2; m++)
         kernel_sph_lo2hi_SSE(RP, m, B + N*(2*m-1));
-    
-    #pragma omp parallel
-    for (int m = (M_star%8+1)/2 + 4*omp_get_thread_num(); m <= M_star/2; m += 4*omp_get_num_threads()) {
+    for (int m = (M_star%8+1)/2; m <= M_star/2; m += 4) {
         kernel_sph_lo2hi_AVX(RP, m, B + N*(2*m-1));
         kernel_sph_lo2hi_AVX(RP, m+1, B + N*(2*m+3));
     }
