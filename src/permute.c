@@ -35,7 +35,6 @@ void permute_t_sph_AVX(double * A, const double * B, const int N, const int M) {
 }
 
 void permute_sph_AVX512(const double * A, double * B, const int N, const int M) {
-    int M_star = M%16;
     permute_sph_AVX(A, B, N, M%16);
     #pragma omp parallel for
     for (int j = M%16; j < M; j += 8)
@@ -44,7 +43,6 @@ void permute_sph_AVX512(const double * A, double * B, const int N, const int M) 
 }
 
 void permute_t_sph_AVX512(double * A, const double * B, const int N, const int M) {
-    int M_star = M%16;
     permute_t_sph_AVX(A, B, N, M%16);
     #pragma omp parallel for
     for (int j = M%16; j < M; j += 8)
