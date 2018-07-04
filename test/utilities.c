@@ -115,3 +115,7 @@ double * copyA(double * A, int n, int m) {
         B[i] = A[i];
     return B;
 }
+
+double elapsed(struct timeval * start, struct timeval * end, int N) {
+    return ((end->tv_sec  - start->tv_sec) * 1000000u + end->tv_usec - start->tv_usec) / (1.e6 * N);
+}
