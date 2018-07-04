@@ -135,8 +135,7 @@ int main(void) {
         free(RP);
     }
     printf("];\n");
-*/
-/*
+    
     printf("err2 = [\n");
     for (int i = 0; i < 8; i++) {
         N = 64*pow(2, i);
