@@ -112,7 +112,6 @@ void execute_sph_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, c
     reverse_four_warp(A, N, M);
 }
 
-
 void execute_tri_hi2lo(const RotationPlan * RP, double * A, const int M) {
     #pragma omp parallel
     for (int m = 1 + omp_get_thread_num(); m < M; m += omp_get_num_threads())
@@ -179,9 +178,48 @@ void execute_tri_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, c
     permute_t_tri_AVX512(A, B, N, M);
 }
 
+
+void execute_disk_hi2lo(const RotationPlan * RP, double * A, const int M) {
+    int N = RP->n;
+    #pragma omp parallel
+    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+        kernel_disk_hi2lo(RP, m, A + N*(2*m-1));
+        kernel_disk_hi2lo(RP, m, A + N*(2*m));
+    }
+}
+
+void execute_disk_lo2hi(const RotationPlan * RP, double * A, const int M) {
+    int N = RP->n;
+    #pragma omp parallel
+    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+        kernel_disk_lo2hi(RP, m, A + N*(2*m-1));
+        kernel_disk_lo2hi(RP, m, A + N*(2*m));
+    }
+}
+
+void execute_disk_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    permute_disk_SSE(A, B, N, M);
+    #pragma omp parallel
+    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
+        kernel_disk_hi2lo_SSE(RP, m, B + N*(2*m-1));
+    permute_t_disk_SSE(A, B, N, M);
+}
+
+void execute_disk_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    permute_disk_SSE(A, B, N, M);
+    #pragma omp parallel
+    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
+        kernel_disk_lo2hi_SSE(RP, m, B + N*(2*m-1));
+    permute_t_disk_SSE(A, B, N, M);
+}
+
+
 SphericalHarmonicPlan * plan_sph2fourier(const int n) {
     SphericalHarmonicPlan * P = malloc(sizeof(SphericalHarmonicPlan));
     P->RP = plan_rotsphere(n);
+    P->B = (double *) calloc(n * (2*n-1), sizeof(double));
     P->P1 = plan_leg2cheb(1, 0, n);
     P->P2 = plan_ultra2ultra(1, 0, n, 1.5, 1.0);
     P->P1inv = plan_cheb2leg(0, 1, n);
@@ -190,7 +228,7 @@ SphericalHarmonicPlan * plan_sph2fourier(const int n) {
 }
 
 void execute_sph2fourier(const SphericalHarmonicPlan * P, double * A, const int N, const int M) {
-    execute_sph_hi2lo(P->RP, A, M);
+    execute_sph_hi2lo_AVX(P->RP, A, P->B, M);
     cblas_dtrmv(CblasColMajor, CblasUpper, CblasNoTrans, CblasNonUnit, N, P->P1, N, A, 1);
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P2, N, A+N, 4*N);
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P2, N, A+2*N, 4*N);
@@ -204,7 +242,7 @@ void execute_fourier2sph(const SphericalHarmonicPlan * P, double * A, const int 
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P2inv, N, A+2*N, 4*N);
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P1inv, N, A+3*N, 4*N);
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M-1)/4, 1.0, P->P1inv, N, A+4*N, 4*N);
-    execute_sph_lo2hi(P->RP, A, M);
+    execute_sph_lo2hi_AVX(P->RP, A, P->B, M);
 }
 
 TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma) {
