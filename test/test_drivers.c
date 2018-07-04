@@ -188,10 +188,10 @@ int main(void) {
         free(P);
     }
     printf("];\n");
-*/
+    
     //double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
     double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
-/*
+
     TriangularHarmonicPlan * Q;
 
     printf("err3 = [\n");
@@ -340,8 +340,7 @@ int main(void) {
         free(RP);
     }
     printf("];\n");
-*/
-/*
+
     printf("err4 = [\n");
     for (int i = 0; i < 8; i++) {
         N = 64*pow(2, i);
