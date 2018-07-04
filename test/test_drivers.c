@@ -51,9 +51,15 @@ int main(void) {
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
-        
+
         execute_sph_hi2lo_AVX512(RP, A, Ac, M);
-        execute_sph_lo2hi_SSE(RP, A, Ac, M);
+        execute_sph_lo2hi_AVX(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_sph_hi2lo_AVX(RP, A, Ac, M);
+        execute_sph_lo2hi_AVX512(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
@@ -128,7 +134,7 @@ int main(void) {
         free(RP);
     }
     printf("];\n");
-    
+
     printf("err2 = [\n");
     for (int i = 0; i < 8; i++) {
         N = 64*pow(2, i);
@@ -179,7 +185,7 @@ int main(void) {
         free(P);
     }
     printf("];\n");
-    
+
     //double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
     double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 

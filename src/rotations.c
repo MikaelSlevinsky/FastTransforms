@@ -114,24 +114,6 @@ void kernel_sph_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A) {
         apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+8*l+2, A+8*(l+2)+2);
 }
 
-RotationPlan * plan_rottriangle(const int n, const double alpha, const double beta, const double gamma) {
-    double * s = (double *) malloc(n*(n+1)/2 * sizeof(double));
-    double * c = (double *) malloc(n*(n+1)/2 * sizeof(double));
-    double nums, numc, den;
-    for (int m = 0; m < n; m++)
-        for (int l = 0; l < n-m; l++) {
-            nums = (l+1)*(l+alpha+1);
-            numc = (2*m+beta+gamma+2)*(2*l+2*m+alpha+beta+gamma+4);
-            den = (l+2*m+beta+gamma+3)*(l+2*m+alpha+beta+gamma+3);
-            s(l, m) = sqrt(nums/den);
-            c(l, m) = sqrt(numc/den);
-        }
-    RotationPlan * RP = malloc(sizeof(RotationPlan));
-    RP->s = s;
-    RP->c = c;
-    RP->n = n;
-    return RP;
-}
 
 RotationPlan * plan_rottriangle(const int n, const double alpha, const double beta, const double gamma) {
     double * s = (double *) malloc(n*(n+1)/2 * sizeof(double));

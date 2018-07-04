@@ -32,7 +32,6 @@ void permute_t_sph_AVX(double * A, const double * B, const int N, const int M) {
     for (int j = M%8; j < M; j += 4)
         for (int i = 0; i < 4*N; i++)
             A[i+j*N] = B[(4*i)%(4*N)+(4*i)/(4*N)+j*N];
-            
 }
 
 void permute_sph_AVX512(const double * A, double * B, const int N, const int M) {
