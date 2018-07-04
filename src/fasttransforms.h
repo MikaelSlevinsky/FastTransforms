@@ -71,6 +71,9 @@ void kernel_sph_lo2hi_SSE(const RotationPlan * RP, const int m, double * A);
 void kernel_sph_hi2lo_AVX(const RotationPlan * RP, const int m, double * A);
 void kernel_sph_lo2hi_AVX(const RotationPlan * RP, const int m, double * A);
 
+void kernel_sph_hi2lo_AVX512(const RotationPlan * RP, const int m, double * A);
+void kernel_sph_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A);
+
 RotationPlan * plan_rottriangle(const int n, const double alpha, const double beta, const double gamma);
 
 void kernel_tri_hi2lo(const RotationPlan * RP, const int m, double * A);
@@ -113,6 +116,9 @@ void execute_sph_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, cons
 
 void execute_sph_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M);
 void execute_sph_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, const int M);
+
+void execute_sph_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, const int M);
+void execute_sph_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, const int M);
 
 void execute_tri_hi2lo(const RotationPlan * RP, double * A, const int M);
 void execute_tri_lo2hi(const RotationPlan * RP, double * A, const int M);
@@ -173,6 +179,7 @@ static void chebyshev_normalization_t(double * A, const int N, const int M);
 
 void two_warp(double * A, const int N, const int M);
 void four_warp(double * A, const int N, const int M);
+void reverse_four_warp(double * A, const int N, const int M);
 
 void swap(double * A, double * B, const int N);
 void swap_SSE(double * A, double * B, const int N);
@@ -182,6 +189,8 @@ void permute_sph_SSE(const double * A, double * B, const int N, const int M);
 void permute_t_sph_SSE(double * A, const double * B, const int N, const int M);
 void permute_sph_AVX(const double * A, double * B, const int N, const int M);
 void permute_t_sph_AVX(double * A, const double * B, const int N, const int M);
+void permute_sph_AVX512(const double * A, double * B, const int N, const int M);
+void permute_t_sph_AVX512(double * A, const double * B, const int N, const int M);
 
 void permute_tri_SSE(const double * A, double * B, const int N, const int M);
 void permute_t_tri_SSE(double * A, const double * B, const int N, const int M);
