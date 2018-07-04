@@ -93,9 +93,29 @@ double * trirand(int n, int m) {
     return A;
 }
 
+double * diskones(int n, int m) {
+    double * A = (double *) calloc(n * m, sizeof(double));
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m-4*i; j++)
+            A(i,j) = 1.0;
+    return A;
+}
+
+double * diskrand(int n, int m) {
+    double * A = (double *) calloc(n * m, sizeof(double));
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m-4*i; j++)
+            A(i,j) = 2.0*(((double) rand())/RAND_MAX)-1.0;
+    return A;
+}
+
 double * copyA(double * A, int n, int m) {
     double * B = (double *) calloc(n * m, sizeof(double));
     for (int i = 0; i < n*m; i++)
         B[i] = A[i];
     return B;
+}
+
+double elapsed(struct timeval * start, struct timeval * end, int N) {
+    return ((end->tv_sec  - start->tv_sec) * 1000000u + end->tv_usec - start->tv_usec) / (1.e6 * N);
 }
