@@ -148,6 +148,7 @@ void execute_fourier2sph(const SphericalHarmonicPlan * P, double * A, const int 
 
 typedef struct {
     RotationPlan * RP;
+    double * B;
     double * P1;
     double * P2;
     double * P3;
