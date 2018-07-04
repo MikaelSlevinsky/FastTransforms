@@ -86,6 +86,52 @@ void kernel_sph_lo2hi_AVX(const RotationPlan * RP, const int m, double * A) {
         apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+2)+2);
 }
 
+void kernel_sph_hi2lo_AVX512(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int l = n-3-m; l >= 0; l--)
+        apply_givens_SSE(RP->s(l, m), RP->c(l, m), A+8*l+2, A+8*(l+2)+2);
+    for (int l = n-7-m; l >= 0; l--)
+        apply_givens_SSE(RP->s(l, m+4), RP->c(l, m+4), A+8*l+6, A+8*(l+2)+6);
+    for(int j = m+2; j >= m; j -= 2)
+        for (int l = n-3-j; l >= 0; l--)
+            apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+8*l+4, A+8*(l+2)+4);
+    for (int j = m-2; j >= 0; j -= 2)
+        for (int l = n-3-j; l >= 0; l--)
+            apply_givens_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+2));
+}
+
+void kernel_sph_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int j = m%2; j < m-1; j += 2)
+        for (int l = 0; l <= n-3-j; l++)
+            apply_givens_t_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+2));
+    for(int j = m; j <= m+2; j += 2)
+        for (int l = 0; l <= n-3-j; l++)
+            apply_givens_t_AVX(RP->s(l, j), RP->c(l, j), A+8*l+4, A+8*(l+2)+4);
+    for (int l = 0; l <= n-7-m; l++)
+        apply_givens_t_SSE(RP->s(l, m+4), RP->c(l, m+4), A+8*l+6, A+8*(l+2)+6);
+    for (int l = 0; l <= n-3-m; l++)
+        apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+8*l+2, A+8*(l+2)+2);
+}
+
+RotationPlan * plan_rottriangle(const int n, const double alpha, const double beta, const double gamma) {
+    double * s = (double *) malloc(n*(n+1)/2 * sizeof(double));
+    double * c = (double *) malloc(n*(n+1)/2 * sizeof(double));
+    double nums, numc, den;
+    for (int m = 0; m < n; m++)
+        for (int l = 0; l < n-m; l++) {
+            nums = (l+1)*(l+alpha+1);
+            numc = (2*m+beta+gamma+2)*(2*l+2*m+alpha+beta+gamma+4);
+            den = (l+2*m+beta+gamma+3)*(l+2*m+alpha+beta+gamma+3);
+            s(l, m) = sqrt(nums/den);
+            c(l, m) = sqrt(numc/den);
+        }
+    RotationPlan * RP = malloc(sizeof(RotationPlan));
+    RP->s = s;
+    RP->c = c;
+    RP->n = n;
+    return RP;
+}
 
 RotationPlan * plan_rottriangle(const int n, const double alpha, const double beta, const double gamma) {
     double * s = (double *) malloc(n*(n+1)/2 * sizeof(double));
