@@ -24,25 +24,6 @@ RotationPlan * plan_rotsphere(const int n) {
     return RP;
 }
 
-RotationPlan * plan_rottriangle(const int n, const double alpha, const double beta, const double gamma) {
-    double * s = (double *) malloc(n*(n+1)/2 * sizeof(double));
-    double * c = (double *) malloc(n*(n+1)/2 * sizeof(double));
-    double nums, numc, den;
-    for (int m = 0; m < n; m++)
-        for (int l = 0; l < n-m; l++) {
-            nums = (l+1)*(l+alpha+1);
-            numc = (2*m+beta+gamma+2)*(2*l+2*m+alpha+beta+gamma+4);
-            den = (l+2*m+beta+gamma+3)*(l+2*m+alpha+beta+gamma+3);
-            s(l, m) = sqrt(nums/den);
-            c(l, m) = sqrt(numc/den);
-        }
-    RotationPlan * RP = malloc(sizeof(RotationPlan));
-    RP->s = s;
-    RP->c = c;
-    RP->n = n;
-    return RP;
-}
-
 // Convert a single vector of spherical harmonics of order m to 0/1.
 
 void kernel_sph_hi2lo(const RotationPlan * RP, const int m, double * A) {
@@ -105,6 +86,25 @@ void kernel_sph_lo2hi_AVX(const RotationPlan * RP, const int m, double * A) {
         apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+2)+2);
 }
 
+
+RotationPlan * plan_rottriangle(const int n, const double alpha, const double beta, const double gamma) {
+    double * s = (double *) malloc(n*(n+1)/2 * sizeof(double));
+    double * c = (double *) malloc(n*(n+1)/2 * sizeof(double));
+    double nums, numc, den;
+    for (int m = 0; m < n; m++)
+        for (int l = 0; l < n-m; l++) {
+            nums = (l+1)*(l+alpha+1);
+            numc = (2*m+beta+gamma+2)*(2*l+2*m+alpha+beta+gamma+4);
+            den = (l+2*m+beta+gamma+3)*(l+2*m+alpha+beta+gamma+3);
+            s(l, m) = sqrt(nums/den);
+            c(l, m) = sqrt(numc/den);
+        }
+    RotationPlan * RP = malloc(sizeof(RotationPlan));
+    RP->s = s;
+    RP->c = c;
+    RP->n = n;
+    return RP;
+}
 
 // Convert a single vector of triangular harmonics of order m to 0.
 
@@ -229,6 +229,68 @@ void kernel_tri_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A) {
     for (int l = 0; l <= n-2-m; l++)
         apply_givens_t(RP->s(l, m), RP->c(l, m), A+8*l+1, A+8*(l+1)+1);
 }
+
+#undef s
+#undef c
+
+#define s(l,m) s[l+(m)*n-(m)/2*((m)+1)/2]
+#define c(l,m) c[l+(m)*n-(m)/2*((m)+1)/2]
+
+RotationPlan * plan_rotdisk(const int n) {
+    double * s = (double *) malloc(n*n * sizeof(double));
+    double * c = (double *) malloc(n*n * sizeof(double));
+    double numc, den;
+    for (int m = 0; m < 2*n-1; m++)
+        for (int l = 0; l < n-(m+1)/2; l++) {
+            numc = (m+1)*(2*l+m+3);
+            den = (l+m+2)*(l+m+2);
+            s(l, m) = -((double) (l+1))/((double) (l+m+2));
+            c(l, m) = sqrt(numc/den);
+        }
+    RotationPlan * RP = malloc(sizeof(RotationPlan));
+    RP->s = s;
+    RP->c = c;
+    RP->n = n;
+    return RP;
+}
+
+// Convert a single vector of disk harmonics of order m to 0/1.
+
+void kernel_disk_hi2lo(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int j = m-2; j >= 0; j -= 2)
+        for (int l = n-2-(j+1)/2; l >= 0; l--)
+            apply_givens(RP->s(l, j), RP->c(l, j), A+l, A+l+1);
+}
+
+// Convert a single vector of disk harmonics of order 0/1 to m.
+
+void kernel_disk_lo2hi(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int j = m%2; j < m-1; j += 2)
+        for (int l = 0; l <= n-2-(j+1)/2; l++)
+            apply_givens_t(RP->s(l, j), RP->c(l, j), A+l, A+l+1);
+}
+
+// Convert a pair of vectors of disk harmonics of order m to 0/1.
+
+void kernel_disk_hi2lo_SSE(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int j = m-2; j >= 0; j -= 2)
+        for (int l = n-2-(j+1)/2; l >= 0; l--)
+            apply_givens_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+1));
+}
+
+// Convert a pair of vectors of disk harmonics of order 0/1 to m.
+
+void kernel_disk_lo2hi_SSE(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int j = m%2; j < m-1; j += 2)
+        for (int l = 0; l <= n-2-(j+1)/2; l++)
+            apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+1));
+}
+
+
 
 
 static inline void apply_givens(const double S, const double C, double * X, double * Y) {
