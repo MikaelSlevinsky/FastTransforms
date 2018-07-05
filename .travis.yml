@@ -1,0 +1,13 @@
+# Documentation: http://docs.travis-ci.com/user/languages/c/
+language: c
+
+os:
+  - osx
+
+before_install:
+    - brew install gcc7
+
+script:
+  - make lib
+  - make tests
+  - OMP_NUM_THREADS = 4 ./test_drivers 3 3

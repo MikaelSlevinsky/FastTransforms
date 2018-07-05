@@ -15,10 +15,10 @@ endif
 
 OBJ = src/transforms.c src/rotations.c src/permute.c src/drivers.c
 
-#CC = gcc-8
-CC = /usr/local/opt/llvm/bin/clang
+CC = gcc-7
+#CC = /usr/local/opt/llvm/bin/clang
 
-AVX512 = -mavx512f
+AVX512 =# -mavx512f
 BLAS = APPLEBLAS
 #BLAS = OPENBLAS
 
