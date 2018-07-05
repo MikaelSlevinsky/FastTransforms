@@ -5,9 +5,9 @@ os:
   - osx
 
 before_install:
-    - brew install gcc@7
+    - brew install gcc
 
 script:
   - make lib
   - make tests
-  - OMP_NUM_THREADS = 4 ./test_drivers 3 3
+  - OMP_NUM_THREADS=4 ./test_drivers 3 3
