@@ -3,7 +3,8 @@ language: c
 os:
   - osx
 before_install:
-    - brew uninstall oclint
+    - brew update
+    - brew cask uninstall oclint
     - brew install gcc
 script:
   - make lib
