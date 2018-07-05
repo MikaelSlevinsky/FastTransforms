@@ -1,7 +1,7 @@
 #include "fasttransforms.h"
 #include "utilities.h"
 
-int main(void) {
+int main(int argc, const char * argv[]) {
     struct timeval start, end;
 
     static double * A;
@@ -10,10 +10,18 @@ int main(void) {
     RotationPlan * RP;
     SphericalHarmonicPlan * P;
 
-    int N, M, NLOOPS;
+    int IERR, ITIME, N, M, NLOOPS;
 
+    if (argc > 1) {
+        sscanf(argv[1], "%d", &IERR);
+        if (argc > 2) sscanf(argv[2], "%d", &ITIME);
+        else ITIME = 1;
+    }
+    else IERR = 1;
+
+    printf("\nTesting the accuracy of spherical harmonic drivers.\n\n");
     printf("err1 = [\n");
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
 
@@ -70,12 +78,13 @@ int main(void) {
         free(RP);
     }
     printf("];\n");
-/*
+
+    printf("\nTiming spherical harmonic drivers.\n\n");
     printf("t1 = [\n");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
-        NLOOPS = 1 + pow(4096/N, 2);
+        NLOOPS = 1 + pow(2048/N, 2);
 
         A = sphones(N, M);
         B = sphones(N, M);
@@ -127,6 +136,21 @@ int main(void) {
         }
         gettimeofday(&end, NULL);
 
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_sph_hi2lo_AVX512(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_sph_lo2hi_AVX512(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
         printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
@@ -135,8 +159,9 @@ int main(void) {
     }
     printf("];\n");
 
+    printf("\nTesting the accuracy of spherical harmonic transforms.\n\n");
     printf("err2 = [\n");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
 
@@ -156,11 +181,12 @@ int main(void) {
     }
     printf("];\n");
 
+    printf("\nTiming spherical harmonic transforms.\n\n");
     printf("t2 = [\n");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i);
         M = 2*N-1;
-        NLOOPS = 1 + pow(4096/N, 2);
+        NLOOPS = 1 + pow(2048/N, 2);
 
         A = sphrand(N, M);
         P = plan_sph2fourier(N);
@@ -191,8 +217,9 @@ int main(void) {
 
     TriangularHarmonicPlan * Q;
 
+    printf("\nTesting the accuracy of triangular harmonic drivers.\n\n");
     printf("err3 = [\n");
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i);
         M = N;
 
@@ -250,11 +277,12 @@ int main(void) {
     }
     printf("];\n");
 
+    printf("\nTiming triangular harmonic drivers.\n\n");
     printf("t3 = [\n");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i);
         M = N;
-        NLOOPS = 1 + pow(4096/N, 2);
+        NLOOPS = 1 + pow(2048/N, 2);
 
         A = triones(N, M);
         B = triones(N, M);
@@ -330,8 +358,9 @@ int main(void) {
     }
     printf("];\n");
 
+    printf("\nTesting the accuracy of triangular harmonic transforms.\n\n");
     printf("err4 = [\n");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i);
         M = N;
 
@@ -351,11 +380,12 @@ int main(void) {
     }
     printf("];\n");
 
+    printf("\nTiming triangular harmonic transforms.\n\n");
     printf("t4 = [\n");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i);
         M = N;
-        NLOOPS = 1 + pow(4096/N, 2);
+        NLOOPS = 1 + pow(2048/N, 2);
 
         A = trirand(N, M);
         Q = plan_tri2cheb(N, alpha, beta, gamma);
@@ -380,10 +410,10 @@ int main(void) {
         free(Q);
     }
     printf("];\n");
-*/
 
+    printf("\nTesting the accuracy of disk harmonic drivers.\n\n");
     printf("err5 = [\n");
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i);
         M = 4*N-3;
 
@@ -417,11 +447,12 @@ int main(void) {
     }
     printf("];\n");
 
+    printf("\nTiming disk harmonic drivers.\n\n");
     printf("t5 = [\n");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i);
         M = 4*N-3;
-        NLOOPS = 1 + pow(4096/N, 2);
+        NLOOPS = 1 + pow(2048/N, 2);
 
         A = diskones(N, M);
         B = diskones(N, M);
