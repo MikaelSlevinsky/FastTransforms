@@ -5,7 +5,7 @@ os:
   - osx
 
 before_install:
-    - brew install gcc7
+    - brew install gcc@7
 
 script:
   - make lib
