@@ -219,7 +219,6 @@ int main(int argc, const char * argv[]) {
 
     printf("\nTesting the accuracy of triangular harmonic drivers.\n\n");
     printf("err3 = [\n");
-<<<<<<< HEAD
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i);
         M = N;
