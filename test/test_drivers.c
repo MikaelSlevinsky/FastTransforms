@@ -75,7 +75,7 @@ int main(int argc, const char * argv[]) {
         free(A);
         free(Ac);
         free(B);
-        free(RP);
+        freeRotationPlan(RP);
     }
     printf("];\n");
 
@@ -155,7 +155,7 @@ int main(int argc, const char * argv[]) {
 
         free(A);
         free(B);
-        free(RP);
+        freeRotationPlan(RP);
     }
     printf("];\n");
 
@@ -177,7 +177,7 @@ int main(int argc, const char * argv[]) {
 
         free(A);
         free(B);
-        free(P);
+        freeSphericalHarmonicPlan(P);
     }
     printf("];\n");
 
@@ -208,7 +208,7 @@ int main(int argc, const char * argv[]) {
         printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
-        free(P);
+        freeSphericalHarmonicPlan(P);
     }
     printf("];\n");
 
@@ -273,7 +273,7 @@ int main(int argc, const char * argv[]) {
         free(A);
         free(Ac);
         free(B);
-        free(RP);
+        freeRotationPlan(RP);
     }
     printf("];\n");
 
@@ -354,7 +354,7 @@ int main(int argc, const char * argv[]) {
 
         free(A);
         free(B);
-        free(RP);
+        freeRotationPlan(RP);
     }
     printf("];\n");
 
@@ -376,7 +376,7 @@ int main(int argc, const char * argv[]) {
 
         free(A);
         free(B);
-        free(Q);
+        freeTriangularHarmonicPlan(Q);
     }
     printf("];\n");
 
@@ -407,7 +407,7 @@ int main(int argc, const char * argv[]) {
         printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
-        free(Q);
+        freeTriangularHarmonicPlan(Q);
     }
     printf("];\n");
 
@@ -443,7 +443,7 @@ int main(int argc, const char * argv[]) {
         free(A);
         free(Ac);
         free(B);
-        free(RP);
+        freeRotationPlan(RP);
     }
     printf("];\n");
 
@@ -492,7 +492,7 @@ int main(int argc, const char * argv[]) {
 
         free(A);
         free(B);
-        free(RP);
+        freeRotationPlan(RP);
     }
     printf("];\n");
 

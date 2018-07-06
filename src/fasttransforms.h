@@ -60,6 +60,8 @@ typedef struct {
     int n;
 } RotationPlan;
 
+void freeRotationPlan(RotationPlan * RP);
+
 RotationPlan * plan_rotsphere(const int n);
 
 void kernel_sph_hi2lo(const RotationPlan * RP, const int m, double * A);
@@ -147,6 +149,8 @@ typedef struct {
     double * P2inv;
 } SphericalHarmonicPlan;
 
+void freeSphericalHarmonicPlan(SphericalHarmonicPlan * P);
+
 SphericalHarmonicPlan * plan_sph2fourier(const int n);
 
 void execute_sph2fourier(const SphericalHarmonicPlan * P, double * A, const int N, const int M);
@@ -167,6 +171,8 @@ typedef struct {
     double beta;
     double gamma;
 } TriangularHarmonicPlan;
+
+void freeTriangularHarmonicPlan(TriangularHarmonicPlan * P);
 
 TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma);
 

@@ -2,6 +2,12 @@
 
 #include "fasttransforms.h"
 
+void freeRotationPlan(RotationPlan * RP) {
+    free(RP->s);
+    free(RP->c);
+    free(RP);
+}
+
 #define s(l,m) s[l+(m)*(2*n+1-(m))/2]
 #define c(l,m) c[l+(m)*(2*n+1-(m))/2]
 

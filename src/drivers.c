@@ -215,6 +215,15 @@ void execute_disk_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, con
     permute_t_disk_SSE(A, B, N, M);
 }
 
+void freeSphericalHarmonicPlan(SphericalHarmonicPlan * P) {
+    freeRotationPlan(P->RP);
+    free(P->B);
+    free(P->P1);
+    free(P->P2);
+    free(P->P1inv);
+    free(P->P2inv);
+    free(P);
+}
 
 SphericalHarmonicPlan * plan_sph2fourier(const int n) {
     SphericalHarmonicPlan * P = malloc(sizeof(SphericalHarmonicPlan));
@@ -243,6 +252,20 @@ void execute_fourier2sph(const SphericalHarmonicPlan * P, double * A, const int 
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P1inv, N, A+3*N, 4*N);
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M-1)/4, 1.0, P->P1inv, N, A+4*N, 4*N);
     execute_sph_lo2hi_AVX512(P->RP, A, P->B, M);
+}
+
+void freeTriangularHarmonicPlan(TriangularHarmonicPlan * P) {
+    freeRotationPlan(P->RP);
+    free(P->B);
+    free(P->P1);
+    free(P->P2);
+    free(P->P3);
+    free(P->P4);
+    free(P->P1inv);
+    free(P->P2inv);
+    free(P->P3inv);
+    free(P->P4inv);
+    free(P);
 }
 
 TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma) {

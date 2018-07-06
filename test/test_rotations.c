@@ -97,7 +97,7 @@ int main(void) {
         free(A);
         free(Ac);
         free(B);
-        free(RP);
+        freeRotationPlan(RP);
     }
 
     printf("\n\nTesting the computation of the triangular harmonic Givens rotations.\n");
@@ -189,7 +189,7 @@ int main(void) {
         free(A);
         free(Ac);
         free(B);
-        free(RP);
+        freeRotationPlan(RP);
     }
 
     printf("\n\nTesting the computation of the disk harmonic Givens rotations.\n");
@@ -243,7 +243,7 @@ int main(void) {
         free(A);
         free(Ac);
         free(B);
-        free(RP);
+        freeRotationPlan(RP);
     }
 
     return 0;
