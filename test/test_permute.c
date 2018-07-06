@@ -3,7 +3,6 @@
 
 int main(void) {
     struct timeval start, end;
-    double delta;
 
     static double * A;
     static double * B;
@@ -90,8 +89,7 @@ int main(void) {
         }
         gettimeofday(&end, NULL);
 
-        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-        printf("%d  %.6f", N, delta/NLOOPS);
+        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
 
         free(A);
         free(B);
@@ -108,8 +106,7 @@ int main(void) {
         }
         gettimeofday(&end, NULL);
 
-        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-        printf("  %.6f\n", delta/NLOOPS);
+        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
         free(B);
@@ -160,8 +157,7 @@ int main(void) {
         }
         gettimeofday(&end, NULL);
 
-        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-        printf("%d  %.6f", N, delta/NLOOPS);
+        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
 
         free(A);
         free(B);
@@ -178,8 +174,7 @@ int main(void) {
         }
         gettimeofday(&end, NULL);
 
-        delta = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
-        printf("  %.6f\n", delta/NLOOPS);
+        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
         free(B);

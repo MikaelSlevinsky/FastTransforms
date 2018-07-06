@@ -136,6 +136,7 @@ int main(int argc, const char * argv[]) {
         }
         gettimeofday(&end, NULL);
 
+<<<<<<< HEAD
         printf("  %.6f", elapsed(&start, &end, NLOOPS));
 
         gettimeofday(&start, NULL);
@@ -151,6 +152,8 @@ int main(int argc, const char * argv[]) {
             execute_sph_lo2hi_AVX512(RP, A, B, M);
         }
         gettimeofday(&end, NULL);
+=======
+>>>>>>> 688081a623c624332e2c50d46cd0ab0d2fadf234
         printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
@@ -219,7 +222,11 @@ int main(int argc, const char * argv[]) {
 
     printf("\nTesting the accuracy of triangular harmonic drivers.\n\n");
     printf("err3 = [\n");
+<<<<<<< HEAD
     for (int i = 0; i < IERR; i++) {
+=======
+    for (int i = 0; i < 3; i++) {
+>>>>>>> 688081a623c624332e2c50d46cd0ab0d2fadf234
         N = 64*pow(2, i);
         M = N;
 
@@ -411,9 +418,15 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 */
+<<<<<<< HEAD
     printf("\nTesting the accuracy of disk harmonic drivers.\n\n");
     printf("err5 = [\n");
     for (int i = 0; i < IERR; i++) {
+=======
+
+    printf("err5 = [\n");
+    for (int i = 0; i < 3; i++) {
+>>>>>>> 688081a623c624332e2c50d46cd0ab0d2fadf234
         N = 64*pow(2, i);
         M = 4*N-3;
 
@@ -434,8 +447,13 @@ int main(int argc, const char * argv[]) {
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
+<<<<<<< HEAD
         execute_disk_hi2lo_AVX(RP, A, Ac, M);
         execute_disk_lo2hi_AVX(RP, A, Ac, M);
+=======
+        execute_disk_hi2lo(RP, A, M);
+        execute_disk_lo2hi_SSE(RP, A, Ac, M);
+>>>>>>> 688081a623c624332e2c50d46cd0ab0d2fadf234
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
@@ -446,6 +464,7 @@ int main(int argc, const char * argv[]) {
         free(RP);
     }
     printf("];\n");
+<<<<<<< HEAD
 /*
     printf("\nTiming disk harmonic drivers.\n\n");
     printf("t5 = [\n");
@@ -453,6 +472,14 @@ int main(int argc, const char * argv[]) {
         N = 64*pow(2, i);
         M = 4*N-3;
         NLOOPS = 1 + pow(2048/N, 2);
+=======
+
+    printf("t5 = [\n");
+    for (int i = 0; i < 8; i++) {
+        N = 64*pow(2, i);
+        M = 4*N-3;
+        NLOOPS = 1 + pow(4096/N, 2);
+>>>>>>> 688081a623c624332e2c50d46cd0ab0d2fadf234
 
         A = diskones(N, M);
         B = diskones(N, M);
@@ -494,7 +521,10 @@ int main(int argc, const char * argv[]) {
         free(B);
         free(RP);
     }
+<<<<<<< HEAD
     */
+=======
+>>>>>>> 688081a623c624332e2c50d46cd0ab0d2fadf234
     printf("];\n");
 
     return 0;

@@ -278,6 +278,7 @@ void execute_fourier2sph(const SphericalHarmonicPlan * P, double * A, const int 
 TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma) {
     TriangularHarmonicPlan * P = malloc(sizeof(TriangularHarmonicPlan));
     P->RP = plan_rottriangle(n, alpha, beta, gamma);
+    P->B = (double *) calloc(n * n, sizeof(double));
     P->P1 = plan_jac2jac(1, 1, n, beta + gamma + 1.0, alpha, -0.5);
     P->P2 = plan_jac2jac(1, 1, n, alpha, -0.5, -0.5);
     P->P3 = plan_jac2jac(1, 1, n, gamma, beta, -0.5);
@@ -293,7 +294,7 @@ TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const do
 }
 
 void execute_tri2cheb(const TriangularHarmonicPlan * P, double * A, const int N, const int M) {
-    execute_tri_hi2lo(P->RP, A, M);
+    execute_tri_hi2lo_AVX512(P->RP, A, P->B, M);
     if (P->beta + P->gamma != -1.5)
         cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1, N, A, N);
     if (P->alpha != -0.5) {
@@ -327,7 +328,7 @@ void execute_cheb2tri(const TriangularHarmonicPlan * P, double * A, const int N,
     }
     if (P->beta + P->gamma != -1.5)
         cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1inv, N, A, N);
-    execute_tri_lo2hi(P->RP, A, M);
+    execute_tri_lo2hi_AVX512(P->RP, A, P->B, M);
 }
 
 static void alternate_sign(double * A, const int N) {

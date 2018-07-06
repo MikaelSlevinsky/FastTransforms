@@ -25,7 +25,17 @@
 
 \section{What {\tt FastTransforms} actually computes}
 
-For every subsection below, there is a pre-computation called by the prefix \verb+plan_+, a forward execution called by the prefix \verb+execute_+, and a backward execution called by the prefix \verb+execute_a2b+ with the roles of \verb+a+ and \verb+b+ reversed.
+For every subsection below, the title of the subsection, of the form \verb+a2b+, refers conceptually to the transform and the available functions are as follows:
+\begin{itemize}
+\item \verb+plan_a2b+, is a pre-computation,
+\item \verb+execute_a2b+, is a forward execution,
+\item \verb+execute_b2a+, is a backward execution,
+\item \verb+execute_a_hi2lo+, is a conversion to a tensor-product basis,
+\item \verb+execute_a_lo2hi+, is a conversion from a tensor-product basis,
+\item \verb+kernel_a_hi2lo+, is an orthonormal conversion from high to low order,
+\item \verb+kernel_a_lo2hi+, is an orthonormal conversion from low to high order.
+\end{itemize}
+The \verb+execute_*+ functions are drivers that perform transforms as defined below. They are composed of computational kernels, \verb+kernel_*+ functions, that may be assembled differently.
 
 \subsection{{\tt sph2fourier}}
 
@@ -92,7 +102,7 @@ g_0^0 & g_0^1 & \cdots & g_0^n\\
 g_1^0 & g_1^1 & \cdots & g_1^n\\
 \vdots & \vdots & \ddots & \vdots\\
 g_{n-1}^0 & g_{n-1}^1& \cdots & g_{n-1}^n\\
-g_n^0 & 0 & \cdots & g_n^n\\
+g_n^0 & g_n^1 & \cdots & g_n^n\\
 \end{pmatrix}.
 \]
 That is:
@@ -100,8 +110,6 @@ That is:
 g_n(x,y) = \sum_{\ell=0}^n\sum_{m=0}^n g_\ell^m T_\ell(2x-1) T_m\left(\frac{2y}{1-x}-1\right).
 \]
 
-%\bibliographystyle{unsrt}
-%\bibliography{/Users/Mikael/Bibliography/Mik}
 \begin{thebibliography}{1}
 
 \bibitem{Slevinsky-ACHA-17}

@@ -1,7 +1,7 @@
 #include "fasttransforms.h"
 #include "utilities.h"
 
-const int N = 4097;
+const int N = 2049;
 
 int main(void) {
     double * A, * B, * C;
@@ -23,7 +23,7 @@ int main(void) {
 
                 cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
 
-                printf("\t\tNormalization of SRC:TRG = %d:%d. The relative Frobenius norm error is: %17.16e.\n", normleg, normcheb, vecnorm_2arg(B, C, n, n)/vecnorm_1arg(C, n, n));
+                printf("\t\tNormalization of SRC:TRG = %d:%d. The relative Frobenius norm error is: %1.2e.\n", normleg, normcheb, vecnorm_2arg(B, C, n, n)/vecnorm_1arg(C, n, n));
 
                 free(A);
                 free(B);
@@ -51,7 +51,7 @@ int main(void) {
 
                 cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
 
-                printf("\t\tNormalization of SRC:TRG = %d:%d. The relative Frobenius norm error is: %17.16e.\n", normultra1, normultra2, vecnorm_2arg(B, C, n, n)/vecnorm_1arg(C, n, n));
+                printf("\t\tNormalization of SRC:TRG = %d:%d. The relative Frobenius norm error is: %1.2e.\n", normultra1, normultra2, vecnorm_2arg(B, C, n, n)/vecnorm_1arg(C, n, n));
 
                 free(A);
                 free(B);
@@ -112,7 +112,7 @@ int main(void) {
 
                     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
 
-                    printf("\t\t\tNormalization of SRC:TRG = %d:%d. The relative Frobenius norm error is: %17.16e.\n", normjac1, normjac2, vecnorm_2arg(B, C, n, n)/vecnorm_1arg(C, n, n));
+                    printf("\t\t\tNormalization of SRC:TRG = %d:%d. The relative Frobenius norm error is: %1.2e.\n", normjac1, normjac2, vecnorm_2arg(B, C, n, n)/vecnorm_1arg(C, n, n));
 
                     free(A);
                     free(B);
