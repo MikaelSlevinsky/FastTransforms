@@ -211,7 +211,7 @@ int main(int argc, const char * argv[]) {
         free(P);
     }
     printf("];\n");
-
+*/
     //double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
     double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 
@@ -221,7 +221,7 @@ int main(int argc, const char * argv[]) {
     printf("err3 = [\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i);
-        M = N;
+        M = N-4;
 
         A = triones(N, M);
         Ac = copyA(A, N, M);
@@ -258,14 +258,14 @@ int main(int argc, const char * argv[]) {
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
-        execute_tri_hi2lo_AVX512(RP, A, Ac, M);
-        execute_tri_lo2hi_AVX(RP, A, Ac, M);
+        execute_tri_hi2lo_AVX(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX512(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
-        execute_tri_hi2lo_AVX(RP, A, Ac, M);
-        execute_tri_lo2hi_AVX512(RP, A, Ac, M);
+        execute_tri_hi2lo_AVX512(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
@@ -276,7 +276,7 @@ int main(int argc, const char * argv[]) {
         free(RP);
     }
     printf("];\n");
-
+/*
     printf("\nTiming triangular harmonic drivers.\n\n");
     printf("t3 = [\n");
     for (int i = 0; i < ITIME; i++) {
@@ -410,7 +410,7 @@ int main(int argc, const char * argv[]) {
         free(Q);
     }
     printf("];\n");
-*/
+
     printf("\nTesting the accuracy of disk harmonic drivers.\n\n");
     printf("err5 = [\n");
     for (int i = 0; i < IERR; i++) {
@@ -446,7 +446,7 @@ int main(int argc, const char * argv[]) {
         free(RP);
     }
     printf("];\n");
-/*
+
     printf("\nTiming disk harmonic drivers.\n\n");
     printf("t5 = [\n");
     for (int i = 0; i < ITIME; i++) {

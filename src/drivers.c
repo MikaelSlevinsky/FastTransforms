@@ -145,8 +145,10 @@ void execute_tri_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, cons
 void execute_tri_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
     permute_tri_AVX(A, B, N, M);
+    for (int m = 0; m < M%8; m += 2)
+        kernel_tri_hi2lo_SSE(RP, m, B+N*m);
     #pragma omp parallel
-    for (int m = 4*omp_get_thread_num(); m < M; m += 4*omp_get_num_threads())
+    for (int m = M%8 + 4*omp_get_thread_num(); m < M; m += 4*omp_get_num_threads())
         kernel_tri_hi2lo_AVX(RP, m, B+N*m);
     permute_t_tri_AVX(A, B, N, M);
 }
@@ -154,26 +156,38 @@ void execute_tri_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, cons
 void execute_tri_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
     permute_tri_AVX(A, B, N, M);
+    for (int m = 0; m < M%8; m += 2)
+        kernel_tri_lo2hi_SSE(RP, m, B+N*m);
     #pragma omp parallel
-    for (int m = 4*omp_get_thread_num(); m < M; m += 4*omp_get_num_threads())
+    for (int m = M%8 + 4*omp_get_thread_num(); m < M; m += 4*omp_get_num_threads())
         kernel_tri_lo2hi_AVX(RP, m, B+N*m);
     permute_t_tri_AVX(A, B, N, M);
 }
 
 void execute_tri_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
+    int M_star = M%16;
     permute_tri_AVX512(A, B, N, M);
+    for (int m = 0; m < M_star%8; m += 2)
+        kernel_tri_hi2lo_SSE(RP, m, B+N*m);
+    for (int m = M_star%8; m < M%16; m += 4)
+        kernel_tri_hi2lo_AVX(RP, m, B+N*m);
     #pragma omp parallel
-    for (int m = 8*omp_get_thread_num(); m < M; m += 8*omp_get_num_threads())
+    for (int m = M_star + 8*omp_get_thread_num(); m < M; m += 8*omp_get_num_threads())
         kernel_tri_hi2lo_AVX512(RP, m, B+N*m);
     permute_t_tri_AVX512(A, B, N, M);
 }
 
 void execute_tri_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
+    int M_star = M%16;
     permute_tri_AVX512(A, B, N, M);
+    for (int m = 0; m < M_star%8; m += 2)
+        kernel_tri_lo2hi_SSE(RP, m, B+N*m);
+    for (int m = M_star%8; m < M%16; m += 4)
+        kernel_tri_lo2hi_AVX(RP, m, B+N*m);
     #pragma omp parallel
-    for (int m = 8*omp_get_thread_num(); m < M; m += 8*omp_get_num_threads())
+    for (int m = M_star + 8*omp_get_thread_num(); m < M; m += 8*omp_get_num_threads())
         kernel_tri_lo2hi_AVX512(RP, m, B+N*m);
     permute_t_tri_AVX512(A, B, N, M);
 }

@@ -99,6 +99,9 @@ void kernel_disk_lo2hi_SSE(const RotationPlan * RP, const int m, double * A);
 void kernel_disk_hi2lo_AVX(const RotationPlan * RP, const int m, double * A);
 void kernel_disk_lo2hi_AVX(const RotationPlan * RP, const int m, double * A);
 
+void kernel_disk_hi2lo_AVX512(const RotationPlan * RP, const int m, double * A);
+void kernel_disk_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A);
+
 static inline void apply_givens(const double S, const double C, double * X, double * Y);
 static inline void apply_givens_t(const double S, const double C, double * X, double * Y);
 
