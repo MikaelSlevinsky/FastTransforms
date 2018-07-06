@@ -317,7 +317,23 @@ void kernel_disk_lo2hi_SSE(const RotationPlan * RP, const int m, double * A) {
             apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+1));
 }
 
+void kernel_disk_hi2lo_AVX(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int l = n-2-(m+1)/2; l >= 0; l--)
+        apply_givens_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+1)+2);
+    for (int j = m-2; j >= 0; j -= 2)
+        for (int l = n-2-(j+1)/2; l >= 0; l--)
+            apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+1));
+}
 
+void kernel_disk_lo2hi_AVX(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int j = m%2; j < m-1; j += 2)
+        for (int l = 0; l <= n-2-(j+1)/2; l++)
+            apply_givens_t_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+1));
+    for (int l = 0; l <= n-2-(m+1)/2; l++)
+        apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+1)+2);
+}
 
 
 static inline void apply_givens(const double S, const double C, double * X, double * Y) {

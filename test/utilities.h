@@ -20,6 +20,9 @@ double * sphones(int n, int m);
 double * sphrand(int n, int m);
 double * triones(int n, int m);
 double * trirand(int n, int m);
+double * diskones(int n, int m);
+double * diskrand(int n, int m);
 double * copyA(double * A, int n, int m);
+double elapsed(struct timeval * start, struct timeval * end, int N);
 
 #endif //UTILITIES_H
