@@ -136,7 +136,6 @@ int main(int argc, const char * argv[]) {
         }
         gettimeofday(&end, NULL);
 
-<<<<<<< HEAD
         printf("  %.6f", elapsed(&start, &end, NLOOPS));
 
         gettimeofday(&start, NULL);
@@ -152,8 +151,6 @@ int main(int argc, const char * argv[]) {
             execute_sph_lo2hi_AVX512(RP, A, B, M);
         }
         gettimeofday(&end, NULL);
-=======
->>>>>>> 688081a623c624332e2c50d46cd0ab0d2fadf234
         printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
@@ -224,9 +221,6 @@ int main(int argc, const char * argv[]) {
     printf("err3 = [\n");
 <<<<<<< HEAD
     for (int i = 0; i < IERR; i++) {
-=======
-    for (int i = 0; i < 3; i++) {
->>>>>>> 688081a623c624332e2c50d46cd0ab0d2fadf234
         N = 64*pow(2, i);
         M = N;
 
