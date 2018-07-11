@@ -183,7 +183,7 @@ g_{2n}^0 & 0 & 0 & g_{2n}^{-2} & g_{2n}^2 & \cdots & g_{2n}^{-2n} & g_{2n}^{2n}\
 \end{equation}
 That is:
 \begin{equation}
-g_{2n}(r,\theta) = \sum_{\ell=0}^{n}\sum_{m=-2n}^{+2n} g_{2\ell}^m \frac{e^{\ii m\theta}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos[2\ell\cos^{-1}(r)] & m~{\rm even},\\ \cos[(2\ell+1)\cos^{-1}(r)] & m~{\rm odd}.\end{array}\right.
+g_{2n}(r,\theta) = \sum_{\ell=0}^{n}\sum_{m=-2n}^{+2n} g_{2\ell}^m \frac{e^{\ii m\theta}}{\sqrt{2\pi}} \left\{\begin{array}{lr} T_{2\ell}(r) & m~{\rm even},\\ T_{2\ell+1}(r) & m~{\rm odd}.\end{array}\right.
 \end{equation}
 Since {\tt disk2cxf} only transforms columns of the arrays, the routine is indifferent to the choice of azimuthal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
 
