@@ -6,6 +6,7 @@ const int N = 257;
 int main(void) {
     double * A, * Ac, * B;
     RotationPlan * RP;
+    SpinRotationPlan * SRP;
     double nrm;
 
     printf("\n\nTesting the computation of the spherical harmonic Givens rotations.\n");
@@ -244,6 +245,46 @@ int main(void) {
         free(Ac);
         free(B);
         freeRotationPlan(RP);
+    }
+
+    printf("\n\nTesting the computation of the spin-weighted spherical harmonic Givens rotations.\n");
+    for (int n = 64; n < N; n *= 2) {
+        printf("\tDegree: %d.\n", n);
+
+        for (int s = 0; s < 9; s++) {
+            printf("\t\tSpin: %d. ", s);
+            RP = plan_rotsphere(n);
+            SRP = plan_rotspinsphere(n, s);
+
+            A = (double *) calloc(n, sizeof(double));
+            B = (double *) calloc(n, sizeof(double));
+
+            nrm = 0.0;
+            for (int m = 0; m < n; m++) {
+                for (int i = 0; i < n-MAX(m, s); i++)
+                    A[i] = B[i] = 1.0;
+                for (int i = n-MAX(m, s); i < n; i++)
+                    A[i] = B[i] = 0.0;
+                kernel_spinsph_hi2lo(SRP, m, A);
+                kernel_spinsph_lo2hi(SRP, m, A);
+                nrm += pow(vecnorm_2arg(A, B, n, 1)/vecnorm_1arg(B, n, 1), 2);
+                if (s == 0) {
+                    kernel_spinsph_hi2lo(SRP, m, A);
+                    kernel_sph_lo2hi(RP, m, A);
+                    nrm += pow(vecnorm_2arg(A, B, n, 1)/vecnorm_1arg(B, n, 1), 2);
+                    kernel_sph_hi2lo(RP, m, A);
+                    kernel_spinsph_lo2hi(SRP, m, A);
+                    nrm += pow(vecnorm_2arg(A, B, n, 1)/vecnorm_1arg(B, n, 1), 2);
+                }
+            }
+            if (s == 0) nrm /= 3.0;
+            printf("The 2-norm relative error in the rotations: %1.2e.\n", sqrt(nrm));
+
+            free(A);
+            free(B);
+            freeRotationPlan(RP);
+            freeSpinRotationPlan(SRP);
+        }
     }
 
     return 0;

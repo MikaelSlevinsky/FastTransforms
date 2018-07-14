@@ -19,6 +19,8 @@
 #define M_1_SQRT_PI  0.564189583547756287   /* 1/sqrt(pi)     */
 #define M_SQRT_PI_2  0.886226925452758014   /* sqrt(pi)/2     */
 
+#define MAX(a,b) ((a) > (b) ? a : b)
+#define MIN(a,b) ((a) < (b) ? a : b)
 
 #if __SSE2__
     #define VECTOR_SIZE_2 2
@@ -98,6 +100,24 @@ void kernel_disk_lo2hi(const RotationPlan * RP, const int m, double * A);
 void kernel_disk_hi2lo_SSE(const RotationPlan * RP, const int m, double * A);
 void kernel_disk_lo2hi_SSE(const RotationPlan * RP, const int m, double * A);
 
+typedef struct {
+    double * s1;
+    double * c1;
+    double * s2;
+    double * c2;
+    double * s3;
+    double * c3;
+    int n;
+    int s;
+} SpinRotationPlan;
+
+void freeSpinRotationPlan(SpinRotationPlan * SRP);
+
+SpinRotationPlan * plan_rotspinsphere(const int n, const int s);
+
+void kernel_spinsph_hi2lo(const SpinRotationPlan * SRP, const int m, double * A);
+void kernel_spinsph_lo2hi(const SpinRotationPlan * SRP, const int m, double * A);
+
 static inline void apply_givens(const double S, const double C, double * X, double * Y);
 static inline void apply_givens_t(const double S, const double C, double * X, double * Y);
 
@@ -139,6 +159,9 @@ void execute_disk_lo2hi(const RotationPlan * RP, double * A, const int M);
 
 void execute_disk_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, const int M);
 void execute_disk_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, const int M);
+
+void execute_spinsph_hi2lo(const SpinRotationPlan * SRP, double * A, const int M);
+void execute_spinsph_lo2hi(const SpinRotationPlan * SRP, double * A, const int M);
 
 typedef struct {
     RotationPlan * RP;

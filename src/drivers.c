@@ -215,6 +215,27 @@ void execute_disk_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, con
     permute_t_disk_SSE(A, B, N, M);
 }
 
+void execute_spinsph_hi2lo(const SpinRotationPlan * SRP, double * A, const int M) {
+    int N = SRP->n;
+    kernel_spinsph_hi2lo(SRP, 0, A);
+    #pragma omp parallel
+    for (int m = 1 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+        kernel_spinsph_hi2lo(SRP, m, A + N*(2*m-1));
+        kernel_spinsph_hi2lo(SRP, m, A + N*(2*m));
+    }
+}
+
+void execute_spinsph_lo2hi(const SpinRotationPlan * SRP, double * A, const int M) {
+    int N = SRP->n;
+    kernel_spinsph_lo2hi(SRP, 0, A);
+    #pragma omp parallel
+    for (int m = 1 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+        kernel_spinsph_lo2hi(SRP, m, A + N*(2*m-1));
+        kernel_spinsph_lo2hi(SRP, m, A + N*(2*m));
+    }
+}
+
+
 void freeSphericalHarmonicPlan(SphericalHarmonicPlan * P) {
     freeRotationPlan(P->RP);
     free(P->B);
