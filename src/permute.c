@@ -134,7 +134,7 @@ void permute_spinsph_SSE(const double * A, double * B, const int N, const int M)
 }
 
 void permute_t_spinsph_SSE(double * A, const double * B, const int N, const int M) {
-    permute_t_sph_AVX(A, B, N, M);
+    permute_t_sph_SSE(A, B, N, M);
 }
 
 void permute_spinsph_AVX(const double * A, double * B, const int N, const int M) {
