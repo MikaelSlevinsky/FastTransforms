@@ -129,6 +129,30 @@ void permute_t_disk_AVX512(double * A, const double * B, const int N, const int 
     permute_t_sph_AVX512(A, B, N, M);
 }
 
+void permute_spinsph_SSE(const double * A, double * B, const int N, const int M) {
+    permute_sph_SSE(A, B, N, M);
+}
+
+void permute_t_spinsph_SSE(double * A, const double * B, const int N, const int M) {
+    permute_t_sph_AVX(A, B, N, M);
+}
+
+void permute_spinsph_AVX(const double * A, double * B, const int N, const int M) {
+    permute_sph_AVX(A, B, N, M);
+}
+
+void permute_t_spinsph_AVX(double * A, const double * B, const int N, const int M) {
+    permute_t_sph_AVX(A, B, N, M);
+}
+
+void permute_spinsph_AVX512(const double * A, double * B, const int N, const int M) {
+    permute_sph_AVX512(A, B, N, M);
+}
+
+void permute_t_spinsph_AVX512(double * A, const double * B, const int N, const int M) {
+    permute_t_sph_AVX512(A, B, N, M);
+}
+
 
 void swap(double * A, double * B, const int N) {
     double tmp;

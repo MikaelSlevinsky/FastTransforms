@@ -517,6 +517,12 @@ int main(int argc, const char * argv[]) {
             printf("  %1.2e", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
             printf("  %1.2e", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
+            execute_spinsph_hi2lo_SSE(SRP, A, M);
+            execute_spinsph_lo2hi_SSE(SRP, A, M);
+
+            printf("  %1.2e", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+            printf("  %1.2e", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
             free(A);
             free(Ac);
             free(B);
