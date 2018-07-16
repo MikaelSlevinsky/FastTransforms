@@ -118,6 +118,12 @@ SpinRotationPlan * plan_rotspinsphere(const int n, const int s);
 void kernel_spinsph_hi2lo(const SpinRotationPlan * SRP, const int m, double * A);
 void kernel_spinsph_lo2hi(const SpinRotationPlan * SRP, const int m, double * A);
 
+void kernel_disk_hi2lo_AVX(const RotationPlan * RP, const int m, double * A);
+void kernel_disk_lo2hi_AVX(const RotationPlan * RP, const int m, double * A);
+
+void kernel_disk_hi2lo_AVX512(const RotationPlan * RP, const int m, double * A);
+void kernel_disk_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A);
+
 static inline void apply_givens(const double S, const double C, double * X, double * Y);
 static inline void apply_givens_t(const double S, const double C, double * X, double * Y);
 
@@ -162,6 +168,12 @@ void execute_disk_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, con
 
 void execute_spinsph_hi2lo(const SpinRotationPlan * SRP, double * A, const int M);
 void execute_spinsph_lo2hi(const SpinRotationPlan * SRP, double * A, const int M);
+
+void execute_disk_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M);
+void execute_disk_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, const int M);
+
+void execute_disk_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, const int M);
+void execute_disk_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, const int M);
 
 typedef struct {
     RotationPlan * RP;
@@ -231,5 +243,9 @@ void permute_t_tri_AVX512(double * A, const double * B, const int N, const int M
 
 void permute_disk_SSE(const double * A, double * B, const int N, const int M);
 void permute_t_disk_SSE(double * A, const double * B, const int N, const int M);
+void permute_disk_AVX(const double * A, double * B, const int N, const int M);
+void permute_t_disk_AVX(double * A, const double * B, const int N, const int M);
+void permute_disk_AVX512(const double * A, double * B, const int N, const int M);
+void permute_t_disk_AVX512(double * A, const double * B, const int N, const int M);
 
 #endif //FASTTRANSFORMS_H

@@ -16,6 +16,7 @@ int main(int argc, const char * argv[]) {
 
     int IERR, ITIME, N, M, NLOOPS;
 
+
     if (argc > 1) {
         sscanf(argv[1], "%d", &IERR);
         if (argc > 2) sscanf(argv[2], "%d", &ITIME);
@@ -23,6 +24,7 @@ int main(int argc, const char * argv[]) {
     }
     else IERR = 1;
 
+  
     printf("\nTesting the accuracy of spherical harmonic drivers.\n\n");
     printf("err1 = [\n");
     for (int i = 0; i < IERR; i++) {
@@ -220,7 +222,7 @@ int main(int argc, const char * argv[]) {
     printf("err3 = [\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i);
-        M = N;
+        M = N-4;
 
         A = triones(N, M);
         Ac = copyA(A, N, M);
@@ -257,14 +259,14 @@ int main(int argc, const char * argv[]) {
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
-        execute_tri_hi2lo_AVX512(RP, A, Ac, M);
-        execute_tri_lo2hi_AVX(RP, A, Ac, M);
+        execute_tri_hi2lo_AVX(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX512(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
-        execute_tri_hi2lo_AVX(RP, A, Ac, M);
-        execute_tri_lo2hi_AVX512(RP, A, Ac, M);
+        execute_tri_hi2lo_AVX512(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
@@ -276,6 +278,7 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
+  
     printf("\nTiming triangular harmonic drivers.\n\n");
     printf("t3 = [\n");
     for (int i = 0; i < ITIME; i++) {
@@ -433,8 +436,8 @@ int main(int argc, const char * argv[]) {
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
-        execute_disk_hi2lo(RP, A, M);
-        execute_disk_lo2hi_SSE(RP, A, Ac, M);
+        execute_disk_hi2lo_AVX512(RP, A, Ac, M);
+        execute_disk_lo2hi_AVX(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
@@ -559,6 +562,7 @@ int main(int argc, const char * argv[]) {
         }
         printf("\n");
     }
+    */
     printf("];\n");
 
     return 0;

@@ -120,7 +120,6 @@ void kernel_sph_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A) {
         apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+8*l+2, A+8*(l+2)+2);
 }
 
-
 RotationPlan * plan_rottriangle(const int n, const double alpha, const double beta, const double gamma) {
     double * s = (double *) malloc(n*(n+1)/2 * sizeof(double));
     double * c = (double *) malloc(n*(n+1)/2 * sizeof(double));
@@ -324,6 +323,23 @@ void kernel_disk_lo2hi_SSE(const RotationPlan * RP, const int m, double * A) {
             apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+1));
 }
 
+void kernel_disk_hi2lo_AVX(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int l = n-2-(m+1)/2; l >= 0; l--)
+        apply_givens_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+1)+2);
+    for (int j = m-2; j >= 0; j -= 2)
+        for (int l = n-2-(j+1)/2; l >= 0; l--)
+            apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+1));
+}
+
+void kernel_disk_lo2hi_AVX(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int j = m%2; j < m-1; j += 2)
+        for (int l = 0; l <= n-2-(j+1)/2; l++)
+            apply_givens_t_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+1));
+    for (int l = 0; l <= n-2-(m+1)/2; l++)
+        apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+1)+2);
+}
 
 void freeSpinRotationPlan(SpinRotationPlan * SRP) {
     free(SRP->s1);
@@ -465,7 +481,34 @@ void kernel_spinsph_lo2hi(const SpinRotationPlan * SRP, const int m, double * A)
 }
 
 
+void kernel_disk_hi2lo_AVX512(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int l = n-2-(m+1)/2; l >= 0; l--)
+        apply_givens_SSE(RP->s(l, m), RP->c(l, m), A+8*l+2, A+8*(l+1)+2);
+    for (int l = n-4-(m+1)/2; l >= 0; l--)
+        apply_givens_SSE(RP->s(l, m+4), RP->c(l, m+4), A+8*l+6, A+8*(l+1)+6);
+    for (int j = m+2; j >= m; j -= 2)
+        for (int l = n-2-(j+1)/2; l >= 0; l--)
+            apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+8*l+4, A+8*(l+1)+4);
+    for (int j = m-2; j >= 0; j -= 2)
+        for (int l = n-2-(j+1)/2; l >= 0; l--)
+            apply_givens_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+1));
+}
 
+
+void kernel_disk_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A) {
+    int n = RP->n;
+    for (int j = m%2; j < m-1; j += 2)
+        for (int l = 0; l <= n-2-(j+1)/2; l++)
+            apply_givens_t_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+1));
+    for (int j = m; j <= m+2; j += 2)
+        for (int l = 0; l <= n-2-(j+1)/2; l++)
+            apply_givens_t_AVX(RP->s(l, j), RP->c(l, j), A+8*l+4, A+8*(l+1)+4);
+    for (int l = 0; l <= n-4-(m+1)/2; l++)
+        apply_givens_t_SSE(RP->s(l, m+4), RP->c(l, m+4), A+8*l+6, A+8*(l+1)+6);
+    for (int l = 0; l <= n-2-(m+1)/2; l++)
+        apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+8*l+2, A+8*(l+1)+2);
+}
 
 static inline void apply_givens(const double S, const double C, double * X, double * Y) {
     double x = C*X[0] + S*Y[0];
