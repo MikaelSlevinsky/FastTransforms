@@ -23,6 +23,8 @@
 
 {\tt FastTransforms} is a C library based on the solutions of the two-dimensional harmonic polynomial connection problems in~\cite{Slevinsky-ACHA-17,Slevinsky-1711-07866} that have an $\mathcal{O}(n^3)$ run-time, where $n$ is the polynomial degree, and are $2$-normwise backward stable.
 
+The transforms are separated into computational kernels that offer SSE, AVX, and AVX-512 vectorization on applicable Intel processors, and driver routines that are easily parallelized by OpenMP.
+
 \section{What {\tt FastTransforms} actually computes}
 
 For every subsection below, the title of the subsection, of the form \verb+a2b+, refers conceptually to the transform and the available functions are as follows:
@@ -41,7 +43,7 @@ The \verb+execute_*+ functions are drivers that perform transforms as defined be
 
 Spherical harmonics are:
 \begin{equation}
-Y_\ell^m(\theta,\varphi) = \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \ii^{m+|m|}\sqrt{(\ell+\tfrac{1}{2})\frac{(\ell-m)!}{(\ell+m)!}} P_\ell^m(\cos\theta)
+Y_\ell^m(\theta,\varphi) = \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} (-1)^{\abs{m}}\sqrt{(\ell+\tfrac{1}{2})\frac{(\ell-\abs{m})!}{(\ell+\abs{m})!}} P_\ell^{\abs{m}}(\cos\theta),
 \end{equation}
 where $P_\ell^m(\cos\theta)$ are the associated Legendre functions. A degree-$n$ expansion in spherical harmonics is given by:
 \begin{equation}
@@ -52,7 +54,7 @@ If spherical harmonic expansion coefficients are organized into the array:
 F = \begin{pmatrix}
 f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_n^{-n} & f_n^n\\
 f_1^0 & f_2^{-1} & f_2^1 & f_3^{-2} & f_3^2 & \cdots & 0 & 0\\
-\vdots & \vdots & \vdots &  \vdots &  \vdots & \ddots & \vdots & \vdots\\
+\vdots & \vdots & \vdots &  \vdots &  \vdots & \iddots & \vdots & \vdots\\
 f_{n-2}^0 & f_{n-1}^{-1} & f_{n-1}^1 & f_n^{-2} & f_n^2 &  & \vdots & \vdots\\
 f_{n-1}^0 & f_n^{-1} & f_n^1 & 0 & 0 & \cdots & 0 & 0\\
 f_n^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
@@ -74,6 +76,44 @@ g_n(\theta,\varphi) = \sum_{\ell=0}^n\sum_{m=-n}^{+n} g_\ell^m \frac{e^{\ii m\va
 \end{equation}
 Since {\tt sph2fourier} only transforms columns of the arrays, the routine is indifferent to the choice of longitudinal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
 
+\subsection{{\tt spinsph2fourier}}
+
+Spin-weighted spherical harmonics are:
+\begin{align}
+Y_{\ell,m}^s(\theta,\varphi) & = \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \sqrt{(\ell+\tfrac{1}{2})\dfrac{(\ell+\ell_0)!(\ell-\ell_0)!}{(\ell+\ell_1)!(\ell-\ell_1)!}}\nonumber\\
+& \times \sin^{\abs{m+s}}(\tfrac{\theta}{2})\cos^{\abs{m-s}}(\tfrac{\theta}{2}) P_{\ell-\ell_0}^{(\abs{m+s},\abs{m-s})}(\cos\theta).
+\end{align}
+where $P_n^{(\alpha,\beta)}(\cos\theta)$ are the Jacobi polynomials and $\ell_0 = \max\{\abs{m},\abs{s}\}$ and $\ell_1 = \min\{\abs{m},\abs{s}\}$. A degree-$n$ expansion in spin-weighted spherical harmonics is given by:
+\begin{equation}
+f_n^s(\theta,\varphi) = \sum_{\ell=\ell_0}^{n}\sum_{m=-\ell}^{+\ell} f_\ell^m Y_{\ell,m}^s(\theta,\varphi).
+\end{equation}
+If spin-weighted spherical harmonic expansion coefficients with $s=2$, for example, are organized into the array:
+\begin{equation}
+F = \begin{pmatrix}
+f_2^0 & f_2^{-1} & f_2^1 & f_2^{-2} & f_2^2 & \cdots & f_n^{-n} & f_n^n\\
+f_3^0 & f_3^{-1} & f_3^1 & f_3^{-2} & f_3^2 & \cdots & 0 & 0\\
+\vdots & \vdots & \vdots &  \vdots &  \vdots & \iddots & \vdots & \vdots\\
+f_{n}^0 & f_{n}^{-1} & f_{n}^1 & f_n^{-2} & f_n^2 &  & \vdots & \vdots\\
+0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+\end{pmatrix},
+\end{equation}
+then {\tt spinsph2fourier} returns the bivariate Fourier coefficients:
+\begin{equation}
+G = \begin{pmatrix}
+g_0^0 & g_0^{-1} & g_0^1 & \cdots & g_0^{-n} & g_0^n\\
+g_1^0 & g_1^{-1} & g_1^1 & \cdots & g_1^{-n} & g_1^n\\
+\vdots & \vdots & \vdots & \ddots & \vdots & \vdots\\
+g_{n-1}^0 & g_{n-1}^{-1} & g_{n-1}^1& \cdots & g_{n-1}^{-n} & g_{n-1}^n\\
+g_n^0 & 0 & 0 & \cdots & g_n^{-n} & g_n^n\\
+\end{pmatrix}.
+\end{equation}
+That is:
+\begin{equation}
+g_n(\theta,\varphi) = \sum_{\ell=0}^n\sum_{m=-n}^{+n} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m+s~{\rm even},\\ \sin((\ell+1)\theta) & m+s~{\rm odd}.\end{array}\right.
+\end{equation}
+Since {\tt spinsph2fourier} only transforms columns of the arrays, the routine is indifferent to the choice of longitudinal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
+
 \subsection{{\tt tri2cheb}}
 
 Triangular harmonics are:
@@ -88,7 +128,7 @@ If triangular harmonic expansion coefficients are organized into the array:
 \[
 F = \begin{pmatrix}
 f_0^0 & f_1^1 & f_2^2 & \cdots & f_n^n\\
-f_1^0 & f_2^1 & f_3^2 & \cdots & 0\\
+%f_1^0 & f_2^1 & f_3^2 & \cdots & 0\\
 \vdots & \vdots &  \vdots & \iddots & 0\\
 f_{n-2}^0 & f_{n-1}^1 & f_n^2 & \iddots & \vdots\\
 f_{n-1}^0 & f_n^1 & 0 & \cdots & 0\\
@@ -101,7 +141,7 @@ G = \begin{pmatrix}
 g_0^0 & g_0^1 & \cdots & g_0^n\\
 g_1^0 & g_1^1 & \cdots & g_1^n\\
 \vdots & \vdots & \ddots & \vdots\\
-g_{n-1}^0 & g_{n-1}^1& \cdots & g_{n-1}^n\\
+%g_{n-1}^0 & g_{n-1}^1& \cdots & g_{n-1}^n\\
 g_n^0 & g_n^1 & \cdots & g_n^n\\
 \end{pmatrix}.
 \]
@@ -109,6 +149,43 @@ That is:
 \[
 g_n(x,y) = \sum_{\ell=0}^n\sum_{m=0}^n g_\ell^m T_\ell(2x-1) T_m\left(\frac{2y}{1-x}-1\right).
 \]
+
+\subsection{{\tt disk2cxf}}
+
+Disk harmonics are Zernike polynomials:
+\begin{equation}
+Z_\ell^m(r,\theta) = \sqrt{2\ell+2} r^{\abs{m}}P_{\frac{\ell-\abs{m}}{2}}^{(0,\abs{m})}(2r^2-1)\frac{e^{\ii m\theta}}{\sqrt{2\pi}}.
+\end{equation}
+A degree-$2n$ expansion in disk harmonics is given by:
+\begin{equation}
+f_{2n}(r,\theta) = \sum_{\ell=0}^{2n}\sum_{m=-\ell,2}^{+\ell} f_\ell^m Z_\ell^m(r,\theta),
+\end{equation}
+where the $,2$ in the inner summation index implies that the inner summation runs from $m=-\ell$ in steps of $2$ up to $+\ell$. If disk harmonic expansion coefficients are organized into the array:
+\begin{equation}
+F = \begin{pmatrix}
+f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_{2n}^{-2n} & f_{2n}^{2n}\\
+f_2^0 & f_3^{-1} & f_3^1 & f_4^{-2} & f_4^2 & \cdots & 0 & 0\\
+\vdots & \vdots & \vdots &  \vdots &  \vdots & \iddots & \vdots & \vdots\\
+f_{2n-4}^0 & f_{2n-3}^{-1} & f_{2n-3}^1 & f_{2n-2}^{-2} & f_{2n-2}^2 &  & \vdots & \vdots\\
+f_{2n-2}^0 & f_{2n-1}^{-1} & f_{2n-1}^1 & f_{2n}^{-2} & f_{2n}^2 & \cdots & 0 & 0\\
+f_{2n}^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+\end{pmatrix},
+\end{equation}
+then {\tt disk2cxf} returns the even Chebyshev--Fourier coefficients:
+\begin{equation}
+G = \begin{pmatrix}
+g_0^0 & g_0^{-1} & g_0^1 & g_0^{-2} & g_0^2 & \cdots & g_0^{-2n} & g_0^{2n}\\
+g_2^0 & g_2^{-1} & g_2^1 & g_2^{-2} & g_2^2 & \cdots & g_2^{-2n} & g_2^{2n}\\
+\vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots\\
+g_{2n-2}^0 & g_{2n-2}^{-1} & g_{2n-2}^1 & g_{2n-2}^{-2} & g_{2n-2}^2 & \cdots & g_{2n-2}^{-2n} & g_{2n-2}^{2n}\\
+g_{2n}^0 & 0 & 0 & g_{2n}^{-2} & g_{2n}^2 & \cdots & g_{2n}^{-2n} & g_{2n}^{2n}\\
+\end{pmatrix}.
+\end{equation}
+That is:
+\begin{equation}
+g_{2n}(r,\theta) = \sum_{\ell=0}^{n}\sum_{m=-2n}^{+2n} g_{2\ell}^m \frac{e^{\ii m\theta}}{\sqrt{2\pi}} \left\{\begin{array}{lr} T_{2\ell}(r) & m~{\rm even},\\ T_{2\ell+1}(r) & m~{\rm odd}.\end{array}\right.
+\end{equation}
+Since {\tt disk2cxf} only transforms columns of the arrays, the routine is indifferent to the choice of azimuthal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
 
 \begin{thebibliography}{1}
 

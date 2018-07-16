@@ -51,6 +51,22 @@ void permute_t_sph_AVX512(double * A, const double * B, const int N, const int M
             A[i+j*N] = B[(8*i)%(8*N)+(8*i)/(8*N)+j*N];
 }
 
+void permute_sph_AVX512(const double * A, double * B, const int N, const int M) {
+    permute_sph_AVX(A, B, N, M%16);
+    #pragma omp parallel for
+    for (int j = M%16; j < M; j += 8)
+        for (int i = 0; i < 8*N; i++)
+            B[(8*i)%(8*N)+(8*i)/(8*N)+j*N] = A[i+j*N];
+}
+
+void permute_t_sph_AVX512(double * A, const double * B, const int N, const int M) {
+    permute_t_sph_AVX(A, B, N, M%16);
+    #pragma omp parallel for
+    for (int j = M%16; j < M; j += 8)
+        for (int i = 0; i < 8*N; i++)
+            A[i+j*N] = B[(8*i)%(8*N)+(8*i)/(8*N)+j*N];
+}
+
 
 void permute_tri_SSE(const double * A, double * B, const int N, const int M) {
     for (int j = 0; j < M; j += 2)
