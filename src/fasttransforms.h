@@ -100,6 +100,13 @@ void kernel_disk_lo2hi(const RotationPlan * RP, const int m, double * A);
 void kernel_disk_hi2lo_SSE(const RotationPlan * RP, const int m, double * A);
 void kernel_disk_lo2hi_SSE(const RotationPlan * RP, const int m, double * A);
 
+void kernel_disk_hi2lo_AVX(const RotationPlan * RP, const int m, double * A);
+void kernel_disk_lo2hi_AVX(const RotationPlan * RP, const int m, double * A);
+
+void kernel_disk_hi2lo_AVX512(const RotationPlan * RP, const int m, double * A);
+void kernel_disk_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A);
+
+
 typedef struct {
     double * s1;
     double * c1;
@@ -117,12 +124,6 @@ SpinRotationPlan * plan_rotspinsphere(const int n, const int s);
 
 void kernel_spinsph_hi2lo(const SpinRotationPlan * SRP, const int m, double * A);
 void kernel_spinsph_lo2hi(const SpinRotationPlan * SRP, const int m, double * A);
-
-void kernel_disk_hi2lo_AVX(const RotationPlan * RP, const int m, double * A);
-void kernel_disk_lo2hi_AVX(const RotationPlan * RP, const int m, double * A);
-
-void kernel_disk_hi2lo_AVX512(const RotationPlan * RP, const int m, double * A);
-void kernel_disk_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A);
 
 static inline void apply_givens(const double S, const double C, double * X, double * Y);
 static inline void apply_givens_t(const double S, const double C, double * X, double * Y);
