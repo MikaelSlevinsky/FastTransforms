@@ -326,24 +326,24 @@ void execute_spinsph_lo2hi(const SpinRotationPlan * SRP, double * A, const int M
 
 void execute_spinsph_hi2lo_SSE(const SpinRotationPlan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
-    permute_spinsph_SSE(A, B, N, M)
+    permute_spinsph_SSE(A, B, N, M);
     kernel_spinsph_hi2lo(SRP, 0, A);
     #pragma omp parallel
     for (int m = 1 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
         kernel_spinsph_hi2lo_SSE(SRP, m, A + N*(2*m-1));
     }
-    permute_t_spinsph_SSE(A, B, N, M)
+    permute_t_spinsph_SSE(A, B, N, M);
 }
 
 void execute_spinsph_lo2hi_SSE(const SpinRotationPlan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
-    permute_spinsph_SSE(A, B, N, M)
+    permute_spinsph_SSE(A, B, N, M);
     kernel_spinsph_lo2hi(SRP, 0, A);
     #pragma omp parallel
     for (int m = 1 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
         kernel_spinsph_lo2hi_SSE(SRP, m, A + N*(2*m-1));
     }
-    permute_t_spinsph_SSE(A, B, N, M)
+    permute_t_spinsph_SSE(A, B, N, M);
 }
 
 
