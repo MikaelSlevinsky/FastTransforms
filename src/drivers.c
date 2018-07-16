@@ -229,38 +229,6 @@ void execute_disk_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, con
     permute_t_disk_SSE(A, B, N, M);
 }
 
-
-void execute_spinsph_hi2lo(const SpinRotationPlan * SRP, double * A, const int M) {
-    int N = SRP->n;
-    kernel_spinsph_hi2lo(SRP, 0, A);
-    #pragma omp parallel
-    for (int m = 1 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
-        kernel_spinsph_hi2lo(SRP, m, A + N*(2*m-1));
-        kernel_spinsph_hi2lo(SRP, m, A + N*(2*m));
-    }
-}
-
-void execute_spinsph_lo2hi(const SpinRotationPlan * SRP, double * A, const int M) {
-    int N = SRP->n;
-    kernel_spinsph_lo2hi(SRP, 0, A);
-    #pragma omp parallel
-    for (int m = 1 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
-        kernel_spinsph_lo2hi(SRP, m, A + N*(2*m-1));
-        kernel_spinsph_lo2hi(SRP, m, A + N*(2*m));
-    }
-}
-
-
-void freeSphericalHarmonicPlan(SphericalHarmonicPlan * P) {
-    freeRotationPlan(P->RP);
-    free(P->B);
-    free(P->P1);
-    free(P->P2);
-    free(P->P1inv);
-    free(P->P2inv);
-    free(P);
-}
-
 void execute_disk_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
     two_warp(A, N, M);
@@ -333,6 +301,38 @@ void execute_disk_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, 
     permute_t_disk_AVX512(A, B, N, M);
     two_warp(A, N, M_star);
     reverse_four_warp(A, N, M);
+}
+
+
+void execute_spinsph_hi2lo(const SpinRotationPlan * SRP, double * A, const int M) {
+    int N = SRP->n;
+    kernel_spinsph_hi2lo(SRP, 0, A);
+    #pragma omp parallel
+    for (int m = 1 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+        kernel_spinsph_hi2lo(SRP, m, A + N*(2*m-1));
+        kernel_spinsph_hi2lo(SRP, m, A + N*(2*m));
+    }
+}
+
+void execute_spinsph_lo2hi(const SpinRotationPlan * SRP, double * A, const int M) {
+    int N = SRP->n;
+    kernel_spinsph_lo2hi(SRP, 0, A);
+    #pragma omp parallel
+    for (int m = 1 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+        kernel_spinsph_lo2hi(SRP, m, A + N*(2*m-1));
+        kernel_spinsph_lo2hi(SRP, m, A + N*(2*m));
+    }
+}
+
+
+void freeSphericalHarmonicPlan(SphericalHarmonicPlan * P) {
+    freeRotationPlan(P->RP);
+    free(P->B);
+    free(P->P1);
+    free(P->P2);
+    free(P->P1inv);
+    free(P->P2inv);
+    free(P);
 }
 
 SphericalHarmonicPlan * plan_sph2fourier(const int n) {
