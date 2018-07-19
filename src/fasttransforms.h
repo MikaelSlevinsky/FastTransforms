@@ -128,6 +128,9 @@ void kernel_spinsph_lo2hi(const SpinRotationPlan * SRP, const int m, double * A)
 void kernel_spinsph_hi2lo_SSE(const SpinRotationPlan * SRP, const int m, double * A);
 void kernel_spinsph_lo2hi_SSE(const SpinRotationPlan * SRP, const int m, double * A);
 
+void kernel_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, const int m, double * A);
+void kernel_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, const int m, double * A); 
+
 static inline void apply_givens(const double S, const double C, double * X, double * Y);
 static inline void apply_givens_t(const double S, const double C, double * X, double * Y);
 
@@ -181,6 +184,9 @@ void execute_spinsph_lo2hi(const SpinRotationPlan * SRP, double * A, const int M
 
 void execute_spinsph_hi2lo_SSE(const SpinRotationPlan * SRP, double * A, double * B, const int M);
 void execute_spinsph_lo2hi_SSE(const SpinRotationPlan * SRP, double * A, double * B, const int M);
+
+void execute_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, double * A, double * B, const int M);
+void execute_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, double * A, double * B, const int M);
 
 typedef struct {
     RotationPlan * RP;
