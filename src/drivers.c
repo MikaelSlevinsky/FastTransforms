@@ -360,6 +360,22 @@ void execute_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, double * A, double 
    two_warp(A, N, M);
 }
 
+void execute_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, double * A, double * B, const int M) {
+    int N = SRP->n;
+    two_warp(A, N, M);
+    permute_spinsph_AVX(A, B, N, M);
+    kernel_spinsph_lo2hi(SRP, 0, B);
+    for (int m = 1; m <= (M%8)/2; m++)
+        kernel_spinsph_lo2hi_SSE(SRP, m, B + N*(2*m-1));
+    #pragma omp parallel
+    for (int m = (M%8+1)/2 + 4*omp_get_thread_num(); m <= M/2; m += 4*omp_get_num_threads()) {
+        kernel_spinsph_lo2hi_AVX(SRP, m, B + N*(2*m-1));
+        kernel_spinsph_lo2hi_AVX(SRP, m+1, B + N*(2*m+3));
+    }
+   permute_t_spinsph_AVX(A, B, N, M);
+   two_warp(A, N, M);
+}
+
 
 void freeSphericalHarmonicPlan(SphericalHarmonicPlan * P) {
     freeRotationPlan(P->RP);

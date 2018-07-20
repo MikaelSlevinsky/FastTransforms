@@ -625,6 +625,73 @@ void kernel_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, const int m, double 
     }
 }
 
+void kernel_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, const int m, double * A) {
+    int n = SRP->n, s = SRP->s;
+    int as = abs(s), am = abs(m);
+    int j = (as+am)%2;
+    int flick = j;
+
+   if (am > (as - 1)) {
+        while (j < MAX(0, as-am)) {
+            for (int l = 0; l <= n-3-j; l++)
+                apply_givens_t_AVX(SRP->s3(l, j), SRP->c3(l, j), A+4*l, A+4*(l+2));
+            j += 2;
+        }
+        while (j < MIN(2*as, as+am)) {
+            for (int l = 0; l <= n-2-MAX(0, as-am)/2-flick-j/2; l++)
+                apply_givens_t_AVX(SRP->s2(l, j, MAX(0, as-am)), SRP->c2(l, j, MAX(0, as-am)), A+4*l, A+4*(l+1));
+            j += 2;
+        }
+        while (j < as + am) {
+            for (int l = 0; l <= n-2+as-j; l++)
+                apply_givens_t_AVX(SRP->s1(l, j-as), SRP->c1(l, j-as), A+4*l, A+4*(l+1));
+            for (int l = 0; l <= n-3+as-j; l++)
+                apply_givens_t_AVX(SRP->s1(l+n, j-as), SRP->c1(l+n, j-as), A+4*l, A+4*(l+1));
+            j += 2;
+        }
+
+        if (j < MAX(0, as-am-2)) {
+            for (int l = 0; l <= n-3-j; l++)
+                apply_givens_t_SSE(SRP->s3(l, j), SRP->c3(l, j), A+4*l+2, A+4*(l+2)+2);
+            j += 2;
+        } else if (j < MIN(2*as, as+am+2)) {
+            for (int l = 0; l <= n-2-MAX(0, as-am)/2-flick-j/2; l++)
+                apply_givens_t_SSE(SRP->s2(l, j, MAX(0, as-am-2)), SRP->c2(l, j, MAX(0, as-am-2)), A+4*l+2, A+4*(l+1)+2);
+            j += 2;
+        } else if (j < as + am + 2) {
+            for (int l = 0; l <= n-2+as-j; l++)
+                apply_givens_t_SSE(SRP->s1(l, j-as), SRP->c1(l, j-as), A+4*l+2, A+4*(l+1)+2);
+            for (int l = 0; l <= n-3+as-j; l++)
+                apply_givens_t_SSE(SRP->s1(l+n, j-as), SRP->c1(l+n, j-as), A+4*l+2, A+4*(l+1)+2);
+            j += 2;
+        }
+   } else {
+        while (j < MAX(0, as-am)) {
+            for (int l = 0; l <= n-3-j; l++)
+                apply_givens_t_SSE(SRP->s3(l, j), SRP->c3(l, j), A+4*l, A+4*(l+2));
+            j += 2;
+        }
+        while (j < MIN(2*as, as+am)) {
+            for (int l = 0; l <= n-2-MAX(0, as-am)/2-flick-j/2; l++)
+                apply_givens_t_SSE(SRP->s2(l, j, MAX(0, as-am)), SRP->c2(l, j, MAX(0, as-am)), A+4*l, A+4*(l+1));
+            j += 2;
+        }
+
+        j = (as+am)%2;
+
+        while (j < MAX(0, as-am-2)) {
+            for (int l = 0; l <= n-3-j; l++)
+                apply_givens_t_SSE(SRP->s3(l, j), SRP->c3(l, j), A+4*l+2, A+4*(l+2)+2);
+            j += 2;
+        }
+        while (j < MIN(2*as, as+am+2)) {
+            for (int l = 0; l <= n-2-MAX(0, as-am-2)/2-flick-j/2; l++)
+                apply_givens_t_SSE(SRP->s2(l, j, MAX(0, as-am-2)), SRP->c2(l, j, MAX(0, as-am-2)), A+4*l+2, A+4*(l+1)+2);
+            j += 2;
+        }
+    }
+}
+
 
 static inline void apply_givens(const double S, const double C, double * X, double * Y) {
     double x = C*X[0] + S*Y[0];
