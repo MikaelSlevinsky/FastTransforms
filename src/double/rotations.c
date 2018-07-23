@@ -92,6 +92,9 @@ void kernel_sph_lo2hi_AVX(const RotationPlan * RP, const int m, double * A) {
         apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+2)+2);
 }
 
+// Convert eight vectors of spherical harmonics of order m, m, m+2, m+2, m+4, m+4, m+6, m+6 to 0/1.
+// The eight vectors are stored in A in row-major ordering.
+
 void kernel_sph_hi2lo_AVX512(const RotationPlan * RP, const int m, double * A) {
     int n = RP->n;
     for (int l = n-3-m; l >= 0; l--)
@@ -105,6 +108,9 @@ void kernel_sph_hi2lo_AVX512(const RotationPlan * RP, const int m, double * A) {
         for (int l = n-3-j; l >= 0; l--)
             apply_givens_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+2));
 }
+
+// Convert eight vectors of spherical harmonics of order 0/1 to m, m, m+2, m+2, m+4, m+4, m+6, m+6.
+// The eight vectors are stored in A in row-major ordering.
 
 void kernel_sph_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A) {
     int n = RP->n;
@@ -211,7 +217,7 @@ void kernel_tri_lo2hi_AVX(const RotationPlan * RP, const int m, double * A) {
         apply_givens_t(RP->s(l, m), RP->c(l, m), A+4*l+1, A+4*(l+1)+1);
 }
 
-// Convert four vectors of triangular harmonics of order m, m+1, m+2, m+3, m+4, m+5, m+6, m+7 to 0.
+// Convert eight vectors of triangular harmonics of order m, m+1, m+2, m+3, m+4, m+5, m+6, m+7 to 0.
 
 void kernel_tri_hi2lo_AVX512(const RotationPlan * RP, const int m, double * A) {
     int n = RP->n;
@@ -237,7 +243,7 @@ void kernel_tri_hi2lo_AVX512(const RotationPlan * RP, const int m, double * A) {
             apply_givens_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+1));
 }
 
-// Convert four vectors of triangular harmonics of order 0 to m, m+1, m+2, m+3, m+4, m+5, m+6, m+7.
+// Convert eight vectors of triangular harmonics of order 0 to m, m+1, m+2, m+3, m+4, m+5, m+6, m+7.
 
 void kernel_tri_lo2hi_AVX512(const RotationPlan * RP, const int m, double * A) {
     int n = RP->n;
@@ -569,7 +575,7 @@ void kernel_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, const int m, double 
             for (int l = n-2-MAX(0, as-am-2)/2-flick-j/2; l >= 0; l--)
                 apply_givens_SSE(SRP->s2(l, j, MAX(0, as-am-2)), SRP->c2(l, j, MAX(0, as-am-2)), A+4*l+2, A+4*(l+1)+2);
             j -= 2;
-        } 
+        }
         while (j >= 0) {
             for (int l = n-3-j; l >= 0; l--)
                 apply_givens_SSE(SRP->s3(l, j), SRP->c3(l, j), A+4*l+2, A+4*(l+2)+2);
@@ -577,7 +583,7 @@ void kernel_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, const int m, double 
         }
 
         j = as+am-2;
-        
+
         while (j >= MAX(0, as-am)) {
             for (int l = n-2-MAX(0, as-am)/2-flick-j/2; l >= 0; l--)
                 apply_givens_SSE(SRP->s2(l, j, MAX(0, as-am)), SRP->c2(l, j, MAX(0, as-am)), A+4*l, A+4*(l+1));
@@ -621,7 +627,7 @@ void kernel_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, const int m, double 
             for (int l = n-3-j; l >= 0; l--)
                 apply_givens_AVX(SRP->s3(l, j), SRP->c3(l, j), A+4*l, A+4*(l+2));
             j -= 2;
-        }  
+        }
     }
 }
 

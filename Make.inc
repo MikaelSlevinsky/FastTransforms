@@ -13,7 +13,8 @@ else
 	endif
 endif
 
-OBJ = src/transforms.c src/rotations.c src/permute.c src/drivers.c
+OBJ = src/double/transforms.c src/double/rotations.c src/double/permute.c src/double/drivers.c
+OBJF = src/float/transforms.c src/float/rotations.c src/float/permute.c src/float/drivers.c
 
 CC = gcc-8
 #CC = /usr/local/opt/llvm/bin/clang
