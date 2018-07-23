@@ -55,7 +55,7 @@ void execute_sph_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, cons
 
 void execute_sph_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    two_warp(A, N, M);
+    warp(A, N, M, 2);
     permute_sph(A, B, N, M, 4);
     for (int m = 2; m <= (M%8)/2; m++)
         kernel_sph_lo2hi_SSE(RP, m, B + N*(2*m-1));
