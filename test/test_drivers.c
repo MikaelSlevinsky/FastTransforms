@@ -24,7 +24,7 @@ int main(int argc, const char * argv[]) {
     }
     else IERR = 1;
 
-  
+
     printf("\nTesting the accuracy of spherical harmonic drivers.\n\n");
     printf("err1 = [\n");
     for (int i = 0; i < IERR; i++) {
@@ -278,7 +278,7 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-  
+
     printf("\nTiming triangular harmonic drivers.\n\n");
     printf("t3 = [\n");
     for (int i = 0; i < ITIME; i++) {
@@ -436,8 +436,32 @@ int main(int argc, const char * argv[]) {
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
+        execute_disk_hi2lo(RP, A, M);
+        execute_disk_lo2hi_SSE(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_disk_hi2lo_AVX(RP, A, Ac, M);
+        execute_disk_lo2hi_SSE(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_disk_hi2lo_SSE(RP, A, Ac, M);
+        execute_disk_lo2hi_AVX(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
         execute_disk_hi2lo_AVX512(RP, A, Ac, M);
         execute_disk_lo2hi_AVX(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_disk_hi2lo_AVX(RP, A, Ac, M);
+        execute_disk_lo2hi_AVX512(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
@@ -487,6 +511,38 @@ int main(int argc, const char * argv[]) {
         gettimeofday(&start, NULL);
         for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
             execute_disk_lo2hi_SSE(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_disk_hi2lo_AVX(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_disk_lo2hi_AVX(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_disk_hi2lo_AVX512(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_disk_lo2hi_AVX512(RP, A, B, M);
         }
         gettimeofday(&end, NULL);
 
