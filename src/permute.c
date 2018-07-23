@@ -3,14 +3,14 @@
 #include "fasttransforms.h"
 
 void permute(const double * A, double * B, const int N, const int M, const int L) {
-    #pragma omp parallel for
+    #pragma omp parallel for if (N < 2*M)
     for (int j = 0; j < M; j += L)
         for (int i = 0; i < L*N; i++)
             B[(L*i)%(L*N)+(L*i)/(L*N)+j*N] = A[i+j*N];
 }
 
 void permute_t(double * A, const double * B, const int N, const int M, const int L) {
-    #pragma omp parallel for
+    #pragma omp parallel for if (N < 2*M)
     for (int j = 0; j < M; j += L)
         for (int i = 0; i < L*N; i++)
             A[i+j*N] = B[(L*i)%(L*N)+(L*i)/(L*N)+j*N];
