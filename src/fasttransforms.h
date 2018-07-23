@@ -129,7 +129,7 @@ void kernel_spinsph_hi2lo_SSE(const SpinRotationPlan * SRP, const int m, double 
 void kernel_spinsph_lo2hi_SSE(const SpinRotationPlan * SRP, const int m, double * A);
 
 void kernel_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, const int m, double * A);
-void kernel_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, const int m, double * A); 
+void kernel_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, const int m, double * A);
 
 static inline void apply_givens(const double S, const double C, double * X, double * Y);
 static inline void apply_givens_t(const double S, const double C, double * X, double * Y);
@@ -232,6 +232,22 @@ static void alternate_sign(double * A, const int N);
 static void chebyshev_normalization(double * A, const int N, const int M);
 static void chebyshev_normalization_t(double * A, const int N, const int M);
 
+
+void permute(const double * A, double * B, const int N, const int M, const int L);
+void permute_t(double * A, const double * B, const int N, const int M, const int L);
+
+void permute_sph(const double * A, double * B, const int N, const int M, const int L);
+void permute_t_sph(double * A, const double * B, const int N, const int M, const int L);
+
+void permute_tri(const double * A, double * B, const int N, const int M, const int L);
+void permute_t_tri(double * A, const double * B, const int N, const int M, const int L);
+
+void permute_disk(const double * A, double * B, const int N, const int M, const int L);
+void permute_t_disk(double * A, const double * B, const int N, const int M, const int L);
+
+void permute_spinsph(const double * A, double * B, const int N, const int M, const int L);
+void permute_t_spinsph(double * A, const double * B, const int N, const int M, const int L);
+
 void two_warp(double * A, const int N, const int M);
 void four_warp(double * A, const int N, const int M);
 void reverse_four_warp(double * A, const int N, const int M);
@@ -239,33 +255,5 @@ void reverse_four_warp(double * A, const int N, const int M);
 void swap(double * A, double * B, const int N);
 void swap_SSE(double * A, double * B, const int N);
 void swap_AVX(double * A, double * B, const int N);
-
-void permute_sph_SSE(const double * A, double * B, const int N, const int M);
-void permute_t_sph_SSE(double * A, const double * B, const int N, const int M);
-void permute_sph_AVX(const double * A, double * B, const int N, const int M);
-void permute_t_sph_AVX(double * A, const double * B, const int N, const int M);
-void permute_sph_AVX512(const double * A, double * B, const int N, const int M);
-void permute_t_sph_AVX512(double * A, const double * B, const int N, const int M);
-
-void permute_tri_SSE(const double * A, double * B, const int N, const int M);
-void permute_t_tri_SSE(double * A, const double * B, const int N, const int M);
-void permute_tri_AVX(const double * A, double * B, const int N, const int M);
-void permute_t_tri_AVX(double * A, const double * B, const int N, const int M);
-void permute_tri_AVX512(const double * A, double * B, const int N, const int M);
-void permute_t_tri_AVX512(double * A, const double * B, const int N, const int M);
-
-void permute_disk_SSE(const double * A, double * B, const int N, const int M);
-void permute_t_disk_SSE(double * A, const double * B, const int N, const int M);
-void permute_disk_AVX(const double * A, double * B, const int N, const int M);
-void permute_t_disk_AVX(double * A, const double * B, const int N, const int M);
-void permute_disk_AVX512(const double * A, double * B, const int N, const int M);
-void permute_t_disk_AVX512(double * A, const double * B, const int N, const int M);
-
-void permute_spinsph_SSE(const double * A, double * B, const int N, const int M);
-void permute_t_spinsph_SSE(double * A, const double * B, const int N, const int M);
-void permute_spinsph_AVX(const double * A, double * B, const int N, const int M);
-void permute_t_spinsph_AVX(double * A, const double * B, const int N, const int M);
-void permute_spinsph_AVX512(const double * A, double * B, const int N, const int M);
-void permute_t_spinsph_AVX512(double * A, const double * B, const int N, const int M);
 
 #endif //FASTTRANSFORMS_H

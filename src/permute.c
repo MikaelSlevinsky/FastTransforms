@@ -2,156 +2,71 @@
 
 #include "fasttransforms.h"
 
-void permute_sph_SSE(const double * A, double * B, const int N, const int M) {
-    for (int i = 0; i < N; i++)
-        B[i] = A[i];
-    for (int j = 1; j < M; j += 2)
-        for (int i = 0; i < 2*N; i++)
-            B[(2*i)%(2*N)+(2*i)/(2*N)+j*N] = A[i+j*N];
-}
-
-void permute_t_sph_SSE(double * A, const double * B, const int N, const int M) {
-    for (int i = 0; i < N; i++)
-        A[i] = B[i];
-    for (int j = 1; j < M; j += 2)
-        for (int i = 0; i < 2*N; i++)
-            A[i+j*N] = B[(2*i)%(2*N)+(2*i)/(2*N)+j*N];
-}
-
-void permute_sph_AVX(const double * A, double * B, const int N, const int M) {
-    permute_sph_SSE(A, B, N, M%8);
+void permute(const double * A, double * B, const int N, const int M, const int L) {
     #pragma omp parallel for
-    for (int j = M%8; j < M; j += 4)
-        for (int i = 0; i < 4*N; i++)
-            B[(4*i)%(4*N)+(4*i)/(4*N)+j*N] = A[i+j*N];
+    for (int j = 0; j < M; j += L)
+        for (int i = 0; i < L*N; i++)
+            B[(L*i)%(L*N)+(L*i)/(L*N)+j*N] = A[i+j*N];
 }
 
-void permute_t_sph_AVX(double * A, const double * B, const int N, const int M) {
-    permute_t_sph_SSE(A, B, N, M%8);
+void permute_t(double * A, const double * B, const int N, const int M, const int L) {
     #pragma omp parallel for
-    for (int j = M%8; j < M; j += 4)
-        for (int i = 0; i < 4*N; i++)
-            A[i+j*N] = B[(4*i)%(4*N)+(4*i)/(4*N)+j*N];
-            
-}
-
-void permute_sph_AVX512(const double * A, double * B, const int N, const int M) {
-    permute_sph_AVX(A, B, N, M%16);
-    #pragma omp parallel for
-    for (int j = M%16; j < M; j += 8)
-        for (int i = 0; i < 8*N; i++)
-            B[(8*i)%(8*N)+(8*i)/(8*N)+j*N] = A[i+j*N];
-}
-
-void permute_t_sph_AVX512(double * A, const double * B, const int N, const int M) {
-    permute_t_sph_AVX(A, B, N, M%16);
-    #pragma omp parallel for
-    for (int j = M%16; j < M; j += 8)
-        for (int i = 0; i < 8*N; i++)
-            A[i+j*N] = B[(8*i)%(8*N)+(8*i)/(8*N)+j*N];
+    for (int j = 0; j < M; j += L)
+        for (int i = 0; i < L*N; i++)
+            A[i+j*N] = B[(L*i)%(L*N)+(L*i)/(L*N)+j*N];
 }
 
 
-void permute_tri_SSE(const double * A, double * B, const int N, const int M) {
-    for (int j = 0; j < M; j += 2)
-        for (int i = 0; i < 2*N; i++)
-            B[(2*i)%(2*N)+(2*i)/(2*N)+j*N] = A[i+j*N];
+void permute_sph(const double * A, double * B, const int N, const int M, const int L) {
+    if (L == 2) {
+        for (int i = 0; i < N; i++)
+            B[i] = A[i];
+        permute(A+N, B+N, N, M-1, 2);
+    }
+    else {
+        permute_sph(A, B, N, M%(2*L), L/2);
+        permute(A+(M%(2*L))*N, B+(M%(2*L))*N, N, M-M%(2*L), L);
+    }
 }
 
-void permute_t_tri_SSE(double * A, const double * B, const int N, const int M) {
-    for (int j = 0; j < M; j += 2)
-        for (int i = 0; i < 2*N; i++)
-            A[i+j*N] = B[(2*i)%(2*N)+(2*i)/(2*N)+j*N];
+void permute_t_sph(double * A, const double * B, const int N, const int M, const int L) {
+    if (L == 2) {
+        for (int i = 0; i < N; i++)
+            A[i] = B[i];
+        permute_t(A+N, B+N, N, M-1, 2);
+    }
+    else {
+        permute_t_sph(A, B, N, M%(2*L), L/2);
+        permute_t(A+(M%(2*L))*N, B+(M%(2*L))*N, N, M-M%(2*L), L);
+    }
 }
 
-void permute_tri_AVX(const double * A, double * B, const int N, const int M) {
-    permute_tri_SSE(A, B, N, M%8);
-    #pragma omp parallel for
-    for (int j = M%8; j < M; j += 4)
-        for (int i = 0; i < 4*N; i++)
-            B[(4*i)%(4*N)+(4*i)/(4*N)+j*N] = A[i+j*N];
+void permute_tri(const double * A, double * B, const int N, const int M, const int L) {
+    if (L == 2) {
+        permute(A, B, N, M, 2);
+    }
+    else {
+        permute_tri(A, B, N, M%(2*L), L/2);
+        permute(A+(M%(2*L))*N, B+(M%(2*L))*N, N, M-M%(2*L), L);
+    }
 }
 
-void permute_t_tri_AVX(double * A, const double * B, const int N, const int M) {
-    permute_t_tri_SSE(A, B, N, M%8);
-    #pragma omp parallel for
-    for (int j = M%8; j < M; j += 4)
-        for (int i = 0; i < 4*N; i++)
-            A[i+j*N] = B[(4*i)%(4*N)+(4*i)/(4*N)+j*N];
+void permute_t_tri(double * A, const double * B, const int N, const int M, const int L) {
+    if (L == 2) {
+        permute_t(A, B, N, M, 2);
+    }
+    else {
+        permute_t_tri(A, B, N, M%(2*L), L/2);
+        permute_t(A+(M%(2*L))*N, B+(M%(2*L))*N, N, M-M%(2*L), L);
+    }
 }
 
-void permute_tri_AVX512(const double * A, double * B, const int N, const int M) {
-    permute_tri_AVX(A, B, N, M%16);
-    #pragma omp parallel for
-    for (int j = M%16; j < M; j += 8)
-        for (int i = 0; i < 8*N; i++)
-            B[(8*i)%(8*N)+(8*i)/(8*N)+j*N] = A[i+j*N];
-}
+void permute_disk(const double * A, double * B, const int N, const int M, const int L) {permute_sph(A, B, N, M, L);}
+void permute_t_disk(double * A, const double * B, const int N, const int M, const int L) {permute_t_sph(A, B, N, M, L);}
 
-void permute_t_tri_AVX512(double * A, const double * B, const int N, const int M) {
-    permute_t_tri_AVX(A, B, N, M%16);
-    #pragma omp parallel for
-    for (int j = M%16; j < M; j += 8)
-        for (int i = 0; i < 8*N; i++)
-            A[i+j*N] = B[(8*i)%(8*N)+(8*i)/(8*N)+j*N];
-}
+void permute_spinsph(const double * A, double * B, const int N, const int M, const int L) {permute_sph(A, B, N, M, L);}
+void permute_t_spinsph(double * A, const double * B, const int N, const int M, const int L) {permute_t_sph(A, B, N, M, L);}
 
-
-void permute_disk_SSE(const double * A, double * B, const int N, const int M) {
-    for (int i = 0; i < N; i++)
-        B[i] = A[i];
-    for (int j = 1; j < M; j += 2)
-        for (int i = 0; i < 2*N; i++)
-            B[(2*i)%(2*N)+(2*i)/(2*N)+j*N] = A[i+j*N];
-}
-
-void permute_t_disk_SSE(double * A, const double * B, const int N, const int M) {
-    for (int i = 0; i < N; i++)
-        A[i] = B[i];
-    for (int j = 1; j < M; j += 2)
-        for (int i = 0; i < 2*N; i++)
-            A[i+j*N] = B[(2*i)%(2*N)+(2*i)/(2*N)+j*N];
-}
-
-void permute_disk_AVX(const double * A, double * B, const int N, const int M) {
-    permute_sph_AVX(A, B, N, M);
-}
-
-void permute_t_disk_AVX(double * A, const double * B, const int N, const int M) {
-    permute_t_sph_AVX(A, B, N, M);
-}
-
-void permute_disk_AVX512(const double * A, double * B, const int N, const int M) {
-    permute_sph_AVX512(A, B, N, M);
-}
-
-void permute_t_disk_AVX512(double * A, const double * B, const int N, const int M) {
-    permute_t_sph_AVX512(A, B, N, M);
-}
-
-void permute_spinsph_SSE(const double * A, double * B, const int N, const int M) {
-    permute_sph_SSE(A, B, N, M);
-}
-
-void permute_t_spinsph_SSE(double * A, const double * B, const int N, const int M) {
-    permute_t_sph_SSE(A, B, N, M);
-}
-
-void permute_spinsph_AVX(const double * A, double * B, const int N, const int M) {
-    permute_sph_AVX(A, B, N, M);
-}
-
-void permute_t_spinsph_AVX(double * A, const double * B, const int N, const int M) {
-    permute_t_sph_AVX(A, B, N, M);
-}
-
-void permute_spinsph_AVX512(const double * A, double * B, const int N, const int M) {
-    permute_sph_AVX512(A, B, N, M);
-}
-
-void permute_t_spinsph_AVX512(double * A, const double * B, const int N, const int M) {
-    permute_t_sph_AVX512(A, B, N, M);
-}
 
 
 void swap(double * A, double * B, const int N) {
