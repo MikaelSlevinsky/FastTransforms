@@ -8,9 +8,14 @@ int main(int argc, const char * argv[]) {
     static double * Ac;
     static double * B;
     RotationPlan * RP;
+    SpinRotationPlan * SRP;
     SphericalHarmonicPlan * P;
+    TriangularHarmonicPlan * Q;
+    //double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
+    double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 
     int IERR, ITIME, N, M, NLOOPS;
+
 
     if (argc > 1) {
         sscanf(argv[1], "%d", &IERR);
@@ -18,6 +23,7 @@ int main(int argc, const char * argv[]) {
         else ITIME = 1;
     }
     else IERR = 1;
+
 
     printf("\nTesting the accuracy of spherical harmonic drivers.\n\n");
     printf("err1 = [\n");
@@ -212,16 +218,11 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    //double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
-    double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
-
-    TriangularHarmonicPlan * Q;
-
     printf("\nTesting the accuracy of triangular harmonic drivers.\n\n");
     printf("err3 = [\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i);
-        M = N;
+        M = N-4;
 
         A = triones(N, M);
         Ac = copyA(A, N, M);
@@ -258,14 +259,14 @@ int main(int argc, const char * argv[]) {
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
-        execute_tri_hi2lo_AVX512(RP, A, Ac, M);
-        execute_tri_lo2hi_AVX(RP, A, Ac, M);
+        execute_tri_hi2lo_AVX(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX512(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
-        execute_tri_hi2lo_AVX(RP, A, Ac, M);
-        execute_tri_lo2hi_AVX512(RP, A, Ac, M);
+        execute_tri_hi2lo_AVX512(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
@@ -276,6 +277,7 @@ int main(int argc, const char * argv[]) {
         freeRotationPlan(RP);
     }
     printf("];\n");
+
 
     printf("\nTiming triangular harmonic drivers.\n\n");
     printf("t3 = [\n");
@@ -438,6 +440,30 @@ int main(int argc, const char * argv[]) {
         execute_disk_lo2hi_SSE(RP, A, Ac, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_disk_hi2lo_AVX(RP, A, Ac, M);
+        execute_disk_lo2hi_SSE(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_disk_hi2lo_SSE(RP, A, Ac, M);
+        execute_disk_lo2hi_AVX(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_disk_hi2lo_AVX512(RP, A, Ac, M);
+        execute_disk_lo2hi_AVX(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e  ", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        execute_disk_hi2lo_AVX(RP, A, Ac, M);
+        execute_disk_lo2hi_AVX512(RP, A, Ac, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         free(A);
@@ -488,11 +514,121 @@ int main(int argc, const char * argv[]) {
         }
         gettimeofday(&end, NULL);
 
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_disk_hi2lo_AVX(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_disk_lo2hi_AVX(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_disk_hi2lo_AVX512(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_disk_lo2hi_AVX512(RP, A, B, M);
+        }
+        gettimeofday(&end, NULL);
+
         printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
         free(B);
         freeRotationPlan(RP);
+    }
+    printf("];\n");
+
+    printf("\nTesting the accuracy of spin-weighted spherical harmonic drivers.\n\n");
+    printf("err6 = [\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 64*pow(2, i);
+        M = 2*N-1;
+
+        printf("%d", N);
+        for (int S = 0; S < 9; S++) {
+            A = spinsphones(N, M, S);
+            Ac = copyA(A, N, M);
+            B = copyA(A, N, M);
+            SRP = plan_rotspinsphere(N, S);
+
+            execute_spinsph_hi2lo(SRP, A, M);
+            execute_spinsph_lo2hi(SRP, A, M);
+
+            printf("  %1.2e", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+            printf("  %1.2e", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+            execute_spinsph_hi2lo_SSE(SRP, A, Ac, M);
+            execute_spinsph_lo2hi_SSE(SRP, A, Ac, M);
+
+            printf("  %1.2e", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+            printf("  %1.2e", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+            execute_spinsph_hi2lo(SRP, A, M);
+            execute_spinsph_lo2hi_SSE(SRP, A, Ac, M);
+
+            printf("  %1.2e", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+            printf("  %1.2e", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+            free(A);
+            free(Ac);
+            free(B);
+            freeSpinRotationPlan(SRP);
+        }
+        printf("\n");
+    }
+    printf("];\n");
+
+    printf("\nTiming spin-weighted spherical harmonic drivers.\n\n");
+    printf("t6 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 64*pow(2, i);
+        M = 2*N-1;
+        NLOOPS = 1 + pow(2048/N, 2);
+
+        printf("%d", N);
+
+        for (int S = 0; S < 9; S++) {
+            A = spinsphones(N, M, S);
+            B = spinsphones(N, M, S);
+            SRP = plan_rotspinsphere(N, S);
+
+            gettimeofday(&start, NULL);
+            for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+                execute_spinsph_hi2lo(SRP, A, M);
+            }
+            gettimeofday(&end, NULL);
+
+            printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+            gettimeofday(&start, NULL);
+            for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+                execute_spinsph_lo2hi(SRP, A, M);
+            }
+            gettimeofday(&end, NULL);
+
+            printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+            free(A);
+            free(B);
+            freeSpinRotationPlan(SRP);
+        }
+        printf("\n");
     }
     printf("];\n");
 

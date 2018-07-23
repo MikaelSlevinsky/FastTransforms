@@ -18,7 +18,7 @@ int main(void) {
         for (int i = 0; i < N * M; i++)
             A[i] = (double) i;
 
-        permute_sph_SSE(A, B, N, M);
+        permute_sph(A, B, N, M, 2);
 
         printmat("A", A, N, M);
         printmat("B", B, N, M);
@@ -27,11 +27,11 @@ int main(void) {
 
         A = (double *) calloc(N * M, sizeof(double));
 
-        permute_t_sph_SSE(A, B, N, M);
+        permute_t_sph(A, B, N, M, 2);
 
         printmat("A", A, N, M);
 
-        permute_sph_AVX(A, B, N, M);
+        permute_sph(A, B, N, M, 4);
 
         printmat("A", A, N, M);
         printmat("B", B, N, M);
@@ -40,7 +40,7 @@ int main(void) {
 
         A = (double *) calloc(N * M, sizeof(double));
 
-        permute_t_sph_AVX(A, B, N, M);
+        permute_t_sph(A, B, N, M, 4);
 
         printmat("A", A, N, M);
 
@@ -54,7 +54,7 @@ int main(void) {
         for (int i = 0; i < N * M; i++)
             A[i] = (double) i;
 
-        permute_sph_AVX(A, B, N, M);
+        permute_sph(A, B, N, M, 4);
 
         printmat("A", A, N, M);
         printmat("B", B, N, M);
@@ -63,7 +63,7 @@ int main(void) {
 
         A = (double *) calloc(N * M, sizeof(double));
 
-        permute_t_sph_AVX(A, B, N, M);
+        permute_t_sph(A, B, N, M, 4);
 
         printmat("A", A, N, M);
 

@@ -85,17 +85,17 @@ Y_{\ell,m}^s(\theta,\varphi) & = \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \sqrt{(\el
 \end{align}
 where $P_n^{(\alpha,\beta)}(\cos\theta)$ are the Jacobi polynomials and $\ell_0 = \max\{\abs{m},\abs{s}\}$ and $\ell_1 = \min\{\abs{m},\abs{s}\}$. A degree-$n$ expansion in spin-weighted spherical harmonics is given by:
 \begin{equation}
-f_n^s(\theta,\varphi) = \sum_{\ell=0}^{n}\sum_{m=-\ell}^{+\ell} f_\ell^m Y_{\ell,m}^s(\theta,\varphi).
+f_n^s(\theta,\varphi) = \sum_{\ell=\ell_0}^{n}\sum_{m=-\ell}^{+\ell} f_\ell^m Y_{\ell,m}^s(\theta,\varphi).
 \end{equation}
-If spherical harmonic expansion coefficients are organized into the array:
+If spin-weighted spherical harmonic expansion coefficients with $s=2$, for example, are organized into the array:
 \begin{equation}
 F = \begin{pmatrix}
-f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_n^{-n} & f_n^n\\
-f_1^0 & f_2^{-1} & f_2^1 & f_3^{-2} & f_3^2 & \cdots & 0 & 0\\
+f_2^0 & f_2^{-1} & f_2^1 & f_2^{-2} & f_2^2 & \cdots & f_n^{-n} & f_n^n\\
+f_3^0 & f_3^{-1} & f_3^1 & f_3^{-2} & f_3^2 & \cdots & 0 & 0\\
 \vdots & \vdots & \vdots &  \vdots &  \vdots & \iddots & \vdots & \vdots\\
-f_{n-2}^0 & f_{n-1}^{-1} & f_{n-1}^1 & f_n^{-2} & f_n^2 &  & \vdots & \vdots\\
-f_{n-1}^0 & f_n^{-1} & f_n^1 & 0 & 0 & \cdots & 0 & 0\\
-f_n^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+f_{n}^0 & f_{n}^{-1} & f_{n}^1 & f_n^{-2} & f_n^2 &  & \vdots & \vdots\\
+0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
 \end{pmatrix},
 \end{equation}
 then {\tt spinsph2fourier} returns the bivariate Fourier coefficients:
