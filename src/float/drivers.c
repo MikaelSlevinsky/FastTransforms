@@ -22,7 +22,7 @@ void execute_sph_lo2hi(const RotationPlan * RP, float * A, const int M) {
 
 void execute_sph_hi2lo_SSE(const RotationPlan * RP, float * A, float * B, const int M) {
     int N = RP->n;
-    two_warp(A, N, M);
+    warp(A, N, M, 2);
     permute_sph(A, B, N, M, 4);
     for (int m = 2; m <= (M%8)/2; m++) {
         kernel_sph_hi2lo(RP, m, B + N*(2*m-1));
@@ -34,12 +34,12 @@ void execute_sph_hi2lo_SSE(const RotationPlan * RP, float * A, float * B, const 
         kernel_sph_hi2lo_SSE(RP, m+1, B + N*(2*m+3));
     }
     permute_t_sph(A, B, N, M, 4);
-    two_warp(A, N, M);
+    warp_t(A, N, M, 2);
 }
 
 void execute_sph_lo2hi_SSE(const RotationPlan * RP, float * A, float * B, const int M) {
     int N = RP->n;
-    two_warp(A, N, M);
+    warp(A, N, M, 2);
     permute_sph(A, B, N, M, 4);
     for (int m = 2; m <= (M%8)/2; m++) {
         kernel_sph_lo2hi(RP, m, B + N*(2*m-1));
@@ -51,14 +51,14 @@ void execute_sph_lo2hi_SSE(const RotationPlan * RP, float * A, float * B, const 
         kernel_sph_lo2hi_SSE(RP, m+1, B + N*(2*m+3));
     }
     permute_t_sph(A, B, N, M, 4);
-    two_warp(A, N, M);
+    warp_t(A, N, M, 2);
 }
 
 void execute_sph_hi2lo_AVX(const RotationPlan * RP, float * A, float * B, const int M) {
     int N = RP->n;
     int M_star = M%16;
-    four_warp(A, N, M);
-    two_warp(A, N, M_star);
+    warp(A, N, M, 4);
+    warp(A, N, M_star, 2);
     permute_sph(A, B, N, M, 8);
     for (int m = 2; m <= (M_star%8)/2; m++) {
         kernel_sph_hi2lo(RP, m, B + N*(2*m-1));
@@ -74,15 +74,15 @@ void execute_sph_hi2lo_AVX(const RotationPlan * RP, float * A, float * B, const 
         kernel_sph_hi2lo_AVX(RP, m+1, B + N*(2*m+7));
     }
     permute_t_sph(A, B, N, M, 8);
-    two_warp(A, N, M_star);
-    reverse_four_warp(A, N, M);
+    warp_t(A, N, M_star, 2);
+    warp_t(A, N, M, 4);
 }
 
 void execute_sph_lo2hi_AVX(const RotationPlan * RP, float * A, float * B, const int M) {
     int N = RP->n;
     int M_star = M%16;
-    four_warp(A, N, M);
-    two_warp(A, N, M_star);
+    warp(A, N, M, 4);
+    warp(A, N, M_star, 2);
     permute_sph(A, B, N, M, 8);
     for (int m = 2; m <= (M_star%8)/2; m++) {
         kernel_sph_lo2hi(RP, m, B + N*(2*m-1));
@@ -98,8 +98,8 @@ void execute_sph_lo2hi_AVX(const RotationPlan * RP, float * A, float * B, const 
         kernel_sph_lo2hi_AVX(RP, m+1, B + N*(2*m+7));
     }
     permute_t_sph(A, B, N, M, 8);
-    two_warp(A, N, M_star);
-    reverse_four_warp(A, N, M);
+    warp_t(A, N, M_star, 2);
+    warp_t(A, N, M, 4);
 }
 
 void execute_sph_hi2lo_AVX512(const RotationPlan * RP, float * A, float * B, const int M) {
@@ -229,7 +229,7 @@ void execute_disk_lo2hi_SSE(const RotationPlan * RP, float * A, float * B, const
 
 void execute_disk_hi2lo_AVX(const RotationPlan * RP, float * A, float * B, const int M) {
     int N = RP->n;
-    two_warp(A, N, M);
+    warp(A, N, M, 2);
     permute_disk(A, B, N, M, 4);
     for (int m = 2; m <= (M%8)/2; m++)
         kernel_disk_hi2lo_SSE(RP, m, B + N*(2*m-1));
@@ -239,12 +239,12 @@ void execute_disk_hi2lo_AVX(const RotationPlan * RP, float * A, float * B, const
         kernel_disk_hi2lo_AVX(RP, m+1, B + N*(2*m+3));
     }
     permute_t_disk(A, B, N, M, 4);
-    two_warp(A, N, M);
+    warp_t(A, N, M, 2);
 }
 
 void execute_disk_lo2hi_AVX(const RotationPlan * RP, float * A, float * B, const int M) {
     int N = RP->n;
-    two_warp(A, N, M);
+    warp(A, N, M, 2);
     permute_disk(A, B, N, M, 4);
     for (int m = 2; m <= (M%8)/2; m++)
         kernel_disk_lo2hi_SSE(RP, m, B + N*(2*m-1));
@@ -254,14 +254,14 @@ void execute_disk_lo2hi_AVX(const RotationPlan * RP, float * A, float * B, const
         kernel_disk_lo2hi_AVX(RP, m+1, B + N*(2*m+3));
     }
     permute_t_disk(A, B, N, M, 4);
-    two_warp(A, N, M);
+    warp_t(A, N, M, 2);
 }
 
 void execute_disk_hi2lo_AVX512(const RotationPlan * RP, float * A, float * B, const int M) {
     int N = RP->n;
     int M_star = M%16;
-    four_warp(A, N, M);
-    two_warp(A, N, M_star);
+    warp(A, N, M, 4);
+    warp(A, N, M_star, 2);
     permute_disk(A, B, N, M, 8);
     for (int m = 2; m <= (M_star%8)/2; m++)
         kernel_disk_hi2lo_SSE(RP, m, B + N*(2*m-1));
@@ -275,15 +275,15 @@ void execute_disk_hi2lo_AVX512(const RotationPlan * RP, float * A, float * B, co
         kernel_disk_hi2lo_AVX512(RP, m+1, B + N*(2*m+7));
     }
     permute_t_disk(A, B, N, M, 8);
-    two_warp(A, N, M_star);
-    reverse_four_warp(A, N, M);
+    warp_t(A, N, M_star, 2);
+    warp_t(A, N, M, 4);
 }
 
 void execute_disk_lo2hi_AVX512(const RotationPlan * RP, float * A, float * B, const int M) {
     int N = RP->n;
     int M_star = M%16;
-    four_warp(A, N, M);
-    two_warp(A, N, M_star);
+    warp(A, N, M, 4);
+    warp(A, N, M_star, 2);
     permute_disk(A, B, N, M, 8);
     for (int m = 2; m <= (M_star%8)/2; m++)
         kernel_disk_lo2hi_SSE(RP, m, B + N*(2*m-1));
@@ -297,8 +297,8 @@ void execute_disk_lo2hi_AVX512(const RotationPlan * RP, float * A, float * B, co
         kernel_disk_lo2hi_AVX512(RP, m+1, B + N*(2*m+7));
     }
     permute_t_disk(A, B, N, M, 8);
-    two_warp(A, N, M_star);
-    reverse_four_warp(A, N, M);
+    warp_t(A, N, M_star, 2);
+    warp_t(A, N, M, 4);
 }
 
 
@@ -344,7 +344,7 @@ void execute_spinsph_lo2hi_SSE(const SpinRotationPlan * SRP, float * A, float * 
 
 void execute_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, float * A, float * B, const int M) {
     int N = SRP->n;
-    two_warp(A, N, M);
+    warp(A, N, M, 2);
     permute_spinsph(A, B, N, M, 4);
     kernel_spinsph_hi2lo(SRP, 0, B);
     for (int m = 1; m <= (M%8)/2; m++)
@@ -355,12 +355,12 @@ void execute_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, float * A, float * 
         kernel_spinsph_hi2lo_AVX(SRP, m+1, B + N*(2*m+3));
     }
    permute_t_spinsph(A, B, N, M, 4);
-   two_warp(A, N, M);
+   warp_t(A, N, M, 2);
 }
 
 void execute_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, float * A, float * B, const int M) {
     int N = SRP->n;
-    two_warp(A, N, M);
+    warp(A, N, M, 2);
     permute_spinsph(A, B, N, M, 4);
     kernel_spinsph_lo2hi(SRP, 0, B);
     for (int m = 1; m <= (M%8)/2; m++)
@@ -371,7 +371,7 @@ void execute_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, float * A, float * 
         kernel_spinsph_lo2hi_AVX(SRP, m+1, B + N*(2*m+3));
     }
    permute_t_spinsph(A, B, N, M, 4);
-   two_warp(A, N, M);
+   warp_t(A, N, M, 2);
 }
 
 

@@ -243,12 +243,8 @@ void permute_t_tri(float * A, const float * B, const int N, const int M, const i
 #define permute_spinsph(A, B, N, M, L) permute_sph(A, B, N, M, L)
 #define permute_t_spinsph(A, B, N, M, L) permute_t_sph(A, B, N, M, L)
 
-void two_warp(float * A, const int N, const int M);
-void four_warp(float * A, const int N, const int M);
-void reverse_four_warp(float * A, const int N, const int M);
-
 void swap(float * A, float * B, const int N);
-void swap_SSE(float * A, float * B, const int N);
-void swap_AVX(float * A, float * B, const int N);
+void warp(float * A, const int N, const int M, const int L);
+void warp_t(float * A, const int N, const int M, const int L);
 
 #endif //FASTTRANSFORMSF_H
