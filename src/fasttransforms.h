@@ -242,11 +242,11 @@ void permute_t_sph(double * A, const double * B, const int N, const int M, const
 void permute_tri(const double * A, double * B, const int N, const int M, const int L);
 void permute_t_tri(double * A, const double * B, const int N, const int M, const int L);
 
-void permute_disk(const double * A, double * B, const int N, const int M, const int L);
-void permute_t_disk(double * A, const double * B, const int N, const int M, const int L);
+#define permute_disk(A, B, N, M, L) permute_sph(A, B, N, M, L)
+#define permute_t_disk(A, B, N, M, L) permute_t_sph(A, B, N, M, L)
 
-void permute_spinsph(const double * A, double * B, const int N, const int M, const int L);
-void permute_t_spinsph(double * A, const double * B, const int N, const int M, const int L);
+#define permute_spinsph(A, B, N, M, L) permute_sph(A, B, N, M, L)
+#define permute_t_spinsph(A, B, N, M, L) permute_t_sph(A, B, N, M, L)
 
 void two_warp(double * A, const int N, const int M);
 void four_warp(double * A, const int N, const int M);

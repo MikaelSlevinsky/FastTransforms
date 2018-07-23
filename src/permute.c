@@ -61,11 +61,6 @@ void permute_t_tri(double * A, const double * B, const int N, const int M, const
     }
 }
 
-void permute_disk(const double * A, double * B, const int N, const int M, const int L) {permute_sph(A, B, N, M, L);}
-void permute_t_disk(double * A, const double * B, const int N, const int M, const int L) {permute_t_sph(A, B, N, M, L);}
-
-void permute_spinsph(const double * A, double * B, const int N, const int M, const int L) {permute_sph(A, B, N, M, L);}
-void permute_t_spinsph(double * A, const double * B, const int N, const int M, const int L) {permute_t_sph(A, B, N, M, L);}
 
 
 
