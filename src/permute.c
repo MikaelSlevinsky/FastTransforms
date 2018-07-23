@@ -101,29 +101,16 @@ void swap_AVX(double * A, double * B, const int N) {
     }
 }
 
-
-void two_warp(double * A, const int N, const int M) {
-    #pragma omp parallel for
-    for (int i = M%8; i < M; i += 8)
-        swap_AVX(A+(i+2)*N, A+(i+4)*N, N);
-}
-
-void four_warp(double * A, const int N, const int M) {
-    #pragma omp parallel for
-    for (int i = M%16; i < M; i += 16) {
-        swap_AVX(A+(i+2)*N, A+(i+4)*N, N);
-        swap_AVX(A+(i+4)*N, A+(i+8)*N, N);
-        swap_AVX(A+(i+6)*N, A+(i+12)*N, N);
-        swap_AVX(A+(i+10)*N, A+(i+12)*N, N);
+void warp(double * A, const int N, const int M, const int L){
+    for (int j = 2;  j <= L; j *= 2) {
+        for (int i = M%(4*L); i < M; i += (4*j))
+            swap_AVX(A+(i+j)*N, A+(i+j*2)*N, N*(j/2));
     }
 }
 
-void reverse_four_warp(double * A, const int N, const int M) {
-    #pragma omp parallel for
-    for (int i = M%16; i < M; i += 16) {
-        swap_AVX(A+(i+12)*N, A+(i+10)*N, N);
-        swap_AVX(A+(i+12)*N, A+(i+6)*N, N);
-        swap_AVX(A+(i+8)*N, A+(i+4)*N, N);
-        swap_AVX(A+(i+4)*N, A+(i+2)*N, N);
+void reverse_warp(double * A, const int N, const int M, const int L){
+    for (int j = L;  j >= 2; j = j/2) {
+        for (int i = M%(4*L); i < M; i += (4*j))
+            swap_AVX(A+(i+j)*N, A+(i+j*2)*N, N*(j/2));
     }
 }

@@ -248,9 +248,8 @@ void permute_t_tri(double * A, const double * B, const int N, const int M, const
 #define permute_spinsph(A, B, N, M, L) permute_sph(A, B, N, M, L)
 #define permute_t_spinsph(A, B, N, M, L) permute_t_sph(A, B, N, M, L)
 
-void two_warp(double * A, const int N, const int M);
-void four_warp(double * A, const int N, const int M);
-void reverse_four_warp(double * A, const int N, const int M);
+void warp(double * A, const int N, const int M, const int L);
+void reverse_warp(double * A, const int N, const int M, const int L);
 
 void swap(double * A, double * B, const int N);
 void swap_SSE(double * A, double * B, const int N);
