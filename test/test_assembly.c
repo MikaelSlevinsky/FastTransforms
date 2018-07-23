@@ -24,6 +24,15 @@
     #define vstore8(u, v) (_mm512_storeu_pd(u, v))
 #endif
 
+void swap(double * A, double * B, const int N) {
+    double tmp;
+    for (int i = 0; i < N; i++) {
+        tmp = A[i];
+        A[i] = B[i];
+        B[i] = tmp;
+    }
+}
+
 void apply_givens(const double S, const double C, double * X, double * Y) {
     double x = C*X[0] + S*Y[0];
     double y = C*Y[0] - S*X[0];
