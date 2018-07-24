@@ -188,6 +188,8 @@ void execute_spinsph_lo2hi_SSE(const SpinRotationPlan * SRP, double * A, double 
 void execute_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, double * A, double * B, const int M);
 void execute_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, double * A, double * B, const int M);
 
+void execute_spinsph_hi2lo_AVX512(const SpinRotationPlan * SRP, double * A, double * B, const int M);
+
 typedef struct {
     RotationPlan * RP;
     double * B;
