@@ -381,7 +381,7 @@ void execute_spinsph_hi2lo_AVX512(const SpinRotationPlan * SRP, double * A, doub
     int M_star = M%16;
     warp(A, N, M, 4);
     warp(A, N, M_star, 2);
-    permute_spinsph_AVX512(A, B, N, M);
+    permute_spinsph(A, B, N, M, 8);
     kernel_spinsph_hi2lo(SRP, 0, B);
     for (int m = 1; m <= (M_star%8)/2; m++)
         kernel_spinsph_hi2lo_SSE(SRP, m, B + N*(2*m-1));
@@ -394,7 +394,7 @@ void execute_spinsph_hi2lo_AVX512(const SpinRotationPlan * SRP, double * A, doub
         kernel_spinsph_hi2lo_AVX512(SRP, m, B + N*(2*m-1));
         kernel_spinsph_hi2lo_AVX512(SRP, m+1, B + N*(2*m+7));
     }
-    permute_t_spinsph_AVX512(A, B, N, M);
+    permute_t_spinsph(A, B, N, M, 8);
     warp(A, N, M_star, 2);
     reverse_warp(A, N, M, 4);
 }
