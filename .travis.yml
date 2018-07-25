@@ -12,8 +12,9 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-8
+            - libopenblas-base
       env:
-        - MATRIX_EVAL="sudo apt-get update && sudo apt-get install libopenblas-base && CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+        - MATRIX_EVAL="CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
 
 before_install:
   - eval "${MATRIX_EVAL}"
