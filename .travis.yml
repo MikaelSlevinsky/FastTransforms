@@ -5,7 +5,8 @@ os:
 before_install:
     - brew update
     - brew cask uninstall oclint
-    - brew install gcc
+    - brew install gcc && CC=gcc-8
+    - brew install openblas
 script:
   - make lib
   - make tests
