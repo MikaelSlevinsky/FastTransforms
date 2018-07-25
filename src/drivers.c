@@ -5,7 +5,7 @@
 void execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M) {
     int N = RP->n;
     #pragma omp parallel
-    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+    for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS()) {
         kernel_sph_hi2lo(RP, m, A + N*(2*m-1));
         kernel_sph_hi2lo(RP, m, A + N*(2*m));
     }
@@ -14,7 +14,7 @@ void execute_sph_hi2lo(const RotationPlan * RP, double * A, const int M) {
 void execute_sph_lo2hi(const RotationPlan * RP, double * A, const int M) {
     int N = RP->n;
     #pragma omp parallel
-    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+    for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS()) {
         kernel_sph_lo2hi(RP, m, A + N*(2*m-1));
         kernel_sph_lo2hi(RP, m, A + N*(2*m));
     }
@@ -24,7 +24,7 @@ void execute_sph_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, cons
     int N = RP->n;
     permute_sph(A, B, N, M, 2);
     #pragma omp parallel
-    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
+    for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
         kernel_sph_hi2lo_SSE(RP, m, B + N*(2*m-1));
     permute_t_sph(A, B, N, M, 2);
 }
@@ -33,7 +33,7 @@ void execute_sph_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, cons
     int N = RP->n;
     permute_sph(A, B, N, M, 2);
     #pragma omp parallel
-    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
+    for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
         kernel_sph_lo2hi_SSE(RP, m, B + N*(2*m-1));
     permute_t_sph(A, B, N, M, 2);
 }
@@ -45,7 +45,7 @@ void execute_sph_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, cons
     for (int m = 2; m <= (M%8)/2; m++)
         kernel_sph_hi2lo_SSE(RP, m, B + N*(2*m-1));
     #pragma omp parallel
-    for (int m = (M%8+1)/2 + 4*omp_get_thread_num(); m <= M/2; m += 4*omp_get_num_threads()) {
+    for (int m = (M%8+1)/2 + 4*FT_GET_THREAD_NUM(); m <= M/2; m += 4*FT_GET_NUM_THREADS()) {
         kernel_sph_hi2lo_AVX(RP, m, B + N*(2*m-1));
         kernel_sph_hi2lo_AVX(RP, m+1, B + N*(2*m+3));
     }
@@ -60,7 +60,7 @@ void execute_sph_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, cons
     for (int m = 2; m <= (M%8)/2; m++)
         kernel_sph_lo2hi_SSE(RP, m, B + N*(2*m-1));
     #pragma omp parallel
-    for (int m = (M%8+1)/2 + 4*omp_get_thread_num(); m <= M/2; m += 4*omp_get_num_threads()) {
+    for (int m = (M%8+1)/2 + 4*FT_GET_THREAD_NUM(); m <= M/2; m += 4*FT_GET_NUM_THREADS()) {
         kernel_sph_lo2hi_AVX(RP, m, B + N*(2*m-1));
         kernel_sph_lo2hi_AVX(RP, m+1, B + N*(2*m+3));
     }
@@ -81,7 +81,7 @@ void execute_sph_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, c
         kernel_sph_hi2lo_AVX(RP, m+1, B + N*(2*m+3));
     }
     #pragma omp parallel
-    for (int m = (M_star+1)/2 + 8*omp_get_thread_num(); m <= M/2; m += 8*omp_get_num_threads()) {
+    for (int m = (M_star+1)/2 + 8*FT_GET_THREAD_NUM(); m <= M/2; m += 8*FT_GET_NUM_THREADS()) {
         kernel_sph_hi2lo_AVX512(RP, m, B + N*(2*m-1));
         kernel_sph_hi2lo_AVX512(RP, m+1, B + N*(2*m+7));
     }
@@ -103,7 +103,7 @@ void execute_sph_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, c
         kernel_sph_lo2hi_AVX(RP, m+1, B + N*(2*m+3));
     }
     #pragma omp parallel
-    for (int m = (M_star+1)/2 + 8*omp_get_thread_num(); m <= M/2; m += 8*omp_get_num_threads()) {
+    for (int m = (M_star+1)/2 + 8*FT_GET_THREAD_NUM(); m <= M/2; m += 8*FT_GET_NUM_THREADS()) {
         kernel_sph_lo2hi_AVX512(RP, m, B + N*(2*m-1));
         kernel_sph_lo2hi_AVX512(RP, m+1, B + N*(2*m+7));
     }
@@ -114,13 +114,13 @@ void execute_sph_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, c
 
 void execute_tri_hi2lo(const RotationPlan * RP, double * A, const int M) {
     #pragma omp parallel
-    for (int m = 1 + omp_get_thread_num(); m < M; m += omp_get_num_threads())
+    for (int m = 1 + FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS())
         kernel_tri_hi2lo(RP, m, A+(RP->n)*m);
 }
 
 void execute_tri_lo2hi(const RotationPlan * RP, double * A, const int M) {
     #pragma omp parallel
-    for (int m = 1 + omp_get_thread_num(); m < M; m += omp_get_num_threads())
+    for (int m = 1 + FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS())
         kernel_tri_lo2hi(RP, m, A+(RP->n)*m);
 }
 
@@ -128,7 +128,7 @@ void execute_tri_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, cons
     int N = RP->n;
     permute_tri(A, B, N, M, 2);
     #pragma omp parallel
-    for (int m = 2*omp_get_thread_num(); m < M; m += 2*omp_get_num_threads())
+    for (int m = 2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
         kernel_tri_hi2lo_SSE(RP, m, B+N*m);
     permute_t_tri(A, B, N, M, 2);
 }
@@ -137,7 +137,7 @@ void execute_tri_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, cons
     int N = RP->n;
     permute_tri(A, B, N, M, 2);
     #pragma omp parallel
-    for (int m = 2*omp_get_thread_num(); m < M; m += 2*omp_get_num_threads())
+    for (int m = 2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
         kernel_tri_lo2hi_SSE(RP, m, B+N*m);
     permute_t_tri(A, B, N, M, 2);
 }
@@ -148,7 +148,7 @@ void execute_tri_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, cons
     for (int m = 0; m < M%8; m += 2)
         kernel_tri_hi2lo_SSE(RP, m, B+N*m);
     #pragma omp parallel
-    for (int m = M%8 + 4*omp_get_thread_num(); m < M; m += 4*omp_get_num_threads())
+    for (int m = M%8 + 4*FT_GET_THREAD_NUM(); m < M; m += 4*FT_GET_NUM_THREADS())
         kernel_tri_hi2lo_AVX(RP, m, B+N*m);
     permute_t_tri(A, B, N, M, 4);
 }
@@ -159,7 +159,7 @@ void execute_tri_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, cons
     for (int m = 0; m < M%8; m += 2)
         kernel_tri_lo2hi_SSE(RP, m, B+N*m);
     #pragma omp parallel
-    for (int m = M%8 + 4*omp_get_thread_num(); m < M; m += 4*omp_get_num_threads())
+    for (int m = M%8 + 4*FT_GET_THREAD_NUM(); m < M; m += 4*FT_GET_NUM_THREADS())
         kernel_tri_lo2hi_AVX(RP, m, B+N*m);
     permute_t_tri(A, B, N, M, 4);
 }
@@ -173,7 +173,7 @@ void execute_tri_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, c
     for (int m = M_star%8; m < M%16; m += 4)
         kernel_tri_hi2lo_AVX(RP, m, B+N*m);
     #pragma omp parallel
-    for (int m = M_star + 8*omp_get_thread_num(); m < M; m += 8*omp_get_num_threads())
+    for (int m = M_star + 8*FT_GET_THREAD_NUM(); m < M; m += 8*FT_GET_NUM_THREADS())
         kernel_tri_hi2lo_AVX512(RP, m, B+N*m);
     permute_t_tri(A, B, N, M, 8);
 }
@@ -187,7 +187,7 @@ void execute_tri_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, c
     for (int m = M_star%8; m < M%16; m += 4)
         kernel_tri_lo2hi_AVX(RP, m, B+N*m);
     #pragma omp parallel
-    for (int m = M_star + 8*omp_get_thread_num(); m < M; m += 8*omp_get_num_threads())
+    for (int m = M_star + 8*FT_GET_THREAD_NUM(); m < M; m += 8*FT_GET_NUM_THREADS())
         kernel_tri_lo2hi_AVX512(RP, m, B+N*m);
     permute_t_tri(A, B, N, M, 8);
 }
@@ -196,7 +196,7 @@ void execute_tri_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, c
 void execute_disk_hi2lo(const RotationPlan * RP, double * A, const int M) {
     int N = RP->n;
     #pragma omp parallel
-    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+    for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS()) {
         kernel_disk_hi2lo(RP, m, A + N*(2*m-1));
         kernel_disk_hi2lo(RP, m, A + N*(2*m));
     }
@@ -205,7 +205,7 @@ void execute_disk_hi2lo(const RotationPlan * RP, double * A, const int M) {
 void execute_disk_lo2hi(const RotationPlan * RP, double * A, const int M) {
     int N = RP->n;
     #pragma omp parallel
-    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+    for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS()) {
         kernel_disk_lo2hi(RP, m, A + N*(2*m-1));
         kernel_disk_lo2hi(RP, m, A + N*(2*m));
     }
@@ -215,7 +215,7 @@ void execute_disk_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, con
     int N = RP->n;
     permute_disk(A, B, N, M, 2);
     #pragma omp parallel
-    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
+    for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
         kernel_disk_hi2lo_SSE(RP, m, B + N*(2*m-1));
     permute_t_disk(A, B, N, M, 2);
 }
@@ -224,7 +224,7 @@ void execute_disk_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, con
     int N = RP->n;
     permute_disk(A, B, N, M, 2);
     #pragma omp parallel
-    for (int m = 2 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
+    for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
         kernel_disk_lo2hi_SSE(RP, m, B + N*(2*m-1));
     permute_t_disk(A, B, N, M, 2);
 }
@@ -236,7 +236,7 @@ void execute_disk_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, con
     for (int m = 2; m <= (M%8)/2; m++)
         kernel_disk_hi2lo_SSE(RP, m, B + N*(2*m-1));
     #pragma omp parallel
-    for (int m = (M%8+1)/2 + 4*omp_get_thread_num(); m <= M/2; m += 4*omp_get_num_threads()) {
+    for (int m = (M%8+1)/2 + 4*FT_GET_THREAD_NUM(); m <= M/2; m += 4*FT_GET_NUM_THREADS()) {
         kernel_disk_hi2lo_AVX(RP, m, B + N*(2*m-1));
         kernel_disk_hi2lo_AVX(RP, m+1, B + N*(2*m+3));
     }
@@ -251,7 +251,7 @@ void execute_disk_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, con
     for (int m = 2; m <= (M%8)/2; m++)
         kernel_disk_lo2hi_SSE(RP, m, B + N*(2*m-1));
     #pragma omp parallel
-    for (int m = (M%8+1)/2 + 4*omp_get_thread_num(); m <= M/2; m += 4*omp_get_num_threads()) {
+    for (int m = (M%8+1)/2 + 4*FT_GET_THREAD_NUM(); m <= M/2; m += 4*FT_GET_NUM_THREADS()) {
         kernel_disk_lo2hi_AVX(RP, m, B + N*(2*m-1));
         kernel_disk_lo2hi_AVX(RP, m+1, B + N*(2*m+3));
     }
@@ -272,7 +272,7 @@ void execute_disk_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, 
         kernel_disk_hi2lo_AVX(RP, m+1, B + N*(2*m+3));
     }
     #pragma omp parallel
-    for (int m = (M_star+1)/2 + 8*omp_get_thread_num(); m <= M/2; m += 8*omp_get_num_threads()) {
+    for (int m = (M_star+1)/2 + 8*FT_GET_THREAD_NUM(); m <= M/2; m += 8*FT_GET_NUM_THREADS()) {
         kernel_disk_hi2lo_AVX512(RP, m, B + N*(2*m-1));
         kernel_disk_hi2lo_AVX512(RP, m+1, B + N*(2*m+7));
     }
@@ -294,7 +294,7 @@ void execute_disk_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, 
         kernel_disk_lo2hi_AVX(RP, m+1, B + N*(2*m+3));
     }
     #pragma omp parallel
-    for (int m = (M_star+1)/2 + 8*omp_get_thread_num(); m <= M/2; m += 8*omp_get_num_threads()) {
+    for (int m = (M_star+1)/2 + 8*FT_GET_THREAD_NUM(); m <= M/2; m += 8*FT_GET_NUM_THREADS()) {
         kernel_disk_lo2hi_AVX512(RP, m, B + N*(2*m-1));
         kernel_disk_lo2hi_AVX512(RP, m+1, B + N*(2*m+7));
     }
@@ -308,7 +308,7 @@ void execute_spinsph_hi2lo(const SpinRotationPlan * SRP, double * A, const int M
     int N = SRP->n;
     kernel_spinsph_hi2lo(SRP, 0, A);
     #pragma omp parallel
-    for (int m = 1 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+    for (int m = 1 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS()) {
         kernel_spinsph_hi2lo(SRP, m, A + N*(2*m-1));
         kernel_spinsph_hi2lo(SRP, m, A + N*(2*m));
     }
@@ -318,7 +318,7 @@ void execute_spinsph_lo2hi(const SpinRotationPlan * SRP, double * A, const int M
     int N = SRP->n;
     kernel_spinsph_lo2hi(SRP, 0, A);
     #pragma omp parallel
-    for (int m = 1 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads()) {
+    for (int m = 1 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS()) {
         kernel_spinsph_lo2hi(SRP, m, A + N*(2*m-1));
         kernel_spinsph_lo2hi(SRP, m, A + N*(2*m));
     }
@@ -329,7 +329,7 @@ void execute_spinsph_hi2lo_SSE(const SpinRotationPlan * SRP, double * A, double 
     permute_spinsph(A, B, N, M, 2);
     kernel_spinsph_hi2lo(SRP, 0, B);
     #pragma omp parallel
-    for (int m = 1 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
+    for (int m = 1 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
         kernel_spinsph_hi2lo_SSE(SRP, m, B + N*(2*m-1));
    permute_t_spinsph(A, B, N, M, 2);
 }
@@ -339,7 +339,7 @@ void execute_spinsph_lo2hi_SSE(const SpinRotationPlan * SRP, double * A, double 
     permute_spinsph(A, B, N, M, 2);
     kernel_spinsph_lo2hi(SRP, 0, B);
     #pragma omp parallel
-    for (int m = 1 + omp_get_thread_num(); m <= M/2; m += omp_get_num_threads())
+    for (int m = 1 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
         kernel_spinsph_lo2hi_SSE(SRP, m, B + N*(2*m-1));
    permute_t_spinsph(A, B, N, M, 2);
 }
@@ -352,7 +352,7 @@ void execute_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, double * A, double 
     for (int m = 1; m <= (M%8)/2; m++)
         kernel_spinsph_hi2lo_SSE(SRP, m, B + N*(2*m-1));
     #pragma omp parallel
-    for (int m = (M%8+1)/2 + 4*omp_get_thread_num(); m <= M/2; m += 4*omp_get_num_threads()) {
+    for (int m = (M%8+1)/2 + 4*FT_GET_THREAD_NUM(); m <= M/2; m += 4*FT_GET_NUM_THREADS()) {
         kernel_spinsph_hi2lo_AVX(SRP, m, B + N*(2*m-1));
         kernel_spinsph_hi2lo_AVX(SRP, m+1, B + N*(2*m+3));
     }
@@ -368,7 +368,7 @@ void execute_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, double * A, double 
     for (int m = 1; m <= (M%8)/2; m++)
         kernel_spinsph_lo2hi_SSE(SRP, m, B + N*(2*m-1));
     #pragma omp parallel
-    for (int m = (M%8+1)/2 + 4*omp_get_thread_num(); m <= M/2; m += 4*omp_get_num_threads()) {
+    for (int m = (M%8+1)/2 + 4*FT_GET_THREAD_NUM(); m <= M/2; m += 4*FT_GET_NUM_THREADS()) {
         kernel_spinsph_lo2hi_AVX(SRP, m, B + N*(2*m-1));
         kernel_spinsph_lo2hi_AVX(SRP, m+1, B + N*(2*m+3));
     }
@@ -390,7 +390,7 @@ void execute_spinsph_hi2lo_AVX512(const SpinRotationPlan * SRP, double * A, doub
         kernel_spinsph_hi2lo_AVX(SRP, m+1, B + N*(2*m+3));
     }
     #pragma omp parallel
-    for (int m = (M_star+1)/2 + 8*omp_get_thread_num(); m <= M/2; m += 8*omp_get_num_threads()) {
+    for (int m = (M_star+1)/2 + 8*FT_GET_THREAD_NUM(); m <= M/2; m += 8*FT_GET_NUM_THREADS()) {
         kernel_spinsph_hi2lo_AVX512(SRP, m, B + N*(2*m-1));
         kernel_spinsph_hi2lo_AVX512(SRP, m+1, B + N*(2*m+7));
     }
@@ -413,7 +413,7 @@ void execute_spinsph_lo2hi_AVX512(const SpinRotationPlan * SRP, double * A, doub
         kernel_spinsph_lo2hi_AVX(SRP, m+1, B + N*(2*m+3));
     }
     #pragma omp parallel
-    for (int m = (M_star+1)/2 + 8*omp_get_thread_num(); m <= M/2; m += 8*omp_get_num_threads()) {
+    for (int m = (M_star+1)/2 + 8*FT_GET_THREAD_NUM(); m <= M/2; m += 8*FT_GET_NUM_THREADS()) {
         kernel_spinsph_lo2hi_AVX512(SRP, m, B + N*(2*m-1));
         kernel_spinsph_lo2hi_AVX512(SRP, m+1, B + N*(2*m+7));
     }

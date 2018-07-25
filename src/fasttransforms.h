@@ -10,9 +10,15 @@
 
 #ifdef _OPENMP
     #include <omp.h>
+    #define FT_GET_THREAD_NUM() omp_get_thread_num()
+    #define FT_GET_NUM_THREADS() omp_get_num_threads()
+    #define FT_GET_MAX_THREADS() omp_get_max_threads()
+    #define FT_SET_NUM_THREADS(x) omp_set_num_threads(x)
 #else
-    #define omp_get_thread_num() 0
-    #define omp_get_num_threads() 1
+    #define FT_GET_THREAD_NUM() 0
+    #define FT_GET_NUM_THREADS() 1
+    #define FT_GET_MAX_THREADS() 1
+    #define FT_SET_NUM_THREADS(x)
 #endif
 
 #define M_SQRT_PI    1.772453850905516027   /* sqrt(pi)       */
