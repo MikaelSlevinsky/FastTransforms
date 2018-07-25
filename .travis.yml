@@ -1,15 +1,28 @@
 # Documentation: http://docs.travis-ci.com/user/languages/c/
 language: c
-os:
-  - osx
+matrix:
+  include:
+    - os: osx
+      env:
+        - MATRIX_EVAL="brew update && brew cask uninstall oclint && brew install gcc && CC=gcc-8 && brew install openblas"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-8
+            - libopenblas-base
+      env:
+        - MATRIX_EVAL="CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+
 before_install:
-    - brew update
-    - brew cask uninstall oclint
-    - brew install gcc && CC=gcc-8
-    - brew install openblas
+  - eval "${MATRIX_EVAL}"
+
 script:
   - make lib
   - make tests
   - OMP_NUM_THREADS=4 ./test_drivers 3 3
+
 notifications:
   email: false
