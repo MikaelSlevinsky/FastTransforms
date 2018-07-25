@@ -35,8 +35,8 @@ ifeq ($(BLAS), APPLEBLAS)
     LDFLAGS += -L/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A
 else ifeq ($(BLAS), OPENBLAS)
     ifeq ($(UNAME), Linux)
-        CFLAGS += -I/usr/lib
-        LDFLAGS += -L/usr/lib
+        CFLAGS += -I/usr/lib/openblas-base
+        LDFLAGS += -L/usr/lib/openblas-base
     else ifeq ($(UNAME), Darwin)
         CFLAGS += -I/usr/local/opt/openblas/include
         LDFLAGS += -L/usr/local/opt/openblas/lib
