@@ -1,5 +1,4 @@
 # Documentation: http://docs.travis-ci.com/user/languages/c/
-sudo: required
 language: c
 matrix:
   include:
@@ -13,9 +12,11 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-8
+            - libblas-dev
             - libopenblas-base
       env:
-        - MATRIX_EVAL="sudo apt-get install libopenblas-base && CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+        - MATRIX_EVAL="CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+
 before_install:
   - eval "${MATRIX_EVAL}"
 
