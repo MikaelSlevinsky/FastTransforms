@@ -399,6 +399,29 @@ void execute_spinsph_hi2lo_AVX512(const SpinRotationPlan * SRP, double * A, doub
     reverse_warp(A, N, M, 4);
 }
 
+void execute_spinsph_lo2hi_AVX512(const SpinRotationPlan * SRP, double * A, double * B, const int M) {
+    int N = SRP->n;
+    int M_star = M%16;
+    warp(A, N, M, 4);
+    warp(A, N, M_star, 2);
+    permute_spinsph(A, B, N, M, 8);
+    kernel_spinsph_lo2hi(SRP, 0, B);
+    for (int m = 1; m <= (M_star%8)/2; m++)
+        kernel_spinsph_lo2hi_SSE(SRP, m, B + N*(2*m-1));
+    for (int m = (M_star%8+1)/2; m <= M_star/2; m += 4) {
+        kernel_spinsph_lo2hi_AVX(SRP, m, B + N*(2*m-1));
+        kernel_spinsph_lo2hi_AVX(SRP, m+1, B + N*(2*m+3));
+    }
+    #pragma omp parallel
+    for (int m = (M_star+1)/2 + 8*omp_get_thread_num(); m <= M/2; m += 8*omp_get_num_threads()) {
+        kernel_spinsph_lo2hi_AVX512(SRP, m, B + N*(2*m-1));
+        kernel_spinsph_lo2hi_AVX512(SRP, m+1, B + N*(2*m+7));
+    }
+    permute_t_spinsph(A, B, N, M, 8);
+    warp(A, N, M_star, 2);
+    reverse_warp(A, N, M, 4);
+}
+
 
 void freeSphericalHarmonicPlan(SphericalHarmonicPlan * P) {
     freeRotationPlan(P->RP);
