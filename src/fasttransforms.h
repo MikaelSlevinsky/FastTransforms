@@ -131,6 +131,9 @@ void kernel_spinsph_lo2hi_SSE(const SpinRotationPlan * SRP, const int m, double 
 void kernel_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, const int m, double * A);
 void kernel_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, const int m, double * A);
 
+void kernel_spinsph_hi2lo_AVX512(const SpinRotationPlan * SRP, const int m, double * A);
+void kernel_spinsph_lo2hi_AVX512(const SpinRotationPlan * SRP, const int m, double * A);
+
 static inline void apply_givens(const double S, const double C, double * X, double * Y);
 static inline void apply_givens_t(const double S, const double C, double * X, double * Y);
 
@@ -187,6 +190,9 @@ void execute_spinsph_lo2hi_SSE(const SpinRotationPlan * SRP, double * A, double 
 
 void execute_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, double * A, double * B, const int M);
 void execute_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, double * A, double * B, const int M);
+
+void execute_spinsph_hi2lo_AVX512(const SpinRotationPlan * SRP, double * A, double * B, const int M);
+void execute_spinsph_lo2hi_AVX512(const SpinRotationPlan * SRP, double * A, double * B, const int M);
 
 typedef struct {
     RotationPlan * RP;
@@ -248,12 +254,8 @@ void permute_t_tri(double * A, const double * B, const int N, const int M, const
 #define permute_spinsph(A, B, N, M, L) permute_sph(A, B, N, M, L)
 #define permute_t_spinsph(A, B, N, M, L) permute_t_sph(A, B, N, M, L)
 
-void two_warp(double * A, const int N, const int M);
-void four_warp(double * A, const int N, const int M);
-void reverse_four_warp(double * A, const int N, const int M);
-
 void swap(double * A, double * B, const int N);
-void swap_SSE(double * A, double * B, const int N);
-void swap_AVX(double * A, double * B, const int N);
+void warp(double * A, const int N, const int M, const int L);
+void warp_t(double * A, const int N, const int M, const int L);
 
 #endif //FASTTRANSFORMS_H
