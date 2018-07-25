@@ -87,7 +87,7 @@ void execute_sph_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, c
     }
     permute_t_sph(A, B, N, M, 8);
     warp(A, N, M_star, 2);
-    reverse_warp(A, N, M, 4);
+    warp_t(A, N, M, 4);
 }
 
 void execute_sph_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
@@ -109,7 +109,7 @@ void execute_sph_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, c
     }
     permute_t_sph(A, B, N, M, 8);
     warp(A, N, M_star, 2);
-    reverse_warp(A, N, M, 4);
+    warp_t(A, N, M, 4);
 }
 
 void execute_tri_hi2lo(const RotationPlan * RP, double * A, const int M) {
@@ -278,7 +278,7 @@ void execute_disk_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, 
     }
     permute_t_disk(A, B, N, M, 8);
     warp(A, N, M_star, 2);
-    reverse_warp(A, N, M, 4);
+    warp_t(A, N, M, 4);
 }
 
 void execute_disk_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
@@ -300,7 +300,7 @@ void execute_disk_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, 
     }
     permute_t_disk(A, B, N, M, 8);
     warp(A, N, M_star, 2);
-    reverse_warp(A, N, M, 4);
+    warp_t(A, N, M, 4);
 }
 
 
@@ -396,7 +396,7 @@ void execute_spinsph_hi2lo_AVX512(const SpinRotationPlan * SRP, double * A, doub
     }
     permute_t_spinsph(A, B, N, M, 8);
     warp(A, N, M_star, 2);
-    reverse_warp(A, N, M, 4);
+    warp_t(A, N, M, 4);
 }
 
 void execute_spinsph_lo2hi_AVX512(const SpinRotationPlan * SRP, double * A, double * B, const int M) {
@@ -419,7 +419,7 @@ void execute_spinsph_lo2hi_AVX512(const SpinRotationPlan * SRP, double * A, doub
     }
     permute_t_spinsph(A, B, N, M, 8);
     warp(A, N, M_star, 2);
-    reverse_warp(A, N, M, 4);
+    warp_t(A, N, M, 4);
 }
 
 

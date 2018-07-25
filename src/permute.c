@@ -79,7 +79,7 @@ void warp(double * A, const int N, const int M, const int L) {
     }
 }
 
-void reverse_warp(double * A, const int N, const int M, const int L) {
+void warp_t(double * A, const int N, const int M, const int L) {
     for (int j = L; j >= 2; j >>= 1) {
         #pragma omp parallel for
         for (int i = M%(4*L); i < M; i += 4*j)

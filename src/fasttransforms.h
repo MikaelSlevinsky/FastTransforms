@@ -256,6 +256,6 @@ void permute_t_tri(double * A, const double * B, const int N, const int M, const
 
 void swap(double * A, double * B, const int N);
 void warp(double * A, const int N, const int M, const int L);
-void reverse_warp(double * A, const int N, const int M, const int L);
+void warp_t(double * A, const int N, const int M, const int L);
 
 #endif //FASTTRANSFORMS_H
