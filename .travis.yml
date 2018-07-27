@@ -4,7 +4,7 @@ matrix:
   include:
     - os: osx
       env:
-        - MATRIX_EVAL="brew update && brew cask uninstall oclint && brew install gcc && CC=gcc-8 && brew install openblas"
+        - MATRIX_EVAL="brew update && brew cask uninstall oclint && brew install gcc && CC=gcc-8 && brew install openblas && brew install fftw"
     - os: linux
       addons:
         apt:
@@ -14,6 +14,7 @@ matrix:
             - g++-8
             - libblas-dev
             - libopenblas-base
+            - libfftw3-3
       env:
         - MATRIX_EVAL="CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
 

@@ -7,6 +7,7 @@
 #include <math.h>
 #include <immintrin.h>
 #include <cblas.h>
+#include <fftw3.h>
 
 #ifdef _OPENMP
     #include <omp.h>
@@ -21,9 +22,11 @@
     #define FT_SET_NUM_THREADS(x)
 #endif
 
-#define M_SQRT_PI    1.772453850905516027   /* sqrt(pi)       */
-#define M_1_SQRT_PI  0.564189583547756287   /* 1/sqrt(pi)     */
-#define M_SQRT_PI_2  0.886226925452758014   /* sqrt(pi)/2     */
+#define M_SQRT_PI      1.772453850905516027   /* sqrt(pi)       */
+#define M_1_SQRT_PI    0.564189583547756287   /* 1/sqrt(pi)     */
+#define M_SQRT_PI_2    0.886226925452758014   /* sqrt(pi)/2     */
+#define M_4_SQRT_PI    7.089815403622064109   /* 4*sqrt(pi)     */
+#define M_1_4_SQRT_PI  0.141047395886939072   /* 1/(4*sqrt(pi)) */
 
 #define MAX(a,b) ((a) > (b) ? a : b)
 #define MIN(a,b) ((a) < (b) ? a : b)
@@ -263,5 +266,26 @@ void permute_t_tri(double * A, const double * B, const int N, const int M, const
 void swap(double * A, double * B, const int N);
 void warp(double * A, const int N, const int M, const int L);
 void warp_t(double * A, const int N, const int M, const int L);
+
+
+typedef struct {
+    fftw_plan plantheta1;
+    fftw_plan plantheta2;
+    fftw_plan plantheta3;
+    fftw_plan plantheta4;
+    fftw_plan planphi;
+    double * Y;
+} SphereFFTWPlan;
+
+void freeSphereFFTWPlan(SphereFFTWPlan * P);
+
+SphereFFTWPlan * plan_sph_synthesis(const int N, const int M);
+SphereFFTWPlan * plan_sph_analysis(const int N, const int M);
+
+void execute_sph_synthesis(const SphereFFTWPlan * P, double * X, const int N, const int M);
+void execute_sph_analysis(const SphereFFTWPlan * P, double * X, const int N, const int M);
+
+static inline void colswap(const double * X, double * Y, const int N, const int M);
+static inline void colswap_t(double * X, const double * Y, const int N, const int M);
 
 #endif //FASTTRANSFORMS_H
