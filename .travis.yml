@@ -14,7 +14,7 @@ matrix:
             - g++-8
             - libblas-dev
             - libopenblas-base
-            - libfftw3-3
+            - libfftw3-dev
       env:
         - MATRIX_EVAL="CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
 
