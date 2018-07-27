@@ -11,7 +11,6 @@ void freeSphereFFTWPlan(SphereFFTWPlan * P) {
 }
 
 SphereFFTWPlan * plan_sph_synthesis(const int N, const int M) {
-    double X[] = {};
     int rank = 1; /* not 2: we are computing 1d transforms */
     int n[] = {N}; /* 1d transforms of length n */
     int idist = 4*N, odist = 4*N;
@@ -22,33 +21,32 @@ SphereFFTWPlan * plan_sph_synthesis(const int N, const int M) {
 
     int howmany = (M+3)/4;
     fftw_r2r_kind kind[] = {FFTW_REDFT01};
-    P->plantheta1 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind, FFTW_ESTIMATE);
+    P->plantheta1 = fftw_plan_many_r2r(rank, n, howmany, NULL, inembed, istride, idist, NULL, onembed, ostride, odist, kind, FFTW_ESTIMATE);
 
     howmany = (M+2)/4;
     kind[0] = FFTW_RODFT01;
-    P->plantheta2 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind, FFTW_ESTIMATE);
+    P->plantheta2 = fftw_plan_many_r2r(rank, n, howmany, NULL, inembed, istride, idist, NULL, onembed, ostride, odist, kind, FFTW_ESTIMATE);
 
     howmany = (M+1)/4;
     kind[0] = FFTW_RODFT01;
-    P->plantheta3 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind, FFTW_ESTIMATE);
+    P->plantheta3 = fftw_plan_many_r2r(rank, n, howmany, NULL, inembed, istride, idist, NULL, onembed, ostride, odist, kind, FFTW_ESTIMATE);
 
     howmany = M/4;
     kind[0] = FFTW_REDFT01;
-    P->plantheta4 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind, FFTW_ESTIMATE);
+    P->plantheta4 = fftw_plan_many_r2r(rank, n, howmany, NULL, inembed, istride, idist, NULL, onembed, ostride, odist, kind, FFTW_ESTIMATE);
 
     n[0] = M;
     idist = odist = 1;
     istride = ostride = N;
     howmany = N;
     kind[0] = FFTW_HC2R;
-    P->planphi = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind, FFTW_ESTIMATE);
+    P->planphi = fftw_plan_many_r2r(rank, n, howmany, NULL, inembed, istride, idist, NULL, onembed, ostride, odist, kind, FFTW_ESTIMATE);
 
     P->Y = calloc(N*M, sizeof(double));
     return P;
 }
 
 SphereFFTWPlan * plan_sph_analysis(const int N, const int M) {
-    double X[] = {};
     int rank = 1; /* not 2: we are computing 1d transforms */
     int n[] = {N}; /* 1d transforms of length n */
     int idist = 4*N, odist = 4*N;
@@ -59,26 +57,26 @@ SphereFFTWPlan * plan_sph_analysis(const int N, const int M) {
 
     int howmany = (M+3)/4;
     fftw_r2r_kind kind[] = {FFTW_REDFT10};
-    P->plantheta1 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind, FFTW_ESTIMATE);
+    P->plantheta1 = fftw_plan_many_r2r(rank, n, howmany, NULL, inembed, istride, idist, NULL, onembed, ostride, odist, kind, FFTW_ESTIMATE);
 
     howmany = (M+2)/4;
     kind[0] = FFTW_RODFT10;
-    P->plantheta2 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind, FFTW_ESTIMATE);
+    P->plantheta2 = fftw_plan_many_r2r(rank, n, howmany, NULL, inembed, istride, idist, NULL, onembed, ostride, odist, kind, FFTW_ESTIMATE);
 
     howmany = (M+1)/4;
     kind[0] = FFTW_RODFT10;
-    P->plantheta3 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind, FFTW_ESTIMATE);
+    P->plantheta3 = fftw_plan_many_r2r(rank, n, howmany, NULL, inembed, istride, idist, NULL, onembed, ostride, odist, kind, FFTW_ESTIMATE);
 
     howmany = M/4;
     kind[0] = FFTW_REDFT10;
-    P->plantheta4 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind, FFTW_ESTIMATE);
+    P->plantheta4 = fftw_plan_many_r2r(rank, n, howmany, NULL, inembed, istride, idist, NULL, onembed, ostride, odist, kind, FFTW_ESTIMATE);
 
     n[0] = M;
     idist = odist = 1;
     istride = ostride = N;
     howmany = N;
     kind[0] = FFTW_R2HC;
-    P->planphi = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind, FFTW_ESTIMATE);
+    P->planphi = fftw_plan_many_r2r(rank, n, howmany, NULL, inembed, istride, idist, NULL, onembed, ostride, odist, kind, FFTW_ESTIMATE);
 
     P->Y = calloc(N*M, sizeof(double));
     return P;
