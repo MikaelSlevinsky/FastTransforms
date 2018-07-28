@@ -61,6 +61,11 @@ int main(int argc, const char * argv[]) {
         PS = plan_sph_synthesis(N, M);
         PA = plan_sph_analysis(N, M);
 
+        execute_sph_synthesis(PS, A, N, M);
+        execute_sph_analysis(PA, A, N, M);
+        execute_sph_synthesis(PS, A, N, M);
+        execute_sph_analysis(PA, A, N, M);
+
         gettimeofday(&start, NULL);
         for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
             execute_sph2fourier(P, A, N, M);
