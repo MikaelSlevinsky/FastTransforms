@@ -497,16 +497,16 @@ void execute_tri2cheb(const TriangularHarmonicPlan * P, double * A, const int N,
     if (P->beta + P->gamma != -1.5)
         cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1, N, A, N);
     if (P->alpha != -0.5) {
-        alternate_sign(A, N*M);
+        alternate_sign(A, N, M);
         cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P2, N, A, N);
-        alternate_sign(A, N*M);
+        alternate_sign(A, N, M);
     }
     if (P->gamma != -0.5)
         cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P3, N, A, N);
     if (P->beta != -0.5) {
-        alternate_sign(A, N*M);
+        alternate_sign_t(A, N, M);
         cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P4, N, A, N);
-        alternate_sign(A, N*M);
+        alternate_sign_t(A, N, M);
     }
     chebyshev_normalization(A, N, M);
 }
@@ -514,25 +514,32 @@ void execute_tri2cheb(const TriangularHarmonicPlan * P, double * A, const int N,
 void execute_cheb2tri(const TriangularHarmonicPlan * P, double * A, const int N, const int M) {
     chebyshev_normalization_t(A, N, M);
     if (P->beta != -0.5) {
-        alternate_sign(A, N*M);
+        alternate_sign_t(A, N, M);
         cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P4inv, N, A, N);
-        alternate_sign(A, N*M);
+        alternate_sign_t(A, N, M);
     }
     if (P->gamma != -0.5)
         cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P3inv, N, A, N);
     if (P->alpha != -0.5) {
-        alternate_sign(A, N*M);
+        alternate_sign(A, N, M);
         cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P2inv, N, A, N);
-        alternate_sign(A, N*M);
+        alternate_sign(A, N, M);
     }
     if (P->beta + P->gamma != -1.5)
         cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1inv, N, A, N);
     execute_tri_lo2hi_AVX512(P->RP, A, P->B, M);
 }
 
-static void alternate_sign(double * A, const int N) {
+static void alternate_sign(double * A, const int N, const int M) {
+    for (int j = 0; j < M; j++)
+        for (int i = 0; i < N; i += 2)
+            A[i+j*N] = -A[i+j*N];
+}
+
+static void alternate_sign_t(double * A, const int N, const int M) {
     for (int i = 0; i < N; i += 2)
-        A[i] = -A[i];
+        for (int j = 0; j < M; j++)
+            A[j+i*M] = -A[j+i*M];
 }
 
 static void chebyshev_normalization(double * A, const int N, const int M) {
