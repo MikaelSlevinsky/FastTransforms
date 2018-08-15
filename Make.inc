@@ -40,6 +40,8 @@ else ifeq ($(BLAS), OPENBLAS)
     else ifeq ($(UNAME), Darwin)
         CFLAGS += -I/usr/local/opt/openblas/include
         LDFLAGS += -L/usr/local/opt/openblas/lib
+        CFLAGS += -I/usr/local/opt/fftw/include
+        LDFLAGS += -L/usr/local/opt/fftw/lib
     endif
 endif
 LDLIBS += -lm -lblas -lfftw3 -lfftw3_threads
