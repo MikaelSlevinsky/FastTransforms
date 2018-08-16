@@ -126,21 +126,22 @@ void execute_tri_lo2hi(const RotationPlan * RP, double * A, const int M) {
 
 void execute_tri_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    permute_tri(A, B, N, M, 2);
+    int M_star = M%2;
+    permute_tri(A+M_star, B+M_star, N, M-M_star, 2);
     #pragma omp parallel
-    for (int m = 2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
+    for (int m = M_star+2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
         kernel_tri_hi2lo_SSE(RP, m, B+N*m);
-    permute_t_tri(A, B, N, M, 2);
+    permute_t_tri(A+M_star, B+M_star, N, M-M_star, 2);
 }
 
 void execute_tri_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    permute_tri(A, B, N, M, 2);
+    int M_star = M%2;
+    permute_tri(A+M_star, B+M_star, N, M-M_star, 2);
     #pragma omp parallel
-    for (int m = 2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
+    for (int m = M_star+2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
         kernel_tri_lo2hi_SSE(RP, m, B+N*m);
-    permute_t_tri(A, B, N, M, 2);
-}
+    permute_t_tri(A+M_star, B+M_star, N, M-M_star, 2);
 
 void execute_tri_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
