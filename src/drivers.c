@@ -126,27 +126,26 @@ void execute_tri_lo2hi(const RotationPlan * RP, double * A, const int M) {
 
 void execute_tri_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int M_star = M%2;
-    permute_tri(A+N*M_star, B+N*M_star, N, M-M_star, 2);
+    permute_tri(A, B, N, M, 2);
     #pragma omp parallel
-    for (int m = M_star+2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
+    for (int m = M%2+2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
         kernel_tri_hi2lo_SSE(RP, m, B+N*m);
-    permute_t_tri(A+N*M_star, B+N*M_star, N, M-M_star, 2);
+    permute_t_tri(A, B, N, M, 2);
 }
 
 void execute_tri_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int M_star = M%2;
-    permute_tri(A+N*M_star, B+N*M_star, N, M-M_star, 2);
+    permute_tri(A, B, N, M, 2);
     #pragma omp parallel
-    for (int m = M_star+2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
+    for (int m = M%2+2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
         kernel_tri_lo2hi_SSE(RP, m, B+N*m);
-    permute_t_tri(A+N*M_star, B+N*M_star, N, M-M_star, 2);
+    permute_t_tri(A, B, N, M, 2);
+}
 
 void execute_tri_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
     permute_tri(A, B, N, M, 4);
-    for (int m = 0; m < M%8; m += 2)
+    for (int m = M%2; m < M%8; m += 2)
         kernel_tri_hi2lo_SSE(RP, m, B+N*m);
     #pragma omp parallel
     for (int m = M%8 + 4*FT_GET_THREAD_NUM(); m < M; m += 4*FT_GET_NUM_THREADS())
@@ -157,7 +156,7 @@ void execute_tri_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, cons
 void execute_tri_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
     permute_tri(A, B, N, M, 4);
-    for (int m = 0; m < M%8; m += 2)
+    for (int m = M%2; m < M%8; m += 2)
         kernel_tri_lo2hi_SSE(RP, m, B+N*m);
     #pragma omp parallel
     for (int m = M%8 + 4*FT_GET_THREAD_NUM(); m < M; m += 4*FT_GET_NUM_THREADS())
@@ -169,7 +168,7 @@ void execute_tri_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, c
     int N = RP->n;
     int M_star = M%16;
     permute_tri(A, B, N, M, 8);
-    for (int m = 0; m < M_star%8; m += 2)
+    for (int m = M%2; m < M_star%8; m += 2)
         kernel_tri_hi2lo_SSE(RP, m, B+N*m);
     for (int m = M_star%8; m < M%16; m += 4)
         kernel_tri_hi2lo_AVX(RP, m, B+N*m);
@@ -183,7 +182,7 @@ void execute_tri_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, c
     int N = RP->n;
     int M_star = M%16;
     permute_tri(A, B, N, M, 8);
-    for (int m = 0; m < M_star%8; m += 2)
+    for (int m = M%2; m < M_star%8; m += 2)
         kernel_tri_lo2hi_SSE(RP, m, B+N*m);
     for (int m = M_star%8; m < M%16; m += 4)
         kernel_tri_lo2hi_AVX(RP, m, B+N*m);
