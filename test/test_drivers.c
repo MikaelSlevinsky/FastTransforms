@@ -222,7 +222,7 @@ int main(int argc, const char * argv[]) {
     printf("err3 = [\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i);
-        M = N-4;
+        M = N;
 
         A = triones(N, M);
         Ac = copyA(A, N, M);
