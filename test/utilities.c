@@ -3,7 +3,7 @@
 #include "utilities.h"
 
 #define A(i,j) A[(i)+n*(j)]
-#define B(i,j) B[(i)+NB*(j)]
+#define B(i,j) B[(i)+ALIGNB(n)*(j)]
 #define s(l,m) s[l+(m)*(2*n+1-(m))/2]
 #define c(l,m) c[l+(m)*(2*n+1-(m))/2]
 
