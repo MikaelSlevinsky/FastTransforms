@@ -167,8 +167,8 @@ int main(int argc, const char * argv[]) {
 
     printf("\nTesting the accuracy of spherical harmonic transforms.\n\n");
     printf("err2 = [\n");
-    for (int i = 0; i < IERR; i++) {
-        N = 64*pow(2, i)-1;
+    for (int i = 0; i < 8; i++) {
+        N = 64*pow(2, 1)+i;
         M = 2*N-1;
 
         A = sphrand(N, M);
