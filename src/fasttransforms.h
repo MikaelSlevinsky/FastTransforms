@@ -242,7 +242,8 @@ TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const do
 void execute_tri2cheb(const TriangularHarmonicPlan * P, double * A, const int N, const int M);
 void execute_cheb2tri(const TriangularHarmonicPlan * P, double * A, const int N, const int M);
 
-static void alternate_sign(double * A, const int N);
+static void alternate_sign(double * A, const int N, const int M);
+static void alternate_sign_t(double * A, const int N, const int M);
 
 static void chebyshev_normalization(double * A, const int N, const int M);
 static void chebyshev_normalization_t(double * A, const int N, const int M);

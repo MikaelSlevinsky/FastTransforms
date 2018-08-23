@@ -84,17 +84,13 @@ void swap(double * A, double * B, const int N) {
 }
 
 void warp(double * A, const int N, const int M, const int L) {
-    for (int j = 2; j <= L; j <<= 1) {
-        #pragma omp parallel for
+    for (int j = 2; j <= L; j <<= 1)
         for (int i = M%(4*L); i < M; i += 4*j)
             swap(A+(i+j)*N, A+(i+j*2)*N, j*N);
-    }
 }
 
 void warp_t(double * A, const int N, const int M, const int L) {
-    for (int j = L; j >= 2; j >>= 1) {
-        #pragma omp parallel for
+    for (int j = L; j >= 2; j >>= 1)
         for (int i = M%(4*L); i < M; i += 4*j)
             swap(A+(i+j)*N, A+(i+j*2)*N, j*N);
-    }
 }
