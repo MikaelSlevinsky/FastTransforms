@@ -133,7 +133,7 @@ double * copyA(double * A, int n, int m) {
 }
 
 double * copyB(double * A, int n, int m) {
-    double * B = (double *) aligned_alloc(n * m, ALIGN_SIZE*8);
+    double * B = (double *) aligned_alloc(ALIGN_SIZE*8, n * m);
     for (int i = 0; i < n*m; i++)
         B[i] = A[i];
     return B;
