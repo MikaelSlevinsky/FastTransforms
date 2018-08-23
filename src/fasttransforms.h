@@ -41,7 +41,8 @@
 #if __AVX__
     #define VECTOR_SIZE_4 4
     #ifndef ALIGN_SIZE
-    #define ALIGN_SIZE VECTOR_SIZE_4
+        #define ALIGN_SIZE VECTOR_SIZE_4
+    #endif
     typedef double double4 __attribute__ ((vector_size (VECTOR_SIZE_4*8)));
     #define vall4(x) ((double4) _mm256_set1_pd(x))
     #define vload4(v) ((double4) _mm256_loadu_pd(v))
@@ -50,7 +51,8 @@
 #if __SSE2__
     #define VECTOR_SIZE_2 2
     #ifndef ALIGN_SIZE
-    #define ALIGN_SIZE VECTOR_SIZE_2
+        #define ALIGN_SIZE VECTOR_SIZE_2
+    #endif
     typedef double double2 __attribute__ ((vector_size (VECTOR_SIZE_2*8)));
     #define vall2(x) ((double2) _mm_set1_pd(x))
     #define vload2(v) ((double2) _mm_loadu_pd(v))
