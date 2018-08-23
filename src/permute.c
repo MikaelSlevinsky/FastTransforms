@@ -47,6 +47,7 @@ void permute_t_sph(double * A, const double * B, const int N, const int M, const
 }
 
 void permute_tri(const double * A, double * B, const int N, const int M, const int L) {
+    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)
     if (L == 2) {
         if (M%2) {
             for (int i = 0; i < N; i++)
