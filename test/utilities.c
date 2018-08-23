@@ -126,7 +126,7 @@ double * spinsphrand(int n, int m, int s) {
 }
 
 double * copyA(double * A, int n, int m) {
-    double * B = (double *) calloc(n * m, sizeof(double));
+    double * B = (double *) aligned_alloc(n * m, ALIGNED_SIZE*8;
     for (int i = 0; i < n*m; i++)
         B[i] = A[i];
     return B;
