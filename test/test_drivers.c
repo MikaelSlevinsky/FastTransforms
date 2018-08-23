@@ -93,7 +93,7 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = sphones(N, M);
-        B = copyA(N, M);
+        B = copyA(A, N, M);
         RP = plan_rotsphere(N);
 
         gettimeofday(&start, NULL);
