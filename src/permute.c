@@ -4,7 +4,7 @@
 
 
 void permute(const double * A, double * B, const int N, const int M, const int L) {
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     #pragma omp parallel for if (N < 2*M)
     for (int j = 0; j < M; j += L)
         for (int i = 0; i < L*N; i++)
@@ -12,7 +12,7 @@ void permute(const double * A, double * B, const int N, const int M, const int L
 }
 
 void permute_t(double * A, const double * B, const int N, const int M, const int L) {
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     #pragma omp parallel for if (N < 2*M)
     for (int j = 0; j < M; j += L)
         for (int i = 0; i < L*N; i++)
@@ -21,7 +21,7 @@ void permute_t(double * A, const double * B, const int N, const int M, const int
 
 
 void permute_sph(const double * A, double * B, const int N, const int M, const int L) {
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     if (L == 2) {
         for (int i = 0; i < N; i++)
             B[i] = A[i];
@@ -34,7 +34,7 @@ void permute_sph(const double * A, double * B, const int N, const int M, const i
 }
 
 void permute_t_sph(double * A, const double * B, const int N, const int M, const int L) {
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     if (L == 2) {
         for (int i = 0; i < N; i++)
             A[i] = B[i];
@@ -47,7 +47,7 @@ void permute_t_sph(double * A, const double * B, const int N, const int M, const
 }
 
 void permute_tri(const double * A, double * B, const int N, const int M, const int L) {
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     if (L == 2) {
         if (M%2) {
             for (int i = 0; i < N; i++)
@@ -64,7 +64,7 @@ void permute_tri(const double * A, double * B, const int N, const int M, const i
 }
 
 void permute_t_tri(double * A, const double * B, const int N, const int M, const int L) {
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     if (L == 2) {
         if (M%2) {
             for (int i = 0; i < N; i++)

@@ -22,7 +22,7 @@ void execute_sph_lo2hi(const RotationPlan * RP, double * A, const int M) {
 
 void execute_sph_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     permute_sph(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
@@ -32,7 +32,7 @@ void execute_sph_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, cons
 
 void execute_sph_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     permute_sph(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
@@ -42,7 +42,7 @@ void execute_sph_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, cons
 
 void execute_sph_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     warp(A, N, M, 2);
     permute_sph(A, B, N, M, 4);
     for (int m = 2; m <= (M%8)/2; m++)
@@ -58,7 +58,7 @@ void execute_sph_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, cons
 
 void execute_sph_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     warp(A, N, M, 2);
     permute_sph(A, B, N, M, 4);
     for (int m = 2; m <= (M%8)/2; m++)
@@ -74,7 +74,7 @@ void execute_sph_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, cons
 
 void execute_sph_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     int M_star = M%16;
     warp(A, N, M, 4);
     warp(A, N, M_star, 2);
@@ -97,7 +97,7 @@ void execute_sph_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, c
 
 void execute_sph_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     int M_star = M%16;
     warp(A, N, M, 4);
     warp(A, N, M_star, 2);
@@ -132,7 +132,7 @@ void execute_tri_lo2hi(const RotationPlan * RP, double * A, const int M) {
 
 void execute_tri_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     permute_tri(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = M%2+2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
@@ -142,7 +142,7 @@ void execute_tri_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, cons
 
 void execute_tri_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     permute_tri(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = M%2+2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
@@ -152,7 +152,7 @@ void execute_tri_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, cons
 
 void execute_tri_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     permute_tri(A, B, N, M, 4);
     for (int m = M%2; m < M%8; m += 2)
         kernel_tri_hi2lo_SSE(RP, m, B+NB*m);
@@ -164,7 +164,7 @@ void execute_tri_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, cons
 
 void execute_tri_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     permute_tri(A, B, N, M, 4);
     for (int m = M%2; m < M%8; m += 2)
         kernel_tri_lo2hi_SSE(RP, m, B+NB*m);
@@ -176,7 +176,7 @@ void execute_tri_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, cons
 
 void execute_tri_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     int M_star = M%16;
     permute_tri(A, B, N, M, 8);
     for (int m = M%2; m < M_star%8; m += 2)
@@ -191,7 +191,7 @@ void execute_tri_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, c
 
 void execute_tri_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     int M_star = M%16;
     permute_tri(A, B, N, M, 8);
     for (int m = M%2; m < M_star%8; m += 2)
@@ -225,7 +225,7 @@ void execute_disk_lo2hi(const RotationPlan * RP, double * A, const int M) {
 
 void execute_disk_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     permute_disk(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
@@ -235,7 +235,7 @@ void execute_disk_hi2lo_SSE(const RotationPlan * RP, double * A, double * B, con
 
 void execute_disk_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     permute_disk(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
@@ -245,7 +245,7 @@ void execute_disk_lo2hi_SSE(const RotationPlan * RP, double * A, double * B, con
 
 void execute_disk_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     warp(A, N, M, 2);
     permute_disk(A, B, N, M, 4);
     for (int m = 2; m <= (M%8)/2; m++)
@@ -261,7 +261,7 @@ void execute_disk_hi2lo_AVX(const RotationPlan * RP, double * A, double * B, con
 
 void execute_disk_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     warp(A, N, M, 2);
     permute_disk(A, B, N, M, 4);
     for (int m = 2; m <= (M%8)/2; m++)
@@ -277,7 +277,7 @@ void execute_disk_lo2hi_AVX(const RotationPlan * RP, double * A, double * B, con
 
 void execute_disk_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     int M_star = M%16;
     warp(A, N, M, 4);
     warp(A, N, M_star, 2);
@@ -300,7 +300,7 @@ void execute_disk_hi2lo_AVX512(const RotationPlan * RP, double * A, double * B, 
 
 void execute_disk_lo2hi_AVX512(const RotationPlan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     int M_star = M%16;
     warp(A, N, M, 4);
     warp(A, N, M_star, 2);
@@ -344,7 +344,7 @@ void execute_spinsph_lo2hi(const SpinRotationPlan * SRP, double * A, const int M
 
 void execute_spinsph_hi2lo_SSE(const SpinRotationPlan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     permute_spinsph(A, B, N, M, 2);
     kernel_spinsph_hi2lo(SRP, 0, B);
     #pragma omp parallel
@@ -355,7 +355,7 @@ void execute_spinsph_hi2lo_SSE(const SpinRotationPlan * SRP, double * A, double 
 
 void execute_spinsph_lo2hi_SSE(const SpinRotationPlan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     permute_spinsph(A, B, N, M, 2);
     kernel_spinsph_lo2hi(SRP, 0, B);
     #pragma omp parallel
@@ -366,7 +366,7 @@ void execute_spinsph_lo2hi_SSE(const SpinRotationPlan * SRP, double * A, double 
 
 void execute_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     warp(A, N, M, 2);
     permute_spinsph(A, B, N, M, 4);
     kernel_spinsph_hi2lo(SRP, 0, B);
@@ -383,7 +383,7 @@ void execute_spinsph_hi2lo_AVX(const SpinRotationPlan * SRP, double * A, double 
 
 void execute_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     warp(A, N, M, 2);
     permute_spinsph(A, B, N, M, 4);
     kernel_spinsph_lo2hi(SRP, 0, B);
@@ -400,7 +400,7 @@ void execute_spinsph_lo2hi_AVX(const SpinRotationPlan * SRP, double * A, double 
 
 void execute_spinsph_hi2lo_AVX512(const SpinRotationPlan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     int M_star = M%16;
     warp(A, N, M, 4);
     warp(A, N, M_star, 2);
@@ -425,7 +425,7 @@ void execute_spinsph_hi2lo_AVX512(const SpinRotationPlan * SRP, double * A, doub
 void execute_spinsph_lo2hi_AVX512(const SpinRotationPlan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
     int M_star = M%16;
-    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(N);
     warp(A, N, M, 4);
     warp(A, N, M_star, 2);
     permute_spinsph(A, B, N, M, 8);
@@ -458,7 +458,7 @@ void freeSphericalHarmonicPlan(SphericalHarmonicPlan * P) {
 }
 
 SphericalHarmonicPlan * plan_sph2fourier(const int n) {
-    int NB = n+(ALIGN_SIZE-n%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(n);
     SphericalHarmonicPlan * P = malloc(sizeof(SphericalHarmonicPlan));
     P->RP = plan_rotsphere(n);
     P->B = (double *) aligned_alloc(ALIGN_SIZE*8, NB * (2*n-1) * sizeof(double));
@@ -500,7 +500,7 @@ void freeTriangularHarmonicPlan(TriangularHarmonicPlan * P) {
 }
 
 TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma) {
-    int NB = n+(ALIGN_SIZE-n%ALIGN_SIZE)%ALIGN_SIZE;
+    int NB = ALIGNB(n);
     TriangularHarmonicPlan * P = malloc(sizeof(TriangularHarmonicPlan));
     P->RP = plan_rottriangle(n, alpha, beta, gamma);
     P->B = (double *) aligned_alloc(ALIGN_SIZE*8, NB * n * sizeof(double));

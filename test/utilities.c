@@ -3,7 +3,7 @@
 #include "utilities.h"
 
 #define A(i,j) A[(i)+n*(j)]
-#define B(i,j) B[(i)+n*(j)]
+#define B(i,j) B[(i)+NB*(j)]
 #define s(l,m) s[l+(m)*(2*n+1-(m))/2]
 #define c(l,m) c[l+(m)*(2*n+1-(m))/2]
 
@@ -64,7 +64,7 @@ double rotnorm(const RotationPlan * RP) {
 double * sphones(int n, int m) {
     double * A  = (double*) aligned_alloc(ALIGN_SIZE*8, n*m*sizeof(double));
     for (int i = 0; i < n; i++)
-        for (int j = 0; j < m; j++)
+        for (int j = 0; j < m-2*i; j++)
             A(i,j) = 1.0;
     return A;
 }
