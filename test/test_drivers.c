@@ -33,7 +33,7 @@ int main(int argc, const char * argv[]) {
 
         A = sphones(N, M);
         Ac = copyA(A, N, M);
-        B = copyB(A, N, M);
+        B = copyA(A, N, M);
         RP = plan_rotsphere(N);
 
         execute_sph_hi2lo(RP, A, M);
@@ -93,7 +93,7 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = sphones(N, M);
-        B = copyB(A, N, M);
+        B = sphones(N, M);
         RP = plan_rotsphere(N);
 
         gettimeofday(&start, NULL);
