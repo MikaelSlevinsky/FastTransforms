@@ -59,7 +59,7 @@
     #define vstore2(u, v) (_mm_store_pd(u, v))
 #endif
 
-#define ALIGNB(N) (ALIGN_SIZE-1-(N+ALIGN_SIZE-1)%ALIGN_SIZE)
+#define ALIGNB(N) (N + ALIGN_SIZE-1-(N+ALIGN_SIZE-1)%ALIGN_SIZE)
 
 static inline double stirlingseries(const double z);
 static inline double Aratio(const int n, const double alpha, const double beta);
