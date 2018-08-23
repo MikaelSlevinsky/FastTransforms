@@ -126,8 +126,7 @@ double * spinsphrand(int n, int m, int s) {
 }
 
 double * copyA(double * A, int n, int m) {
-    double * B;
-    posix_memalign((void **) &B, ALIGN_SIZE*8, ALIGNB(n)*m*sizeof(double));
+    double * B = (double *) VMALLOC(ALIGNB(n)*m*sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m; j++)
             B(i,j) = A(i,j);

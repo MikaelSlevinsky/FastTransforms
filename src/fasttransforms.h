@@ -60,6 +60,8 @@
 #endif
 
 #define ALIGNB(N) (N + ALIGN_SIZE-1-(N+ALIGN_SIZE-1)%ALIGN_SIZE)
+#define VMALLOC(s) _mm_malloc(s, ALIGN_SIZE)
+#define VFREE(s) _mm_free(s)
 
 static inline double stirlingseries(const double z);
 static inline double Aratio(const int n, const double alpha, const double beta);

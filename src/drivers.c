@@ -449,7 +449,7 @@ void execute_spinsph_lo2hi_AVX512(const SpinRotationPlan * SRP, double * A, doub
 
 void freeSphericalHarmonicPlan(SphericalHarmonicPlan * P) {
     freeRotationPlan(P->RP);
-    free(P->B);
+    VFREE(P->B);
     free(P->P1);
     free(P->P2);
     free(P->P1inv);
@@ -460,7 +460,7 @@ void freeSphericalHarmonicPlan(SphericalHarmonicPlan * P) {
 SphericalHarmonicPlan * plan_sph2fourier(const int n) {
     SphericalHarmonicPlan * P = malloc(sizeof(SphericalHarmonicPlan));
     P->RP = plan_rotsphere(n);
-    posix_memalign((void **) &(P->B), ALIGN_SIZE*8, ALIGNB(n) * (2*n-1) * sizeof(double));
+    P->B = (double *) VMALLOC(ALIGNB(n) * (2*n-1) * sizeof(double));
     P->P1 = plan_leg2cheb(1, 0, n);
     P->P2 = plan_ultra2ultra(1, 0, n, 1.5, 1.0);
     P->P1inv = plan_cheb2leg(0, 1, n);
@@ -486,7 +486,7 @@ void execute_fourier2sph(const SphericalHarmonicPlan * P, double * A, const int 
 
 void freeTriangularHarmonicPlan(TriangularHarmonicPlan * P) {
     freeRotationPlan(P->RP);
-    free(P->B);
+    VFREE(P->B);
     free(P->P1);
     free(P->P2);
     free(P->P3);
@@ -501,7 +501,7 @@ void freeTriangularHarmonicPlan(TriangularHarmonicPlan * P) {
 TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma) {
     TriangularHarmonicPlan * P = malloc(sizeof(TriangularHarmonicPlan));
     P->RP = plan_rottriangle(n, alpha, beta, gamma);
-    posix_memalign((void **) &(P->B), ALIGN_SIZE*8, ALIGNB(n) * n * sizeof(double));
+    P->B = (double *) VMALLOC(ALIGNB(n) * n * sizeof(double));
     P->P1 = plan_jac2jac(1, 1, n, beta + gamma + 1.0, alpha, -0.5);
     P->P2 = plan_jac2jac(1, 1, n, alpha, -0.5, -0.5);
     P->P3 = plan_jac2jac(1, 1, n, gamma, beta, -0.5);
