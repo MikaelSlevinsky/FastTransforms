@@ -93,7 +93,7 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = sphones(N, M);
-        B = sphones(N, M);
+        B = copyA(N, M);
         RP = plan_rotsphere(N);
 
         gettimeofday(&start, NULL);
@@ -164,11 +164,11 @@ int main(int argc, const char * argv[]) {
         freeRotationPlan(RP);
     }
     printf("];\n");
-/*
+
     printf("\nTesting the accuracy of spherical harmonic transforms.\n\n");
     printf("err2 = [\n");
     for (int i = 0; i < IERR; i++) {
-        N = 64*pow(2, i);
+        N = 64*pow(2, i)-1;
         M = 2*N-1;
 
         A = sphrand(N, M);
@@ -287,7 +287,7 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = triones(N, M);
-        B = triones(N, M);
+        B = copyA(A, N, M);
         RP = plan_rottriangle(N, alpha, beta, gamma);
 
         gettimeofday(&start, NULL);
@@ -481,7 +481,7 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = diskones(N, M);
-        B = diskones(N, M);
+        B = copyA(A, N, M);
         RP = plan_rotdisk(N);
 
         gettimeofday(&start, NULL);
@@ -605,7 +605,7 @@ int main(int argc, const char * argv[]) {
 
         for (int S = 0; S < 9; S++) {
             A = spinsphones(N, M, S);
-            B = spinsphones(N, M, S);
+            B = copyA(A, N, M);
             SRP = plan_rotspinsphere(N, S);
 
             gettimeofday(&start, NULL);
@@ -631,6 +631,6 @@ int main(int argc, const char * argv[]) {
         printf("\n");
     }
     printf("];\n");
-*/
+
     return 0;
 }

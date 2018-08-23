@@ -62,7 +62,7 @@ double rotnorm(const RotationPlan * RP) {
 }
 
 double * sphones(int n, int m) {
-    double * A  = (double*) aligned_alloc(ALIGN_SIZE*8, n*m*sizeof(double));
+    double * A  = (double*) calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-2*i; j++)
             A(i,j) = 1.0;
