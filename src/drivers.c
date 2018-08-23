@@ -458,7 +458,7 @@ void freeSphericalHarmonicPlan(SphericalHarmonicPlan * P) {
 }
 
 SphericalHarmonicPlan * plan_sph2fourier(const int n) {
-    int NB = n+(ALIGN_SIZE-n%ALIGN_SIZE)
+    int NB = n+(ALIGN_SIZE-n%ALIGN_SIZE);
     SphericalHarmonicPlan * P = malloc(sizeof(SphericalHarmonicPlan));
     P->RP = plan_rotsphere(n);
     P->B = (double *) aligned_alloc(NB * (2*n-1), ALIGN_SIZE*8);
@@ -500,7 +500,7 @@ void freeTriangularHarmonicPlan(TriangularHarmonicPlan * P) {
 }
 
 TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma) {
-    int NB = n+(ALIGN_SIZE-n%ALIGN_SIZE)
+    int NB = n+(ALIGN_SIZE-n%ALIGN_SIZE);
     TriangularHarmonicPlan * P = malloc(sizeof(TriangularHarmonicPlan));
     P->RP = plan_rottriangle(n, alpha, beta, gamma);
     P->B = (double *) aligned_alloc(NB * n, ALIGN_SIZE*8);
