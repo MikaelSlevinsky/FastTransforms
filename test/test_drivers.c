@@ -14,12 +14,16 @@ int main(int argc, const char * argv[]) {
     //double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
     double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 
-    int IERR, ITIME, N, M, NLOOPS;
+    int IERR, ITIME, J, N, M, NLOOPS;
 
 
     if (argc > 1) {
         sscanf(argv[1], "%d", &IERR);
-        if (argc > 2) sscanf(argv[2], "%d", &ITIME);
+        if (argc > 2) {
+            sscanf(argv[2], "%d", &ITIME);
+            if (argc > 3) sscanf(argv[3], "%d", &J);
+            else J = 0;
+        }
         else ITIME = 1;
     }
     else IERR = 1;
@@ -28,7 +32,7 @@ int main(int argc, const char * argv[]) {
     printf("\nTesting the accuracy of spherical harmonic drivers.\n\n");
     printf("err1 = [\n");
     for (int i = 0; i < IERR; i++) {
-        N = 64*pow(2, i);
+        N = 64*pow(2, i)+J;
         M = 2*N-1;
 
         A = sphones(N, M);
@@ -88,7 +92,7 @@ int main(int argc, const char * argv[]) {
     printf("\nTiming spherical harmonic drivers.\n\n");
     printf("t1 = [\n");
     for (int i = 0; i < ITIME; i++) {
-        N = 64*pow(2, i);
+        N = 64*pow(2, i)+J;
         M = 2*N-1;
         NLOOPS = 1 + pow(2048/N, 2);
 
@@ -167,8 +171,8 @@ int main(int argc, const char * argv[]) {
 
     printf("\nTesting the accuracy of spherical harmonic transforms.\n\n");
     printf("err2 = [\n");
-    for (int i = 0; i < 8; i++) {
-        N = 64*pow(2, 1)+i;
+    for (int i = 0; i < IERR; i++) {
+        N = 64*pow(2, i)+J;
         M = 2*N-1;
 
         A = sphrand(N, M);
@@ -190,7 +194,7 @@ int main(int argc, const char * argv[]) {
     printf("\nTiming spherical harmonic transforms.\n\n");
     printf("t2 = [\n");
     for (int i = 0; i < ITIME; i++) {
-        N = 64*pow(2, i);
+        N = 64*pow(2, i)+J;
         M = 2*N-1;
         NLOOPS = 1 + pow(2048/N, 2);
 
@@ -221,8 +225,8 @@ int main(int argc, const char * argv[]) {
     printf("\nTesting the accuracy of triangular harmonic drivers.\n\n");
     printf("err3 = [\n");
     for (int i = 0; i < IERR; i++) {
-        N = 64*pow(2, i);
-        M = N-4;
+        N = 64*pow(2, i)+J;
+        M = N;
 
         A = triones(N, M);
         Ac = copyA(A, N, M);
@@ -282,7 +286,7 @@ int main(int argc, const char * argv[]) {
     printf("\nTiming triangular harmonic drivers.\n\n");
     printf("t3 = [\n");
     for (int i = 0; i < ITIME; i++) {
-        N = 64*pow(2, i);
+        N = 64*pow(2, i)+J;
         M = N;
         NLOOPS = 1 + pow(2048/N, 2);
 
@@ -363,7 +367,7 @@ int main(int argc, const char * argv[]) {
     printf("\nTesting the accuracy of triangular harmonic transforms.\n\n");
     printf("err4 = [\n");
     for (int i = 0; i < IERR; i++) {
-        N = 64*pow(2, i);
+        N = 64*pow(2, i)+J;
         M = N;
 
         A = trirand(N, M);
@@ -385,7 +389,7 @@ int main(int argc, const char * argv[]) {
     printf("\nTiming triangular harmonic transforms.\n\n");
     printf("t4 = [\n");
     for (int i = 0; i < ITIME; i++) {
-        N = 64*pow(2, i);
+        N = 64*pow(2, i)+J;
         M = N;
         NLOOPS = 1 + pow(2048/N, 2);
 
@@ -416,7 +420,7 @@ int main(int argc, const char * argv[]) {
     printf("\nTesting the accuracy of disk harmonic drivers.\n\n");
     printf("err5 = [\n");
     for (int i = 0; i < IERR; i++) {
-        N = 64*pow(2, i);
+        N = 64*pow(2, i)+J;
         M = 4*N-3;
 
         A = diskones(N, M);
@@ -476,7 +480,7 @@ int main(int argc, const char * argv[]) {
     printf("\nTiming disk harmonic drivers.\n\n");
     printf("t5 = [\n");
     for (int i = 0; i < ITIME; i++) {
-        N = 64*pow(2, i);
+        N = 64*pow(2, i)+J;
         M = 4*N-3;
         NLOOPS = 1 + pow(2048/N, 2);
 
@@ -557,7 +561,7 @@ int main(int argc, const char * argv[]) {
     printf("\nTesting the accuracy of spin-weighted spherical harmonic drivers.\n\n");
     printf("err6 = [\n");
     for (int i = 0; i < IERR; i++) {
-        N = 64*pow(2, i);
+        N = 64*pow(2, i)+J;
         M = 2*N-1;
 
         printf("%d", N);
@@ -597,7 +601,7 @@ int main(int argc, const char * argv[]) {
     printf("\nTiming spin-weighted spherical harmonic drivers.\n\n");
     printf("t6 = [\n");
     for (int i = 0; i < ITIME; i++) {
-        N = 64*pow(2, i);
+        N = 64*pow(2, i)+J;
         M = 2*N-1;
         NLOOPS = 1 + pow(2048/N, 2);
 
