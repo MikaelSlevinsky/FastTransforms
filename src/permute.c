@@ -2,42 +2,47 @@
 
 #include "fasttransforms.h"
 
+
 void permute(const double * A, double * B, const int N, const int M, const int L) {
+    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)
     #pragma omp parallel for if (N < 2*M)
     for (int j = 0; j < M; j += L)
         for (int i = 0; i < L*N; i++)
-            B[(L*i)%(L*N)+(L*i)/(L*N)+j*N] = A[i+j*N];
+            B[(L*i)%(L*N)+(L*i)/(L*N)+j*NB] = A[i+j*N];
 }
 
 void permute_t(double * A, const double * B, const int N, const int M, const int L) {
+    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)
     #pragma omp parallel for if (N < 2*M)
     for (int j = 0; j < M; j += L)
         for (int i = 0; i < L*N; i++)
-            A[i+j*N] = B[(L*i)%(L*N)+(L*i)/(L*N)+j*N];
+            A[i+j*N] = B[(L*i)%(L*N)+(L*i)/(L*N)+j*NB];
 }
 
 
 void permute_sph(const double * A, double * B, const int N, const int M, const int L) {
+    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)
     if (L == 2) {
         for (int i = 0; i < N; i++)
             B[i] = A[i];
-        permute(A+N, B+N, N, M-1, 2);
+        permute(A+N, B+NB, N, M-1, 2);
     }
     else {
         permute_sph(A, B, N, M%(2*L), L/2);
-        permute(A+(M%(2*L))*N, B+(M%(2*L))*N, N, M-M%(2*L), L);
+        permute(A+(M%(2*L))*N, B+(M%(2*L))*NB, N, M-M%(2*L), L);
     }
 }
 
 void permute_t_sph(double * A, const double * B, const int N, const int M, const int L) {
+    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)
     if (L == 2) {
         for (int i = 0; i < N; i++)
             A[i] = B[i];
-        permute_t(A+N, B+N, N, M-1, 2);
+        permute_t(A+N, B+NB, N, M-1, 2);
     }
     else {
         permute_t_sph(A, B, N, M%(2*L), L/2);
-        permute_t(A+(M%(2*L))*N, B+(M%(2*L))*N, N, M-M%(2*L), L);
+        permute_t(A+(M%(2*L))*N, B+(M%(2*L))*NB, N, M-M%(2*L), L);
     }
 }
 
@@ -46,30 +51,31 @@ void permute_tri(const double * A, double * B, const int N, const int M, const i
         if (M%2) {
             for (int i = 0; i < N; i++)
                 B[i] = A[i];
-            permute(A+N, B+N, N, M-1, 2);
+            permute(A+N, B+NB, N, M-1, 2);
         } else {
             permute(A, B, N, M, 2);
         }
     }
     else {
         permute_tri(A, B, N, M%(2*L), L/2);
-        permute(A+(M%(2*L))*N, B+(M%(2*L))*N, N, M-M%(2*L), L);
+        permute(A+(M%(2*L))*N, B+(M%(2*L))*NB, N, M-M%(2*L), L);
     }
 }
 
 void permute_t_tri(double * A, const double * B, const int N, const int M, const int L) {
+    int NB = N+(ALIGN_SIZE-N%ALIGN_SIZE)
     if (L == 2) {
         if (M%2) {
             for (int i = 0; i < N; i++)
                 A[i] = B[i];
-            permute_t(A+N, B+N, N, M-1, 2);
+            permute_t(A+N, B+NB, N, M-1, 2);
         } else {
             permute_t(A, B, N, M, 2);
         }
     }
     else {
         permute_t_tri(A, B, N, M%(2*L), L/2);
-        permute_t(A+(M%(2*L))*N, B+(M%(2*L))*N, N, M-M%(2*L), L);
+        permute_t(A+(M%(2*L))*N, B+(M%(2*L))*NB, N, M-M%(2*L), L);
     }
 }
 
