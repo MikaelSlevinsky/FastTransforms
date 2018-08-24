@@ -36,7 +36,7 @@ int main(int argc, const char * argv[]) {
         M = 2*N-1;
 
         A = sphones(N, M);
-        Ac = copyA(A, N, M);
+        Ac = copyAlign(A, N, M);
         B = copyA(A, N, M);
         RP = plan_rotsphere(N);
 
@@ -83,7 +83,7 @@ int main(int argc, const char * argv[]) {
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         free(A);
-        free(Ac);
+        VFREE(Ac);
         free(B);
         freeRotationPlan(RP);
     }
@@ -97,7 +97,7 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = sphones(N, M);
-        B = copyA(A, N, M);
+        B = copyAlign(A, N, M);
         RP = plan_rotsphere(N);
 
         gettimeofday(&start, NULL);
@@ -164,7 +164,7 @@ int main(int argc, const char * argv[]) {
         printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
-        free(B);
+        VFREE(B);
         freeRotationPlan(RP);
     }
     printf("];\n");
@@ -229,7 +229,7 @@ int main(int argc, const char * argv[]) {
         M = N;
 
         A = triones(N, M);
-        Ac = copyA(A, N, M);
+        Ac = copyAlign(A, N, M);
         B = copyA(A, N, M);
         RP = plan_rottriangle(N, alpha, beta, gamma);
 
@@ -276,7 +276,7 @@ int main(int argc, const char * argv[]) {
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         free(A);
-        free(Ac);
+        VFREE(Ac);
         free(B);
         freeRotationPlan(RP);
     }
@@ -291,7 +291,7 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = triones(N, M);
-        B = copyA(A, N, M);
+        B = copyAlign(A, N, M);
         RP = plan_rottriangle(N, alpha, beta, gamma);
 
         gettimeofday(&start, NULL);
@@ -359,7 +359,7 @@ int main(int argc, const char * argv[]) {
         printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
-        free(B);
+        VFREE(B);
         freeRotationPlan(RP);
     }
     printf("];\n");
@@ -424,7 +424,7 @@ int main(int argc, const char * argv[]) {
         M = 4*N-3;
 
         A = diskones(N, M);
-        Ac = copyA(A, N, M);
+        Ac = copyAlign(A, N, M);
         B = copyA(A, N, M);
         RP = plan_rotdisk(N);
 
@@ -471,7 +471,7 @@ int main(int argc, const char * argv[]) {
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         free(A);
-        free(Ac);
+        VFREE(Ac);
         free(B);
         freeRotationPlan(RP);
     }
@@ -485,7 +485,7 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = diskones(N, M);
-        B = copyA(A, N, M);
+        B = copyAlign(A, N, M);
         RP = plan_rotdisk(N);
 
         gettimeofday(&start, NULL);
@@ -553,7 +553,7 @@ int main(int argc, const char * argv[]) {
         printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
-        free(B);
+        VFREE(B);
         freeRotationPlan(RP);
     }
     printf("];\n");
@@ -567,7 +567,7 @@ int main(int argc, const char * argv[]) {
         printf("%d", N);
         for (int S = 0; S < 9; S++) {
             A = spinsphones(N, M, S);
-            Ac = copyA(A, N, M);
+            Ac = copyAlign(A, N, M);
             B = copyA(A, N, M);
             SRP = plan_rotspinsphere(N, S);
 
@@ -590,7 +590,7 @@ int main(int argc, const char * argv[]) {
             printf("  %1.2e", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
             free(A);
-            free(Ac);
+            VFREE(Ac);
             free(B);
             freeSpinRotationPlan(SRP);
         }

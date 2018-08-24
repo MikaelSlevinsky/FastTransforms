@@ -3,7 +3,7 @@
 #include "utilities.h"
 
 #define A(i,j) A[(i)+n*(j)]
-#define B(i,j) B[(i)+ALIGNB(n)*(j)]
+#define B(i,j) B[(i)+n*(j)]
 #define s(l,m) s[l+(m)*(2*n+1-(m))/2]
 #define c(l,m) c[l+(m)*(2*n+1-(m))/2]
 
@@ -125,14 +125,21 @@ double * spinsphrand(int n, int m, int s) {
     return A;
 }
 
-double * copyA(double * A, int n, int m) {
+double * copyAlign(double * A, int n, int m) {
     double * B = (double *) VMALLOC(ALIGNB(n)*m*sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m; j++)
-            B(i,j) = A(i,j);
+            B[(i)+ALIGNB(n)*(j)] = A(i,j);
     for (int i = n; i < ALIGNB(n); i++)
         for (int j = 0; j < m; j++)
-            B(i,j) = 0.0;
+            B[(i)+ALIGNB(n)*(j)] = 0.0;
+    return B;
+}
+
+double * copyA(double * A, int n, int m) {
+    double * B = (double*) calloc(n*m, sizeof(double));
+    for (int i = 0; i < n*m; i++)
+        B[i] = A[i];
     return B;
 }
 
