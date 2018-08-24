@@ -30,28 +30,38 @@
 
 #define MAX(a,b) ((a) > (b) ? a : b)
 #define MIN(a,b) ((a) < (b) ? a : b)
-
-#if __SSE2__
-    #define VECTOR_SIZE_2 2
-    typedef double double2 __attribute__ ((vector_size (VECTOR_SIZE_2*8)));
-    #define vall2(x) ((double2) _mm_set1_pd(x))
-    #define vload2(v) ((double2) _mm_loadu_pd(v))
-    #define vstore2(u, v) (_mm_storeu_pd(u, v))
+#if __AVX512F__
+    #define VECTOR_SIZE_8 8
+    #define ALIGN_SIZE VECTOR_SIZE_8
+    typedef double double8 __attribute__ ((vector_size (VECTOR_SIZE_8*8)));
+    #define vall8(x) ((double8) _mm512_set1_pd(x))
+    #define vload8(v) ((double8) _mm512_load_pd(v))
+    #define vstore8(u, v) (_mm512_store_pd(u, v))
 #endif
 #if __AVX__
     #define VECTOR_SIZE_4 4
+    #ifndef ALIGN_SIZE
+        #define ALIGN_SIZE VECTOR_SIZE_4
+    #endif
     typedef double double4 __attribute__ ((vector_size (VECTOR_SIZE_4*8)));
     #define vall4(x) ((double4) _mm256_set1_pd(x))
-    #define vload4(v) ((double4) _mm256_loadu_pd(v))
-    #define vstore4(u, v) (_mm256_storeu_pd(u, v))
+    #define vload4(v) ((double4) _mm256_load_pd(v))
+    #define vstore4(u, v) (_mm256_store_pd(u, v))
 #endif
-#if __AVX512F__
-    #define VECTOR_SIZE_8 8
-    typedef double double8 __attribute__ ((vector_size (VECTOR_SIZE_8*8)));
-    #define vall8(x) ((double8) _mm512_set1_pd(x))
-    #define vload8(v) ((double8) _mm512_loadu_pd(v))
-    #define vstore8(u, v) (_mm512_storeu_pd(u, v))
+#if __SSE2__
+    #define VECTOR_SIZE_2 2
+    #ifndef ALIGN_SIZE
+        #define ALIGN_SIZE VECTOR_SIZE_2
+    #endif
+    typedef double double2 __attribute__ ((vector_size (VECTOR_SIZE_2*8)));
+    #define vall2(x) ((double2) _mm_set1_pd(x))
+    #define vload2(v) ((double2) _mm_load_pd(v))
+    #define vstore2(u, v) (_mm_store_pd(u, v))
 #endif
+
+#define ALIGNB(N) (N + ALIGN_SIZE-1-(N+ALIGN_SIZE-1)%ALIGN_SIZE)
+#define VMALLOC(s) _mm_malloc(s, ALIGN_SIZE*8)
+#define VFREE(s) _mm_free(s)
 
 static inline double stirlingseries(const double z);
 static inline double Aratio(const int n, const double alpha, const double beta);

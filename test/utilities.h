@@ -25,6 +25,7 @@ double * diskrand(int n, int m);
 double * spinsphones(int n, int m, int s);
 double * spinsphrand(int n, int m, int s);
 double * copyA(double * A, int n, int m);
+double * copyAlign(double * A, int n, int m);
 double elapsed(struct timeval * start, struct timeval * end, int N);
 
 #endif //UTILITIES_H

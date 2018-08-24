@@ -62,7 +62,7 @@ double rotnorm(const RotationPlan * RP) {
 }
 
 double * sphones(int n, int m) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A  = (double *) calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-2*i; j++)
             A(i,j) = 1.0;
@@ -125,8 +125,19 @@ double * spinsphrand(int n, int m, int s) {
     return A;
 }
 
+double * copyAlign(double * A, int n, int m) {
+    double * B = (double *) VMALLOC(ALIGNB(n)*m*sizeof(double));
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            B[(i)+ALIGNB(n)*(j)] = A(i,j);
+    for (int i = n; i < ALIGNB(n); i++)
+        for (int j = 0; j < m; j++)
+            B[(i)+ALIGNB(n)*(j)] = 0.0;
+    return B;
+}
+
 double * copyA(double * A, int n, int m) {
-    double * B = (double *) calloc(n * m, sizeof(double));
+    double * B = (double*) calloc(n*m, sizeof(double));
     for (int i = 0; i < n*m; i++)
         B[i] = A[i];
     return B;
