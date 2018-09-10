@@ -132,6 +132,48 @@ void execute_sph_analysis(const SphereFFTWPlan * P, double * X, const int N, con
 }
 
 
+void freeTriangleFFTWPlan(TriangleFFTWPlan * P) {
+    fftw_destroy_plan(P->planxy);
+    free(P);
+}
+
+TriangleFFTWPlan * plan_tri_synthesis(const int N, const int M) {
+    TriangleFFTWPlan * P = malloc(sizeof(TriangleFFTWPlan));
+    P->planxy = fftw_plan_r2r_2d(N, M, NULL, NULL, FFTW_REDFT01, FFTW_REDFT01, FFTW_ESTIMATE);
+    return P;
+}
+
+TriangleFFTWPlan * plan_tri_analysis(const int N, const int M) {
+    TriangleFFTWPlan * P = malloc(sizeof(TriangleFFTWPlan));
+    P->planxy = fftw_plan_r2r_2d(N, M, NULL, NULL, FFTW_REDFT10, FFTW_REDFT10, FFTW_ESTIMATE);
+    return P;
+}
+
+void execute_tri_synthesis(const TriangleFFTWPlan * P, double * X, const int N, const int M) {
+    if (N > 1 && M > 1) {
+        for (int i = 0; i < N; i++)
+            X[i] *= 2.0;
+        for (int j = 0; j < M; j++)
+            X[j*N] *= 2.0;
+        fftw_execute_r2r(P->planxy, X, X);
+        for (int i = 0; i < N*M; i++)
+            X[i] *= 0.25;
+    }
+}
+
+void execute_tri_analysis(const TriangleFFTWPlan * P, double * X, const int N, const int M) {
+    if (N > 1 && M > 1) {
+        fftw_execute_r2r(P->planxy, X, X);
+        for (int i = 0; i < N; i++)
+            X[i] *= 0.5;
+        for (int j = 0; j < M; j++)
+            X[j*N] *= 0.5;
+        for (int i = 0; i < N*M; i++)
+            X[i] /= N*M;
+    }
+}
+
+
 static inline void colswap(const double * X, double * Y, const int N, const int M) {
     for (int i = 0; i < N; i++)
         Y[i] = X[i];

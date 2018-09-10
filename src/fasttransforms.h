@@ -297,6 +297,19 @@ SphereFFTWPlan * plan_sph_analysis(const int N, const int M);
 void execute_sph_synthesis(const SphereFFTWPlan * P, double * X, const int N, const int M);
 void execute_sph_analysis(const SphereFFTWPlan * P, double * X, const int N, const int M);
 
+typedef struct {
+    fftw_plan planxy;
+} TriangleFFTWPlan;
+
+void freeTriangleFFTWPlan(TriangleFFTWPlan * P);
+
+TriangleFFTWPlan * plan_tri_synthesis(const int N, const int M);
+TriangleFFTWPlan * plan_tri_analysis(const int N, const int M);
+
+void execute_tri_synthesis(const TriangleFFTWPlan * P, double * X, const int N, const int M);
+void execute_tri_analysis(const TriangleFFTWPlan * P, double * X, const int N, const int M);
+
+
 static inline void colswap(const double * X, double * Y, const int N, const int M);
 static inline void colswap_t(double * X, const double * Y, const int N, const int M);
 
