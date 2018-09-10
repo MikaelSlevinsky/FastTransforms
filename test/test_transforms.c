@@ -32,7 +32,7 @@ int main(void) {
         free(C);
     }
 
-    double lambda1 = 1.5, lambda2 = 1.0;
+    double lambda1, lambda2;
 
     printf("\n\nTesting the accuracy of ultraspherical--ultraspherical transforms.\n");
     for (int n = 64; n < N; n *= 2) {
@@ -43,18 +43,42 @@ int main(void) {
         for (int i = 0; i < n; i++)
             C[i+n*i] = 1.0;
 
-        for (int normultra1 = 0; normultra1 <= 1; normultra1++) {
-            for (int normultra2 = 0; normultra2 <= 1; normultra2++) {
+        for (int cases = 0; cases < 3; cases++) {
+            switch (cases) {
+                case 0:
+                {
+                    lambda1 = 1.5;
+                    lambda2 = 1.0;
+                    break;
+                }
+                case 1:
+                {
+                    lambda1 = 0.25;
+                    lambda2 = 1.25;
+                    break;
+                }
+                case 2:
+                {
+                    lambda1 = 0.5;
+                    lambda2 = 2.5;
+                    break;
+                }
+            }
+            printf("\t\tUltraspherical parameters (%1.2f) → (%1.2f): \n", lambda1, lambda2);
 
-                A = plan_ultra2ultra(normultra1, normultra2, n, lambda1, lambda2);
-                B = plan_ultra2ultra(normultra2, normultra1, n, lambda2, lambda1);
+            for (int normultra1 = 0; normultra1 <= 1; normultra1++) {
+                for (int normultra2 = 0; normultra2 <= 1; normultra2++) {
 
-                cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
+                    A = plan_ultra2ultra(normultra1, normultra2, n, lambda1, lambda2);
+                    B = plan_ultra2ultra(normultra2, normultra1, n, lambda2, lambda1);
 
-                printf("\t\tNormalization of SRC:TRG = %d:%d. The relative Frobenius norm error is: %1.2e.\n", normultra1, normultra2, vecnorm_2arg(B, C, n, n)/vecnorm_1arg(C, n, n));
+                    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
 
-                free(A);
-                free(B);
+                    printf("\t\t\tNormalization of SRC:TRG = %d:%d. The relative Frobenius norm error is: %1.2e.\n", normultra1, normultra2, vecnorm_2arg(B, C, n, n)/vecnorm_1arg(C, n, n));
+
+                    free(A);
+                    free(B);
+                }
             }
         }
         free(C);
@@ -71,7 +95,7 @@ int main(void) {
         for (int i = 0; i < n; i++)
             C[i+n*i] = 1.0;
 
-        for (int cases = 0; cases < 4; cases++) {
+        for (int cases = 0; cases < 8; cases++) {
             switch (cases) {
                 case 0:
                 {
@@ -99,6 +123,34 @@ int main(void) {
                     alpha = -0.25;
                     beta = -0.75;
                     gamma = 0.25;
+                    break;
+                }
+                case 4:
+                {
+                    alpha = 1.0;
+                    beta = 0.0;
+                    gamma = -0.5;
+                    break;
+                }
+                case 5:
+                {
+                    alpha = 0.0;
+                    beta = -0.5;
+                    gamma = -0.5;
+                    break;
+                }
+                case 6:
+                {
+                    alpha = -0.5;
+                    beta = 0.5;
+                    gamma = -0.5;
+                    break;
+                }
+                case 7:
+                {
+                    alpha = 0.5;
+                    beta = -0.5;
+                    gamma = -0.5;
                     break;
                 }
             }

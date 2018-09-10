@@ -121,12 +121,17 @@ double * plan_ultra2ultra(const int normultra1, const int normultra2, const int 
     double * lam2 = (double *) calloc(n, sizeof(double));
     double * sclrow = (double *) calloc(n, sizeof(double));
     double * sclcol = (double *) calloc(n, sizeof(double));
-    double scl = tgamma(l2)/tgamma(l1)/tgamma(l1-l2);
+    double scl = tgamma(l2)/tgamma(l1);
     for (int i = 0; i < n; i++) {
-        lam1[i] = lambda2((double) i, l1 - l2, 1.0);
+        lam1[i] = lambda2((double) i, l1 - l2, 1.0)/tgamma(l1-l2);
         lam2[i] = lambda2((double) i, l1, l2 + 1.0);
         sclrow[i] = normultra2 ? sqrt(2.0*M_PI*lambda2((double) i, 2.0*l2, 1.0)/(i+l2))/(pow(2.0, l2)*tgamma(l2)) : 1.0;
         sclcol[i] = normultra1 ? sqrt((i+l1)/(2.0*M_PI*lambda2((double) i, 2.0*l1, 1.0)))*(pow(2.0, l1)*tgamma(l1)) : 1.0;
+    }
+    if (fabs((l1 - l2) - (int) (l1 - l2)) < M_EPS*(fabs(l1)+fabs(l2))) {
+        lam1[0] = 1.0;
+        for (int i = 0; i < n-1; i++)
+            lam1[i+1] = (l1 - l2 + i)/(1.0 + i)*lam1[i];
     }
     for (int j = 0; j < n; j++)
         for (int i = j; i >= 0; i -= 2)
@@ -145,15 +150,20 @@ double * plan_jac2jac(const int normjac1, const int normjac2, const int n, const
     double * sclrow = (double *) calloc(n, sizeof(double));
     double * sclcol = (double *) calloc(n, sizeof(double));
     for (int i = 0; i < n; i++) {
-        lam1[i] = lambda2((double) i, alpha - gamma, 1.0);
+        lam1[i] = lambda2((double) i, alpha - gamma, 1.0)/tgamma(alpha - gamma);
         sclrow[i] = (2.0*i + gamma + beta + 1.0)*lambda2((double) i, gamma + beta + 1.0, beta + 1.0);
-        sclcol[i] = lambda2((double) i, beta + 1.0, alpha + beta + 1.0)/tgamma(alpha - gamma);
+        sclcol[i] = lambda2((double) i, beta + 1.0, alpha + beta + 1.0);
+    }
+    if (fabs((alpha - gamma) - (int) (alpha - gamma)) < M_EPS*(fabs(alpha)+fabs(gamma))) {
+        lam1[0] = 1.0;
+        for (int i = 0; i < n-1; i++)
+            lam1[i+1] = (alpha - gamma + i)/(1.0 + i)*lam1[i];
     }
     for (int i = 0; i < 2*n; i++)
         lam2[i] = lambda2((double) i, alpha + beta + 1.0, gamma + beta + 2.0);
-    if (beta + gamma == -1.0)
+    if (fabs(beta + gamma + 1.0) < M_EPS*(fabs(beta)+fabs(gamma)+1.0))
         sclrow[0] = 1.0/tgamma(beta + 1.0);
-    if (alpha + beta == -1.0) {
+    if (fabs(alpha + beta + 1.0) < M_EPS*(fabs(alpha)+fabs(beta)+1.0)) {
         lam2[0] = 1.0/(sclrow[0]*lam1[0]);
         sclcol[0] = 1.0;
     }

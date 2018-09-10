@@ -27,6 +27,7 @@
 #define M_SQRT_PI_2    0.886226925452758014   /* sqrt(pi)/2     */
 #define M_4_SQRT_PI    7.089815403622064109   /* 4*sqrt(pi)     */
 #define M_1_4_SQRT_PI  0.141047395886939072   /* 1/(4*sqrt(pi)) */
+#define M_EPS          2.220446049250313E-16  /* pow(2.0, -52)  */
 
 #define MAX(a,b) ((a) > (b) ? a : b)
 #define MIN(a,b) ((a) < (b) ? a : b)
