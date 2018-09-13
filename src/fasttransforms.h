@@ -235,12 +235,8 @@ typedef struct {
     double * B;
     double * P1;
     double * P2;
-    double * P3;
-    double * P4;
     double * P1inv;
     double * P2inv;
-    double * P3inv;
-    double * P4inv;
     double alpha;
     double beta;
     double gamma;

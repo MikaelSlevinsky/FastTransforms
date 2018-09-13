@@ -489,12 +489,8 @@ void freeTriangularHarmonicPlan(TriangularHarmonicPlan * P) {
     VFREE(P->B);
     free(P->P1);
     free(P->P2);
-    free(P->P3);
-    free(P->P4);
     free(P->P1inv);
     free(P->P2inv);
-    free(P->P3inv);
-    free(P->P4inv);
     free(P);
 }
 
@@ -503,13 +499,29 @@ TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const do
     P->RP = plan_rottriangle(n, alpha, beta, gamma);
     P->B = (double *) VMALLOC(ALIGNB(n) * n * sizeof(double));
     P->P1 = plan_jac2jac(1, 1, n, beta + gamma + 1.0, alpha, -0.5);
-    P->P2 = plan_jac2jac(1, 1, n, alpha, -0.5, -0.5);
-    P->P3 = plan_jac2jac(1, 1, n, gamma, beta, -0.5);
-    P->P4 = plan_jac2jac(1, 1, n, beta, -0.5, -0.5);
-    P->P1inv = plan_jac2jac(1, 1, n, -0.5, alpha, beta + gamma + 1.0);
-    P->P2inv = plan_jac2jac(1, 1, n, -0.5, -0.5, alpha);
-    P->P3inv = plan_jac2jac(1, 1, n, -0.5, beta, gamma);
-    P->P4inv = plan_jac2jac(1, 1, n, -0.5, -0.5, beta);
+    double * P12 = plan_jac2jac(1, 1, n, alpha, -0.5, -0.5);
+    alternate_sign(P12, n, n);
+    alternate_sign_t(P12, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P12, n, P->P1, n);
+    free(P12);
+    P->P2 = plan_jac2jac(1, 1, n, gamma, beta, -0.5);
+    double * P22 = plan_jac2jac(1, 1, n, beta, -0.5, -0.5);
+    alternate_sign(P22, n, n);
+    alternate_sign_t(P22, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P22, n, P->P2, n);
+    free(P22);
+    P->P1inv = plan_jac2jac(1, 1, n, -0.5, -0.5, alpha);
+    double * P12inv = plan_jac2jac(1, 1, n, -0.5, alpha, beta + gamma + 1.0);
+    alternate_sign(P->P1inv, n, n);
+    alternate_sign_t(P->P1inv, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P12inv, n, P->P1inv, n);
+    free(P12inv);
+    P->P2inv = plan_jac2jac(1, 1, n, -0.5, -0.5, beta);
+    double * P22inv = plan_jac2jac(1, 1, n, -0.5, beta, gamma);
+    alternate_sign(P->P2inv, n, n);
+    alternate_sign_t(P->P2inv, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P22inv, n, P->P2inv, n);
+    free(P22inv);
     P->alpha = alpha;
     P->beta = beta;
     P->gamma = gamma;
@@ -518,38 +530,18 @@ TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const do
 
 void execute_tri2cheb(const TriangularHarmonicPlan * P, double * A, const int N, const int M) {
     execute_tri_hi2lo_AVX512(P->RP, A, P->B, M);
-    if (P->beta + P->gamma != -1.5)
+    if ((P->beta + P->gamma != -1.5) || (P->alpha != -0.5))
         cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1, N, A, N);
-    if (P->alpha != -0.5) {
-        alternate_sign(A, N, M);
-        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P2, N, A, N);
-        alternate_sign(A, N, M);
-    }
-    if (P->gamma != -0.5)
-        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P3, N, A, N);
-    if (P->beta != -0.5) {
-        alternate_sign_t(A, N, M);
-        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P4, N, A, N);
-        alternate_sign_t(A, N, M);
-    }
+    if ((P->gamma != -0.5) || (P->beta != -0.5))
+        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P2, N, A, N);
     chebyshev_normalization(A, N, M);
 }
 
 void execute_cheb2tri(const TriangularHarmonicPlan * P, double * A, const int N, const int M) {
     chebyshev_normalization_t(A, N, M);
-    if (P->beta != -0.5) {
-        alternate_sign_t(A, N, M);
-        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P4inv, N, A, N);
-        alternate_sign_t(A, N, M);
-    }
-    if (P->gamma != -0.5)
-        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P3inv, N, A, N);
-    if (P->alpha != -0.5) {
-        alternate_sign(A, N, M);
-        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P2inv, N, A, N);
-        alternate_sign(A, N, M);
-    }
-    if (P->beta + P->gamma != -1.5)
+    if ((P->beta != -0.5) || (P->gamma != -0.5))
+        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P2inv, N, A, N);
+    if ((P->alpha != -0.5) || (P->beta + P->gamma != -1.5))
         cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1inv, N, A, N);
     execute_tri_lo2hi_AVX512(P->RP, A, P->B, M);
 }
