@@ -9,8 +9,7 @@ int main(int argc, const char * argv[]) {
     static double * B;
     RotationPlan * RP;
     SpinRotationPlan * SRP;
-    SphericalHarmonicPlan * P;
-    TriangularHarmonicPlan * Q;
+    HarmonicPlan * P;
     //double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
     double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 
@@ -187,7 +186,7 @@ int main(int argc, const char * argv[]) {
 
         free(A);
         free(B);
-        freeSphericalHarmonicPlan(P);
+        freeHarmonicPlan(P);
     }
     printf("];\n");
 
@@ -218,7 +217,7 @@ int main(int argc, const char * argv[]) {
         printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
-        freeSphericalHarmonicPlan(P);
+        freeHarmonicPlan(P);
     }
     printf("];\n");
 
@@ -372,17 +371,17 @@ int main(int argc, const char * argv[]) {
 
         A = trirand(N, M);
         B = copyA(A, N, M);
-        Q = plan_tri2cheb(N, alpha, beta, gamma);
+        P = plan_tri2cheb(N, alpha, beta, gamma);
 
-        execute_tri2cheb(Q, A, N, M);
-        execute_cheb2tri(Q, A, N, M);
+        execute_tri2cheb(P, A, N, M);
+        execute_cheb2tri(P, A, N, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         free(A);
         free(B);
-        freeTriangularHarmonicPlan(Q);
+        freeHarmonicPlan(P);
     }
     printf("];\n");
 
@@ -394,11 +393,11 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = trirand(N, M);
-        Q = plan_tri2cheb(N, alpha, beta, gamma);
+        P = plan_tri2cheb(N, alpha, beta, gamma);
 
         gettimeofday(&start, NULL);
         for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            execute_tri2cheb(Q, A, N, M);
+            execute_tri2cheb(P, A, N, M);
         }
         gettimeofday(&end, NULL);
 
@@ -406,14 +405,14 @@ int main(int argc, const char * argv[]) {
 
         gettimeofday(&start, NULL);
         for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            execute_cheb2tri(Q, A, N, M);
+            execute_cheb2tri(P, A, N, M);
         }
         gettimeofday(&end, NULL);
 
         printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
-        freeTriangularHarmonicPlan(Q);
+        freeHarmonicPlan(P);
     }
     printf("];\n");
 
@@ -558,8 +557,61 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    printf("\nTesting the accuracy of spin-weighted spherical harmonic drivers.\n\n");
+    printf("\nTesting the accuracy of disk harmonic transforms.\n\n");
     printf("err6 = [\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 64*pow(2, i)+J;
+        M = 4*N-3;
+
+        A = diskrand(N, M);
+        B = copyA(A, N, M);
+        P = plan_disk2cxf(N);
+
+        execute_disk2cxf(P, A, N, M);
+        execute_cxf2disk(P, A, N, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        free(A);
+        free(B);
+        freeHarmonicPlan(P);
+    }
+    printf("];\n");
+
+    printf("\nTiming disk harmonic transforms.\n\n");
+    printf("t6 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 64*pow(2, i)+J;
+        M = 4*N-3;
+        NLOOPS = 1 + pow(2048/N, 2);
+
+        A = diskrand(N, M);
+        P = plan_disk2cxf(N);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_disk2cxf(P, A, N, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_cxf2disk(P, A, N, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+
+        free(A);
+        freeHarmonicPlan(P);
+    }
+    printf("];\n");
+
+    printf("\nTesting the accuracy of spin-weighted spherical harmonic drivers.\n\n");
+    printf("err7 = [\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
@@ -599,7 +651,7 @@ int main(int argc, const char * argv[]) {
     printf("];\n");
 
     printf("\nTiming spin-weighted spherical harmonic drivers.\n\n");
-    printf("t6 = [\n");
+    printf("t7 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;

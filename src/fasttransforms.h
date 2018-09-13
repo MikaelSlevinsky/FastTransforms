@@ -221,33 +221,27 @@ typedef struct {
     double * P2;
     double * P1inv;
     double * P2inv;
-} SphericalHarmonicPlan;
-
-void freeSphericalHarmonicPlan(SphericalHarmonicPlan * P);
-
-SphericalHarmonicPlan * plan_sph2fourier(const int n);
-
-void execute_sph2fourier(const SphericalHarmonicPlan * P, double * A, const int N, const int M);
-void execute_fourier2sph(const SphericalHarmonicPlan * P, double * A, const int N, const int M);
-
-typedef struct {
-    RotationPlan * RP;
-    double * B;
-    double * P1;
-    double * P2;
-    double * P1inv;
-    double * P2inv;
     double alpha;
     double beta;
     double gamma;
-} TriangularHarmonicPlan;
+} HarmonicPlan;
 
-void freeTriangularHarmonicPlan(TriangularHarmonicPlan * P);
+void freeHarmonicPlan(HarmonicPlan * P);
 
-TriangularHarmonicPlan * plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma);
+HarmonicPlan * plan_sph2fourier(const int n);
 
-void execute_tri2cheb(const TriangularHarmonicPlan * P, double * A, const int N, const int M);
-void execute_cheb2tri(const TriangularHarmonicPlan * P, double * A, const int N, const int M);
+void execute_sph2fourier(const HarmonicPlan * P, double * A, const int N, const int M);
+void execute_fourier2sph(const HarmonicPlan * P, double * A, const int N, const int M);
+
+HarmonicPlan * plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma);
+
+void execute_tri2cheb(const HarmonicPlan * P, double * A, const int N, const int M);
+void execute_cheb2tri(const HarmonicPlan * P, double * A, const int N, const int M);
+
+HarmonicPlan * plan_disk2cxf(const int n);
+
+void execute_disk2cxf(const HarmonicPlan * P, double * A, const int N, const int M);
+void execute_cxf2disk(const HarmonicPlan * P, double * A, const int N, const int M);
 
 static void alternate_sign(double * A, const int N, const int M);
 static void alternate_sign_t(double * A, const int N, const int M);
@@ -255,6 +249,8 @@ static void alternate_sign_t(double * A, const int N, const int M);
 static void chebyshev_normalization(double * A, const int N, const int M);
 static void chebyshev_normalization_t(double * A, const int N, const int M);
 
+static void partial_chebyshev_normalization(double * A, const int N, const int M);
+static void partial_chebyshev_normalization_t(double * A, const int N, const int M);
 
 void permute(const double * A, double * B, const int N, const int M, const int L);
 void permute_t(double * A, const double * B, const int N, const int M, const int L);
@@ -304,6 +300,23 @@ TriangleFFTWPlan * plan_tri_analysis(const int N, const int M);
 
 void execute_tri_synthesis(const TriangleFFTWPlan * P, double * X, const int N, const int M);
 void execute_tri_analysis(const TriangleFFTWPlan * P, double * X, const int N, const int M);
+
+typedef struct {
+    fftw_plan planr1;
+    fftw_plan planr2;
+    fftw_plan planr3;
+    fftw_plan planr4;
+    fftw_plan plantheta;
+    double * Y;
+} DiskFFTWPlan;
+
+void freeDiskFFTWPlan(DiskFFTWPlan * P);
+
+DiskFFTWPlan * plan_disk_synthesis(const int N, const int M);
+DiskFFTWPlan * plan_disk_analysis(const int N, const int M);
+
+void execute_disk_synthesis(const DiskFFTWPlan * P, double * X, const int N, const int M);
+void execute_disk_analysis(const DiskFFTWPlan * P, double * X, const int N, const int M);
 
 
 static inline void colswap(const double * X, double * Y, const int N, const int M);

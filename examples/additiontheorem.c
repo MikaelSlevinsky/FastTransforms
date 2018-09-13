@@ -35,7 +35,7 @@ int main(void) {
     printf("N.B. for the storage pattern of the printed arrays, please consult the\n");
     printf("documentation. (Arrays are stored in column-major ordering.)\n");
 
-    SphericalHarmonicPlan * P;
+    HarmonicPlan * P;
     SphereFFTWPlan * PA;
 
     double x[] = {0.0,0.0,1.0};
@@ -129,7 +129,7 @@ int main(void) {
     printf("That nonnegligible coefficient should be approximately √(2π/(4+1/2)),\n");
     printf("since the convention in this library is to orthonormalize.\n");
 
-    freeSphericalHarmonicPlan(P);
+    freeHarmonicPlan(P);
     freeSphereFFTWPlan(PA);
     free(theta);
     free(phi);

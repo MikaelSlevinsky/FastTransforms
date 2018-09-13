@@ -7,8 +7,7 @@ int main(int argc, const char * argv[]) {
 
     static double * A;
     static double * B;
-    SphericalHarmonicPlan * P;
-    TriangularHarmonicPlan * Q;
+    HarmonicPlan * P;
     SphereFFTWPlan * PS, * PA;
     TriangleFFTWPlan * QS, * QA;
     //double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
@@ -53,7 +52,7 @@ int main(int argc, const char * argv[]) {
 
         free(A);
         free(B);
-        freeSphericalHarmonicPlan(P);
+        freeHarmonicPlan(P);
         freeSphereFFTWPlan(PS);
         freeSphereFFTWPlan(PA);
     }
@@ -95,7 +94,7 @@ int main(int argc, const char * argv[]) {
         printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
-        freeSphericalHarmonicPlan(P);
+        freeHarmonicPlan(P);
         freeSphereFFTWPlan(PS);
         freeSphereFFTWPlan(PA);
     }
@@ -109,21 +108,21 @@ int main(int argc, const char * argv[]) {
 
         A = trirand(N, M);
         B = copyA(A, N, M);
-        Q = plan_tri2cheb(N, alpha, beta, gamma);
+        P = plan_tri2cheb(N, alpha, beta, gamma);
         QS = plan_tri_synthesis(N, M);
         QA = plan_tri_analysis(N, M);
 
-        execute_tri2cheb(Q, A, N, M);
+        execute_tri2cheb(P, A, N, M);
         execute_tri_synthesis(QS, A, N, M);
         execute_tri_analysis(QA, A, N, M);
-        execute_cheb2tri(Q, A, N, M);
+        execute_cheb2tri(P, A, N, M);
 
         printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
         printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
 
         free(A);
         free(B);
-        freeTriangularHarmonicPlan(Q);
+        freeHarmonicPlan(P);
         freeTriangleFFTWPlan(QS);
         freeTriangleFFTWPlan(QA);
     }
@@ -137,7 +136,7 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = trirand(N, M);
-        Q = plan_tri2cheb(N, alpha, beta, gamma);
+        P = plan_tri2cheb(N, alpha, beta, gamma);
         QS = plan_tri_synthesis(N, M);
         QA = plan_tri_analysis(N, M);
 
@@ -148,7 +147,7 @@ int main(int argc, const char * argv[]) {
 
         gettimeofday(&start, NULL);
         for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            execute_tri2cheb(Q, A, N, M);
+            execute_tri2cheb(P, A, N, M);
             execute_tri_synthesis(QS, A, N, M);
         }
         gettimeofday(&end, NULL);
@@ -158,14 +157,14 @@ int main(int argc, const char * argv[]) {
         gettimeofday(&start, NULL);
         for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
             execute_tri_analysis(QA, A, N, M);
-            execute_cheb2tri(Q, A, N, M);
+            execute_cheb2tri(P, A, N, M);
         }
         gettimeofday(&end, NULL);
 
         printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
 
         free(A);
-        freeTriangularHarmonicPlan(Q);
+        freeHarmonicPlan(P);
         freeTriangleFFTWPlan(QS);
         freeTriangleFFTWPlan(QA);
     }
