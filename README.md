@@ -6,6 +6,31 @@
 
 If you feel you need help getting started, please do not hesitate to e-mail me. If you use this library for your research, please cite the references.
 
+## Installation Notes
+
+Generically, the library makes use of OpenBLAS and FFTW. When compiled with OpenMP, the environment variable that controls multithreading is `OMP_NUM_THREADS`.
+
+### macOS
+
+The dependencies are easily installed via Homebrew. Apple's version of GCC does not support OpenMP. Example installation:
+```
+brew install gcc openblas fftw
+export CC=gcc-8 && make
+```
+On macOS, the OpenBLAS dependency is optional in light of the vecLib framework (see the `BLAS` variable in `Make.inc`). In case the library is compiled with vecLib, then the environment variable `VECLIB_MAXIMUM_THREADS` partially controls the multithreading.
+
+### Linux
+
+The dependencies are easily installed via apt-get. Example installation:
+```
+apt-get install g++-8 libblas-dev libopenblas-base libfftw3-dev
+export CC=gcc-8 && make
+```
+To access functions from the library, you must ensure that you append the current library path to the default:
+```
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
+```
+
 ## Performance Benchmark
 
 The tables below shows the current timings and accuracies for transforming orthonormal spherical harmonic coefficients drawn from U(-1,1) to bivariate Fourier series and back. The timings are reported in seconds and the error is measured in the relative 2- and ∞-norms, treating the matrices of coefficients as vectors.
