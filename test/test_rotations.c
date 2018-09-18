@@ -35,7 +35,7 @@ int main(void) {
         free(B);
 
         A = (double *) calloc(2*n, sizeof(double));
-        Ac = (double *) calloc(2*n, sizeof(double));
+        Ac = (double *) VMALLOC(2*n*sizeof(double));
         B = (double *) calloc(2*n, sizeof(double));
 
         nrm = 0.0;
@@ -62,11 +62,11 @@ int main(void) {
         printf("\t\tThe 2-norm relative error in the rotations: %1.2e.\n", sqrt(nrm));
 
         free(A);
-        free(Ac);
+        VFREE(Ac);
         free(B);
 
         A = (double *) calloc(4*n, sizeof(double));
-        Ac = (double *) calloc(4*n, sizeof(double));
+        Ac = (double *) VMALLOC(4*n*sizeof(double));
         B = (double *) calloc(4*n, sizeof(double));
 
         nrm = 0.0;
@@ -99,7 +99,7 @@ int main(void) {
         printf("\t\tThe 2-norm relative error in the rotations: %1.2e.\n", sqrt(nrm));
 
         free(A);
-        free(Ac);
+        VFREE(Ac);
         free(B);
         ft_destroy_rotation_plan(RP);
     }
@@ -131,7 +131,7 @@ int main(void) {
         free(B);
 
         A = (double *) calloc(2*n, sizeof(double));
-        Ac = (double *) calloc(2*n, sizeof(double));
+        Ac = (double *) VMALLOC(2*n*sizeof(double));
         B = (double *) calloc(2*n, sizeof(double));
 
         nrm = 0.0;
@@ -158,11 +158,11 @@ int main(void) {
         printf("\t\tThe 2-norm relative error in the rotations: %1.2e.\n", sqrt(nrm));
 
         free(A);
-        free(Ac);
+        VFREE(Ac);
         free(B);
 
         A = (double *) calloc(4*n, sizeof(double));
-        Ac = (double *) calloc(4*n, sizeof(double));
+        Ac = (double *) VMALLOC(4*n*sizeof(double));
         B = (double *) calloc(4*n, sizeof(double));
 
         nrm = 0.0;
@@ -195,7 +195,7 @@ int main(void) {
         printf("\t\tThe 2-norm relative error in the rotations: %1.2e.\n", sqrt(nrm));
 
         free(A);
-        free(Ac);
+        VFREE(Ac);
         free(B);
         ft_destroy_rotation_plan(RP);
     }
@@ -225,7 +225,7 @@ int main(void) {
         free(B);
 
         A = (double *) calloc(2*n, sizeof(double));
-        Ac = (double *) calloc(2*n, sizeof(double));
+        Ac = (double *) VMALLOC(2*n*sizeof(double));
         B = (double *) calloc(2*n, sizeof(double));
 
         nrm = 0.0;
@@ -252,7 +252,7 @@ int main(void) {
         printf("\t\tThe 2-norm relative error in the rotations: %1.2e.\n", sqrt(nrm));
 
         free(A);
-        free(Ac);
+        VFREE(Ac);
         free(B);
         ft_destroy_rotation_plan(RP);
     }
