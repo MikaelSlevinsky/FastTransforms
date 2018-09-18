@@ -62,6 +62,10 @@ int main(void) {
         }
         printf("\t\tThe 2-norm relative error in the rotations: %1.2e.\n", sqrt(nrm));
 
+        free(A);
+        free(Ac);
+        free(B);
+
         A = (double *) calloc(4*n, sizeof(double));
         Ac = (double *) calloc(4*n, sizeof(double));
         B = (double *) calloc(4*n, sizeof(double));
@@ -153,6 +157,10 @@ int main(void) {
             nrm += pow(vecnorm_2arg(A, B, n, 2)/vecnorm_1arg(B, n, 2), 2);
         }
         printf("\t\tThe 2-norm relative error in the rotations: %1.2e.\n", sqrt(nrm));
+
+        free(A);
+        free(Ac);
+        free(B);
 
         A = (double *) calloc(4*n, sizeof(double));
         Ac = (double *) calloc(4*n, sizeof(double));
