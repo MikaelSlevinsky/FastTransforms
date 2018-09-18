@@ -271,6 +271,8 @@ void swap(double * A, double * B, const int N);
 void warp(double * A, const int N, const int M, const int L);
 void warp_t(double * A, const int N, const int M, const int L);
 
+// A bitwise OR ('|') of zero or more of the following: FFTW_ESTIMATE FFTW_MEASURE FFTW_PATIENT FFTW_EXHAUSTIVE FFTW_WISDOM_ONLY FFTW_DESTROY_INPUT FFTW_PRESERVE_INPUT FFTW_UNALIGNED
+#define FT_FFTW_FLAGS FFTW_MEASURE | FFTW_DESTROY_INPUT
 
 typedef struct {
     fftw_plan plantheta1;

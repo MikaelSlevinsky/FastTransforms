@@ -4,7 +4,7 @@ matrix:
   include:
     - os: osx
       env:
-        - MATRIX_EVAL="brew update && brew cask uninstall oclint && brew install gcc && CC=gcc-8 && brew install openblas && brew install fftw"
+        - MATRIX_EVAL="brew update && brew cask uninstall oclint && brew install gcc openblas fftw && CC=gcc-8"
     - os: linux
       addons:
         apt:
@@ -24,7 +24,10 @@ before_install:
 script:
   - make lib
   - make tests
-  - OMP_NUM_THREADS=4 ./test_drivers 3 3
+  - ./test_transforms
+  - ./test_rotations
+  - OMP_NUM_THREADS=4 ./test_drivers 3 3 0
+  - OMP_NUM_THREADS=4 ./test_fftw 3 3 0
 
 notifications:
   email: false

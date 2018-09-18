@@ -4,12 +4,12 @@
 int main(int argc, const char * argv[]) {
     struct timeval start, end;
 
-
     static double * A;
     static double * B;
     HarmonicPlan * P;
     SphereFFTWPlan * PS, * PA;
     TriangleFFTWPlan * QS, * QA;
+    DiskFFTWPlan * RS, * RA;
     //double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
     double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 
@@ -101,7 +101,7 @@ int main(int argc, const char * argv[]) {
     printf("];\n");
 
     printf("\nTesting the accuracy of triangular harmonic transforms + FFTW synthesis and analysis.\n\n");
-    printf("err1 = [\n");
+    printf("err2 = [\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i)+J;
         M = N;
@@ -129,7 +129,7 @@ int main(int argc, const char * argv[]) {
     printf("];\n");
 
     printf("\nTiming triangular harmonic transforms + FFTW synthesis and analysis.\n\n");
-    printf("t1 = [\n");
+    printf("t2 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = N;
@@ -167,6 +167,76 @@ int main(int argc, const char * argv[]) {
         freeHarmonicPlan(P);
         freeTriangleFFTWPlan(QS);
         freeTriangleFFTWPlan(QA);
+    }
+    printf("];\n");
+
+    printf("\nTesting the accuracy of disk harmonic transforms + FFTW synthesis and analysis.\n\n");
+    printf("err3 = [\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 64*pow(2, i)+J;
+        M = 4*N-3;
+
+        A = diskrand(N, M);
+        B = copyA(A, N, M);
+        P = plan_disk2cxf(N);
+        RS = plan_disk_synthesis(N, M);
+        RA = plan_disk_analysis(N, M);
+
+        execute_disk2cxf(P, A, N, M);
+        execute_disk_synthesis(RS, A, N, M);
+        execute_disk_analysis(RA, A, N, M);
+        execute_cxf2disk(P, A, N, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        free(A);
+        free(B);
+        freeHarmonicPlan(P);
+        freeDiskFFTWPlan(RS);
+        freeDiskFFTWPlan(RA);
+    }
+    printf("];\n");
+
+    printf("\nTiming disk harmonic transforms + FFTW synthesis and analysis.\n\n");
+    printf("t3 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 64*pow(2, i)+J;
+        M = 4*N-3;
+        NLOOPS = 1 + pow(2048/N, 2);
+
+        A = diskrand(N, M);
+        P = plan_disk2cxf(N);
+        RS = plan_disk_synthesis(N, M);
+        RA = plan_disk_analysis(N, M);
+
+        execute_disk_synthesis(RS, A, N, M);
+        execute_disk_analysis(RA, A, N, M);
+        execute_disk_synthesis(RS, A, N, M);
+        execute_disk_analysis(RA, A, N, M);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_disk2cxf(P, A, N, M);
+            execute_disk_synthesis(RS, A, N, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            execute_disk_analysis(RA, A, N, M);
+            execute_cxf2disk(P, A, N, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+
+        free(A);
+        freeHarmonicPlan(P);
+        freeDiskFFTWPlan(RS);
+        freeDiskFFTWPlan(RA);
     }
     printf("];\n");
 

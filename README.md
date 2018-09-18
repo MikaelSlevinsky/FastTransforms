@@ -8,11 +8,15 @@ If you feel you need help getting started, please do not hesitate to e-mail me. 
 
 ## Installation Notes
 
-Generically, the library makes use of OpenBLAS and FFTW. When compiled with OpenMP, the environment variable that controls multithreading is `OMP_NUM_THREADS`.
+Generically, the library makes use of OpenBLAS and FFTW3, which are easily installed via package managers such as Homebrew or apt-get. Alternatively, FFTW may be compiled independently to ensure that microkernels make full use of vectorization. For example, you may want to build and install FFTW via:
+```
+./configure --enable-sse2 --enable-avx2 --enable-threads --enable-openmp && make && make install
+```
+When `FastTransforms` is compiled with OpenMP, the environment variable that controls multithreading is `OMP_NUM_THREADS`.
 
 ### macOS
 
-The dependencies are easily installed via Homebrew. Apple's version of GCC does not support OpenMP. Example installation:
+Apple's version of GCC does not support OpenMP. Sample installation:
 ```
 brew install gcc openblas fftw
 export CC=gcc-8 && make
@@ -21,7 +25,7 @@ On macOS, the OpenBLAS dependency is optional in light of the vecLib framework (
 
 ### Linux
 
-The dependencies are easily installed via apt-get. Example installation:
+Sample installation:
 ```
 apt-get install g++-8 libblas-dev libopenblas-base libfftw3-dev
 export CC=gcc-8 && make
