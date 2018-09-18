@@ -1,6 +1,6 @@
 // Computational routines for one-dimensional orthogonal polynomial transforms.
 
-#include "fasttransforms.h"
+#include "ftinternal.h"
 
 static inline double stirlingseries(const double z) {
     double iz = 1.0/z;

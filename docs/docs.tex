@@ -29,15 +29,15 @@ The transforms are separated into computational kernels that offer SSE, AVX, and
 
 For every subsection below, the title of the subsection, of the form \verb+a2b+, refers conceptually to the transform and the available functions are as follows:
 \begin{itemize}
-\item \verb+plan_a2b+, is a pre-computation,
-\item \verb+execute_a2b+, is a forward execution,
-\item \verb+execute_b2a+, is a backward execution,
-\item \verb+execute_a_hi2lo+, is a conversion to a tensor-product basis,
-\item \verb+execute_a_lo2hi+, is a conversion from a tensor-product basis,
-\item \verb+kernel_a_hi2lo+, is an orthonormal conversion from high to low order,
-\item \verb+kernel_a_lo2hi+, is an orthonormal conversion from low to high order.
+\item \verb+ft_plan_a2b+, is a pre-computation,
+\item \verb+ft_execute_a2b+, is a forward execution,
+\item \verb+ft_execute_b2a+, is a backward execution,
+\item \verb+ft_execute_a_hi2lo+, is a conversion to a tensor-product basis,
+\item \verb+ft_execute_a_lo2hi+, is a conversion from a tensor-product basis,
+\item \verb+ft_kernel_a_hi2lo+, is an orthonormal conversion from high to low order,
+\item \verb+ft_kernel_a_lo2hi+, is an orthonormal conversion from low to high order.
 \end{itemize}
-The \verb+execute_*+ functions are drivers that perform transforms as defined below. They are composed of computational kernels, \verb+kernel_*+ functions, that may be assembled differently.
+The \verb+ft_execute_*+ functions are drivers that perform transforms as defined below. They are composed of computational kernels, \verb+ft_kernel_*+ functions, that may be assembled differently.
 
 \subsection{{\tt sph2fourier}}
 

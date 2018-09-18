@@ -9,13 +9,14 @@
 #include <float.h>
 #include <sys/time.h>
 #include "fasttransforms.h"
+#include "ftinternal.h"
 
 void printmat(char * MAT, double * A, int n, int m);
 double vecnorm_1arg(double * A, int n, int m);
 double vecnorm_2arg(double * A, double * B, int n, int m);
 double vecnormInf_1arg(double * A, int n, int m);
 double vecnormInf_2arg(double * A, double * B, int n, int m);
-double rotnorm(const RotationPlan * RP);
+double rotnorm(const ft_rotation_plan * RP);
 double * sphones(int n, int m);
 double * sphrand(int n, int m);
 double * triones(int n, int m);

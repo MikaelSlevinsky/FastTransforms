@@ -1,7 +1,6 @@
-// Permutations that enable SSE and AVX vectorization.
+// Permutations that enable SSE, AVX, and AVX-512 vectorization.
 
-#include "fasttransforms.h"
-
+#include "ftinternal.h"
 
 void permute(const double * A, double * B, const int N, const int M, const int L) {
     int NB = ALIGNB(N);

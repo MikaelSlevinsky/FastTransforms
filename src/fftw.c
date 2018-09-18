@@ -1,6 +1,9 @@
-#include "fasttransforms.h"
+// FFTW overrides for synthesis and analysis on tensor product grids.
 
-void freeSphereFFTWPlan(SphereFFTWPlan * P) {
+#include "fasttransforms.h"
+#include "ftinternal.h"
+
+void ft_destroy_sphere_fftw_plan(ft_sphere_fftw_plan * P) {
     fftw_destroy_plan(P->plantheta1);
     fftw_destroy_plan(P->plantheta2);
     fftw_destroy_plan(P->plantheta3);
@@ -10,14 +13,14 @@ void freeSphereFFTWPlan(SphereFFTWPlan * P) {
     free(P);
 }
 
-SphereFFTWPlan * plan_sph_synthesis(const int N, const int M) {
+ft_sphere_fftw_plan * ft_plan_sph_synthesis(const int N, const int M) {
     int rank = 1; // not 2: we are computing 1d transforms //
     int n[] = {N}; // 1d transforms of length n //
     int idist = 4*N, odist = 4*N;
     int istride = 1, ostride = 1; // distance between two elements in the same column //
     int * inembed = n, * onembed = n;
 
-    SphereFFTWPlan * P = malloc(sizeof(SphereFFTWPlan));
+    ft_sphere_fftw_plan * P = malloc(sizeof(ft_sphere_fftw_plan));
 
     P->Y = fftw_malloc(N*M*sizeof(double));
 
@@ -47,14 +50,14 @@ SphereFFTWPlan * plan_sph_synthesis(const int N, const int M) {
     return P;
 }
 
-SphereFFTWPlan * plan_sph_analysis(const int N, const int M) {
+ft_sphere_fftw_plan * ft_plan_sph_analysis(const int N, const int M) {
     int rank = 1; // not 2: we are computing 1d transforms //
     int n[] = {N}; // 1d transforms of length n //
     int idist = 4*N, odist = 4*N;
     int istride = 1, ostride = 1; // distance between two elements in the same column //
     int * inembed = n, * onembed = n;
 
-    SphereFFTWPlan * P = malloc(sizeof(SphereFFTWPlan));
+    ft_sphere_fftw_plan * P = malloc(sizeof(ft_sphere_fftw_plan));
 
     P->Y = fftw_malloc(N*M*sizeof(double));
 
@@ -84,7 +87,7 @@ SphereFFTWPlan * plan_sph_analysis(const int N, const int M) {
     return P;
 }
 
-void execute_sph_synthesis(const SphereFFTWPlan * P, double * X, const int N, const int M) {
+void ft_execute_sph_synthesis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
     X[0] *= 2.0;
     for (int j = 3; j < M; j += 4) {
         X[j*N] *= 2.0;
@@ -102,7 +105,7 @@ void execute_sph_synthesis(const SphereFFTWPlan * P, double * X, const int N, co
     fftw_execute_r2r(P->planphi, P->Y, X);
 }
 
-void execute_sph_analysis(const SphereFFTWPlan * P, double * X, const int N, const int M) {
+void ft_execute_sph_analysis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
     fftw_execute_r2r(P->planphi, X, P->Y);
     colswap_t(X, P->Y, N, M);
     for (int i = 0; i < N*M; i++)
@@ -121,28 +124,28 @@ void execute_sph_analysis(const SphereFFTWPlan * P, double * X, const int N, con
 }
 
 
-void freeTriangleFFTWPlan(TriangleFFTWPlan * P) {
+void ft_destroy_triangle_fftw_plan(ft_triangle_fftw_plan * P) {
     fftw_destroy_plan(P->planxy);
     free(P);
 }
 
-TriangleFFTWPlan * plan_tri_synthesis(const int N, const int M) {
-    TriangleFFTWPlan * P = malloc(sizeof(TriangleFFTWPlan));
+ft_triangle_fftw_plan * ft_plan_tri_synthesis(const int N, const int M) {
+    ft_triangle_fftw_plan * P = malloc(sizeof(ft_triangle_fftw_plan));
     double * X = fftw_malloc(N*M*sizeof(double));
     P->planxy = fftw_plan_r2r_2d(N, M, X, X, FFTW_REDFT01, FFTW_REDFT01, FT_FFTW_FLAGS);
     fftw_free(X);
     return P;
 }
 
-TriangleFFTWPlan * plan_tri_analysis(const int N, const int M) {
-    TriangleFFTWPlan * P = malloc(sizeof(TriangleFFTWPlan));
+ft_triangle_fftw_plan * ft_plan_tri_analysis(const int N, const int M) {
+    ft_triangle_fftw_plan * P = malloc(sizeof(ft_triangle_fftw_plan));
     double * X = fftw_malloc(N*M*sizeof(double));
     P->planxy = fftw_plan_r2r_2d(N, M, X, X, FFTW_REDFT10, FFTW_REDFT10, FT_FFTW_FLAGS);
     fftw_free(X);
     return P;
 }
 
-void execute_tri_synthesis(const TriangleFFTWPlan * P, double * X, const int N, const int M) {
+void ft_execute_tri_synthesis(const ft_triangle_fftw_plan * P, double * X, const int N, const int M) {
     if (N > 1 && M > 1) {
         for (int i = 0; i < N; i++)
             X[i] *= 2.0;
@@ -154,7 +157,7 @@ void execute_tri_synthesis(const TriangleFFTWPlan * P, double * X, const int N, 
     }
 }
 
-void execute_tri_analysis(const TriangleFFTWPlan * P, double * X, const int N, const int M) {
+void ft_execute_tri_analysis(const ft_triangle_fftw_plan * P, double * X, const int N, const int M) {
     if (N > 1 && M > 1) {
         fftw_execute_r2r(P->planxy, X, X);
         for (int i = 0; i < N; i++)
@@ -167,7 +170,7 @@ void execute_tri_analysis(const TriangleFFTWPlan * P, double * X, const int N, c
 }
 
 
-void freeDiskFFTWPlan(DiskFFTWPlan * P) {
+void ft_destroy_disk_fftw_plan(ft_disk_fftw_plan * P) {
     fftw_destroy_plan(P->planr1);
     fftw_destroy_plan(P->planr2);
     fftw_destroy_plan(P->planr3);
@@ -177,14 +180,14 @@ void freeDiskFFTWPlan(DiskFFTWPlan * P) {
     free(P);
 }
 
-DiskFFTWPlan * plan_disk_synthesis(const int N, const int M) {
+ft_disk_fftw_plan * ft_plan_disk_synthesis(const int N, const int M) {
     int rank = 1; // not 2: we are computing 1d transforms //
     int n[] = {N}; // 1d transforms of length n //
     int idist = 4*N, odist = 4*N;
     int istride = 1, ostride = 1; // distance between two elements in the same column //
     int * inembed = n, * onembed = n;
 
-    DiskFFTWPlan * P = malloc(sizeof(DiskFFTWPlan));
+    ft_disk_fftw_plan * P = malloc(sizeof(ft_disk_fftw_plan));
 
     P->Y = fftw_malloc(N*M*sizeof(double));
 
@@ -214,14 +217,14 @@ DiskFFTWPlan * plan_disk_synthesis(const int N, const int M) {
     return P;
 }
 
-DiskFFTWPlan * plan_disk_analysis(const int N, const int M) {
+ft_disk_fftw_plan * ft_plan_disk_analysis(const int N, const int M) {
     int rank = 1; // not 2: we are computing 1d transforms //
     int n[] = {N}; // 1d transforms of length n //
     int idist = 4*N, odist = 4*N;
     int istride = 1, ostride = 1; // distance between two elements in the same column //
     int * inembed = n, * onembed = n;
 
-    DiskFFTWPlan * P = malloc(sizeof(DiskFFTWPlan));
+    ft_disk_fftw_plan * P = malloc(sizeof(ft_disk_fftw_plan));
 
     P->Y = fftw_malloc(N*M*sizeof(double));
 
@@ -251,7 +254,7 @@ DiskFFTWPlan * plan_disk_analysis(const int N, const int M) {
     return P;
 }
 
-void execute_disk_synthesis(const DiskFFTWPlan * P, double * X, const int N, const int M) {
+void ft_execute_disk_synthesis(const ft_disk_fftw_plan * P, double * X, const int N, const int M) {
     X[0] *= 2.0;
     for (int j = 3; j < M; j += 4) {
         X[j*N] *= 2.0;
@@ -269,7 +272,7 @@ void execute_disk_synthesis(const DiskFFTWPlan * P, double * X, const int N, con
     fftw_execute_r2r(P->plantheta, P->Y, X);
 }
 
-void execute_disk_analysis(const DiskFFTWPlan * P, double * X, const int N, const int M) {
+void ft_execute_disk_analysis(const ft_disk_fftw_plan * P, double * X, const int N, const int M) {
     fftw_execute_r2r(P->plantheta, X, P->Y);
     colswap_t(X, P->Y, N, M);
     for (int i = 0; i < N*M; i++)

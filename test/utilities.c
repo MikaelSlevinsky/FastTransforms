@@ -51,7 +51,7 @@ double vecnormInf_2arg(double * A, double * B, int n, int m) {
     return ret;
 }
 
-double rotnorm(const RotationPlan * RP) {
+double rotnorm(const ft_rotation_plan * RP) {
     double * s = RP->s, * c = RP->c;
     double ret = 0.0;
     int n = RP->n;

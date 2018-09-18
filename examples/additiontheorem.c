@@ -1,4 +1,6 @@
+#include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "fasttransforms.h"
 
 void printmat(char * MAT, double * A, int n, int m);
@@ -24,9 +26,9 @@ int main(void) {
     printf("\tφₘ = 2π m/M, for 0 ≤ m < M;\n");
     printf("\n");
     printf("we convert the function samples to Fourier coefficients using\n");
-    printf("`plan_sph_analysis` and `execute_sph_analysis`; and finally, we transform\n");
+    printf("`ft_plan_sph_analysis` and `ft_execute_sph_analysis`; and finally, we transform\n");
     printf("the Fourier coefficients to spherical harmonic coefficients using\n");
-    printf("`plan_sph2fourier` and `execute_fourier2sph`.\n");
+    printf("`ft_plan_sph2fourier` and `ft_execute_fourier2sph`.\n");
     printf("\n");
     printf("In the basis of spherical harmonics, it is plain to see the\n");
     printf("addition theorem in action, since P₄(x⋅y) should only consist of\n");
@@ -35,8 +37,8 @@ int main(void) {
     printf("N.B. for the storage pattern of the printed arrays, please consult the\n");
     printf("documentation. (Arrays are stored in column-major ordering.)\n");
 
-    HarmonicPlan * P;
-    SphereFFTWPlan * PA;
+    ft_harmonic_plan * P;
+    ft_sphere_fftw_plan * PA;
 
     double x[] = {0.0,0.0,1.0};
     double y[] = {0.123,0.456,0.789};
@@ -47,8 +49,8 @@ int main(void) {
 
     printf("\n\nN = %i, and M = %i\n\n", N, M);
 
-    PA = plan_sph_analysis(N, M);
-    P = plan_sph2fourier(N);
+    PA = ft_plan_sph_analysis(N, M);
+    P = ft_plan_sph2fourier(N);
 
     double * theta = malloc(N*sizeof(double));
     double * phi = malloc(M*sizeof(double));
@@ -80,8 +82,8 @@ int main(void) {
     printmat("F", F, N, M);
     printf("\n");
 
-    execute_sph_analysis(PA, F, N, M);
-    execute_fourier2sph(P, F, N, M);
+    ft_execute_sph_analysis(PA, F, N, M);
+    ft_execute_fourier2sph(P, F, N, M);
 
     printf("Its spherical harmonic coefficients demonstrate that it is degree-3:\n\n");
 
@@ -98,8 +100,8 @@ int main(void) {
     printmat("F", F, N, M);
     printf("\n");
 
-    execute_sph_analysis(PA, F, N, M);
-    execute_fourier2sph(P, F, N, M);
+    ft_execute_sph_analysis(PA, F, N, M);
+    ft_execute_fourier2sph(P, F, N, M);
 
     printf("Its spherical harmonic coefficients demonstrate that it is exact-degree-4:\n\n");
 
@@ -116,8 +118,8 @@ int main(void) {
     printmat("F", F, N, M);
     printf("\n");
 
-    execute_sph_analysis(PA, F, N, M);
-    execute_fourier2sph(P, F, N, M);
+    ft_execute_sph_analysis(PA, F, N, M);
+    ft_execute_fourier2sph(P, F, N, M);
 
     printf("It only has one nonnegligible spherical harmonic coefficient.\n");
     printf("Can you spot it?\n\n");
@@ -129,8 +131,8 @@ int main(void) {
     printf("That nonnegligible coefficient should be approximately √(2π/(4+1/2)),\n");
     printf("since the convention in this library is to orthonormalize.\n");
 
-    freeHarmonicPlan(P);
-    freeSphereFFTWPlan(PA);
+    ft_destroy_harmonic_plan(P);
+    ft_destroy_sphere_fftw_plan(PA);
     free(theta);
     free(phi);
     free(F);
