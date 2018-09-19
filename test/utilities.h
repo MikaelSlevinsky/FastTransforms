@@ -11,7 +11,7 @@
 #include "fasttransforms.h"
 #include "ftinternal.h"
 
-void printmat(char * MAT, double * A, int n, int m);
+void printmat(char * MAT, char * FMT, double * A, int n, int m);
 double vecnorm_1arg(double * A, int n, int m);
 double vecnorm_2arg(double * A, double * B, int n, int m);
 double vecnormInf_1arg(double * A, int n, int m);

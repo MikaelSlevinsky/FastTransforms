@@ -6,6 +6,8 @@ int main(void) {
     static double * A;
     static double * B;
 
+    char * FMT = "%3.0f";
+
     int N, M, NLOOPS;
 
     for (int i = 0; i < 1; i++) {
@@ -19,8 +21,8 @@ int main(void) {
 
         permute_sph(A, B, N, M, 2);
 
-        printmat("A", A, N, M);
-        printmat("B", B, N, M);
+        printmat("A", FMT, A, N, M);
+        printmat("B", FMT, B, N, M);
 
         free(A);
 
@@ -28,12 +30,12 @@ int main(void) {
 
         permute_t_sph(A, B, N, M, 2);
 
-        printmat("A", A, N, M);
+        printmat("A", FMT, A, N, M);
 
         permute_sph(A, B, N, M, 4);
 
-        printmat("A", A, N, M);
-        printmat("B", B, N, M);
+        printmat("A", FMT, A, N, M);
+        printmat("B", FMT, B, N, M);
 
         free(A);
 
@@ -41,7 +43,7 @@ int main(void) {
 
         permute_t_sph(A, B, N, M, 4);
 
-        printmat("A", A, N, M);
+        printmat("A", FMT, A, N, M);
 
         free(A);
         free(B);
@@ -55,8 +57,8 @@ int main(void) {
 
         permute_sph(A, B, N, M, 4);
 
-        printmat("A", A, N, M);
-        printmat("B", B, N, M);
+        printmat("A", FMT, A, N, M);
+        printmat("B", FMT, B, N, M);
 
         free(A);
 
@@ -64,7 +66,7 @@ int main(void) {
 
         permute_t_sph(A, B, N, M, 4);
 
-        printmat("A", A, N, M);
+        printmat("A", FMT, A, N, M);
 
         free(A);
         free(B);

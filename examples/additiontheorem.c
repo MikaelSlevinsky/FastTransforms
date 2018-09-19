@@ -3,7 +3,7 @@
 #include <math.h>
 #include "fasttransforms.h"
 
-void printmat(char * MAT, double * A, int n, int m);
+void printmat(char * MAT, char * FMT, double * A, int n, int m);
 double dot3(double * x, double * y);
 void normalize3(double * x);
 double P4(double x);
@@ -37,6 +37,8 @@ int main(void) {
     printf("N.B. for the storage pattern of the printed arrays, please consult the\n");
     printf("documentation. (Arrays are stored in column-major ordering.)\n");
 
+    char * FMT = "%1.3f";
+
     ft_harmonic_plan * P;
     ft_sphere_fftw_plan * PA;
 
@@ -60,15 +62,13 @@ int main(void) {
     for (int m = 0; m < M; m++)
         phi[m] = 2.0*M_PI*m/M;
 
-    for (int n = 0; n < N; n++)
-        printf("Colatitudinal grid theta[%i] = %1.3e\n", n, theta[n]);
+    printmat("Colatitudinal grid θ", FMT, theta, N, 1);
     printf("\n");
-    for (int m = 0; m < M; m++)
-        printf("Longitudinal grid phi[%i] = %1.3e\n", m, phi[m]);
+    printmat("Longitudinal grid φ", FMT, phi, 1, M);
     printf("\n");
 
-    printf("Arbitrarily, we place x at the North pole: x = (%1.2e,%1.2e,%1.2e)ᵀ.\n\n",x[0],x[1],x[2]);
-    printf("Another vector is completely free: y = (%1.2e,%1.2e,%1.2e)ᵀ.\n\n",y[0],y[1],y[2]);
+    printf("Arbitrarily, we place x at the North pole: x = (%1.3f,%1.3f,%1.3f)ᵀ.\n\n",x[0],x[1],x[2]);
+    printf("Another vector is completely free: y = (%1.3f,%1.3f,%1.3f)ᵀ.\n\n",y[0],y[1],y[2]);
     printf("Thus z ∈ 𝕊² is our variable vector.\n\n");
 
     double * F = calloc(N*M, sizeof(double));
@@ -79,7 +79,7 @@ int main(void) {
 
     printf("On the tensor product grid, our function samples are:\n\n");
 
-    printmat("F", F, N, M);
+    printmat("F", FMT, F, N, M);
     printf("\n");
 
     ft_execute_sph_analysis(PA, F, N, M);
@@ -87,7 +87,7 @@ int main(void) {
 
     printf("Its spherical harmonic coefficients demonstrate that it is degree-3:\n\n");
 
-    printmat("U3", F, N, M);
+    printmat("U3", FMT, F, N, M);
 
     printf("\n");
 
@@ -97,7 +97,7 @@ int main(void) {
 
     printf("Similarly, on the tensor product grid, the Legendre polynomial P₄(z⋅y) is:\n\n");
 
-    printmat("F", F, N, M);
+    printmat("F", FMT, F, N, M);
     printf("\n");
 
     ft_execute_sph_analysis(PA, F, N, M);
@@ -105,7 +105,7 @@ int main(void) {
 
     printf("Its spherical harmonic coefficients demonstrate that it is exact-degree-4:\n\n");
 
-    printmat("U4", F, N, M);
+    printmat("U4", FMT, F, N, M);
 
     printf("\n");
 
@@ -115,7 +115,7 @@ int main(void) {
 
     printf("Finally, the Legendre polynomial P₄(z⋅x) is aligned with the grid:\n\n");
 
-    printmat("F", F, N, M);
+    printmat("F", FMT, F, N, M);
     printf("\n");
 
     ft_execute_sph_analysis(PA, F, N, M);
@@ -124,7 +124,7 @@ int main(void) {
     printf("It only has one nonnegligible spherical harmonic coefficient.\n");
     printf("Can you spot it?\n\n");
 
-    printmat("U4", F, N, M);
+    printmat("U4", FMT, F, N, M);
 
     printf("\n");
 
@@ -140,10 +140,43 @@ int main(void) {
     return 0;
 }
 
-void printmat(char * MAT, double * A, int n, int m) {
-    for (int j = 0; j < m; j++)
-        for (int i = 0; i < n; i++)
-            printf("%s[%d][%d] = %17.16f\n", MAT, i, j, A[i+n*j]);
+#define A(i,j) A[(i)+n*(j)]
+
+void printmat(char * MAT, char * FMT, double * A, int n, int m) {
+    printf("%s = \n", MAT);
+    if (n > 0 && m > 0) {
+        if (A(0,0) < 0) {printf("[");}
+        else {printf("[ ");}
+        printf(FMT, A(0,0));
+        for (int j = 1; j < m; j++) {
+            if (A(0,j) < 0) {printf("  ");}
+            else {printf("   ");}
+            printf(FMT, A(0,j));
+        }
+        for (int i = 1; i < n-1; i++) {
+            printf("\n");
+            if (A(i,0) < 0) {printf(" ");}
+            else {printf("  ");}
+            printf(FMT, A(i,0));
+            for (int j = 1; j < m; j++) {
+                if (A(i,j) < 0) {printf("  ");}
+                else {printf("   ");}
+                printf(FMT, A(i,j));
+            }
+        }
+        if (n > 1) {
+            printf("\n");
+            if (A(n-1,0) < 0) {printf(" ");}
+            else {printf("  ");}
+            printf(FMT, A(n-1,0));
+            for (int j = 1; j < m; j++) {
+                if (A(n-1,j) < 0) {printf("  ");}
+                else {printf("   ");}
+                printf(FMT, A(n-1,j));
+            }
+        }
+        printf("]\n");
+    }
 }
 
 double dot3(double * x, double * y) {return x[0]*y[0]+x[1]*y[1]+x[2]*y[2];};
