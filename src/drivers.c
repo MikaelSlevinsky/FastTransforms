@@ -557,6 +557,13 @@ ft_harmonic_plan * ft_plan_disk2cxf(const int n) {
     P->P2inv = plan_jac2jac(1, 1, n, -0.5, 0.5, 0.0);
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P22inv, n, P->P2inv, n);
     free(P22inv);
+    for (int j = 0; j < n; j++)
+        for (int i = 0; i <= j; i++) {
+            P->P1[i+j*n] *= 2.0;
+            P->P2[i+j*n] *= 2.0;
+            P->P1inv[i+j*n] *= 0.5;
+            P->P2inv[i+j*n] *= 0.5;
+        }
     return P;
 }
 
@@ -614,26 +621,22 @@ static void chebyshev_normalization_t(double * A, const int N, const int M) {
 
 static void partial_chebyshev_normalization(double * A, const int N, const int M) {
     for (int j = 1; j < M; j += 4) {
-        A[j*N] *= M_1_SQRT_PI;
-        for (int i = 1; i < N; i++)
+        for (int i = 0; i < N; i++)
             A[i+j*N] *= M_SQRT2*M_1_SQRT_PI;
     }
     for (int j = 2; j < M; j += 4) {
-        A[j*N] *= M_1_SQRT_PI;
-        for (int i = 1; i < N; i++)
+        for (int i = 0; i < N; i++)
             A[i+j*N] *= M_SQRT2*M_1_SQRT_PI;
     }
 }
 
 static void partial_chebyshev_normalization_t(double * A, const int N, const int M) {
     for (int j = 1; j < M; j += 4) {
-        A[j*N] *= M_SQRT_PI;
-        for (int i = 1; i < N; i++)
+        for (int i = 0; i < N; i++)
             A[i+j*N] *= M_SQRT1_2*M_SQRT_PI;
     }
     for (int j = 2; j < M; j += 4) {
-        A[j*N] *= M_SQRT_PI;
-        for (int i = 1; i < N; i++)
+        for (int i = 0; i < N; i++)
             A[i+j*N] *= M_SQRT1_2*M_SQRT_PI;
     }
 }
