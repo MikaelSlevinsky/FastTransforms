@@ -27,6 +27,7 @@ clean:
 	rm -f lib$(LIB).$(SLIB)
 	rm -f test_assembly.s
 	rm -f additiontheorem
+	rm -f holomorphic
 	rm -f test_transforms
 	rm -f test_permute
 	rm -f test_rotations
