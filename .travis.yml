@@ -19,6 +19,10 @@ matrix:
         - MATRIX_EVAL="CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
 
 before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      sudo softwareupdate -i "Command Line Tools (macOS High Sierra version 10.13) for Xcode-9.4";
+    else
+    fi
   - eval "${MATRIX_EVAL}"
 
 script:
