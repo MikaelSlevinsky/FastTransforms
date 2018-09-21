@@ -1,4 +1,4 @@
-// Computational ft_kernels for the harmonic polynomial connection problem.
+// Computational kernels for the harmonic polynomial connection problem.
 
 #include "fasttransforms.h"
 #include "ftinternal.h"
@@ -93,6 +93,9 @@ void ft_kernel_sph_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * 
         apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+2)+2);
 }
 
+// Convert eight vectors of spherical harmonics of order m, m, m+2, m+2, m+4, m+4, m+6, m+6 to 0/1.
+// The eight vectors are stored in A in row-major ordering.
+
 void ft_kernel_sph_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
     for (int l = n-3-m; l >= 0; l--)
@@ -106,6 +109,9 @@ void ft_kernel_sph_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double
         for (int l = n-3-j; l >= 0; l--)
             apply_givens_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+2));
 }
+
+// Convert eight vectors of spherical harmonics of order 0/1 to m, m, m+2, m+2, m+4, m+4, m+6, m+6.
+// The eight vectors are stored in A in row-major ordering.
 
 void ft_kernel_sph_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
@@ -212,7 +218,7 @@ void ft_kernel_tri_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * 
         apply_givens_t(RP->s(l, m), RP->c(l, m), A+4*l+1, A+4*(l+1)+1);
 }
 
-// Convert four vectors of triangular harmonics of order m, m+1, m+2, m+3, m+4, m+5, m+6, m+7 to 0.
+// Convert eight vectors of triangular harmonics of order m, m+1, m+2, m+3, m+4, m+5, m+6, m+7 to 0.
 
 void ft_kernel_tri_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
@@ -238,7 +244,7 @@ void ft_kernel_tri_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double
             apply_givens_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+1));
 }
 
-// Convert four vectors of triangular harmonics of order 0 to m, m+1, m+2, m+3, m+4, m+5, m+6, m+7.
+// Convert eight vectors of triangular harmonics of order 0 to m, m+1, m+2, m+3, m+4, m+5, m+6, m+7.
 
 void ft_kernel_tri_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
