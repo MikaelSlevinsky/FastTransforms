@@ -54,8 +54,7 @@ int main(void) {
     PA = ft_plan_sph_analysis(N, M);
     P = ft_plan_sph2fourier(N);
 
-    double * theta = malloc(N*sizeof(double));
-    double * phi = malloc(M*sizeof(double));
+    double theta[N], phi[M], F[N*M];
 
     for (int n = 0; n < N; n++)
         theta[n] = (n+0.5)*M_PI/N;
@@ -70,8 +69,6 @@ int main(void) {
     printf("Arbitrarily, we place x at the North pole: x = (%1.3f,%1.3f,%1.3f)ᵀ.\n\n",x[0],x[1],x[2]);
     printf("Another vector is completely free: y = (%1.3f,%1.3f,%1.3f)ᵀ.\n\n",y[0],y[1],y[2]);
     printf("Thus z ∈ 𝕊² is our variable vector.\n\n");
-
-    double * F = calloc(N*M, sizeof(double));
 
     for (int m = 0; m < M; m++)
         for (int n = 0; n < N; n++)
@@ -133,9 +130,6 @@ int main(void) {
 
     ft_destroy_harmonic_plan(P);
     ft_destroy_sphere_fftw_plan(PA);
-    free(theta);
-    free(phi);
-    free(F);
 
     return 0;
 }

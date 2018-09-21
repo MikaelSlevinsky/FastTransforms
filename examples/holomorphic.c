@@ -43,8 +43,7 @@ int main(void) {
     P = ft_plan_disk2cxf(N);
     PA = ft_plan_disk_analysis(N, M);
 
-    double * r = malloc(N*sizeof(double));
-    double * theta = malloc(M*sizeof(double));
+    double r[N], theta[M], F[N*M];
 
     for (int n = 0; n < N; n++)
         r[n] = cos((n+0.5)*M_PI/(2*N));
@@ -55,8 +54,6 @@ int main(void) {
     printf("\n");
     printmat("Azimuthal grid θ", FMT, theta, 1, M);
     printf("\n");
-
-    double * F = calloc(N*M, sizeof(double));
 
     for (int m = 0; m < M; m++)
         for (int n = 0; n < N; n++)
@@ -87,9 +84,6 @@ int main(void) {
 
     ft_destroy_harmonic_plan(P);
     ft_destroy_disk_fftw_plan(PA);
-    free(r);
-    free(theta);
-    free(F);
 
     return 0;
 }
