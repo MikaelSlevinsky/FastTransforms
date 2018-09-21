@@ -1,4 +1,8 @@
-#include "utilities.h"
+#include "fasttransforms.h"
+#include "ftinternal.h"
+#include "ftutilities.h"
+
+double * aligned_copymat(double * A, int n, int m);
 
 int main(int argc, const char * argv[]) {
     struct timeval start, end;
@@ -34,8 +38,8 @@ int main(int argc, const char * argv[]) {
         M = 2*N-1;
 
         A = sphones(N, M);
-        Ac = copyAlign(A, N, M);
-        B = copyA(A, N, M);
+        Ac = aligned_copymat(A, N, M);
+        B = copymat(A, N, M);
         RP = ft_plan_rotsphere(N);
 
         ft_execute_sph_hi2lo(RP, A, M);
@@ -95,7 +99,7 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = sphones(N, M);
-        B = copyAlign(A, N, M);
+        B = aligned_copymat(A, N, M);
         RP = ft_plan_rotsphere(N);
 
         gettimeofday(&start, NULL);
@@ -174,7 +178,7 @@ int main(int argc, const char * argv[]) {
         M = 2*N-1;
 
         A = sphrand(N, M);
-        B = copyA(A, N, M);
+        B = copymat(A, N, M);
         P = ft_plan_sph2fourier(N);
 
         ft_execute_sph2fourier(P, A, N, M);
@@ -227,8 +231,8 @@ int main(int argc, const char * argv[]) {
         M = 2*N-1;
 
         A = sphones(N, M);
-        Ac = copyAlign(A, N, M);
-        B = copyA(A, N, M);
+        Ac = aligned_copymat(A, N, M);
+        B = copymat(A, N, M);
         RP = ft_plan_rotsphere(N);
 
         ft_execute_sphv_hi2lo(RP, A, M);
@@ -288,7 +292,7 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = sphones(N, M);
-        B = copyAlign(A, N, M);
+        B = aligned_copymat(A, N, M);
         RP = ft_plan_rotsphere(N);
 
         gettimeofday(&start, NULL);
@@ -367,7 +371,7 @@ int main(int argc, const char * argv[]) {
         M = 2*N-1;
 
         A = sphrand(N, M);
-        B = copyA(A, N, M);
+        B = copymat(A, N, M);
         P = ft_plan_sph2fourier(N);
 
         ft_execute_sphv2fourier(P, A, N, M);
@@ -420,8 +424,8 @@ int main(int argc, const char * argv[]) {
         M = N;
 
         A = triones(N, M);
-        Ac = copyAlign(A, N, M);
-        B = copyA(A, N, M);
+        Ac = aligned_copymat(A, N, M);
+        B = copymat(A, N, M);
         RP = ft_plan_rottriangle(N, alpha, beta, gamma);
 
         ft_execute_tri_hi2lo(RP, A, M);
@@ -481,7 +485,7 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = triones(N, M);
-        B = copyAlign(A, N, M);
+        B = aligned_copymat(A, N, M);
         RP = ft_plan_rottriangle(N, alpha, beta, gamma);
 
         gettimeofday(&start, NULL);
@@ -561,7 +565,7 @@ int main(int argc, const char * argv[]) {
         M = N;
 
         A = trirand(N, M);
-        B = copyA(A, N, M);
+        B = copymat(A, N, M);
         P = ft_plan_tri2cheb(N, alpha, beta, gamma);
 
         ft_execute_tri2cheb(P, A, N, M);
@@ -614,8 +618,8 @@ int main(int argc, const char * argv[]) {
         M = 4*N-3;
 
         A = diskones(N, M);
-        Ac = copyAlign(A, N, M);
-        B = copyA(A, N, M);
+        Ac = aligned_copymat(A, N, M);
+        B = copymat(A, N, M);
         RP = ft_plan_rotdisk(N);
 
         ft_execute_disk_hi2lo(RP, A, M);
@@ -675,7 +679,7 @@ int main(int argc, const char * argv[]) {
         NLOOPS = 1 + pow(2048/N, 2);
 
         A = diskones(N, M);
-        B = copyAlign(A, N, M);
+        B = aligned_copymat(A, N, M);
         RP = ft_plan_rotdisk(N);
 
         gettimeofday(&start, NULL);
@@ -755,7 +759,7 @@ int main(int argc, const char * argv[]) {
         M = 4*N-3;
 
         A = diskrand(N, M);
-        B = copyA(A, N, M);
+        B = copymat(A, N, M);
         P = ft_plan_disk2cxf(N);
 
         ft_execute_disk2cxf(P, A, N, M);
@@ -810,8 +814,8 @@ int main(int argc, const char * argv[]) {
         printf("%d", N);
         for (int S = 0; S < 9; S++) {
             A = spinsphones(N, M, S);
-            Ac = copyAlign(A, N, M);
-            B = copyA(A, N, M);
+            Ac = aligned_copymat(A, N, M);
+            B = copymat(A, N, M);
             SRP = ft_plan_rotspinsphere(N, S);
 
             ft_execute_spinsph_hi2lo(SRP, A, M);
@@ -852,7 +856,7 @@ int main(int argc, const char * argv[]) {
 
         for (int S = 0; S < 9; S++) {
             A = spinsphones(N, M, S);
-            B = copyA(A, N, M);
+            B = copymat(A, N, M);
             SRP = ft_plan_rotspinsphere(N, S);
 
             gettimeofday(&start, NULL);
@@ -880,4 +884,17 @@ int main(int argc, const char * argv[]) {
     printf("];\n");
 
     return 0;
+}
+
+#define A(i,j) A[(i)+n*(j)]
+
+double * aligned_copymat(double * A, int n, int m) {
+    double * B = (double *) VMALLOC(ALIGNB(n)*m*sizeof(double));
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            B[(i)+ALIGNB(n)*(j)] = A(i,j);
+    for (int i = n; i < ALIGNB(n); i++)
+        for (int j = 0; j < m; j++)
+            B[(i)+ALIGNB(n)*(j)] = 0.0;
+    return B;
 }

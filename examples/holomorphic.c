@@ -2,10 +2,9 @@
 #include <stdio.h>
 #include <math.h>
 #include "fasttransforms.h"
+#include "ftutilities.h"
 
-void printmat(char * MAT, char * FMT, double * A, int n, int m);
 double f(double x, double y);
-double vecnorm_1arg(double * A, int n, int m);
 
 int main(void) {
     printf("In this example, we explore integration of a harmonic function over \n");
@@ -95,51 +94,4 @@ int main(void) {
     return 0;
 }
 
-#define A(i,j) A[(i)+n*(j)]
-
-void printmat(char * MAT, char * FMT, double * A, int n, int m) {
-    printf("%s = \n", MAT);
-    if (n > 0 && m > 0) {
-        if (A(0,0) < 0) {printf("[");}
-        else {printf("[ ");}
-        printf(FMT, A(0,0));
-        for (int j = 1; j < m; j++) {
-            if (A(0,j) < 0) {printf("  ");}
-            else {printf("   ");}
-            printf(FMT, A(0,j));
-        }
-        for (int i = 1; i < n-1; i++) {
-            printf("\n");
-            if (A(i,0) < 0) {printf(" ");}
-            else {printf("  ");}
-            printf(FMT, A(i,0));
-            for (int j = 1; j < m; j++) {
-                if (A(i,j) < 0) {printf("  ");}
-                else {printf("   ");}
-                printf(FMT, A(i,j));
-            }
-        }
-        if (n > 1) {
-            printf("\n");
-            if (A(n-1,0) < 0) {printf(" ");}
-            else {printf("  ");}
-            printf(FMT, A(n-1,0));
-            for (int j = 1; j < m; j++) {
-                if (A(n-1,j) < 0) {printf("  ");}
-                else {printf("   ");}
-                printf(FMT, A(n-1,j));
-            }
-        }
-        printf("]\n");
-    }
-}
-
 double f(double x, double y) {return (x*x-y*y+1.0)/((x*x-y*y+1.0)*(x*x-y*y+1.0)+(2.0*x*y+1.0)*(2.0*x*y+1.0));};
-
-double vecnorm_1arg(double * A, int n, int m) {
-    double ret = 0.0;
-    for (int j = 0; j < m; j++)
-        for (int i = 0; i < n; i++)
-            ret += pow(A(i,j), 2);
-    return sqrt(ret);
-}

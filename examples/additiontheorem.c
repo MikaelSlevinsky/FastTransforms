@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 #include "fasttransforms.h"
+#include "ftutilities.h"
 
-void printmat(char * MAT, char * FMT, double * A, int n, int m);
 double dot3(double * x, double * y);
 void normalize3(double * x);
 double P4(double x);
@@ -138,45 +138,6 @@ int main(void) {
     free(F);
 
     return 0;
-}
-
-#define A(i,j) A[(i)+n*(j)]
-
-void printmat(char * MAT, char * FMT, double * A, int n, int m) {
-    printf("%s = \n", MAT);
-    if (n > 0 && m > 0) {
-        if (A(0,0) < 0) {printf("[");}
-        else {printf("[ ");}
-        printf(FMT, A(0,0));
-        for (int j = 1; j < m; j++) {
-            if (A(0,j) < 0) {printf("  ");}
-            else {printf("   ");}
-            printf(FMT, A(0,j));
-        }
-        for (int i = 1; i < n-1; i++) {
-            printf("\n");
-            if (A(i,0) < 0) {printf(" ");}
-            else {printf("  ");}
-            printf(FMT, A(i,0));
-            for (int j = 1; j < m; j++) {
-                if (A(i,j) < 0) {printf("  ");}
-                else {printf("   ");}
-                printf(FMT, A(i,j));
-            }
-        }
-        if (n > 1) {
-            printf("\n");
-            if (A(n-1,0) < 0) {printf(" ");}
-            else {printf("  ");}
-            printf(FMT, A(n-1,0));
-            for (int j = 1; j < m; j++) {
-                if (A(n-1,j) < 0) {printf("  ");}
-                else {printf("   ");}
-                printf(FMT, A(n-1,j));
-            }
-        }
-        printf("]\n");
-    }
 }
 
 double dot3(double * x, double * y) {return x[0]*y[0]+x[1]*y[1]+x[2]*y[2];};

@@ -1,4 +1,8 @@
-#include "utilities.h"
+#include "fasttransforms.h"
+#include "ftinternal.h"
+#include "ftutilities.h"
+
+double rotnorm(const ft_rotation_plan * RP);
 
 const int N = 257;
 
@@ -298,4 +302,17 @@ int main(void) {
     }
 
     return 0;
+}
+
+#define s(l,m) s[l+(m)*(2*n+1-(m))/2]
+#define c(l,m) c[l+(m)*(2*n+1-(m))/2]
+
+double rotnorm(const ft_rotation_plan * RP) {
+    double * s = RP->s, * c = RP->c;
+    double ret = 0.0;
+    int n = RP->n;
+    for (int m = 0; m < n; m++)
+        for (int l = 0; l < n-m; l++)
+            ret += pow(hypot(s(l,m), c(l,m)) - 1.0, 2);
+    return sqrt(ret);
 }

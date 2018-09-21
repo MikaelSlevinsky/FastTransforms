@@ -1,11 +1,9 @@
 // Utility functions for testing.
 
-#include "utilities.h"
+#include "ftutilities.h"
 
 #define A(i,j) A[(i)+n*(j)]
 #define B(i,j) B[(i)+n*(j)]
-#define s(l,m) s[l+(m)*(2*n+1-(m))/2]
-#define c(l,m) c[l+(m)*(2*n+1-(m))/2]
 
 void printmat(char * MAT, char * FMT, double * A, int n, int m) {
     printf("%s = \n", MAT);
@@ -44,6 +42,13 @@ void printmat(char * MAT, char * FMT, double * A, int n, int m) {
     }
 }
 
+double * copymat(double * A, int n, int m) {
+    double * B = (double *) calloc(n*m, sizeof(double));
+    for (int i = 0; i < n*m; i++)
+        B[i] = A[i];
+    return B;
+}
+
 double vecnorm_1arg(double * A, int n, int m) {
     double ret = 0.0;
     for (int j = 0; j < m; j++)
@@ -80,16 +85,6 @@ double vecnormInf_2arg(double * A, double * B, int n, int m) {
                 ret = temp;
         }
     return ret;
-}
-
-double rotnorm(const ft_rotation_plan * RP) {
-    double * s = RP->s, * c = RP->c;
-    double ret = 0.0;
-    int n = RP->n;
-    for (int m = 0; m < n; m++)
-        for (int l = 0; l < n-m; l++)
-            ret += pow(hypot(s(l,m), c(l,m)) - 1.0, 2);
-    return sqrt(ret);
 }
 
 double * sphones(int n, int m) {
@@ -154,24 +149,6 @@ double * spinsphrand(int n, int m, int s) {
         for (int j = 0; j < m-2*i; j++)
             A(i,j) = 2.0*(((double) rand())/RAND_MAX)-1.0;
     return A;
-}
-
-double * copyAlign(double * A, int n, int m) {
-    double * B = (double *) VMALLOC(ALIGNB(n)*m*sizeof(double));
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < m; j++)
-            B[(i)+ALIGNB(n)*(j)] = A(i,j);
-    for (int i = n; i < ALIGNB(n); i++)
-        for (int j = 0; j < m; j++)
-            B[(i)+ALIGNB(n)*(j)] = 0.0;
-    return B;
-}
-
-double * copyA(double * A, int n, int m) {
-    double * B = (double*) calloc(n*m, sizeof(double));
-    for (int i = 0; i < n*m; i++)
-        B[i] = A[i];
-    return B;
 }
 
 double elapsed(struct timeval * start, struct timeval * end, int N) {

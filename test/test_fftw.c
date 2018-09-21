@@ -1,4 +1,5 @@
-#include "utilities.h"
+#include "fasttransforms.h"
+#include "ftutilities.h"
 
 int main(int argc, const char * argv[]) {
     struct timeval start, end;
@@ -36,7 +37,7 @@ int main(int argc, const char * argv[]) {
         M = 2*N-1;
 
         A = sphrand(N, M);
-        B = copyA(A, N, M);
+        B = copymat(A, N, M);
         P = ft_plan_sph2fourier(N);
         PS = ft_plan_sph_synthesis(N, M);
         PA = ft_plan_sph_analysis(N, M);
@@ -106,7 +107,7 @@ int main(int argc, const char * argv[]) {
         M = 2*N-1;
 
         A = sphrand(N, M);
-        B = copyA(A, N, M);
+        B = copymat(A, N, M);
         P = ft_plan_sph2fourier(N);
         PS = ft_plan_sphv_synthesis(N, M);
         PA = ft_plan_sphv_analysis(N, M);
@@ -176,7 +177,7 @@ int main(int argc, const char * argv[]) {
         M = N;
 
         A = trirand(N, M);
-        B = copyA(A, N, M);
+        B = copymat(A, N, M);
         P = ft_plan_tri2cheb(N, alpha, beta, gamma);
         QS = ft_plan_tri_synthesis(N, M);
         QA = ft_plan_tri_analysis(N, M);
@@ -246,7 +247,7 @@ int main(int argc, const char * argv[]) {
         M = 4*N-3;
 
         A = diskrand(N, M);
-        B = copyA(A, N, M);
+        B = copymat(A, N, M);
         P = ft_plan_disk2cxf(N);
         RS = ft_plan_disk_synthesis(N, M);
         RA = ft_plan_disk_analysis(N, M);
