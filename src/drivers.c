@@ -121,6 +121,122 @@ void ft_execute_sph_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double
     warp_t(A, N, M, 4);
 }
 
+void ft_execute_sphv_hi2lo(const ft_rotation_plan * RP, double * A, const int M) {
+    int N = RP->n;
+    #pragma omp parallel
+    for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2-1; m += FT_GET_NUM_THREADS()) {
+        ft_kernel_sph_hi2lo(RP, m, A + N*(2*m+1));
+        ft_kernel_sph_hi2lo(RP, m, A + N*(2*m+2));
+    }
+}
+
+void ft_execute_sphv_lo2hi(const ft_rotation_plan * RP, double * A, const int M) {
+    int N = RP->n;
+    #pragma omp parallel
+    for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2-1; m += FT_GET_NUM_THREADS()) {
+        ft_kernel_sph_lo2hi(RP, m, A + N*(2*m+1));
+        ft_kernel_sph_lo2hi(RP, m, A + N*(2*m+2));
+    }
+}
+
+void ft_execute_sphv_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    int NB = ALIGNB(N);
+    permute_sph(A, B, N, M, 2);
+    #pragma omp parallel
+    for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2-1; m += FT_GET_NUM_THREADS())
+        ft_kernel_sph_hi2lo_SSE(RP, m, B + NB*(2*m+1));
+    permute_t_sph(A, B, N, M, 2);
+}
+
+void ft_execute_sphv_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    int NB = ALIGNB(N);
+    permute_sph(A, B, N, M, 2);
+    #pragma omp parallel
+    for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2-1; m += FT_GET_NUM_THREADS())
+        ft_kernel_sph_lo2hi_SSE(RP, m, B + NB*(2*m+1));
+    permute_t_sph(A, B, N, M, 2);
+}
+
+void ft_execute_sphv_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    int NB = ALIGNB(N);
+    warp(A+2*N, N, M-2, 2);
+    permute_sph(A+2*N, B+2*NB, N, M-2, 4);
+    for (int m = 2; m <= ((M-2)%8)/2; m++)
+        ft_kernel_sph_hi2lo_SSE(RP, m, B + NB*(2*m+1));
+    #pragma omp parallel
+    for (int m = ((M-2)%8+1)/2 + 4*FT_GET_THREAD_NUM(); m <= M/2-1; m += 4*FT_GET_NUM_THREADS()) {
+        ft_kernel_sph_hi2lo_AVX(RP, m, B + NB*(2*m+1));
+        ft_kernel_sph_hi2lo_AVX(RP, m+1, B + NB*(2*m+5));
+    }
+    permute_t_sph(A+2*N, B+2*NB, N, M-2, 4);
+    warp(A+2*N, N, M-2, 2);
+}
+
+void ft_execute_sphv_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    int NB = ALIGNB(N);
+    warp(A+2*N, N, M-2, 2);
+    permute_sph(A+2*N, B+2*NB, N, M-2, 4);
+    for (int m = 2; m <= ((M-2)%8)/2; m++)
+        ft_kernel_sph_lo2hi_SSE(RP, m, B + NB*(2*m+1));
+    #pragma omp parallel
+    for (int m = ((M-2)%8+1)/2 + 4*FT_GET_THREAD_NUM(); m <= M/2-1; m += 4*FT_GET_NUM_THREADS()) {
+        ft_kernel_sph_lo2hi_AVX(RP, m, B + NB*(2*m+1));
+        ft_kernel_sph_lo2hi_AVX(RP, m+1, B + NB*(2*m+5));
+    }
+    permute_t_sph(A+2*N, B+2*NB, N, M-2, 4);
+    warp(A+2*N, N, M-2, 2);
+}
+
+void ft_execute_sphv_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    int NB = ALIGNB(N);
+    int M_star = (M-2)%16;
+    warp(A+2*N, N, M-2, 4);
+    warp(A+2*N, N, M_star, 2);
+    permute_sph(A+2*N, B+2*NB, N, M-2, 8);
+    for (int m = 2; m <= (M_star%8)/2; m++)
+        ft_kernel_sph_hi2lo_SSE(RP, m, B + NB*(2*m+1));
+    for (int m = (M_star%8+1)/2; m <= M_star/2; m += 4) {
+        ft_kernel_sph_hi2lo_AVX(RP, m, B + NB*(2*m+1));
+        ft_kernel_sph_hi2lo_AVX(RP, m+1, B + NB*(2*m+5));
+    }
+    #pragma omp parallel
+    for (int m = (M_star+1)/2 + 8*FT_GET_THREAD_NUM(); m <= M/2-1; m += 8*FT_GET_NUM_THREADS()) {
+        ft_kernel_sph_hi2lo_AVX512(RP, m, B + NB*(2*m+1));
+        ft_kernel_sph_hi2lo_AVX512(RP, m+1, B + NB*(2*m+9));
+    }
+    permute_t_sph(A+2*N, B+2*NB, N, M-2, 8);
+    warp(A+2*N, N, M_star, 2);
+    warp_t(A+2*N, N, M-2, 4);
+}
+
+void ft_execute_sphv_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    int N = RP->n;
+    int NB = ALIGNB(N);
+    int M_star = (M-2)%16;
+    warp(A+2*N, N, M-2, 4);
+    warp(A+2*N, N, M_star, 2);
+    permute_sph(A+2*N, B+2*NB, N, M-2, 8);
+    for (int m = 2; m <= (M_star%8)/2; m++)
+        ft_kernel_sph_lo2hi_SSE(RP, m, B + NB*(2*m+1));
+    for (int m = (M_star%8+1)/2; m <= M_star/2; m += 4) {
+        ft_kernel_sph_lo2hi_AVX(RP, m, B + NB*(2*m+1));
+        ft_kernel_sph_lo2hi_AVX(RP, m+1, B + NB*(2*m+5));
+    }
+    #pragma omp parallel
+    for (int m = (M_star+1)/2 + 8*FT_GET_THREAD_NUM(); m <= M/2-1; m += 8*FT_GET_NUM_THREADS()) {
+        ft_kernel_sph_lo2hi_AVX512(RP, m, B + NB*(2*m+1));
+        ft_kernel_sph_lo2hi_AVX512(RP, m+1, B + NB*(2*m+9));
+    }
+    permute_t_sph(A+2*N, B+2*NB, N, M-2, 8);
+    warp(A+2*N, N, M_star, 2);
+    warp_t(A+2*N, N, M-2, 4);
+}
+
 void ft_execute_tri_hi2lo(const ft_rotation_plan * RP, double * A, const int M) {
     #pragma omp parallel
     for (int m = 1 + FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS())
@@ -485,6 +601,22 @@ void ft_execute_fourier2sph(const ft_harmonic_plan * P, double * A, const int N,
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P2inv, N, A+2*N, 4*N);
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P1inv, N, A+3*N, 4*N);
     ft_execute_sph_lo2hi_AVX512(P->RP, A, P->B, M);
+}
+
+void ft_execute_sphv2fourier(const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    ft_execute_sphv_hi2lo_AVX512(P->RP, A, P->B, M);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P2, N, A, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P1, N, A+N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P1, N, A+2*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P2, N, A+3*N, 4*N);
+}
+
+void ft_execute_fourier2sphv(const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P2inv, N, A, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P1inv, N, A+N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P1inv, N, A+2*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P2inv, N, A+3*N, 4*N);
+    ft_execute_sphv_lo2hi_AVX512(P->RP, A, P->B, M);
 }
 
 ft_harmonic_plan * ft_plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma) {

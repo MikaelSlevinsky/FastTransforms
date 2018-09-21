@@ -13,7 +13,7 @@ void ft_destroy_sphere_fftw_plan(ft_sphere_fftw_plan * P) {
     free(P);
 }
 
-ft_sphere_fftw_plan * ft_plan_sph_synthesis(const int N, const int M) {
+ft_sphere_fftw_plan * ft_plan_sph_with_kind(const int N, const int M, const fftw_r2r_kind kind[3][1]) {
     int rank = 1; // not 2: we are computing 1d transforms //
     int n[] = {N}; // 1d transforms of length n //
     int idist = 4*N, odist = 4*N;
@@ -25,66 +25,44 @@ ft_sphere_fftw_plan * ft_plan_sph_synthesis(const int N, const int M) {
     P->Y = fftw_malloc(N*M*sizeof(double));
 
     int howmany = (M+3)/4;
-    fftw_r2r_kind kind[] = {FFTW_REDFT01};
-    P->plantheta1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
+    P->plantheta1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
 
     howmany = (M+2)/4;
-    kind[0] = FFTW_RODFT01;
-    P->plantheta2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
+    P->plantheta2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], FT_FFTW_FLAGS);
 
     howmany = (M+1)/4;
-    kind[0] = FFTW_RODFT01;
-    P->plantheta3 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
+    P->plantheta3 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], FT_FFTW_FLAGS);
 
     howmany = M/4;
-    kind[0] = FFTW_REDFT01;
-    P->plantheta4 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
+    P->plantheta4 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
 
     n[0] = M;
     idist = odist = 1;
     istride = ostride = N;
     howmany = N;
-    kind[0] = FFTW_HC2R;
-    P->planphi = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
+    P->planphi = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[2], FT_FFTW_FLAGS);
 
     return P;
 }
 
+ft_sphere_fftw_plan * ft_plan_sph_synthesis(const int N, const int M) {
+    fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_RODFT01}, {FFTW_HC2R}};
+    return ft_plan_sph_with_kind(N, M, kind);
+}
+
 ft_sphere_fftw_plan * ft_plan_sph_analysis(const int N, const int M) {
-    int rank = 1; // not 2: we are computing 1d transforms //
-    int n[] = {N}; // 1d transforms of length n //
-    int idist = 4*N, odist = 4*N;
-    int istride = 1, ostride = 1; // distance between two elements in the same column //
-    int * inembed = n, * onembed = n;
+    fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_RODFT10}, {FFTW_R2HC}};
+    return ft_plan_sph_with_kind(N, M, kind);
+}
 
-    ft_sphere_fftw_plan * P = malloc(sizeof(ft_sphere_fftw_plan));
+ft_sphere_fftw_plan * ft_plan_sphv_synthesis(const int N, const int M) {
+    fftw_r2r_kind kind[3][1] = {{FFTW_RODFT01}, {FFTW_REDFT01}, {FFTW_HC2R}};
+    return ft_plan_sph_with_kind(N, M, kind);
+}
 
-    P->Y = fftw_malloc(N*M*sizeof(double));
-
-    int howmany = (M+3)/4;
-    fftw_r2r_kind kind[] = {FFTW_REDFT10};
-    P->plantheta1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
-
-    howmany = (M+2)/4;
-    kind[0] = FFTW_RODFT10;
-    P->plantheta2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
-
-    howmany = (M+1)/4;
-    kind[0] = FFTW_RODFT10;
-    P->plantheta3 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
-
-    howmany = M/4;
-    kind[0] = FFTW_REDFT10;
-    P->plantheta4 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
-
-    n[0] = M;
-    idist = odist = 1;
-    istride = ostride = N;
-    howmany = N;
-    kind[0] = FFTW_R2HC;
-    P->planphi = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
-
-    return P;
+ft_sphere_fftw_plan * ft_plan_sphv_analysis(const int N, const int M) {
+    fftw_r2r_kind kind[3][1] = {{FFTW_RODFT10}, {FFTW_REDFT10}, {FFTW_R2HC}};
+    return ft_plan_sph_with_kind(N, M, kind);
 }
 
 void ft_execute_sph_synthesis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
@@ -123,27 +101,56 @@ void ft_execute_sph_analysis(const ft_sphere_fftw_plan * P, double * X, const in
     }
 }
 
+void ft_execute_sphv_synthesis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
+    for (int j = 1; j < M-2; j += 4) {
+        X[j*N] *= 2.0;
+        X[(j+1)*N] *= 2.0;
+    }
+    fftw_execute_r2r(P->plantheta1, X, X);
+    fftw_execute_r2r(P->plantheta2, X+N, X+N);
+    fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
+    fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
+    for (int i = 0; i < N*M; i++)
+        X[i] *= M_1_4_SQRT_PI;
+    for (int i = 0; i < N; i++)
+        X[i] *= M_SQRT2;
+    colswap(X, P->Y, N, M);
+    fftw_execute_r2r(P->planphi, P->Y, X);
+}
+
+void ft_execute_sphv_analysis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
+    fftw_execute_r2r(P->planphi, X, P->Y);
+    colswap_t(X, P->Y, N, M);
+    for (int i = 0; i < N*M; i++)
+        X[i] *= M_4_SQRT_PI/(2*N*M);
+    for (int i = 0; i < N; i++)
+        X[i] *= M_SQRT1_2;
+    fftw_execute_r2r(P->plantheta1, X, X);
+    fftw_execute_r2r(P->plantheta2, X+N, X+N);
+    fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
+    fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
+    for (int j = 1; j < M-2; j += 4) {
+        X[j*N] *= 0.5;
+        X[(j+1)*N] *= 0.5;
+    }
+}
+
 
 void ft_destroy_triangle_fftw_plan(ft_triangle_fftw_plan * P) {
     fftw_destroy_plan(P->planxy);
     free(P);
 }
 
-ft_triangle_fftw_plan * ft_plan_tri_synthesis(const int N, const int M) {
+ft_triangle_fftw_plan * ft_plan_tri_with_kind(const int N, const int M, const fftw_r2r_kind kind0, const fftw_r2r_kind kind1) {
     ft_triangle_fftw_plan * P = malloc(sizeof(ft_triangle_fftw_plan));
     double * X = fftw_malloc(N*M*sizeof(double));
-    P->planxy = fftw_plan_r2r_2d(N, M, X, X, FFTW_REDFT01, FFTW_REDFT01, FT_FFTW_FLAGS);
+    P->planxy = fftw_plan_r2r_2d(N, M, X, X, kind0, kind1, FT_FFTW_FLAGS);
     fftw_free(X);
     return P;
 }
 
-ft_triangle_fftw_plan * ft_plan_tri_analysis(const int N, const int M) {
-    ft_triangle_fftw_plan * P = malloc(sizeof(ft_triangle_fftw_plan));
-    double * X = fftw_malloc(N*M*sizeof(double));
-    P->planxy = fftw_plan_r2r_2d(N, M, X, X, FFTW_REDFT10, FFTW_REDFT10, FT_FFTW_FLAGS);
-    fftw_free(X);
-    return P;
-}
+ft_triangle_fftw_plan * ft_plan_tri_synthesis(const int N, const int M) {return ft_plan_tri_with_kind(N, M, FFTW_REDFT01, FFTW_REDFT01);}
+ft_triangle_fftw_plan * ft_plan_tri_analysis(const int N, const int M) {return ft_plan_tri_with_kind(N, M, FFTW_REDFT10, FFTW_REDFT10);}
 
 void ft_execute_tri_synthesis(const ft_triangle_fftw_plan * P, double * X, const int N, const int M) {
     if (N > 1 && M > 1) {
@@ -180,7 +187,7 @@ void ft_destroy_disk_fftw_plan(ft_disk_fftw_plan * P) {
     free(P);
 }
 
-ft_disk_fftw_plan * ft_plan_disk_synthesis(const int N, const int M) {
+ft_disk_fftw_plan * ft_plan_disk_with_kind(const int N, const int M, const fftw_r2r_kind kind[3][1]) {
     int rank = 1; // not 2: we are computing 1d transforms //
     int n[] = {N}; // 1d transforms of length n //
     int idist = 4*N, odist = 4*N;
@@ -192,66 +199,34 @@ ft_disk_fftw_plan * ft_plan_disk_synthesis(const int N, const int M) {
     P->Y = fftw_malloc(N*M*sizeof(double));
 
     int howmany = (M+3)/4;
-    fftw_r2r_kind kind[] = {FFTW_REDFT01};
-    P->planr1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
+    P->planr1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
 
     howmany = (M+2)/4;
-    kind[0] = FFTW_REDFT11;
-    P->planr2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
+    P->planr2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], FT_FFTW_FLAGS);
 
     howmany = (M+1)/4;
-    kind[0] = FFTW_REDFT11;
-    P->planr3 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
+    P->planr3 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], FT_FFTW_FLAGS);
 
     howmany = M/4;
-    kind[0] = FFTW_REDFT01;
-    P->planr4 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
+    P->planr4 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
 
     n[0] = M;
     idist = odist = 1;
     istride = ostride = N;
     howmany = N;
-    kind[0] = FFTW_HC2R;
-    P->plantheta = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
+    P->plantheta = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[2], FT_FFTW_FLAGS);
 
     return P;
 }
 
+ft_disk_fftw_plan * ft_plan_disk_synthesis(const int N, const int M) {
+    fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_REDFT11}, {FFTW_HC2R}};
+    return ft_plan_disk_with_kind(N, M, kind);
+}
+
 ft_disk_fftw_plan * ft_plan_disk_analysis(const int N, const int M) {
-    int rank = 1; // not 2: we are computing 1d transforms //
-    int n[] = {N}; // 1d transforms of length n //
-    int idist = 4*N, odist = 4*N;
-    int istride = 1, ostride = 1; // distance between two elements in the same column //
-    int * inembed = n, * onembed = n;
-
-    ft_disk_fftw_plan * P = malloc(sizeof(ft_disk_fftw_plan));
-
-    P->Y = fftw_malloc(N*M*sizeof(double));
-
-    int howmany = (M+3)/4;
-    fftw_r2r_kind kind[] = {FFTW_REDFT10};
-    P->planr1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
-
-    howmany = (M+2)/4;
-    kind[0] = FFTW_REDFT11;
-    P->planr2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
-
-    howmany = (M+1)/4;
-    kind[0] = FFTW_REDFT11;
-    P->planr3 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
-
-    howmany = M/4;
-    kind[0] = FFTW_REDFT10;
-    P->planr4 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
-
-    n[0] = M;
-    idist = odist = 1;
-    istride = ostride = N;
-    howmany = N;
-    kind[0] = FFTW_R2HC;
-    P->plantheta = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind, FT_FFTW_FLAGS);
-
-    return P;
+    fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_REDFT11}, {FFTW_R2HC}};
+    return ft_plan_disk_with_kind(N, M, kind);
 }
 
 void ft_execute_disk_synthesis(const ft_disk_fftw_plan * P, double * X, const int N, const int M) {

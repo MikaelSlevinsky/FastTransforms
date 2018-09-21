@@ -99,8 +99,78 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    printf("\nTesting the accuracy of triangular harmonic transforms + FFTW synthesis and analysis.\n\n");
+    printf("\nTesting the accuracy of spherical vector field transforms + FFTW synthesis and analysis.\n\n");
     printf("err2 = [\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 64*pow(2, i)+J;
+        M = 2*N-1;
+
+        A = sphrand(N, M);
+        B = copyA(A, N, M);
+        P = ft_plan_sph2fourier(N);
+        PS = ft_plan_sphv_synthesis(N, M);
+        PA = ft_plan_sphv_analysis(N, M);
+
+        ft_execute_sphv2fourier(P, A, N, M);
+        ft_execute_sphv_synthesis(PS, A, N, M);
+        ft_execute_sphv_analysis(PA, A, N, M);
+        ft_execute_fourier2sphv(P, A, N, M);
+
+        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
+        printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+
+        free(A);
+        free(B);
+        ft_destroy_harmonic_plan(P);
+        ft_destroy_sphere_fftw_plan(PS);
+        ft_destroy_sphere_fftw_plan(PA);
+    }
+    printf("];\n");
+
+    printf("\nTiming spherical vector field transforms + FFTW synthesis and analysis.\n\n");
+    printf("t2 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 64*pow(2, i)+J;
+        M = 2*N-1;
+        NLOOPS = 1 + pow(2048/N, 2);
+
+        A = sphrand(N, M);
+        P = ft_plan_sph2fourier(N);
+        PS = ft_plan_sphv_synthesis(N, M);
+        PA = ft_plan_sphv_analysis(N, M);
+
+        ft_execute_sphv_synthesis(PS, A, N, M);
+        ft_execute_sphv_analysis(PA, A, N, M);
+        ft_execute_sphv_synthesis(PS, A, N, M);
+        ft_execute_sphv_analysis(PA, A, N, M);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_sphv2fourier(P, A, N, M);
+            ft_execute_sphv_synthesis(PS, A, N, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_sphv_analysis(PA, A, N, M);
+            ft_execute_fourier2sphv(P, A, N, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+
+        free(A);
+        ft_destroy_harmonic_plan(P);
+        ft_destroy_sphere_fftw_plan(PS);
+        ft_destroy_sphere_fftw_plan(PA);
+    }
+    printf("];\n");
+
+    printf("\nTesting the accuracy of triangular harmonic transforms + FFTW synthesis and analysis.\n\n");
+    printf("err3 = [\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i)+J;
         M = N;
@@ -128,7 +198,7 @@ int main(int argc, const char * argv[]) {
     printf("];\n");
 
     printf("\nTiming triangular harmonic transforms + FFTW synthesis and analysis.\n\n");
-    printf("t2 = [\n");
+    printf("t3 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = N;
@@ -170,7 +240,7 @@ int main(int argc, const char * argv[]) {
     printf("];\n");
 
     printf("\nTesting the accuracy of disk harmonic transforms + FFTW synthesis and analysis.\n\n");
-    printf("err3 = [\n");
+    printf("err4 = [\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i)+J;
         M = 4*N-3;
@@ -198,7 +268,7 @@ int main(int argc, const char * argv[]) {
     printf("];\n");
 
     printf("\nTiming disk harmonic transforms + FFTW synthesis and analysis.\n\n");
-    printf("t3 = [\n");
+    printf("t4 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 4*N-3;

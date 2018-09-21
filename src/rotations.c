@@ -99,7 +99,7 @@ void ft_kernel_sph_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double
         apply_givens_SSE(RP->s(l, m), RP->c(l, m), A+8*l+2, A+8*(l+2)+2);
     for (int l = n-7-m; l >= 0; l--)
         apply_givens_SSE(RP->s(l, m+4), RP->c(l, m+4), A+8*l+6, A+8*(l+2)+6);
-    for(int j = m+2; j >= m; j -= 2)
+    for (int j = m+2; j >= m; j -= 2)
         for (int l = n-3-j; l >= 0; l--)
             apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+8*l+4, A+8*(l+2)+4);
     for (int j = m-2; j >= 0; j -= 2)
@@ -112,7 +112,7 @@ void ft_kernel_sph_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double
     for (int j = m%2; j < m-1; j += 2)
         for (int l = 0; l <= n-3-j; l++)
             apply_givens_t_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+2));
-    for(int j = m; j <= m+2; j += 2)
+    for (int j = m; j <= m+2; j += 2)
         for (int l = 0; l <= n-3-j; l++)
             apply_givens_t_AVX(RP->s(l, j), RP->c(l, j), A+8*l+4, A+8*(l+2)+4);
     for (int l = 0; l <= n-7-m; l++)
@@ -700,7 +700,7 @@ void ft_kernel_spinsph_hi2lo_AVX512(const ft_spin_rotation_plan * SRP, const int
     int flick = j%2;
 
     if (am <= (as - 1)) {
-        for(int i = 0; i <= 6; i += 2) {
+        for (int i = 0; i <= 6; i += 2) {
             j = as + am + (i-2);
             while (j >= 2*as) {
                 for (int l = n-3+as-j; l >= 0; l--)
@@ -738,7 +738,7 @@ void ft_kernel_spinsph_hi2lo_AVX512(const ft_spin_rotation_plan * SRP, const int
             j -= 2;
         }
 
-        for(int i = 2; i > 0; i--) {
+        for (int i = 2; i > 0; i--) {
             if (j >= 2*as) {
                 for (int l = n-3+as-j; l >= 0; l--)
                     apply_givens_AVX(SRP->s1(l+n, j-as), SRP->c1(l+n, j-as), A+8*l+4, A+8*(l+1)+4);
@@ -832,7 +832,7 @@ void ft_kernel_spinsph_lo2hi_AVX512(const ft_spin_rotation_plan * SRP, const int
                 apply_givens_t_SSE(SRP->s1(l+n, j-as), SRP->c1(l+n, j-as), A+8*l+2, A+8*(l+1)+2);
         }
 
-        for(int i = 2; i <= 4; i+=2) {
+        for (int i = 2; i <= 4; i+=2) {
             if (j < MAX(0, as-am-i)) {
                 for (int l = 0; l <= n-3-j; l++)
                     apply_givens_t_AVX(SRP->s3(l, j), SRP->c3(l, j), A+8*l+4, A+8*(l+2)+4);

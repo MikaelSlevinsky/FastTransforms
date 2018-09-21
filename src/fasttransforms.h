@@ -110,6 +110,18 @@ void ft_execute_sph_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * 
 void ft_execute_sph_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void ft_execute_sph_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
+void ft_execute_sphv_hi2lo(const ft_rotation_plan * RP, double * A, const int M);
+void ft_execute_sphv_lo2hi(const ft_rotation_plan * RP, double * A, const int M);
+
+void ft_execute_sphv_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_sphv_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
+
+void ft_execute_sphv_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_sphv_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
+
+void ft_execute_sphv_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_sphv_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
+
 void ft_execute_tri_hi2lo(const ft_rotation_plan * RP, double * A, const int M);
 void ft_execute_tri_lo2hi(const ft_rotation_plan * RP, double * A, const int M);
 
@@ -165,6 +177,9 @@ ft_harmonic_plan * ft_plan_sph2fourier(const int n);
 void ft_execute_sph2fourier(const ft_harmonic_plan * P, double * A, const int N, const int M);
 void ft_execute_fourier2sph(const ft_harmonic_plan * P, double * A, const int N, const int M);
 
+void ft_execute_sphv2fourier(const ft_harmonic_plan * P, double * A, const int N, const int M);
+void ft_execute_fourier2sphv(const ft_harmonic_plan * P, double * A, const int N, const int M);
+
 ft_harmonic_plan * ft_plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma);
 
 void ft_execute_tri2cheb(const ft_harmonic_plan * P, double * A, const int N, const int M);
@@ -187,11 +202,17 @@ typedef struct {
 
 void ft_destroy_sphere_fftw_plan(ft_sphere_fftw_plan * P);
 
+ft_sphere_fftw_plan * ft_plan_sph_with_kind(const int N, const int M, const fftw_r2r_kind kind[3][1]);
 ft_sphere_fftw_plan * ft_plan_sph_synthesis(const int N, const int M);
 ft_sphere_fftw_plan * ft_plan_sph_analysis(const int N, const int M);
+ft_sphere_fftw_plan * ft_plan_sphv_synthesis(const int N, const int M);
+ft_sphere_fftw_plan * ft_plan_sphv_analysis(const int N, const int M);
 
 void ft_execute_sph_synthesis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M);
 void ft_execute_sph_analysis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M);
+
+void ft_execute_sphv_synthesis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M);
+void ft_execute_sphv_analysis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M);
 
 typedef struct {
     fftw_plan planxy;
@@ -199,6 +220,7 @@ typedef struct {
 
 void ft_destroy_triangle_fftw_plan(ft_triangle_fftw_plan * P);
 
+ft_triangle_fftw_plan * ft_plan_tri_with_kind(const int N, const int M, const fftw_r2r_kind kind0, const fftw_r2r_kind kind1);
 ft_triangle_fftw_plan * ft_plan_tri_synthesis(const int N, const int M);
 ft_triangle_fftw_plan * ft_plan_tri_analysis(const int N, const int M);
 
@@ -216,6 +238,7 @@ typedef struct {
 
 void ft_destroy_disk_fftw_plan(ft_disk_fftw_plan * P);
 
+ft_disk_fftw_plan * ft_plan_disk_with_kind(const int N, const int M, const fftw_r2r_kind kind[3][1]);
 ft_disk_fftw_plan * ft_plan_disk_synthesis(const int N, const int M);
 ft_disk_fftw_plan * ft_plan_disk_analysis(const int N, const int M);
 
