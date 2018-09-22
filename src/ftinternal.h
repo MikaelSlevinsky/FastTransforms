@@ -21,6 +21,7 @@
     #define vall8(x) ((double8) _mm512_set1_pd(x))
     #define vload8(v) ((double8) _mm512_load_pd(v))
     #define vstore8(u, v) (_mm512_store_pd(u, v))
+    #define vsqrt8(x) ((double8) _mm512_sqrt_pd(x))
 #endif
 #if __AVX__
     #define VECTOR_SIZE_4 4
@@ -31,6 +32,7 @@
     #define vall4(x) ((double4) _mm256_set1_pd(x))
     #define vload4(v) ((double4) _mm256_load_pd(v))
     #define vstore4(u, v) (_mm256_store_pd(u, v))
+    #define vsqrt4(x) ((double4) _mm256_sqrt_pd(x))
 #endif
 #if __SSE2__
     #define VECTOR_SIZE_2 2
@@ -41,6 +43,7 @@
     #define vall2(x) ((double2) _mm_set1_pd(x))
     #define vload2(v) ((double2) _mm_load_pd(v))
     #define vstore2(u, v) (_mm_store_pd(u, v))
+    #define vsqrt2(x) ((double2) _mm_sqrt_pd(x))
 #endif
 
 #define ALIGNB(N) (N + ALIGN_SIZE-1-(N+ALIGN_SIZE-1)%ALIGN_SIZE)

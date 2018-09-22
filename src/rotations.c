@@ -98,16 +98,39 @@ void ft_kernel_sph_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * 
 
 void ft_kernel_sph_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
-    for (int l = n-3-m; l >= 0; l--)
-        apply_givens_SSE(RP->s(l, m), RP->c(l, m), A+8*l+2, A+8*(l+2)+2);
-    for (int l = n-7-m; l >= 0; l--)
-        apply_givens_SSE(RP->s(l, m+4), RP->c(l, m+4), A+8*l+6, A+8*(l+2)+6);
+    double2 scnum2;
+    double4 scnum4, scden4;
+    double sc[4];
+    for (int l = n-3-m; l >= 0; l--) {
+        scnum2 = (double2) {(l+1)*(l+2), (2*m+2)*(2*l+2*m+5)};
+        vstore2(sc, vsqrt2(scnum2/((l+2*m+3)*(l+2*m+4))));
+        apply_givens_SSE(sc[0], sc[1], A+8*l+2, A+8*l+18);
+    }
+    for (int l = n-7-m; l >= 0; l--) {
+        scnum2 = (double2) {(l+1)*(l+2), (2*m+10)*(2*l+2*m+13)};
+        vstore2(sc, vsqrt2(scnum2/((l+2*m+11)*(l+2*m+12))));
+        apply_givens_SSE(sc[0], sc[1], A+8*l+6, A+8*l+22);
+    }
     for (int j = m+2; j >= m; j -= 2)
-        for (int l = n-3-j; l >= 0; l--)
-            apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+8*l+4, A+8*(l+2)+4);
-    for (int j = m-2; j >= 0; j -= 2)
-        for (int l = n-3-j; l >= 0; l--)
-            apply_givens_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+2));
+        for (int l = n-3-j; l >= 0; l--) {
+            scnum2 = (double2) {(l+1)*(l+2), (2*j+2)*(2*l+2*j+5)};
+            vstore2(sc, vsqrt2(scnum2/((l+2*j+3)*(l+2*j+4))));
+            apply_givens_AVX(sc[0], sc[1], A+8*l+4, A+8*l+20);
+        }
+    for (int j = m-2; j >= 0; j -= 2) {
+        for (int l = n-3-j; l >= 0; l -= 2) {
+            scnum4 = (double4) {(l+1)*(l+2), (2*j+2)*(2*l+2*j+5), l*(l+1), (2*j+2)*(2*l+2*j+3)};
+            scden4 = (double4) {(l+2*j+3)*(l+2*j+4), (l+2*j+3)*(l+2*j+4), (l+2*j+2)*(l+2*j+3), (l+2*j+2)*(l+2*j+3)};
+            vstore4(sc, vsqrt4(scnum4/scden4));
+            apply_givens_AVX512(sc[0], sc[1], A+8*l, A+8*l+16);
+            apply_givens_AVX512(sc[2], sc[3], A+8*l-8, A+8*l+8);
+        }
+        if (n-3-j % 2 == 0) {
+            scnum2 = (double2) {2, (2*j+2)*(2*j+5)};
+            vstore2(sc, vsqrt2(scnum2/((2*j+3)*(2*j+4))));
+            apply_givens_AVX512(sc[0], sc[1], A, A+16);
+        }
+    }
 }
 
 // Convert eight vectors of spherical harmonics of order 0/1 to m, m, m+2, m+2, m+4, m+4, m+6, m+6.
