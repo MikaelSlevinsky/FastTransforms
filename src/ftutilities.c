@@ -8,32 +8,32 @@
 void printmat(char * MAT, char * FMT, double * A, int n, int m) {
     printf("%s = \n", MAT);
     if (n > 0 && m > 0) {
-        if (A(0,0) < 0) {printf("[");}
+        if (signbit(A(0,0))) {printf("[");}
         else {printf("[ ");}
         printf(FMT, A(0,0));
         for (int j = 1; j < m; j++) {
-            if (A(0,j) < 0) {printf("  ");}
+            if (signbit(A(0,j))) {printf("  ");}
             else {printf("   ");}
             printf(FMT, A(0,j));
         }
         for (int i = 1; i < n-1; i++) {
             printf("\n");
-            if (A(i,0) < 0) {printf(" ");}
+            if (signbit(A(i,0))) {printf(" ");}
             else {printf("  ");}
             printf(FMT, A(i,0));
             for (int j = 1; j < m; j++) {
-                if (A(i,j) < 0) {printf("  ");}
+                if (signbit(A(i,j))) {printf("  ");}
                 else {printf("   ");}
                 printf(FMT, A(i,j));
             }
         }
         if (n > 1) {
             printf("\n");
-            if (A(n-1,0) < 0) {printf(" ");}
+            if (signbit(A(n-1,0))) {printf(" ");}
             else {printf("  ");}
             printf(FMT, A(n-1,0));
             for (int j = 1; j < m; j++) {
-                if (A(n-1,j) < 0) {printf("  ");}
+                if (signbit(A(n-1,j))) {printf("  ");}
                 else {printf("   ");}
                 printf(FMT, A(n-1,j));
             }
