@@ -20,7 +20,7 @@ ft_sphere_fftw_plan * ft_plan_sph_with_kind(const int N, const int M, const fftw
     int istride = 1, ostride = 1; // distance between two elements in the same column //
     int * inembed = n, * onembed = n;
 
-    ft_sphere_fftw_plan * P = malloc(sizeof(ft_sphere_fftw_plan));
+    ft_sphere_fftw_plan * P = (ft_sphere_fftw_plan *) malloc(sizeof(ft_sphere_fftw_plan));
 
     P->Y = fftw_malloc(N*M*sizeof(double));
 
@@ -142,7 +142,7 @@ void ft_destroy_triangle_fftw_plan(ft_triangle_fftw_plan * P) {
 }
 
 ft_triangle_fftw_plan * ft_plan_tri_with_kind(const int N, const int M, const fftw_r2r_kind kind0, const fftw_r2r_kind kind1) {
-    ft_triangle_fftw_plan * P = malloc(sizeof(ft_triangle_fftw_plan));
+    ft_triangle_fftw_plan * P = (ft_triangle_fftw_plan *) malloc(sizeof(ft_triangle_fftw_plan));
     double * X = fftw_malloc(N*M*sizeof(double));
     P->planxy = fftw_plan_r2r_2d(N, M, X, X, kind0, kind1, FT_FFTW_FLAGS);
     fftw_free(X);
@@ -194,7 +194,7 @@ ft_disk_fftw_plan * ft_plan_disk_with_kind(const int N, const int M, const fftw_
     int istride = 1, ostride = 1; // distance between two elements in the same column //
     int * inembed = n, * onembed = n;
 
-    ft_disk_fftw_plan * P = malloc(sizeof(ft_disk_fftw_plan));
+    ft_disk_fftw_plan * P = (ft_disk_fftw_plan *) malloc(sizeof(ft_disk_fftw_plan));
 
     P->Y = fftw_malloc(N*M*sizeof(double));
 

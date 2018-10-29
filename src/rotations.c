@@ -24,7 +24,7 @@ ft_rotation_plan * ft_plan_rotsphere(const int n) {
             s(l, m) = sqrt(nums/den);
             c(l, m) = sqrt(numc/den);
         }
-    ft_rotation_plan * RP = malloc(sizeof(ft_rotation_plan));
+    ft_rotation_plan * RP = (ft_rotation_plan *) malloc(sizeof(ft_rotation_plan));
     RP->s = s;
     RP->c = c;
     RP->n = n;
@@ -139,7 +139,7 @@ ft_rotation_plan * ft_plan_rottriangle(const int n, const double alpha, const do
             s(l, m) = sqrt(nums/den);
             c(l, m) = sqrt(numc/den);
         }
-    ft_rotation_plan * RP = malloc(sizeof(ft_rotation_plan));
+    ft_rotation_plan * RP = (ft_rotation_plan *) malloc(sizeof(ft_rotation_plan));
     RP->s = s;
     RP->c = c;
     RP->n = n;
@@ -287,7 +287,7 @@ ft_rotation_plan * ft_plan_rotdisk(const int n) {
             s(l, m) = -((double) (l+1))/((double) (l+m+2));
             c(l, m) = sqrt(numc/den);
         }
-    ft_rotation_plan * RP = malloc(sizeof(ft_rotation_plan));
+    ft_rotation_plan * RP = (ft_rotation_plan *) malloc(sizeof(ft_rotation_plan));
     RP->s = s;
     RP->c = c;
     RP->n = n;
@@ -449,7 +449,7 @@ ft_spin_rotation_plan * ft_plan_rotspinsphere(const int n, const int s) {
             c3(l, m) = sqrt(numc/den);
         }
 
-    ft_spin_rotation_plan * SRP = malloc(sizeof(ft_spin_rotation_plan));
+    ft_spin_rotation_plan * SRP = (ft_spin_rotation_plan *) malloc(sizeof(ft_spin_rotation_plan));
     SRP->s1 = s1;
     SRP->c1 = c1;
     SRP->s2 = s2;
