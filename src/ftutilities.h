@@ -9,13 +9,12 @@
 #include <float.h>
 #include <sys/time.h>
 
-#define RED     "\x1b[31m"
-#define GREEN   "\x1b[32m"
-#define YELLOW  "\x1b[33m"
-#define BLUE    "\x1b[34m"
-#define MAGENTA "\x1b[35m"
-#define CYAN    "\x1b[36m"
-#define RESET   "\x1b[0m"
+#define RED(string) "\x1b[31m" string "\x1b[0m"
+#define GREEN(string) "\x1b[32m" string "\x1b[0m"
+#define YELLOW(string) "\x1b[33m" string "\x1b[0m"
+#define BLUE(string) "\x1b[34m" string "\x1b[0m"
+#define MAGENTA(string) "\x1b[35m" string "\x1b[0m"
+#define CYAN(string) "\x1b[36m" string "\x1b[0m"
 
 void printmat(char * MAT, char * FMT, double * A, int n, int m);
 double * copymat(double * A, int n, int m);
