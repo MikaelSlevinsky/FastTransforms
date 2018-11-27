@@ -20,7 +20,7 @@ int main(void) {
     printf("\n");
     printf("and\n");
     printf("\n");
-    printf("\tφₘ = 2π m/M, for 0 ≤ m < M;\n");
+    printf("\tθₘ = 2π m/M, for 0 ≤ m < M;\n");
     printf("\n");
     printf("we convert the function samples to Chebyshev×Fourier coefficients using\n");
     printf("`ft_plan_disk_analysis` and `ft_execute_disk_analysis`; and finally, we transform\n");
