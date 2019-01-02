@@ -1,4 +1,5 @@
 # Documentation: http://docs.travis-ci.com/user/languages/c/
+sudo: true
 language: c
 matrix:
   include:
@@ -8,12 +9,6 @@ matrix:
       env:
         - C_COMPILER='gcc-7'
         - MATRIX_EVAL="brew update && brew install gcc@7 openblas fftw"
-    - os: osx
-      osx_image: xcode10.1
-      compiler: clang-6
-      env:
-        - C_COMPILER='/usr/local/opt/llvm/bin/clang'
-        - MATRIX_EVAL="brew update && brew install llvm@6 openblas fftw"
     - os: linux
       compiler: gcc-7
       addons:
