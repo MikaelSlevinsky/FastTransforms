@@ -5,9 +5,12 @@ matrix:
   include:
     - os: osx
       osx_image: xcode10.1
+      compiler: gcc-7
       env:
-        - MATRIX_EVAL="brew update && brew install gcc openblas fftw && CC=gcc-7"
+        - C_COMPILER='gcc-7'
+        - MATRIX_EVAL="brew update && brew install gcc@7 openblas fftw"
     - os: linux
+      compiler: gcc-7
       addons:
         apt:
           sources:
@@ -18,12 +21,10 @@ matrix:
             - libopenblas-base
             - libfftw3-dev
       env:
-        - MATRIX_EVAL="CC=gcc-7 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+        - C_COMPILER='gcc-7'
+        - MATRIX_EVAL="export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
 
 before_install:
-#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-#      open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg;
-#    fi
   - eval "${MATRIX_EVAL}"
 
 script:
