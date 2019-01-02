@@ -1,4 +1,5 @@
 # Documentation: http://docs.travis-ci.com/user/languages/c/
+sudo: true
 language: c
 matrix:
   include:
@@ -19,9 +20,10 @@ matrix:
         - MATRIX_EVAL="CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
 
 before_install:
-#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-#      open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg;
-#    fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      sudo xcode-select --install
+      #open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg;
+    fi
   - eval "${MATRIX_EVAL}"
 
 script:
