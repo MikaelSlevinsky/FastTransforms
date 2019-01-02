@@ -4,6 +4,7 @@ language: c
 matrix:
   include:
     - os: osx
+      osx_image: xcode10.1
       env:
         - MATRIX_EVAL="brew update && brew install gcc openblas fftw && CC=gcc-8"
     - os: linux
@@ -20,10 +21,9 @@ matrix:
         - MATRIX_EVAL="CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      sudo xcode-select --install
-      #open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg;
-    fi
+#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+#      open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg;
+#    fi
   - eval "${MATRIX_EVAL}"
 
 script:
