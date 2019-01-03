@@ -12,7 +12,7 @@ matrix:
       osx_image: xcode10
       compiler: gcc-7
       env: MATRIX_EVAL="brew update && brew install gcc@7 fftw && export CC=gcc-7 && export BLAS=APPLEBLAS"
-    # Minimum requirements
+    # Minimum system requirements
     - os: linux
       compiler: gcc-4.9
       addons:
