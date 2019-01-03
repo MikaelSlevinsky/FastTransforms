@@ -19,11 +19,12 @@ OBJ = src/transforms.c src/rotations.c src/permute.c src/drivers.c src/fftw.c
 #CC = gcc-8
 #CC = /usr/local/opt/llvm/bin/clang
 
-AVX512 =# -mavx512f
 #BLAS = APPLEBLAS
-BLAS = OPENBLAS
+#BLAS = OPENBLAS
 
-CFLAGS = -Ofast $(AVX512) -march=native -mtune=native -I./src
+AVX512 =# -mavx512f 
+
+CFLAGS = -std=gnu99 -Ofast $(AVX512) -march=native -mtune=native -I./src
 
 ifeq ($(CC),/usr/local/opt/llvm/bin/clang)
     CFLAGS += -I/usr/local/opt/llvm/include

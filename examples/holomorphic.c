@@ -9,23 +9,23 @@ double f(double x, double y);
 int main(void) {
     printf("In this example, we explore integration of a harmonic function over \n");
     printf("the unit disk. In this case, we know from complex analysis that the \n");
-    printf("integral of a holomorphic function is equal to "MAGENTA"π × f(0,0)"RESET".\n");
+    printf("integral of a holomorphic function is equal to "MAGENTA("π × f(0,0)")".\n");
     printf("We analyze the function:\n");
     printf("\n");
-    printf("\t"MAGENTA"f(x,y) = (x²-y²+1)/[(x²-y²+1)²+(2xy+1)²]"RESET",\n");
+    printf("\t"MAGENTA("f(x,y) = (x²-y²+1)/[(x²-y²+1)²+(2xy+1)²]")",\n");
     printf("\n");
-    printf("on an "MAGENTA"N×M"RESET" tensor product grid defined by:\n");
+    printf("on an "MAGENTA("N×M")" tensor product grid defined by:\n");
     printf("\n");
-    printf("\t"MAGENTA"rₙ = cos[(n+1/2)π/2N]"RESET", for "MAGENTA"0 ≤ n < N"RESET",\n");
+    printf("\t"MAGENTA("rₙ = cos[(n+1/2)π/2N]")", for "MAGENTA("0 ≤ n < N")",\n");
     printf("\n");
     printf("and\n");
     printf("\n");
-    printf("\t"MAGENTA"θₘ = 2π m/M"RESET", for "MAGENTA"0 ≤ m < M"RESET";\n");
+    printf("\t"MAGENTA("θₘ = 2π m/M")", for "MAGENTA("0 ≤ m < M")";\n");
     printf("\n");
     printf("we convert the function samples to Chebyshev×Fourier coefficients using\n");
-    printf(CYAN"ft_plan_disk_analysis"RESET" and "CYAN"ft_execute_disk_analysis"RESET"; and finally, we transform\n");
+    printf(CYAN("ft_plan_disk_analysis")" and "CYAN("ft_execute_disk_analysis")"; and finally, we transform\n");
     printf("the Chebyshev×Fourier coefficients to disk harmonic coefficients using\n");
-    printf(CYAN"ft_plan_disk2cxf"RESET" and "CYAN"ft_execute_cxf2disk"RESET".\n");
+    printf(CYAN("ft_plan_disk2cxf")" and "CYAN("ft_execute_cxf2disk")".\n");
     printf("\n");
     printf("N.B. for the storage pattern of the printed arrays, please consult the\n");
     printf("documentation. (Arrays are stored in column-major ordering.)\n");
@@ -38,7 +38,7 @@ int main(void) {
     int N = 5;
     int M = 4*N-3;
 
-    printf("\n\n"MAGENTA"N = %i"RESET", and "MAGENTA"M = %i"RESET"\n\n", N, M);
+    printf("\n\n"MAGENTA("N = %i")", and "MAGENTA("M = %i")"\n\n", N, M);
 
     P = ft_plan_disk2cxf(N);
     PA = ft_plan_disk_analysis(N, M);
@@ -50,9 +50,9 @@ int main(void) {
     for (int m = 0; m < M; m++)
         theta[m] = 2.0*M_PI*m/M;
 
-    printmat("Radial grid "MAGENTA"r"RESET, FMT, r, N, 1);
+    printmat("Radial grid "MAGENTA("r"), FMT, r, N, 1);
     printf("\n");
-    printmat("Azimuthal grid "MAGENTA"θ"RESET, FMT, theta, 1, M);
+    printmat("Azimuthal grid "MAGENTA("θ"), FMT, theta, 1, M);
     printf("\n");
 
     for (int m = 0; m < M; m++)
@@ -73,11 +73,11 @@ int main(void) {
     printf("\n");
 
     printf("The Zernike coefficients are useful for integration. The integral\n");
-    printf("of "MAGENTA"f(x,y)"RESET" over the disk should be "MAGENTA"π/2"RESET" by harmonicity.\n");
-    printf("The coefficient of "MAGENTA"Z_0^0"RESET" multiplied by "MAGENTA"√π"RESET" is: ");
+    printf("of "MAGENTA("f(x,y)")" over the disk should be "MAGENTA("π/2")" by harmonicity.\n");
+    printf("The coefficient of "MAGENTA("Z_0^0")" multiplied by "MAGENTA("√π")" is: ");
     printf(FMT, F[0]*sqrt(M_PI));
     printf(".\n\n");
-    printf("Using an orthonormal basis, the integral of "MAGENTA"[f(x,y)]^2"RESET" over the\n");
+    printf("Using an orthonormal basis, the integral of "MAGENTA("[f(x,y)]^2")" over the\n");
     printf("disk is approximately the square of the 2-norm of the coefficients, ");
     printf(FMT, pow(vecnorm_1arg(F, N, M), 2));
     printf(".\n");

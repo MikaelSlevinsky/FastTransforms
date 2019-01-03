@@ -46,22 +46,22 @@ ft_sphere_fftw_plan * ft_plan_sph_with_kind(const int N, const int M, const fftw
 }
 
 ft_sphere_fftw_plan * ft_plan_sph_synthesis(const int N, const int M) {
-    fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_RODFT01}, {FFTW_HC2R}};
+    const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_RODFT01}, {FFTW_HC2R}};
     return ft_plan_sph_with_kind(N, M, kind);
 }
 
 ft_sphere_fftw_plan * ft_plan_sph_analysis(const int N, const int M) {
-    fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_RODFT10}, {FFTW_R2HC}};
+    const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_RODFT10}, {FFTW_R2HC}};
     return ft_plan_sph_with_kind(N, M, kind);
 }
 
 ft_sphere_fftw_plan * ft_plan_sphv_synthesis(const int N, const int M) {
-    fftw_r2r_kind kind[3][1] = {{FFTW_RODFT01}, {FFTW_REDFT01}, {FFTW_HC2R}};
+    const fftw_r2r_kind kind[3][1] = {{FFTW_RODFT01}, {FFTW_REDFT01}, {FFTW_HC2R}};
     return ft_plan_sph_with_kind(N, M, kind);
 }
 
 ft_sphere_fftw_plan * ft_plan_sphv_analysis(const int N, const int M) {
-    fftw_r2r_kind kind[3][1] = {{FFTW_RODFT10}, {FFTW_REDFT10}, {FFTW_R2HC}};
+    const fftw_r2r_kind kind[3][1] = {{FFTW_RODFT10}, {FFTW_REDFT10}, {FFTW_R2HC}};
     return ft_plan_sph_with_kind(N, M, kind);
 }
 
@@ -220,12 +220,12 @@ ft_disk_fftw_plan * ft_plan_disk_with_kind(const int N, const int M, const fftw_
 }
 
 ft_disk_fftw_plan * ft_plan_disk_synthesis(const int N, const int M) {
-    fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_REDFT11}, {FFTW_HC2R}};
+    const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_REDFT11}, {FFTW_HC2R}};
     return ft_plan_disk_with_kind(N, M, kind);
 }
 
 ft_disk_fftw_plan * ft_plan_disk_analysis(const int N, const int M) {
-    fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_REDFT11}, {FFTW_R2HC}};
+    const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_REDFT11}, {FFTW_R2HC}};
     return ft_plan_disk_with_kind(N, M, kind);
 }
 

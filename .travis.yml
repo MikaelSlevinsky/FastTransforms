@@ -2,26 +2,36 @@
 language: c
 matrix:
   include:
+    # Minimum system requirements
     - os: osx
-      env:
-        - MATRIX_EVAL="brew update && brew cask uninstall oclint && brew install gcc openblas fftw && CC=gcc-8"
+      osx_image: xcode8
+      compiler: gcc-4.9
+      env: MATRIX_EVAL="brew update && brew install fftw && export CC=gcc-4.9 && export BLAS=APPLEBLAS"
+    # Recommended system requirements
+    - os: osx
+      osx_image: xcode10
+      compiler: gcc-7
+      env: MATRIX_EVAL="brew update && brew install gcc@7 fftw && export CC=gcc-7 && export BLAS=APPLEBLAS"
+    # Minimum system requirements
     - os: linux
+      compiler: gcc-4.9
       addons:
         apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-8
-            - libblas-dev
-            - libopenblas-base
-            - libfftw3-dev
+          sources: ubuntu-toolchain-r-test
+          packages: ['gcc-4.9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev']
       env:
-        - MATRIX_EVAL="CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+        - MATRIX_EVAL="export CC=gcc-4.9 && export BLAS=OPENBLAS && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+    # Recommended system requirements
+    - os: linux
+      compiler: gcc-7
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: ['gcc-7', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev']
+      env:
+        - MATRIX_EVAL="export CC=gcc-7 && export BLAS=OPENBLAS && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      sudo softwareupdate -i "Command Line Tools (macOS High Sierra version 10.13) for Xcode-9.4";
-    fi
   - eval "${MATRIX_EVAL}"
 
 script:
@@ -31,6 +41,9 @@ script:
   - ./test_rotations
   - OMP_NUM_THREADS=4 ./test_drivers 3 3 0
   - OMP_NUM_THREADS=4 ./test_fftw 3 3 0
+  - make examples
+  - ./additiontheorem
+  - ./holomorphic
 
 notifications:
   email: false
