@@ -6,12 +6,12 @@ matrix:
     - os: osx
       osx_image: xcode8
       compiler: gcc-4.9
-      env: MATRIX_EVAL="brew update && brew install gcc@4.9 openblas fftw && export CC=gcc-4.9"
+      env: MATRIX_EVAL="brew update && brew install fftw && export CC=gcc-4.9 && export BLAS=APPLEBLAS"
     # Recommended system requirements
     - os: osx
       osx_image: xcode10
       compiler: gcc-7
-      env: MATRIX_EVAL="brew update && brew install gcc@7 openblas fftw && export CC=gcc-7"
+      env: MATRIX_EVAL="brew update && brew install gcc@7 openblas fftw && export CC=gcc-7 && export BLAS=OPENBLAS"
     # Minimum requirements
     - os: linux
       compiler: gcc-4.9
@@ -20,7 +20,7 @@ matrix:
           sources: ubuntu-toolchain-r-test
           packages: ['g++-4.9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev']
       env:
-        - MATRIX_EVAL="export CC=gcc-4.9 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+        - MATRIX_EVAL="export CC=gcc-4.9 && export BLAS=OPENBLAS && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     # Recommended system requirements
     - os: linux
       compiler: gcc-7
@@ -29,7 +29,7 @@ matrix:
           sources: ubuntu-toolchain-r-test
           packages: ['g++-7', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev']
       env:
-        - MATRIX_EVAL="export CC=gcc-7 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+        - MATRIX_EVAL="export CC=gcc-7 && export BLAS=OPENBLAS && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
 
 before_install:
   - eval "${MATRIX_EVAL}"
