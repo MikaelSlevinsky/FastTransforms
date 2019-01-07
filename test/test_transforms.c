@@ -1,5 +1,4 @@
 #include "fasttransforms.h"
-#include "ftinternal.h"
 #include "ftutilities.h"
 
 const int N = 2049;

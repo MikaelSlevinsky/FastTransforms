@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <math.h>
+#include <quadmath.h>
 #include <immintrin.h>
 
 #define M_SQRT_PI      1.772453850905516027   /* sqrt(pi)       */
@@ -11,6 +12,42 @@
 #define M_4_SQRT_PI    7.089815403622064109   /* 4*sqrt(pi)     */
 #define M_1_4_SQRT_PI  0.141047395886939072   /* 1/(4*sqrt(pi)) */
 #define M_EPS          0x1p-52                /* pow(2.0, -52)  */
+#define M_EPSf         0x1p-23                /* pow(2.0, -23)  */
+#define M_EPSl         0x1p-63                /* pow(2.0, -63)  */
+#define M_EPSq         0x1p-112               /* pow(2.0, -112) */
+
+#ifndef M_PIl
+    #define M_PIl       0xc.90fdaa22168c235p-2L
+#endif
+
+typedef __float128 quadruple;
+
+float epsf(void);
+double eps(void);
+long double epsl(void);
+quadruple epsq(void);
+
+long double __cospil(long double x);
+quadruple __cospiq(quadruple x);
+long double __sinpil(long double x);
+quadruple __sinpiq(quadruple x);
+long double __tanpil(long double x);
+quadruple __tanpiq(quadruple x);
+
+#define CONCAT(prefix, name, suffix) prefix ## name ## suffix
+
+#define ZERO(FLT) ((FLT) 0)
+#define ONE(FLT) ((FLT) 1)
+#define TWO(FLT) ((FLT) 2)
+
+#define signbitf(x) signbit(x)
+#define signbitl(x) signbit(x)
+
+#define isinff(x) isinf(x)
+#define isinfl(x) isinf(x)
+
+#define isnanf(x) isnan(x)
+#define isnanl(x) isnan(x)
 
 #define MAX(a,b) ((a) > (b) ? a : b)
 #define MIN(a,b) ((a) < (b) ? a : b)
@@ -96,7 +133,7 @@ void permute_t_tri(double * A, const double * B, const int N, const int M, const
 #define permute_spinsph(A, B, N, M, L) permute_sph(A, B, N, M, L)
 #define permute_t_spinsph(A, B, N, M, L) permute_t_sph(A, B, N, M, L)
 
-void swap(double * A, double * B, const int N);
+void swap_warp(double * A, double * B, const int N);
 void warp(double * A, const int N, const int M, const int L);
 void warp_t(double * A, const int N, const int M, const int L);
 

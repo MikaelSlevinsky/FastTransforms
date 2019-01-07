@@ -1,5 +1,4 @@
 #include "fasttransforms.h"
-#include "ftinternal.h"
 #include "ftutilities.h"
 
 double * aligned_copymat(double * A, int n, int m);

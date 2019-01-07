@@ -49,43 +49,6 @@ double * copymat(double * A, int n, int m) {
     return B;
 }
 
-void checktest(double err, int n, int * checksum) {
-    if (fabs(err) < n*0x1p-52) printf(GREEN("✓")"\n");
-    else {printf(RED("×")"\n"); (*checksum)++;}
-}
-
-double norm_1arg(double * A, int n) {
-    double ret = 0.0;
-    for (int i = 0; i < n; i++)
-        ret += pow(A[i], 2);
-    return sqrt(ret);
-}
-
-double norm_2arg(double * A, double * B, int n) {
-    double ret = 0.0;
-    for (int i = 0; i < n; i++)
-        ret += pow(A[i]-B[i], 2);
-    return sqrt(ret);
-}
-
-double normInf_1arg(double * A, int n) {
-    double ret = 0.0, temp;
-    for (int i = 0; i < n; i++) {
-        temp = fabs(A[i]);
-        if (temp > ret) ret = temp;
-    }
-    return ret;
-}
-
-double normInf_2arg(double * A, double * B, int n) {
-    double ret = 0.0, temp;
-    for (int i = 0; i < n; i++) {
-        temp = fabs(A[i]-B[i]);
-        if (temp > ret) ret = temp;
-    }
-    return ret;
-}
-
 double * sphones(int n, int m) {
     double * A  = (double *) calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
@@ -153,3 +116,27 @@ double * spinsphrand(int n, int m, int s) {
 double elapsed(struct timeval * start, struct timeval * end, int N) {
     return ((end->tv_sec  - start->tv_sec) * 1000000u + end->tv_usec - start->tv_usec) / (1.e6 * N);
 }
+
+#define FLT float
+#define X(name) CONCAT(, name, f)
+#include "ftutilities_source.c"
+#undef FLT
+#undef X
+
+#define FLT double
+#define X(name) CONCAT(, name, )
+#include "ftutilities_source.c"
+#undef FLT
+#undef X
+
+#define FLT long double
+#define X(name) CONCAT(, name, l)
+#include "ftutilities_source.c"
+#undef FLT
+#undef X
+
+#define FLT quadruple
+#define X(name) CONCAT(, name, q)
+#include "ftutilities_source.c"
+#undef FLT
+#undef X

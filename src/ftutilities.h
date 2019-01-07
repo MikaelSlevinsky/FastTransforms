@@ -8,6 +8,7 @@
 #include <math.h>
 #include <float.h>
 #include <sys/time.h>
+#include "ftinternal.h"
 
 #define RED(string) "\x1b[31m" string "\x1b[0m"
 #define GREEN(string) "\x1b[32m" string "\x1b[0m"
@@ -18,11 +19,6 @@
 
 void printmat(char * MAT, char * FMT, double * A, int n, int m);
 double * copymat(double * A, int n, int m);
-void checktest(double err, int n, int * checksum);
-double norm_1arg(double * A, int n);
-double norm_2arg(double * A, double * B, int n);
-double normInf_1arg(double * A, int n);
-double normInf_2arg(double * A, double * B, int n);
 double * sphones(int n, int m);
 double * sphrand(int n, int m);
 double * triones(int n, int m);
@@ -32,5 +28,29 @@ double * diskrand(int n, int m);
 double * spinsphones(int n, int m, int s);
 double * spinsphrand(int n, int m, int s);
 double elapsed(struct timeval * start, struct timeval * end, int N);
+
+#define FLT float
+#define X(name) CONCAT(, name, f)
+#include "ftutilities_source.h"
+#undef FLT
+#undef X
+
+#define FLT double
+#define X(name) CONCAT(, name, )
+#include "ftutilities_source.h"
+#undef FLT
+#undef X
+
+#define FLT long double
+#define X(name) CONCAT(, name, l)
+#include "ftutilities_source.h"
+#undef FLT
+#undef X
+
+#define FLT quadruple
+#define X(name) CONCAT(, name, q)
+#include "ftutilities_source.h"
+#undef FLT
+#undef X
 
 #endif //FTUTILITIES_H

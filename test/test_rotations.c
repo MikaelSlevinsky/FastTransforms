@@ -1,5 +1,4 @@
 #include "fasttransforms.h"
-#include "ftinternal.h"
 #include "ftutilities.h"
 
 double rotnorm(const ft_rotation_plan * RP);

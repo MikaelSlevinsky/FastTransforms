@@ -80,7 +80,7 @@ void permute_t_tri(double * A, const double * B, const int N, const int M, const
 }
 
 
-void swap(double * A, double * B, const int N) {
+void swap_warp(double * A, double * B, const int N) {
     double tmp;
     for (int i = 0; i < N; i++) {
         tmp = A[i];
@@ -92,11 +92,11 @@ void swap(double * A, double * B, const int N) {
 void warp(double * A, const int N, const int M, const int L) {
     for (int j = 2; j <= L; j <<= 1)
         for (int i = M%(4*L); i < M; i += 4*j)
-            swap(A+(i+j)*N, A+(i+j*2)*N, j*N);
+            swap_warp(A+(i+j)*N, A+(i+j*2)*N, j*N);
 }
 
 void warp_t(double * A, const int N, const int M, const int L) {
     for (int j = L; j >= 2; j >>= 1)
         for (int i = M%(4*L); i < M; i += 4*j)
-            swap(A+(i+j)*N, A+(i+j*2)*N, j*N);
+            swap_warp(A+(i+j)*N, A+(i+j*2)*N, j*N);
 }

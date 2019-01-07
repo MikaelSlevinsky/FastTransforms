@@ -14,7 +14,7 @@ else
 	endif
 endif
 
-OBJ = src/transforms.c src/rotations.c src/permute.c src/drivers.c src/fftw.c
+OBJ = src/ftinternal.c src/transforms.c src/rotations.c src/permute.c src/arrow.c src/tridiagonal.c src/hierarchical.c src/drivers.c src/fftw.c
 
 #CC = gcc-8
 #CC = /usr/local/opt/llvm/bin/clang
@@ -45,4 +45,4 @@ else ifeq ($(BLAS), OPENBLAS)
         LDFLAGS += -L/usr/local/opt/fftw/lib
     endif
 endif
-LDLIBS += -lm -lblas -lfftw3 -lfftw3_threads
+LDLIBS += -lm -lquadmath -lblas -lfftw3 -lfftw3_threads
