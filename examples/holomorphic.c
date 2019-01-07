@@ -79,7 +79,7 @@ int main(void) {
     printf(".\n\n");
     printf("Using an orthonormal basis, the integral of "MAGENTA("[f(x,y)]^2")" over the\n");
     printf("disk is approximately the square of the 2-norm of the coefficients, ");
-    printf(FMT, pow(vecnorm_1arg(F, N, M), 2));
+    printf(FMT, pow(norm_1arg(F, N*M), 2));
     printf(".\n");
 
     ft_destroy_harmonic_plan(P);

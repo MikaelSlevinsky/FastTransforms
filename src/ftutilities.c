@@ -49,41 +49,40 @@ double * copymat(double * A, int n, int m) {
     return B;
 }
 
-double vecnorm_1arg(double * A, int n, int m) {
+void checktest(double err, int n, int * checksum) {
+    if (fabs(err) < n*0x1p-52) printf(GREEN("✓")"\n");
+    else {printf(RED("×")"\n"); (*checksum)++;}
+}
+
+double norm_1arg(double * A, int n) {
     double ret = 0.0;
-    for (int j = 0; j < m; j++)
-        for (int i = 0; i < n; i++)
-            ret += pow(A(i,j), 2);
+    for (int i = 0; i < n; i++)
+        ret += pow(A[i], 2);
     return sqrt(ret);
 }
 
-double vecnorm_2arg(double * A, double * B, int n, int m) {
+double norm_2arg(double * A, double * B, int n) {
     double ret = 0.0;
-    for (int j = 0; j < m; j++)
-        for (int i = 0; i < n; i++)
-            ret += pow(A(i,j)-B(i,j), 2);
+    for (int i = 0; i < n; i++)
+        ret += pow(A[i]-B[i], 2);
     return sqrt(ret);
 }
 
-double vecnormInf_1arg(double * A, int n, int m) {
+double normInf_1arg(double * A, int n) {
     double ret = 0.0, temp;
-    for (int j = 0; j < m; j++)
-        for (int i = 0; i < n; i++) {
-            temp = fabs(A(i,j));
-            if (temp > ret)
-                ret = temp;
-        }
+    for (int i = 0; i < n; i++) {
+        temp = fabs(A[i]);
+        if (temp > ret) ret = temp;
+    }
     return ret;
 }
 
-double vecnormInf_2arg(double * A, double * B, int n, int m) {
+double normInf_2arg(double * A, double * B, int n) {
     double ret = 0.0, temp;
-    for (int j = 0; j < m; j++)
-        for (int i = 0; i < n; i++) {
-            temp = fabs(A(i,j)-B(i,j));
-            if (temp > ret)
-                ret = temp;
-        }
+    for (int i = 0; i < n; i++) {
+        temp = fabs(A[i]-B[i]);
+        if (temp > ret) ret = temp;
+    }
     return ret;
 }
 
