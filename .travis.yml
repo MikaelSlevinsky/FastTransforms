@@ -19,12 +19,7 @@ matrix:
         apt:
           sources: ubuntu-toolchain-r-test
           packages: ['gcc-4.9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev']
-<<<<<<< HEAD
-      env:
-        - MATRIX_EVAL="export CC=gcc-4.9 && export BLAS=OPENBLAS && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
-=======
       env: MATRIX_EVAL="export CC=gcc-4.9 && export BLAS=OPENBLAS && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
->>>>>>> master
     # Recommended system requirements
     - os: linux
       compiler: gcc-7
@@ -32,17 +27,9 @@ matrix:
         apt:
           sources: ubuntu-toolchain-r-test
           packages: ['gcc-7', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev']
-<<<<<<< HEAD
-      env:
-        - MATRIX_EVAL="export CC=gcc-7 && export BLAS=OPENBLAS && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
-
-before_install:
-  - eval "${MATRIX_EVAL}"
-=======
       env: MATRIX_EVAL="export CC=gcc-7 && export BLAS=OPENBLAS && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
 
 before_install: eval "${MATRIX_EVAL}"
->>>>>>> master
 
 script:
   - make lib

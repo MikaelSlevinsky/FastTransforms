@@ -22,11 +22,7 @@ OBJ = src/transforms.c src/rotations.c src/permute.c src/drivers.c src/fftw.c
 #BLAS = APPLEBLAS
 #BLAS = OPENBLAS
 
-<<<<<<< HEAD
-AVX512 =# -mavx512f 
-=======
 #AVX512 = -mavx512f
->>>>>>> master
 
 CFLAGS = -std=gnu99 -Ofast $(AVX512) -march=native -mtune=native -I./src
 
