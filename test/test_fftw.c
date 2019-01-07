@@ -47,8 +47,8 @@ int main(int argc, const char * argv[]) {
         ft_execute_sph_analysis(PA, A, N, M);
         ft_execute_fourier2sph(P, A, N, M);
 
-        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
-        printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
+        printf("%1.2e\n", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
 
         free(A);
         free(B);
@@ -117,8 +117,8 @@ int main(int argc, const char * argv[]) {
         ft_execute_sphv_analysis(PA, A, N, M);
         ft_execute_fourier2sphv(P, A, N, M);
 
-        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
-        printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
+        printf("%1.2e\n", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
 
         free(A);
         free(B);
@@ -187,8 +187,8 @@ int main(int argc, const char * argv[]) {
         ft_execute_tri_analysis(QA, A, N, M);
         ft_execute_cheb2tri(P, A, N, M);
 
-        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
-        printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
+        printf("%1.2e\n", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
 
         free(A);
         free(B);
@@ -257,8 +257,8 @@ int main(int argc, const char * argv[]) {
         ft_execute_disk_analysis(RA, A, N, M);
         ft_execute_cxf2disk(P, A, N, M);
 
-        printf("%1.2e  ", vecnorm_2arg(A, B, N, M)/vecnorm_1arg(B, N, M));
-        printf("%1.2e\n", vecnormInf_2arg(A, B, N, M)/vecnormInf_1arg(B, N, M));
+        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
+        printf("%1.2e\n", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
 
         free(A);
         free(B);
