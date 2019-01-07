@@ -21,14 +21,14 @@ On macOS, the OpenBLAS dependency is optional in light of the vecLib framework (
 
 ### Linux
 
+To access functions from the library, you must ensure that you append the current library path to the default:
+```
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
+```
 Sample installation:
 ```
 apt-get install gcc-8 libblas-dev libopenblas-base libfftw3-dev
 export CC=gcc-8 && export BLAS=OPENBLAS && make
-```
-To access functions from the library, you must ensure that you append the current library path to the default:
-```
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
 ```
 
 ## Performance Benchmark
