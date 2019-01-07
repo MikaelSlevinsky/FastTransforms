@@ -6,7 +6,7 @@ matrix:
     - os: osx
       osx_image: xcode9
       compiler: gcc-4.9
-      env: MATRIX_EVAL="brew update && brew install fftw && export CC=gcc-4.9 && export BLAS=APPLEBLAS"
+      env: MATRIX_EVAL="brew update && brew install gcc@4.9 fftw && export CC=gcc-4.9 && export BLAS=APPLEBLAS"
     # Recommended system requirements
     - os: osx
       osx_image: xcode10
