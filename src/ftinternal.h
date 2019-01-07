@@ -27,6 +27,14 @@ double eps(void);
 long double epsl(void);
 quadruple epsq(void);
 
+#if !(__APPLE__)
+    float __cospif(float x);
+    double __cospi(double x);
+    float __sinpif(float x);
+    double __sinpi(double x);
+    float __tanpif(float x);
+    double __tanpi(double x);
+#endif
 long double __cospil(long double x);
 quadruple __cospiq(quadruple x);
 long double __sinpil(long double x);
