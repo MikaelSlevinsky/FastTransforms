@@ -4,7 +4,7 @@ matrix:
   include:
     # Minimum system requirements
     - os: osx
-      osx_image: xcode8
+      osx_image: xcode9
       compiler: gcc-4.9
       env: MATRIX_EVAL="brew update && brew install fftw && export CC=gcc-4.9 && export BLAS=APPLEBLAS"
     # Recommended system requirements
