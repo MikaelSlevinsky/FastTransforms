@@ -18,7 +18,6 @@ int main(void) {
     printf("\n\tQuadruple precision.\n\n");
     test_hierarchicalq(&checksum);
     printf("\n");
-    printf("This is the checksum: %i.\n", checksum);
     return checksum;
 }
 
