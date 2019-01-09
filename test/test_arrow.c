@@ -8,7 +8,7 @@ void test_arrowq(int * checksum);
 
 int main(void) {
     int checksum = 0;
-    printf("\nTesting methods for bidiagonal and symmetric arrow matrices.\n");
+    printf("\nTesting methods for upper and symmetric arrow matrices.\n");
     printf("\n\tSingle precision.\n\n");
     test_arrowf(&checksum);
     printf("\n\tDouble precision.\n\n");

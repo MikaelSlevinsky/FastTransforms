@@ -56,7 +56,7 @@ void X(test_hierarchical)(int * checksum) {
     printf("\t\t\t\t\t\t\t |   or Calculation Time\n");
     printf("---------------------------------------------------------|----------------------\n");
 
-    int nmin = 800, nmax = 3200;
+    int nmin = 500, nmax = 2000;
     FLT err = 0;
 
     for (int n = 40; n < 42; n++) {
