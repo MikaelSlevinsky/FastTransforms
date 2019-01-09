@@ -1,7 +1,7 @@
 #include "fasttransforms.h"
 #include "ftutilities.h"
 
-const int N = 2049;
+const int N = 1025;
 
 int main(void) {
     int checksum = 0;
