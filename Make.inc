@@ -14,7 +14,7 @@ else
 	endif
 endif
 
-OBJ = src/ftinternal.c src/transforms.c src/rotations.c src/permute.c src/arrow.c src/tridiagonal.c src/hierarchical.c src/drivers.c src/fftw.c
+OBJ = src/ftinternal.c src/transforms.c src/rotations.c src/permute.c src/adc.c src/drivers.c src/fftw.c
 
 #CC = gcc-8
 #CC = /usr/local/opt/llvm/bin/clang

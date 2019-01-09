@@ -17,9 +17,7 @@
     #define FT_SET_NUM_THREADS(x)
 #endif
 
-#include "arrow.h"
-#include "tridiagonal.h"
-#include "hierarchical.h"
+#include "adc.h"
 
 void ft_set_num_threads(const int n);
 

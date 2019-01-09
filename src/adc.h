@@ -1,5 +1,5 @@
-#ifndef HIERARCHICAL_H
-#define HIERARCHICAL_H
+#ifndef ADC_H
+#define ADC_H
 
 /*
 For assignments of the form:
@@ -20,26 +20,34 @@ typedef struct {
 
 #define FLT float
 #define X(name) CONCAT(, name, f)
+#include "arrow_source.h"
+#include "tridiagonal_source.h"
 #include "hierarchical_source.h"
 #undef FLT
 #undef X
 
 #define FLT double
 #define X(name) CONCAT(, name, )
+#include "arrow_source.h"
+#include "tridiagonal_source.h"
 #include "hierarchical_source.h"
 #undef FLT
 #undef X
 
 #define FLT long double
 #define X(name) CONCAT(, name, l)
+#include "arrow_source.h"
+#include "tridiagonal_source.h"
 #include "hierarchical_source.h"
 #undef FLT
 #undef X
 
 #define FLT __float128
 #define X(name) CONCAT(, name, q)
+#include "arrow_source.h"
+#include "tridiagonal_source.h"
 #include "hierarchical_source.h"
 #undef FLT
 #undef X
 
-#endif // HIERARCHICAL_H
+#endif // ADC_H
