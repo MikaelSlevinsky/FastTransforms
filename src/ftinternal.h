@@ -23,25 +23,25 @@
 
 typedef __float128 quadruple;
 
-float epsf(void);
-double eps(void);
-long double epsl(void);
-quadruple epsq(void);
+static inline float epsf(void) {return (float) M_EPSf;}
+static inline double eps(void) {return (double) M_EPS;}
+static inline long double epsl(void) {return (long double) M_EPSl;}
+static inline quadruple epsq(void) {return (quadruple) M_EPSq;}
 
 #if !(__APPLE__)
-    float __cospif(float x);
-    double __cospi(double x);
-    float __sinpif(float x);
-    double __sinpi(double x);
-    float __tanpif(float x);
-    double __tanpi(double x);
+    static inline float __cospif(float x) {return cosf(M_PIf*x);}
+    static inline double __cospi(double x) {return cos(M_PI*x);}
+    static inline float __sinpif(float x) {return sinf(M_PIf*x);}
+    static inline double __sinpi(double x) {return sin(M_PI*x);}
+    static inline float __tanpif(float x) {return tanf(M_PIf*x);}
+    static inline double __tanpi(double x) {return tan(M_PI*x);}
 #endif
-long double __cospil(long double x);
-quadruple __cospiq(quadruple x);
-long double __sinpil(long double x);
-quadruple __sinpiq(quadruple x);
-long double __tanpil(long double x);
-quadruple __tanpiq(quadruple x);
+static inline long double __cospil(long double x) {return cosl(M_PIl*x);}
+static inline quadruple __cospiq(quadruple x) {return cosq(M_PIq*x);}
+static inline long double __sinpil(long double x) {return sinl(M_PIl*x);}
+static inline quadruple __sinpiq(quadruple x) {return sinq(M_PIq*x);}
+static inline long double __tanpil(long double x) {return tanl(M_PIl*x);}
+static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
 
 #define CONCAT(prefix, name, suffix) prefix ## name ## suffix
 
