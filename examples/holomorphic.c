@@ -4,7 +4,7 @@
 #include "fasttransforms.h"
 #include "ftutilities.h"
 
-double f(double x, double y);
+double f(double x, double y) {return (x*x-y*y+1.0)/((x*x-y*y+1.0)*(x*x-y*y+1.0)+(2.0*x*y+1.0)*(2.0*x*y+1.0));};
 
 int main(void) {
     printf("In this example, we explore integration of a harmonic function over \n");
@@ -87,5 +87,3 @@ int main(void) {
 
     return 0;
 }
-
-double f(double x, double y) {return (x*x-y*y+1.0)/((x*x-y*y+1.0)*(x*x-y*y+1.0)+(2.0*x*y+1.0)*(2.0*x*y+1.0));};

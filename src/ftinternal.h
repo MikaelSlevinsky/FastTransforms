@@ -16,7 +16,7 @@
 #define M_EPSl         0x1p-63                /* pow(2.0, -63)  */
 #define M_EPSq         0x1p-112               /* pow(2.0, -112) */
 
-#define M_PIf          0xc.90fdaap-2f         //3.1415927f0
+#define M_PIf          0xc.90fdaap-2f         // 3.1415927f0
 #ifndef M_PIl
     #define M_PIl      0xc.90fdaa22168c235p-2L
 #endif
