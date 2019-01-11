@@ -1,3 +1,28 @@
+FLT X(secular_cond)(X(symmetric_arrow) * A, FLT lambda) {
+    int n = A->n;
+    FLT * a = A->a, * b = A->b, ret = X(fabs)(lambda)+X(fabs)(A->c), t;
+    for (int i = 0; i < n-1; i++) {
+        t = b[i];
+        t = t*t/(a[i]-lambda);
+        ret += X(fabs)(t);
+    }
+    return ret;
+}
+
+FLT X(secular_derivative_cond)(X(symmetric_arrow) * A, FLT lambda) {return X(secular_derivative)(A, lambda);}
+
+FLT X(secular_second_derivative_cond)(X(symmetric_arrow) * A, FLT lambda) {
+    int n = A->n;
+    FLT * a = A->a, * b = A->b, ret = ZERO(FLT), t;
+    for (int i = 0; i < n-1; i++) {
+        t = b[i]/(a[i]-lambda);
+        t = t*t/(a[i]-lambda);
+        ret += X(fabs)(t);
+    }
+    return TWO(FLT)*ret;
+}
+
+
 void X(test_arrow)(int * checksum) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
@@ -95,11 +120,44 @@ void X(test_arrow)(int * checksum) {
     lambda[n-1] = n*(n-ONE(FLT)/2);
     X(symmetric_arrow) * AS = X(symmetric_arrow_synthesize)(A, lambda);
     int * p = (int *) malloc(n*sizeof(int));
-    int ib = X(symmetric_arrow_process)(AS, p);
+    int ib = X(symmetric_arrow_deflate)(AS, p);
     free(p);
+    FLT * v = (FLT *) calloc(n, sizeof(FLT));
+    for (int i = 0; i < n; i++)
+        v[i] = (1+X(cbrt)(X(eps)()))*lambda[i];
+    FLT * ret = X(secular_FMM)(AS, v, ib);
+    FLT * ret_true = (FLT *) calloc(n, sizeof(FLT));
+    FLT * cond = (FLT *) calloc(n, sizeof(FLT));
+    for (int j = ib+1; j < n-1; j++) {
+        ret_true[j] = X(secular)(AS, v[j]);
+        cond[j] = X(secular_cond)(AS, v[j]);
+    }
+    err = X(norm_2arg)(ret+ib+1, ret_true+ib+1, n-2-ib)/X(norm_1arg)(cond+ib+1, n-2-ib);
+    free(ret);
+    ret = X(secular_derivative_FMM)(AS, v, ib);
+    for (int j = ib+1; j < n-1; j++) {
+        ret_true[j] = X(secular_derivative)(AS, v[j]);
+        cond[j] = X(secular_derivative_cond)(AS, v[j]);
+    }
+    err += X(norm_2arg)(ret+ib+1, ret_true+ib+1, n-2-ib)/X(norm_1arg)(cond+ib+1, n-2-ib);
+    free(ret);
+    ret = X(secular_second_derivative_FMM)(AS, v, ib);
+    for (int j = ib+1; j < n-1; j++) {
+        ret_true[j] = X(secular_second_derivative)(AS, v[j]);
+        cond[j] = X(secular_second_derivative_cond)(AS, v[j]);
+    }
+    err += X(norm_2arg)(ret+ib+1, ret_true+ib+1, n-2-ib)/X(norm_1arg)(ret_true+ib+1, n-2-ib);
+    printf("FMM acceleration of secular(-like) equations \t\t |%20.2e ", (double) err);
+    X(checktest)(err, n, checksum);
+
     FLT * mu = X(symmetric_arrow_eigvals)(AS, ib);
     err = X(norm_2arg)(lambda, mu, n)/X(norm_1arg)(lambda, n);
     printf("Synthetic symmetric arrow eigenvalues \t\t\t |%20.2e ", (double) err);
+    X(checktest)(err, n, checksum);
+
+    FLT * mu_FMM = X(symmetric_arrow_eigvals_FMM)(AS, ib);
+    err = X(norm_2arg)(lambda, mu_FMM, n)/X(norm_1arg)(lambda, n);
+    printf("FMM accelerated symmetric arrow eigenvalues \t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
     X(symmetric_arrow_eigen) * F = X(symmetric_arrow_eig)(A);
@@ -128,6 +186,10 @@ void X(test_arrow)(int * checksum) {
     free(z);
     free(lambda);
     free(mu);
+    free(mu_FMM);
+    free(ret);
+    free(ret_true);
+    free(cond);
     free(QtQ);
     free(I);
 }

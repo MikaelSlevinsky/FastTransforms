@@ -34,18 +34,23 @@ void X(uamv)(char TRANS, X(upper_arrow) * R, FLT * x);
 void X(uasv)(char TRANS, X(upper_arrow) * R, FLT * x);
 
 FLT X(secular)(X(symmetric_arrow) * A, FLT lambda);
+FLT * X(secular_FMM)(X(symmetric_arrow) * A, FLT * lambda, int ib);
 FLT X(secular_derivative)(X(symmetric_arrow) * A, FLT lambda);
+FLT * X(secular_derivative_FMM)(X(symmetric_arrow) * A, FLT * lambda, int ib);
 FLT X(secular_second_derivative)(X(symmetric_arrow) * A, FLT lambda);
+FLT * X(secular_second_derivative_FMM)(X(symmetric_arrow) * A, FLT * lambda, int ib);
 
 FLT X(first_initial_guess)(FLT a0, FLT nrmb2, FLT c);
 FLT X(first_pick_zero_update)(X(symmetric_arrow) * A, FLT lambda, int ib);
 FLT X(last_initial_guess)(FLT an, FLT nrmb2, FLT c);
 FLT X(last_pick_zero_update)(X(symmetric_arrow) * A, FLT lambda);
 FLT X(pick_zero_update)(X(symmetric_arrow) * A, FLT lambda, int j);
+FLT * X(pick_zero_update_FMM)(X(symmetric_arrow) * A, FLT * lambda, int ib);
 
-int X(symmetric_arrow_process)(X(symmetric_arrow) * A, int * p);
+int X(symmetric_arrow_deflate)(X(symmetric_arrow) * A, int * p);
 
 FLT * X(symmetric_arrow_eigvals)(X(symmetric_arrow) * A, int ib);
+FLT * X(symmetric_arrow_eigvals_FMM)(X(symmetric_arrow) * A, int ib);
 FLT * X(symmetric_arrow_eigvecs)(X(symmetric_arrow) * A, FLT * lambda, int ib);
 X(symmetric_arrow_eigen) * X(symmetric_arrow_eig)(X(symmetric_arrow) * A);
 
