@@ -48,20 +48,10 @@ int main(void) {
 
     char * FMT = "%1.3f";
 
-    ft_harmonic_plan * P;
-    ft_sphere_fftw_plan * PA;
-
-    double3 x = {0.0,0.0,1.0};
-    double3 y = {0.123,0.456,0.789};
-    normalize3(&y);
-
     int N = 5;
     int M = 2*N-1;
 
     printf("\n\n"MAGENTA("N = %i")", and "MAGENTA("M = %i")"\n\n", N, M);
-
-    PA = ft_plan_sph_analysis(N, M);
-    P = ft_plan_sph2fourier(N);
 
     double theta[N], phi[M], F[N*M];
 
@@ -75,6 +65,10 @@ int main(void) {
     printmat("Longitudinal grid "MAGENTA("φ"), FMT, phi, 1, M);
     printf("\n");
 
+    double3 x = {0.0,0.0,1.0};
+    double3 y = {0.123,0.456,0.789};
+    normalize3(&y);
+
     printf("Arbitrarily, we place "MAGENTA("x")" at the North pole: "MAGENTA("x = (%1.3f,%1.3f,%1.3f)ᵀ")".\n\n", x.x, x.y, x.z);
     printf("Another vector is completely free: "MAGENTA("y = (%1.3f,%1.3f,%1.3f)ᵀ")".\n\n", y.x, y.y, y.z);
     printf("Thus "MAGENTA("z ∈ 𝕊²")" is our variable vector.\n\n");
@@ -87,6 +81,9 @@ int main(void) {
 
     printmat("F", FMT, F, N, M);
     printf("\n");
+
+    ft_harmonic_plan * P = ft_plan_sph2fourier(N);
+    ft_sphere_fftw_plan * PA = ft_plan_sph_analysis(N, M);
 
     ft_execute_sph_analysis(PA, F, N, M);
     ft_execute_fourier2sph(P, F, N, M);

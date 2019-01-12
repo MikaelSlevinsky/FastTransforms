@@ -29,16 +29,10 @@ int main(void) {
 
     char * FMT = "%1.3f";
 
-    ft_harmonic_plan * P;
-    ft_disk_fftw_plan * PA;
-
     int N = 5;
     int M = 4*N-3;
 
     printf("\n\n"MAGENTA("N = %i")", and "MAGENTA("M = %i")"\n\n", N, M);
-
-    P = ft_plan_disk2cxf(N);
-    PA = ft_plan_disk_analysis(N, M);
 
     double r[N], theta[M], F[N*M];
 
@@ -60,6 +54,9 @@ int main(void) {
 
     printmat("F", FMT, F, N, M);
     printf("\n");
+
+    ft_harmonic_plan * P = ft_plan_disk2cxf(N);
+    ft_disk_fftw_plan * PA = ft_plan_disk_analysis(N, M);
 
     ft_execute_disk_analysis(PA, F, N, M);
     ft_execute_cxf2disk(P, F, N, M);
