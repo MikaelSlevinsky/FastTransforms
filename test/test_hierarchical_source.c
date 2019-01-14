@@ -44,11 +44,36 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     printf("Comparison of matrix-vector products \t (%5i×%5i) \t |%20.2e ", m, n, (double) err);
     X(checktest)(err, MAX(m, n), checksum);
 
+    X(scale_columns_hierarchicalmatrix)(1, u, H);
+    FLT * ones  = (FLT *) malloc(n*sizeof(FLT));
+    for (int j = 0; j < n; j++)
+        ones[j] = 1;
+    FLT * z = (FLT *) calloc(m, sizeof(FLT));
+    X(himv)('N', 1, H, ones, 0, z);
+    err = X(norm_2arg)(w, z, m)/X(norm_1arg)(w, m);
+
+    FLT * a = (FLT *) malloc(m*sizeof(FLT));
+    for (int i = 0; i < m; i++)
+        a[i] = i+1;
+    X(scale_rows_hierarchicalmatrix)(2, a, H);
+    FLT * b = (FLT *) calloc(m, sizeof(FLT));
+    X(himv)('N', 1, H, ones, 0, b);
+    for (int i = 0; i < m; i++)
+        z[i] *= 2*a[i];
+    err = X(norm_2arg)(z, b, m)/X(norm_1arg)(z, m);
+
+    printf("Check row/column scalings \t\t (%5i×%5i) \t |%20.2e ", m, n, (double) err);
+    X(checktest)(err, MAX(m, n), checksum);
+
     X(destroy_densematrix)(A);
     X(destroy_hierarchicalmatrix)(H);
+    free(a);
+    free(b);
+    free(ones);
     free(u);
     free(v);
     free(w);
+    free(z);
 }
 
 void X(test_hierarchical)(int * checksum) {

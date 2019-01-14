@@ -49,14 +49,18 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
 #define ONE(FLT) ((FLT) 1)
 #define TWO(FLT) ((FLT) 2)
 
-#define signbitf(x) signbit(x)
-#define signbitl(x) signbit(x)
+#define isfinitef(x) isfinite(x)
+#define isfinitel(x) isfinite(x)
+#define isfiniteq(x) finiteq(x)
 
 #define isinff(x) isinf(x)
 #define isinfl(x) isinf(x)
 
 #define isnanf(x) isnan(x)
 #define isnanl(x) isnan(x)
+
+#define signbitf(x) signbit(x)
+#define signbitl(x) signbit(x)
 
 #define MAX(a,b) ((a) > (b) ? a : b)
 #define MIN(a,b) ((a) < (b) ? a : b)

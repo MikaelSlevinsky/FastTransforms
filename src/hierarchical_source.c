@@ -170,8 +170,8 @@ X(lowrankmatrix) * X(sample_lowrankmatrix)(FLT (*f)(FLT x, FLT y), FLT * x, FLT 
         k = -1;
         temp = 0;
         for (int p = 0; p < r; p++) {
-            if (X(isnan)(U[m+M*p]) || X(isinf)(U[m+M*p])) {k = p; break;}
-            else temp += U[m+M*p];
+            if (X(isfinite)(U[m+M*p])) temp += U[m+M*p];
+            else {k = p; break;}
         }
         if (k != -1) {
             for (int p = 0; p < r; p++)
@@ -195,8 +195,8 @@ X(lowrankmatrix) * X(sample_lowrankmatrix)(FLT (*f)(FLT x, FLT y), FLT * x, FLT 
         k = -1;
         temp = 0;
         for (int q = 0; q < r; q++) {
-            if (X(isnan)(V[n+N*q]) || X(isinf)(V[n+N*q])) {k = q; break;}
-            else temp += V[n+N*q];
+            if (X(isfinite)(V[n+N*q])) temp += V[n+N*q];
+            else {k = q; break;}
         }
         if (k != -1) {
             for (int q = 0; q < r; q++)
@@ -392,6 +392,96 @@ int X(blocksize_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int m, int n, int
         case 1: return X(size_hierarchicalmatrix)(H->hierarchicalmatrices(m, n), k);
         case 2: return X(size_densematrix)(H->densematrices(m, n), k);
         case 3: return X(size_lowrankmatrix)(H->lowrankmatrices(m, n), k);
+    }
+}
+
+void X(scale_rows_densematrix)(FLT alpha, FLT * x, X(densematrix) * AD) {
+    int m = AD->m, n = AD->n;
+    FLT * A = AD->A;
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < m; i++)
+            A[i] *= alpha*x[i];
+        A += m;
+    }
+}
+
+void X(scale_columns_densematrix)(FLT alpha, FLT * x, X(densematrix) * AD) {
+    int m = AD->m, n = AD->n;
+    FLT * A = AD->A;
+    FLT axj;
+    for (int j = 0; j < n; j++) {
+        axj = alpha*x[j];
+        for (int i = 0; i < m; i++)
+            A[i] *= axj;
+        A += m;
+    }
+}
+
+void X(scale_rows_lowrankmatrix)(FLT alpha, FLT * x, X(lowrankmatrix) * L) {
+    int m = L->m, r = L->r;
+    FLT * U = L->U;
+    for (int j = 0; j < r; j++) {
+        for (int i = 0; i < m; i++)
+            U[i] *= alpha*x[i];
+        U += m;
+    }
+}
+
+void X(scale_columns_lowrankmatrix)(FLT alpha, FLT * x, X(lowrankmatrix) * L) {
+    int n = L->n, r = L->r;
+    FLT * V = L->V;
+    for (int j = 0; j < r; j++) {
+        for (int i = 0; i < n; i++)
+            V[i] *= alpha*x[i];
+        V += n;
+    }
+}
+
+void X(scale_rows_hierarchicalmatrix)(FLT alpha, FLT * x, X(hierarchicalmatrix) * H) {
+    int M = H->M, N = H->N;
+    for (int n = 0; n < N; n++) {
+        int p = 0;
+        for (int m = 0; m < M; m++) {
+            switch (H->hash(m, n)) {
+                case 1: {
+                    X(scale_rows_hierarchicalmatrix)(alpha, x+p, H->hierarchicalmatrices(m, n));
+                    break;
+                }
+                case 2: {
+                    X(scale_rows_densematrix)(alpha, x+p, H->densematrices(m, n));
+                    break;
+                }
+                case 3: {
+                    X(scale_rows_lowrankmatrix)(alpha, x+p, H->lowrankmatrices(m, n));
+                    break;
+                }
+            }
+            p += X(blocksize_hierarchicalmatrix)(H, m, N-1, 1);
+        }
+    }
+}
+
+void X(scale_columns_hierarchicalmatrix)(FLT alpha, FLT * x, X(hierarchicalmatrix) * H) {
+    int M = H->M, N = H->N;
+    int q = 0;
+    for (int n = 0; n < N; n++) {
+        for (int m = 0; m < M; m++) {
+            switch (H->hash(m, n)) {
+                case 1: {
+                    X(scale_columns_hierarchicalmatrix)(alpha, x+q, H->hierarchicalmatrices(m, n));
+                    break;
+                }
+                case 2: {
+                    X(scale_columns_densematrix)(alpha, x+q, H->densematrices(m, n));
+                    break;
+                }
+                case 3: {
+                    X(scale_columns_lowrankmatrix)(alpha, x+q, H->lowrankmatrices(m, n));
+                    break;
+                }
+            }
+        }
+        q += X(blocksize_hierarchicalmatrix)(H, 0, n, 2);
     }
 }
 

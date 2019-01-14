@@ -73,6 +73,13 @@ FLT X(getindex_lowrankmatrix)(X(lowrankmatrix) * L, int i, int j);
 FLT X(getindex_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int i, int j);
 FLT X(blockgetindex_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int m, int n, int i, int j);
 
+void X(scale_rows_densematrix)(FLT alpha, FLT * x, X(densematrix) * AD);
+void X(scale_columns_densematrix)(FLT alpha, FLT * x, X(densematrix) * AD);
+void X(scale_rows_lowrankmatrix)(FLT alpha, FLT * x, X(lowrankmatrix) * L);
+void X(scale_columns_lowrankmatrix)(FLT alpha, FLT * x, X(lowrankmatrix) * L);
+void X(scale_rows_hierarchicalmatrix)(FLT alpha, FLT * x, X(hierarchicalmatrix) * H);
+void X(scale_columns_hierarchicalmatrix)(FLT alpha, FLT * x, X(hierarchicalmatrix) * H);
+
 void X(gemv)(char TRANS, int m, int n, FLT alpha, FLT * A, FLT * x, FLT beta, FLT * y);
 void X(demv)(char TRANS, FLT alpha, X(densematrix) * A, FLT * x, FLT beta, FLT * y);
 void X(lrmv)(char TRANS, FLT alpha, X(lowrankmatrix) * L, FLT * x, FLT beta, FLT * y);

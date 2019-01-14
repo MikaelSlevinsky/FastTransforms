@@ -169,7 +169,33 @@ void X(test_arrow)(int * checksum) {
     for (int j = 0; j < n; j++)
         X(gemv)('T', n, n, 1, Q, Q+j*n, 0, QtQ+j*n);
     err = X(norm_2arg)(QtQ, I, n*n)/X(norm_1arg)(I, n*n);
+    free(QtQ);
     printf("Numerical orthogonality of eigenvectors \t\t |%20.2e ", (double) err);
+    X(checktest)(err, n, checksum);
+
+    X(symmetric_arrow_eigen_FMM) * FFMM = X(symmetric_arrow_eig_FMM)(A);
+    FLT * FQ = (FLT *) calloc(n*n, sizeof(FLT));
+    for (int j = 0; j < FFMM->ib; j++)
+        FQ[j+j*n] = 1;
+    for (int j = FFMM->ib; j < n; j++) {
+        X(himv)('N', 1, FFMM->Q, I+ib+j*n, 0, FQ+ib+j*n);
+        FLT t = 0;
+        for (int i = 0; i < n-FFMM->ib; i++)
+             t += FFMM->q[i]*I[i+FFMM->ib+j*n];
+        (FQ+j*n)[n-1] = t;
+    }
+    QtQ = (FLT *) calloc(n*n, sizeof(FLT));
+    for (int j = 0; j < FFMM->ib; j++)
+        QtQ[j+j*n] = 1;
+    for (int j = FFMM->ib; j < n; j++) {
+        X(himv)('T', 1, FFMM->Q, FQ+FFMM->ib+j*n, 0, QtQ+FFMM->ib+j*n);
+        for (int i = 0; i < n-FFMM->ib; i++)
+             QtQ[i+FFMM->ib+j*n] += FFMM->q[i]*FQ[n-1+j*n];
+    }
+    //for (int j = 0; j < n; j++)
+    //    X(gemv)('T', n, n, 1, FQ, FQ+j*n, 0, QtQ+j*n);
+    err = X(norm_2arg)(QtQ, I, n*n)/X(norm_1arg)(I, n*n);
+    printf("FMM accelerated orthogonality of eigenvectors \t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
     X(destroy_symmetric_arrow)(A);
@@ -177,6 +203,7 @@ void X(test_arrow)(int * checksum) {
     X(destroy_symmetric_arrow)(B);
     X(destroy_symmetric_arrow)(C);
     X(destroy_symmetric_arrow_eigen)(F);
+    X(destroy_symmetric_arrow_eigen_FMM)(FFMM);
     X(destroy_upper_arrow)(R);
     X(destroy_upper_arrow)(S);
     free(d_true);
@@ -190,6 +217,7 @@ void X(test_arrow)(int * checksum) {
     free(ret);
     free(ret_true);
     free(cond);
+    free(FQ);
     free(QtQ);
     free(I);
 }

@@ -19,10 +19,20 @@ typedef struct {
     int n;
 } X(symmetric_arrow_eigen);
 
+typedef struct {
+    X(hierarchicalmatrix) * Q;
+    FLT * q;
+    FLT * lambda;
+    int * p;
+    int n;
+    int ib;
+} X(symmetric_arrow_eigen_FMM);
+
 
 void X(destroy_symmetric_arrow)(X(symmetric_arrow) * A);
 void X(destroy_upper_arrow)(X(upper_arrow) * R);
 void X(destroy_symmetric_arrow_eigen)(X(symmetric_arrow_eigen) * F);
+void X(destroy_symmetric_arrow_eigen_FMM)(X(symmetric_arrow_eigen_FMM) * F);
 
 X(upper_arrow) * X(symmetric_arrow_cholesky)(X(symmetric_arrow) * A);
 X(upper_arrow) * X(upper_arrow_inv)(X(upper_arrow) * R);
@@ -53,6 +63,7 @@ FLT * X(symmetric_arrow_eigvals)(X(symmetric_arrow) * A, int ib);
 FLT * X(symmetric_arrow_eigvals_FMM)(X(symmetric_arrow) * A, int ib);
 FLT * X(symmetric_arrow_eigvecs)(X(symmetric_arrow) * A, FLT * lambda, int ib);
 X(symmetric_arrow_eigen) * X(symmetric_arrow_eig)(X(symmetric_arrow) * A);
+X(symmetric_arrow_eigen_FMM) * X(symmetric_arrow_eig_FMM)(X(symmetric_arrow) * A);
 
 void X(quicksort)(FLT * a, FLT * b, int * p, int lo, int hi, int (*by)(FLT x, FLT y));
 int X(partition)(FLT * a, FLT * b, int * p, int lo, int hi, int (*by)(FLT x, FLT y));

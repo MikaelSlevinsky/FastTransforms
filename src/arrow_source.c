@@ -17,6 +17,14 @@ void X(destroy_symmetric_arrow_eigen)(X(symmetric_arrow_eigen) * F) {
     free(F);
 }
 
+void X(destroy_symmetric_arrow_eigen_FMM)(X(symmetric_arrow_eigen_FMM) * F) {
+    X(destroy_hierarchicalmatrix)(F->Q);
+    free(F->q);
+    free(F->lambda);
+    free(F->p);
+    free(F);
+}
+
 X(upper_arrow) * X(symmetric_arrow_cholesky)(X(symmetric_arrow) * A) {
     int n = A->n;
     FLT * a = A->a;
@@ -453,7 +461,7 @@ FLT * X(symmetric_arrow_eigvals_FMM)(X(symmetric_arrow) * A, int ib) {
 
     lambdak = X(first_initial_guess)(a[ib], nrmb2, c);
     deltak = ONE(FLT);
-    while (X(fabs)(deltak) > n2*X(eps)()) {
+    while (X(fabs)(deltak) > 100*n2*X(eps)()) {
         deltak = X(first_pick_zero_update)(A, lambdak, ib);
         if (deltak != deltak) break;
         lambdak += deltak;
@@ -463,7 +471,7 @@ FLT * X(symmetric_arrow_eigvals_FMM)(X(symmetric_arrow) * A, int ib) {
     FLT nrmd = 1;
     for (int j = ib+1; j < n-1; j++)
         lambda[j] = (a[j]+a[j-1])/2;
-    while (nrmd > n2*X(eps)()) {
+    while (nrmd > 100*n2*X(eps)()) {
         FLT * delta = X(pick_zero_update_FMM)(A, lambda, ib);
         nrmd = 0;
         for (int j = ib+1; j < n-1; j++) {
@@ -477,7 +485,7 @@ FLT * X(symmetric_arrow_eigvals_FMM)(X(symmetric_arrow) * A, int ib) {
 
     lambdak = X(last_initial_guess)(a[n-2], nrmb2, c);
     deltak = ONE(FLT);
-    while (X(fabs)(deltak) > n2*X(eps)()) {
+    while (X(fabs)(deltak) > 100*n2*X(eps)()) {
         deltak = X(last_pick_zero_update)(A, lambdak);
         if (deltak != deltak) break;
         lambdak += deltak;
@@ -495,20 +503,20 @@ FLT * X(symmetric_arrow_eigvecs)(X(symmetric_arrow) * A, FLT * lambda, int ib) {
     for (int j = 0; j < ib; j++)
         Q[j+j*n] = 1;
     for (int j = ib; j < n; j++) {
-        for (int i = 0; i < n-1; i++)
+        for (int i = ib; i < n-1; i++)
             Q[i+j*n] = b[i]/(lambda[j]-a[i]);
         Q[n-1+j*n] = 1;
         nrm = 0;
-        for (int i = 0; i < n; i++)
+        for (int i = ib; i < n; i++)
             nrm += Q[i+j*n]*Q[i+j*n];
         nrm = 1/X(sqrt)(nrm);
-        for (int i = 0; i < n; i++)
+        for (int i = ib; i < n; i++)
             Q[i+j*n] *= nrm;
         /*
         k = -1;
         for (int i = 0; i < n; i++) {
-            if (X(isnan)(Q[i+j*n]) || X(isinf)(Q[i+j*n])) {k = i; break;}
-            else nrm += Q[i+j*n]*Q[i+j*n];
+            if (X(isfinite)(Q[i+j*n])) nrm += Q[i+j*n]*Q[i+j*n];
+            else {k = i; break;}
         }
         if (k != -1) {
             for (int i = 0; i < n; i++)
@@ -553,6 +561,50 @@ X(symmetric_arrow_eigen) * X(symmetric_arrow_eig)(X(symmetric_arrow) * A) {
     return F;
 }
 
+X(symmetric_arrow_eigen_FMM) * X(symmetric_arrow_eig_FMM)(X(symmetric_arrow) * A) {
+    int n = A->n;
+    int * pq = (int *) malloc(n*sizeof(int));
+    for (int i = 0; i < n; i++)
+        pq[i] = i;
+    int ib = X(symmetric_arrow_deflate)(A, pq);
+    FLT * lambda = X(symmetric_arrow_eigvals_FMM)(A, ib);
+    X(symmetric_arrow) * B = X(symmetric_arrow_synthesize)(A, lambda);
+    int * p = (int *) malloc(n*sizeof(int));
+    for (int i = 0; i < n; i++)
+        p[i] = i;
+    ib = X(symmetric_arrow_deflate)(B, p);
+    for (int i = 0; i < n; i++)
+        p[i] = pq[p[i]];
+    free(pq);
+    free(lambda);
+    lambda = X(symmetric_arrow_eigvals_FMM)(B, ib);
+
+    FLT * a = B->a, * b = B->b;
+    X(hierarchicalmatrix) * Q = X(sample_hierarchicalmatrix)(X(cauchykernel), a, lambda, (unitrange) {ib, n-1}, (unitrange) {ib, n});
+    X(hierarchicalmatrix) * N = X(sample_hierarchicalmatrix)(X(coulombkernel), lambda, a, (unitrange) {ib, n}, (unitrange) {ib, n-1});
+    FLT * b2 = (FLT *) calloc(n-1-ib, sizeof(FLT));
+    for (int i = ib; i < n-1; i++)
+        b2[i-ib] = b[i]*b[i];
+    FLT * q = (FLT *) calloc(n-ib, sizeof(FLT));
+    X(himv)('N', 1, N, b2, 0, q);
+    free(b2);
+    for (int i = ib; i < n; i++)
+        q[i-ib] = 1/X(sqrt)(1+q[i-ib]);
+    X(scale_rows_hierarchicalmatrix)(-1, b+ib, Q);
+    X(scale_columns_hierarchicalmatrix)(1, q, Q);
+
+    X(destroy_symmetric_arrow)(B);
+    X(destroy_hierarchicalmatrix)(N);
+
+    X(symmetric_arrow_eigen_FMM) * F = (X(symmetric_arrow_eigen_FMM) *) malloc(sizeof(X(symmetric_arrow_eigen_FMM)));
+    F->Q = Q;
+    F->q = q;
+    F->lambda = lambda;
+    F->p = p;
+    F->n = n;
+    F->ib = ib;
+    return F;
+}
 
 /*
 These versions of quicksort sort `a` in-place according to the `by` ordering on
