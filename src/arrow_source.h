@@ -36,7 +36,7 @@ void X(destroy_symmetric_arrow_eigen_FMM)(X(symmetric_arrow_eigen_FMM) * F);
 
 X(upper_arrow) * X(symmetric_arrow_cholesky)(X(symmetric_arrow) * A);
 X(upper_arrow) * X(upper_arrow_inv)(X(upper_arrow) * R);
-X(symmetric_arrow) * X(symmetric_arrow_similarity)(X(symmetric_arrow) * A, X(symmetric_arrow) * B);
+X(symmetric_arrow) * X(symmetric_arrow_congruence)(X(symmetric_arrow) * A, X(symmetric_arrow) * B);
 X(symmetric_arrow) * X(symmetric_arrow_synthesize)(X(symmetric_arrow) * A, FLT * lambda);
 
 void X(samv)(char TRANS, FLT alpha, X(symmetric_arrow) * A, FLT * x, FLT beta, FLT * y);

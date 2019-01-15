@@ -28,6 +28,7 @@ void X(test_arrow)(int * checksum) {
     printf("---------------------------------------------------------|----------------------\n");
 
     int n = 50;
+    struct timeval start, end;
 
     X(symmetric_arrow) * A = (X(symmetric_arrow) *) malloc(sizeof(X(symmetric_arrow)));
     A->a = (FLT *) calloc(n-1, sizeof(FLT));
@@ -98,12 +99,12 @@ void X(test_arrow)(int * checksum) {
     }
     B->c = (n*n+n-1);
     B->n = n;
-    X(symmetric_arrow) * C = X(symmetric_arrow_similarity)(A, B);
+    X(symmetric_arrow) * C = X(symmetric_arrow_congruence)(A, B);
     err = X(pow)(C->c-1, 2);
     for (int i = 0; i < n-1; i++)
         err += X(pow)(C->a[i]-1, 2) + X(pow)(C->b[i]-0, 2);
     err = X(sqrt)(err);
-    printf("Self-similarity transformations (Ax = λAx) \t\t |%20.2e ", (double) err);
+    printf("Self-congruence transformations (Ax = λAx) \t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
     A = (X(symmetric_arrow) *) malloc(sizeof(X(symmetric_arrow)));
@@ -166,15 +167,20 @@ void X(test_arrow)(int * checksum) {
     FLT * I = (FLT *) calloc(n*n, sizeof(FLT));
     for (int i = 0; i < n; i++)
         I[i+i*n] = 1;
+    gettimeofday(&start, NULL);
     for (int j = 0; j < n; j++)
         X(gemv)('T', n, n, 1, Q, Q+j*n, 0, QtQ+j*n);
+    gettimeofday(&end, NULL);
     err = X(norm_2arg)(QtQ, I, n*n)/X(norm_1arg)(I, n*n);
     free(QtQ);
     printf("Numerical orthogonality of eigenvectors \t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
+    printf("Time to create eigenvectors densely \t\t\t |%20.6f s\n", elapsed(&start, &end, 1));
 
     X(symmetric_arrow_eigen_FMM) * FFMM = X(symmetric_arrow_eig_FMM)(A);
     FLT * FQ = (FLT *) calloc(n*n, sizeof(FLT));
+    QtQ = (FLT *) calloc(n*n, sizeof(FLT));
+    gettimeofday(&start, NULL);
     for (int j = 0; j < FFMM->ib; j++)
         FQ[j+j*n] = 1;
     for (int j = FFMM->ib; j < n; j++) {
@@ -184,7 +190,6 @@ void X(test_arrow)(int * checksum) {
              t += FFMM->q[i]*I[i+FFMM->ib+j*n];
         (FQ+j*n)[n-1] = t;
     }
-    QtQ = (FLT *) calloc(n*n, sizeof(FLT));
     for (int j = 0; j < FFMM->ib; j++)
         QtQ[j+j*n] = 1;
     for (int j = FFMM->ib; j < n; j++) {
@@ -192,11 +197,13 @@ void X(test_arrow)(int * checksum) {
         for (int i = 0; i < n-FFMM->ib; i++)
              QtQ[i+FFMM->ib+j*n] += FFMM->q[i]*FQ[n-1+j*n];
     }
+    gettimeofday(&end, NULL);
     //for (int j = 0; j < n; j++)
     //    X(gemv)('T', n, n, 1, FQ, FQ+j*n, 0, QtQ+j*n);
     err = X(norm_2arg)(QtQ, I, n*n)/X(norm_1arg)(I, n*n);
     printf("FMM accelerated orthogonality of eigenvectors \t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
+    printf("Time to create eigenvectors hierarchically \t\t |%20.6f s\n", elapsed(&start, &end, 1));
 
     X(destroy_symmetric_arrow)(A);
     X(destroy_symmetric_arrow)(AS);

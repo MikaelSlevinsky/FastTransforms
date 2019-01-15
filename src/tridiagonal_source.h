@@ -21,7 +21,7 @@ void X(bdsv)(char TRANS, X(bidiagonal) * B, FLT * x);
 
 void X(symmetric_tridiagonal_eig)(X(symmetric_tridiagonal) * A, FLT * Z, FLT * lambda);
 void X(symmetric_definite_tridiagonal_eig)(X(symmetric_tridiagonal) * A, X(symmetric_tridiagonal) * B, FLT * V, FLT * lambda);
-X(symmetric_tridiagonal) * X(symmetric_tridiagonal_similarity)(X(symmetric_tridiagonal) * A, X(symmetric_tridiagonal) * B, FLT * V);
+X(symmetric_tridiagonal) * X(symmetric_tridiagonal_congruence)(X(symmetric_tridiagonal) * A, X(symmetric_tridiagonal) * B, FLT * V);
 
 X(symmetric_tridiagonal) * X(create_A_shtsdtev)(const int n, const int mu, const int m, char PARITY);
 X(symmetric_tridiagonal) * X(create_B_shtsdtev)(const int n, const int m, char PARITY);

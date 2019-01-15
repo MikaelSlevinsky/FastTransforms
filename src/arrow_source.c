@@ -71,7 +71,7 @@ X(upper_arrow) * X(upper_arrow_inv)(X(upper_arrow) * R) {
     return R1;
 }
 
-X(symmetric_arrow) * X(symmetric_arrow_similarity)(X(symmetric_arrow) * A, X(symmetric_arrow) * B) {
+X(symmetric_arrow) * X(symmetric_arrow_congruence)(X(symmetric_arrow) * A, X(symmetric_arrow) * B) {
     X(upper_arrow) * R = X(symmetric_arrow_cholesky)(B);
     X(upper_arrow) * Ri = X(upper_arrow_inv)(R);
     X(destroy_upper_arrow)(R);

@@ -76,6 +76,24 @@ void X(test_tridiagonal)(int * checksum) {
     printf("Symmetric tridiagonal eigenvalues \t\t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
+    X(symmetric_tridiagonal) * D = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
+    FLT * c = (FLT *) calloc(n, sizeof(FLT));
+    FLT * d = (FLT *) calloc(n-1, sizeof(FLT));
+    for (int i = 0; i < n; i++)
+        c[i] = A->a[i];
+    for (int i = 0; i < n-1; i++)
+        d[i] = A->b[i];
+    D->a = c;
+    D->b = d;
+    D->n = n;
+    X(symmetric_tridiagonal) * C = X(symmetric_tridiagonal_congruence)(A, D, V);
+    err = X(pow)(C->a[n-1]-1, 2);
+    for (int i = 0; i < n-1; i++)
+        err += X(pow)(C->a[i]-1, 2) + X(pow)(C->b[i]-0, 2);
+    err = X(sqrt)(err);
+    printf("Self-congruence transformations (Ax = λAx) \t\t |%20.2e ", (double) err);
+    X(checktest)(err, n*n, checksum);
+
     int mu = 40;
     int m = mu-10;
     char PARITY = 'E';
@@ -120,6 +138,8 @@ void X(test_tridiagonal)(int * checksum) {
     X(checktest)(err, n, checksum);
 
     X(destroy_symmetric_tridiagonal)(A);
+    X(destroy_symmetric_tridiagonal)(C);
+    X(destroy_symmetric_tridiagonal)(D);
     X(destroy_symmetric_tridiagonal)(T);
     X(destroy_symmetric_tridiagonal)(S);
     X(destroy_bidiagonal)(B);

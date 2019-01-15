@@ -201,12 +201,12 @@ void X(symmetric_tridiagonal_eig)(X(symmetric_tridiagonal) * A, FLT * V, FLT * l
 }
 
 void X(symmetric_definite_tridiagonal_eig)(X(symmetric_tridiagonal) * A, X(symmetric_tridiagonal) * B, FLT * V, FLT * lambda) {
-    X(symmetric_tridiagonal) * AS = X(symmetric_tridiagonal_similarity)(A, B, V);
+    X(symmetric_tridiagonal) * AS = X(symmetric_tridiagonal_congruence)(A, B, V);
     X(symmetric_tridiagonal_eig)(AS, V, lambda);
     X(destroy_symmetric_tridiagonal)(AS);
 }
 
-X(symmetric_tridiagonal) * X(symmetric_tridiagonal_similarity)(X(symmetric_tridiagonal) * A, X(symmetric_tridiagonal) * B, FLT * V) {
+X(symmetric_tridiagonal) * X(symmetric_tridiagonal_congruence)(X(symmetric_tridiagonal) * A, X(symmetric_tridiagonal) * B, FLT * V) {
     X(bidiagonal) * R = X(symmetric_tridiagonal_cholesky)(B);
     int n = A->n;
     FLT * c = R->c;
