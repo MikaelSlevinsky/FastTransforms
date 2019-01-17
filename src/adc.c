@@ -1,4 +1,4 @@
-#include "adc.h"
+#include "fasttransforms.h"
 #include "ftinternal.h"
 
 #define FLT float

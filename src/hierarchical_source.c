@@ -116,8 +116,8 @@ X(lowrankmatrix) * X(calloc_lowrankmatrix)(char N, int m, int n, int r) {
     L->U = (FLT *) calloc(m*r, sizeof(FLT));
     L->S = (FLT *) calloc(sz, sizeof(FLT));
     L->V = (FLT *) calloc(n*r, sizeof(FLT));
-    L->t1 = (FLT *) calloc(r, sizeof(FLT));
-    L->t2 = (FLT *) calloc(r, sizeof(FLT));
+    L->t1 = (FLT *) calloc(r*FT_GET_NUM_THREADS(), sizeof(FLT));
+    L->t2 = (FLT *) calloc(r*FT_GET_NUM_THREADS(), sizeof(FLT));
     L->m = m;
     L->n = n;
     L->r = r;
@@ -133,8 +133,8 @@ X(lowrankmatrix) * X(malloc_lowrankmatrix)(char N, int m, int n, int r) {
     L->U = (FLT *) malloc(m*r*sizeof(FLT));
     L->S = (FLT *) malloc(sz*sizeof(FLT));
     L->V = (FLT *) malloc(n*r*sizeof(FLT));
-    L->t1 = (FLT *) calloc(r, sizeof(FLT));
-    L->t2 = (FLT *) calloc(r, sizeof(FLT));
+    L->t1 = (FLT *) calloc(r*FT_GET_NUM_THREADS(), sizeof(FLT));
+    L->t2 = (FLT *) calloc(r*FT_GET_NUM_THREADS(), sizeof(FLT));
     L->m = m;
     L->n = n;
     L->r = r;
@@ -519,7 +519,7 @@ void X(demv)(char TRANS, FLT alpha, X(densematrix) * A, FLT * x, FLT beta, FLT *
 // y ← α*(USVᵀ)*x + β*y, y ← α*(VSᵀUᵀ)*x + β*y
 void X(lrmv)(char TRANS, FLT alpha, X(lowrankmatrix) * L, FLT * x, FLT beta, FLT * y) {
     int m = L->m, n = L->n, r = L->r;
-    FLT * t1 = L->t1, * t2 = L->t2;
+    FLT * t1 = L->t1+r*FT_GET_THREAD_NUM(), * t2 = L->t2+r*FT_GET_THREAD_NUM();
     if (TRANS == 'N') {
         if (L->N == '2') {
             X(gemv)('T', n, r, ONE(FLT), L->V, x, ZERO(FLT), t1);
