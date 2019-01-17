@@ -67,7 +67,7 @@ void X(test_tridiagonal)(int * checksum) {
         z[i] = alpha*x[i] + beta*z[i];
     err = X(norm_2arg)(y, z, n)/X(norm_1arg)(y, n);
     printf("Induced spectral decomposition matrix-vector product \t |%20.2e ", (double) err);
-    X(checktest)(err, 2*n, checksum);
+    X(checktest)(err, 4*n, checksum);
 
     FLT * lambda_true = (FLT *) calloc(n, sizeof(FLT));
     for (int i = 0; i < n; i++)
