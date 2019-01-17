@@ -34,6 +34,9 @@ clean:
 	rm -f test_transforms
 	rm -f test_permute
 	rm -f test_rotations
+	rm -f test_arrow
+	rm -f test_tridiagonal
+	rm -f test_hierarchical
 	rm -f test_drivers
 	rm -f test_fftw
 

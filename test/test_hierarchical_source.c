@@ -108,7 +108,7 @@ void X(test_hierarchical)(int * checksum) {
         free(lc);
     }
     printf("Approximation by second-kind barycentric interpolant \t |%20.2e ", (double) err);
-    X(checktest)(err, 8, checksum);
+    X(checktest)(err, 16, checksum);
 
     printf("\t\t\t\t\t\t\t |\n");
     printf("The Cauchy kernel and quadratically spaced samples \t |\n");
