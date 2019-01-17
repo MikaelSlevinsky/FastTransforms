@@ -6,27 +6,27 @@
 #include <quadmath.h>
 #include <immintrin.h>
 
-#define M_SQRT_PI      1.772453850905516027   /* sqrt(pi)       */
-#define M_1_SQRT_PI    0.564189583547756287   /* 1/sqrt(pi)     */
-#define M_SQRT_PI_2    0.886226925452758014   /* sqrt(pi)/2     */
-#define M_4_SQRT_PI    7.089815403622064109   /* 4*sqrt(pi)     */
-#define M_1_4_SQRT_PI  0.141047395886939072   /* 1/(4*sqrt(pi)) */
-#define M_EPS          0x1p-52                /* pow(2.0, -52)  */
-#define M_EPSf         0x1p-23                /* pow(2.0, -23)  */
-#define M_EPSl         0x1p-63                /* pow(2.0, -63)  */
-#define M_EPSq         0x1p-112               /* pow(2.0, -112) */
+#define M_SQRT_PI      1.772453850905516027   /* sqrt(pi)         */
+#define M_1_SQRT_PI    0.564189583547756287   /* 1/sqrt(pi)       */
+#define M_SQRT_PI_2    0.886226925452758014   /* sqrt(pi)/2       */
+#define M_4_SQRT_PI    7.089815403622064109   /* 4*sqrt(pi)       */
+#define M_1_4_SQRT_PI  0.141047395886939072   /* 1/(4*sqrt(pi))   */
+#define M_EPSf         0x1p-23f               /* powf(2.0f, -23)  */
+#define M_EPS          0x1p-52                /* pow(2.0, -52)    */
+#define M_EPSl         0x1p-63l               /* powl(2.0l, -63)  */
+#define M_EPSq         0x1p-112q              /* powq(2.0q, -112) */
 
 #define M_PIf          0xc.90fdaap-2f         // 3.1415927f0
 #ifndef M_PIl
-    #define M_PIl      0xc.90fdaa22168c235p-2L
+    #define M_PIl      0xc.90fdaa22168c235p-2l
 #endif
 
 typedef __float128 quadruple;
 
-static inline float epsf(void) {return (float) M_EPSf;}
-static inline double eps(void) {return (double) M_EPS;}
-static inline long double epsl(void) {return (long double) M_EPSl;}
-static inline quadruple epsq(void) {return (quadruple) M_EPSq;}
+static inline float epsf(void) {return M_EPSf;}
+static inline double eps(void) {return M_EPS;}
+static inline long double epsl(void) {return M_EPSl;}
+static inline quadruple epsq(void) {return M_EPSq;}
 
 #if !(__APPLE__)
     static inline float __cospif(float x) {return cosf(M_PIf*x);}
