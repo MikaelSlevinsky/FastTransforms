@@ -126,7 +126,11 @@ void X(test_arrow)(int * checksum) {
     FLT * v = (FLT *) calloc(n, sizeof(FLT));
     for (int i = 0; i < n; i++)
         v[i] = (1+X(cbrt)(X(eps)()))*lambda[i];
-    FLT * ret = X(secular_FMM)(AS, v, ib);
+    FLT * ret = (FLT *) malloc(n*sizeof(FLT));
+    FLT * b2 = (FLT *) malloc((n-1)*sizeof(FLT));
+    for (int i = 0; i < n-1; i++)
+        b2[i] = AS->b[i]*AS->b[i];
+    X(secular_FMM)(AS, b2, v, ret, ib);
     FLT * ret_true = (FLT *) calloc(n, sizeof(FLT));
     FLT * cond = (FLT *) calloc(n, sizeof(FLT));
     for (int j = ib+1; j < n-1; j++) {
@@ -134,15 +138,13 @@ void X(test_arrow)(int * checksum) {
         cond[j] = X(secular_cond)(AS, v[j]);
     }
     err = X(norm_2arg)(ret+ib+1, ret_true+ib+1, n-2-ib)/X(norm_1arg)(cond+ib+1, n-2-ib);
-    free(ret);
-    ret = X(secular_derivative_FMM)(AS, v, ib);
+    X(secular_derivative_FMM)(AS, b2, v, ret, ib);
     for (int j = ib+1; j < n-1; j++) {
         ret_true[j] = X(secular_derivative)(AS, v[j]);
         cond[j] = X(secular_derivative_cond)(AS, v[j]);
     }
     err += X(norm_2arg)(ret+ib+1, ret_true+ib+1, n-2-ib)/X(norm_1arg)(cond+ib+1, n-2-ib);
-    free(ret);
-    ret = X(secular_second_derivative_FMM)(AS, v, ib);
+    X(secular_second_derivative_FMM)(AS, b2, v, ret, ib);
     for (int j = ib+1; j < n-1; j++) {
         ret_true[j] = X(secular_second_derivative)(AS, v[j]);
         cond[j] = X(secular_second_derivative_cond)(AS, v[j]);
@@ -151,15 +153,21 @@ void X(test_arrow)(int * checksum) {
     printf("FMM acceleration of secular(-like) equations \t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
+    gettimeofday(&start, NULL);
     FLT * mu = X(symmetric_arrow_eigvals)(AS, ib);
+    gettimeofday(&end, NULL);
     err = X(norm_2arg)(lambda, mu, n)/X(norm_1arg)(lambda, n);
     printf("Synthetic symmetric arrow eigenvalues \t\t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
+    printf("Time for symmetric arrow eigenvalues \t\t\t |%20.6f s\n", elapsed(&start, &end, 1));
 
+    gettimeofday(&start, NULL);
     FLT * mu_FMM = X(symmetric_arrow_eigvals_FMM)(AS, ib);
+    gettimeofday(&end, NULL);
     err = X(norm_2arg)(lambda, mu_FMM, n)/X(norm_1arg)(lambda, n);
     printf("FMM accelerated symmetric arrow eigenvalues \t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
+    printf("Time for FMM accelerated eigenvalues \t\t\t |%20.6f s\n", elapsed(&start, &end, 1));
 
     X(symmetric_arrow_eigen) * F = X(symmetric_arrow_eig)(A);
     FLT * Q = F->Q;
@@ -213,6 +221,7 @@ void X(test_arrow)(int * checksum) {
     X(destroy_symmetric_arrow_eigen_FMM)(FFMM);
     X(destroy_upper_arrow)(R);
     X(destroy_upper_arrow)(S);
+    free(b2);
     free(d_true);
     free(e_true);
     free(x);

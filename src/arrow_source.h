@@ -44,18 +44,18 @@ void X(uamv)(char TRANS, X(upper_arrow) * R, FLT * x);
 void X(uasv)(char TRANS, X(upper_arrow) * R, FLT * x);
 
 FLT X(secular)(X(symmetric_arrow) * A, FLT lambda);
-FLT * X(secular_FMM)(X(symmetric_arrow) * A, FLT * lambda, int ib);
+void X(secular_FMM)(X(symmetric_arrow) * A, FLT * b2, FLT * lambda, FLT * ret, int ib);
 FLT X(secular_derivative)(X(symmetric_arrow) * A, FLT lambda);
-FLT * X(secular_derivative_FMM)(X(symmetric_arrow) * A, FLT * lambda, int ib);
+void X(secular_derivative_FMM)(X(symmetric_arrow) * A, FLT * b2, FLT * lambda, FLT * ret, int ib);
 FLT X(secular_second_derivative)(X(symmetric_arrow) * A, FLT lambda);
-FLT * X(secular_second_derivative_FMM)(X(symmetric_arrow) * A, FLT * lambda, int ib);
+void X(secular_second_derivative_FMM)(X(symmetric_arrow) * A, FLT * b2, FLT * lambda, FLT * ret, int ib);
 
 FLT X(first_initial_guess)(FLT a0, FLT nrmb2, FLT c);
 FLT X(first_pick_zero_update)(X(symmetric_arrow) * A, FLT lambda, int ib);
 FLT X(last_initial_guess)(FLT an, FLT nrmb2, FLT c);
 FLT X(last_pick_zero_update)(X(symmetric_arrow) * A, FLT lambda);
 FLT X(pick_zero_update)(X(symmetric_arrow) * A, FLT lambda, int j);
-FLT * X(pick_zero_update_FMM)(X(symmetric_arrow) * A, FLT * lambda, int ib);
+void X(pick_zero_update_FMM)(X(symmetric_arrow) * A, FLT * b2, FLT * lambda, FLT * delta, FLT * f, FLT * fp, FLT * fpp, int ib);
 
 int X(symmetric_arrow_deflate)(X(symmetric_arrow) * A, int * p);
 

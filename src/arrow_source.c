@@ -201,19 +201,14 @@ FLT X(secular)(X(symmetric_arrow) * A, FLT lambda) {
     return ret;
 }
 
-FLT * X(secular_FMM)(X(symmetric_arrow) * A, FLT * lambda, int ib) {
+void X(secular_FMM)(X(symmetric_arrow) * A, FLT * b2, FLT * lambda, FLT * ret, int ib) {
     int n = A->n;
     FLT * a = A->a, * b = A->b;
-    FLT * ret = (FLT *) malloc(n*sizeof(FLT));
     for (int j = ib+1; j < n-1; j++)
         ret[j] = lambda[j] - A->c;
-    FLT * b2 = (FLT *) malloc((n-1)*sizeof(FLT));
-    for (int i = ib; i < n-1; i++)
-        b2[i] = b[i]*b[i];
     X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda, a, (unitrange) {ib+1, n-1}, (unitrange) {ib, n-1});
     X(himv)('N', -1, H, b2+ib, 1, ret+(ib+1));
-    free(b2);
-    return ret;
+    X(destroy_hierarchicalmatrix)(H);
 }
 
 FLT X(secular_derivative)(X(symmetric_arrow) * A, FLT lambda) {
@@ -227,19 +222,14 @@ FLT X(secular_derivative)(X(symmetric_arrow) * A, FLT lambda) {
     return ret;
 }
 
-FLT * X(secular_derivative_FMM)(X(symmetric_arrow) * A, FLT * lambda, int ib) {
+void X(secular_derivative_FMM)(X(symmetric_arrow) * A, FLT * b2, FLT * lambda, FLT * ret, int ib) {
     int n = A->n;
     FLT * a = A->a, * b = A->b;
-    FLT * ret = (FLT *) malloc(n*sizeof(FLT));
     for (int j = ib+1; j < n-1; j++)
         ret[j] = ONE(FLT);
-    FLT * b2 = (FLT *) malloc((n-1)*sizeof(FLT));
-    for (int i = ib; i < n-1; i++)
-        b2[i] = b[i]*b[i];
     X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(X(coulombkernel), lambda, a, (unitrange) {ib+1, n-1}, (unitrange) {ib, n-1});
     X(himv)('N', 1, H, b2+ib, 1, ret+(ib+1));
-    free(b2);
-    return ret;
+    X(destroy_hierarchicalmatrix)(H);
 }
 
 FLT X(secular_second_derivative)(X(symmetric_arrow) * A, FLT lambda) {
@@ -253,17 +243,14 @@ FLT X(secular_second_derivative)(X(symmetric_arrow) * A, FLT lambda) {
     return TWO(FLT)*ret;
 }
 
-FLT * X(secular_second_derivative_FMM)(X(symmetric_arrow) * A, FLT * lambda, int ib) {
+void X(secular_second_derivative_FMM)(X(symmetric_arrow) * A, FLT * b2, FLT * lambda, FLT * ret, int ib) {
     int n = A->n;
     FLT * a = A->a, * b = A->b;
-    FLT * ret = (FLT *) calloc(n, sizeof(FLT));
-    FLT * b2 = (FLT *) malloc((n-1)*sizeof(FLT));
-    for (int i = ib; i < n-1; i++)
-        b2[i] = b[i]*b[i];
+    for (int j = ib+1; j < n-1; j++)
+        ret[j] = ZERO(FLT);
     X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(X(coulombprimekernel), lambda, a, (unitrange) {ib+1, n-1}, (unitrange) {ib, n-1});
     X(himv)('N', -2, H, b2+ib, 1, ret+(ib+1));
-    free(b2);
-    return ret;
+    X(destroy_hierarchicalmatrix)(H);
 }
 
 FLT X(first_initial_guess)(FLT a0, FLT nrmb2, FLT c) {
@@ -342,14 +329,13 @@ FLT X(pick_zero_update)(X(symmetric_arrow) * A, FLT lambda, int j) {
     return 2*c/(b+X(sqrt)(b*b-4*a*c));
 }
 
-FLT * X(pick_zero_update_FMM)(X(symmetric_arrow) * A, FLT * lambda, int ib) {
+void X(pick_zero_update_FMM)(X(symmetric_arrow) * A, FLT * b2, FLT * lambda, FLT * delta, FLT * f, FLT * fp, FLT * fpp, int ib) {
     int n = A->n;
     FLT * Aa = A->a;
-    FLT * f = X(secular_FMM)(A, lambda, ib);
-    FLT * fp = X(secular_derivative_FMM)(A, lambda, ib);
-    FLT * fpp = X(secular_second_derivative_FMM)(A, lambda, ib);
+    X(secular_FMM)(A, b2, lambda, f, ib);
+    X(secular_derivative_FMM)(A, b2, lambda, fp, ib);
+    X(secular_second_derivative_FMM)(A, b2, lambda, fpp, ib);
     FLT c1, c2, c2g, c1b, alpha, a, b, c;
-    FLT * ret = (FLT *) malloc((n-1)*sizeof(FLT));
     for (int j = ib+1; j < n-1; j++) {
         c1 = 1/(Aa[j-1] - lambda[j]);
         c2 = 1/(Aa[j] - lambda[j]);
@@ -359,12 +345,8 @@ FLT * X(pick_zero_update_FMM)(X(symmetric_arrow) * A, FLT * lambda, int ib) {
         a = alpha/((Aa[j-1] - lambda[j])*(lambda[j] - Aa[j]));
         b = fp[j] - (c1+c2)*f[j];
         c = -f[j];
-        ret[j] = 2*c/(b+X(sqrt)(b*b-4*a*c));
+        delta[j] = 2*c/(b+X(sqrt)(b*b-4*a*c));
     }
-    free(f);
-    free(fp);
-    free(fpp);
-    return ret;
 }
 
 
@@ -396,7 +378,6 @@ int X(symmetric_arrow_deflate)(X(symmetric_arrow) * A, int * p) {
 FLT * X(symmetric_arrow_eigvals)(X(symmetric_arrow) * A, int ib) {
     int n = A->n;
     FLT * a = A->a, * b = A->b, c = A->c;
-    int n2 = n*n;
 
     FLT * lambda = (FLT *) calloc(n, sizeof(FLT));
 
@@ -411,31 +392,31 @@ FLT * X(symmetric_arrow_eigvals)(X(symmetric_arrow) * A, int ib) {
 
     lambdak = X(first_initial_guess)(a[ib], nrmb2, c);
     deltak = ONE(FLT);
-    while (X(fabs)(deltak) > n2*X(eps)()) {
+    while (X(fabs)(deltak) > MAX(n*X(eps)()*X(fabs)(lambdak), X(floatmin)())) {
         deltak = X(first_pick_zero_update)(A, lambdak, ib);
-        if (deltak != deltak) break;
-        lambdak += deltak;
+        if (X(isfinite)(deltak)) lambdak += deltak;
+        else break;
     }
     lambda[ib] = lambdak;
 
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int j = ib+1; j < n-1; j++) {
         FLT lambdak = (a[j]+a[j-1])/2;
         FLT deltak = ONE(FLT);
-        while (X(fabs)(deltak) > n2*X(eps)()) {
+        while (X(fabs)(deltak) > MAX(n*X(eps)()*X(fabs)(lambdak), X(floatmin)())) {
             deltak = X(pick_zero_update)(A, lambdak, j);
-            if (deltak != deltak) break;
-            lambdak += deltak;
+            if (X(isfinite)(deltak)) lambdak += deltak;
+            else break;
         }
         lambda[j] = lambdak;
     }
 
     lambdak = X(last_initial_guess)(a[n-2], nrmb2, c);
     deltak = ONE(FLT);
-    while (X(fabs)(deltak) > n2*X(eps)()) {
+    while (X(fabs)(deltak) > MAX(n*X(eps)()*X(fabs)(lambdak), X(floatmin)())) {
         deltak = X(last_pick_zero_update)(A, lambdak);
-        if (deltak != deltak) break;
-        lambdak += deltak;
+        if (X(isfinite)(deltak)) lambdak += deltak;
+        else break;
     }
     lambda[n-1] = lambdak;
 
@@ -446,13 +427,15 @@ FLT * X(symmetric_arrow_eigvals)(X(symmetric_arrow) * A, int ib) {
 FLT * X(symmetric_arrow_eigvals_FMM)(X(symmetric_arrow) * A, int ib) {
     int n = A->n;
     FLT * a = A->a, * b = A->b, c = A->c;
-    int n2 = n*n;
 
     FLT * lambda = (FLT *) calloc(n, sizeof(FLT));
+    FLT * b2 = (FLT *) malloc((n-1)*sizeof(FLT));
 
     FLT nrmb2 = 0;
-    for (int i = 0; i < n-1; i++)
-        nrmb2 += b[i]*b[i];
+    for (int i = 0; i < n-1; i++) {
+        b2[i] = b[i]*b[i];
+        nrmb2 += b2[i];
+    }
 
     for (int i = 0; i < ib; i++)
         lambda[i] = a[i];
@@ -461,34 +444,46 @@ FLT * X(symmetric_arrow_eigvals_FMM)(X(symmetric_arrow) * A, int ib) {
 
     lambdak = X(first_initial_guess)(a[ib], nrmb2, c);
     deltak = ONE(FLT);
-    while (X(fabs)(deltak) > 100*n2*X(eps)()) {
+    while (X(fabs)(deltak) > MAX(n*X(eps)()*X(fabs)(lambdak), X(floatmin)())) {
         deltak = X(first_pick_zero_update)(A, lambdak, ib);
-        if (deltak != deltak) break;
-        lambdak += deltak;
+        if (X(isfinite)(deltak)) lambdak += deltak;
+        else break;
     }
     lambda[ib] = lambdak;
 
-    FLT nrmd = 1;
+    FLT nrmd = 1, nrml = 1;
+    FLT * delta = (FLT *) malloc((n-1)*sizeof(FLT));
+    FLT * f = (FLT *) malloc(n*sizeof(FLT));
+    FLT * fp = (FLT *) malloc(n*sizeof(FLT));
+    FLT * fpp = (FLT *) malloc(n*sizeof(FLT));
     for (int j = ib+1; j < n-1; j++)
         lambda[j] = (a[j]+a[j-1])/2;
-    while (nrmd > 100*n2*X(eps)()) {
-        FLT * delta = X(pick_zero_update_FMM)(A, lambda, ib);
-        nrmd = 0;
+    while (nrmd > MAX(n*X(eps)()*nrml, X(floatmin)())) {
+        X(pick_zero_update_FMM)(A, b2, lambda, delta, f, fp, fpp, ib);
+        nrmd = nrml = 0;
         for (int j = ib+1; j < n-1; j++) {
-            if (delta[j] != delta[j]) continue;
-            lambda[j] += delta[j];
-            nrmd += delta[j]*delta[j];
+            if (X(isfinite)(delta[j])) {
+                lambda[j] += delta[j];
+                nrmd += delta[j]*delta[j];
+                nrml += lambda[j]*lambda[j];
+            }
+            else continue;
         }
         nrmd = X(sqrt)(nrmd);
-        free(delta);
+        nrml = X(sqrt)(nrml);
     }
+    free(b2);
+    free(delta);
+    free(f);
+    free(fp);
+    free(fpp);
 
     lambdak = X(last_initial_guess)(a[n-2], nrmb2, c);
     deltak = ONE(FLT);
-    while (X(fabs)(deltak) > 100*n2*X(eps)()) {
+    while (X(fabs)(deltak) > MAX(n*X(eps)()*X(fabs)(lambdak), X(floatmin)())) {
         deltak = X(last_pick_zero_update)(A, lambdak);
-        if (deltak != deltak) break;
-        lambdak += deltak;
+        if (X(isfinite)(deltak)) lambdak += deltak;
+        else break;
     }
     lambda[n-1] = lambdak;
 
@@ -509,7 +504,7 @@ FLT * X(symmetric_arrow_eigvecs)(X(symmetric_arrow) * A, FLT * lambda, int ib) {
         nrm = 0;
         for (int i = ib; i < n; i++)
             nrm += Q[i+j*n]*Q[i+j*n];
-        nrm = 1/X(sqrt)(nrm);
+        nrm = X(copysign)(1/X(sqrt)(nrm), Q[j+j*n]);
         for (int i = ib; i < n; i++)
             Q[i+j*n] *= nrm;
         /*
@@ -588,8 +583,9 @@ X(symmetric_arrow_eigen_FMM) * X(symmetric_arrow_eig_FMM)(X(symmetric_arrow) * A
     FLT * q = (FLT *) calloc(n-ib, sizeof(FLT));
     X(himv)('N', 1, N, b2, 0, q);
     free(b2);
-    for (int i = ib; i < n; i++)
-        q[i-ib] = 1/X(sqrt)(1+q[i-ib]);
+    for (int i = ib; i < n-1; i++)
+        q[i-ib] = -1/X(sqrt)(1+q[i-ib]);
+    q[n-1-ib] = 1/X(sqrt)(1+q[n-1-ib]);
     X(scale_rows_hierarchicalmatrix)(-1, b+ib, Q);
     X(scale_columns_hierarchicalmatrix)(1, q, Q);
 
