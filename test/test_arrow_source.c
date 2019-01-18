@@ -191,8 +191,9 @@ void X(test_arrow)(int * checksum) {
     gettimeofday(&start, NULL);
     for (int j = 0; j < FFMM->ib; j++)
         FQ[j+j*n] = 1;
+    #pragma omp parallel for
     for (int j = FFMM->ib; j < n; j++) {
-        X(himv)('N', 1, FFMM->Q, I+ib+j*n, 0, FQ+ib+j*n);
+        X(himv)('N', 1, FFMM->Q, I+FFMM->ib+j*n, 0, FQ+FFMM->ib+j*n);
         FLT t = 0;
         for (int i = 0; i < n-FFMM->ib; i++)
              t += FFMM->q[i]*I[i+FFMM->ib+j*n];
@@ -200,6 +201,7 @@ void X(test_arrow)(int * checksum) {
     }
     for (int j = 0; j < FFMM->ib; j++)
         QtQ[j+j*n] = 1;
+    #pragma omp parallel for
     for (int j = FFMM->ib; j < n; j++) {
         X(himv)('T', 1, FFMM->Q, FQ+FFMM->ib+j*n, 0, QtQ+FFMM->ib+j*n);
         for (int i = 0; i < n-FFMM->ib; i++)

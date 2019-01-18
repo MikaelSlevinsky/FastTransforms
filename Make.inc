@@ -1,6 +1,6 @@
 LIB = fasttransforms
 LIBDIR = .
-LIBFLAGS = -shared -lm -fPIC -fopenmp
+LIBFLAGS = -shared -lm -fPIC
 
 ifeq ($(OS), Windows_NT)
     UNAME := Windows
@@ -45,4 +45,4 @@ else ifeq ($(BLAS), OPENBLAS)
         LDFLAGS += -L/usr/local/opt/fftw/lib
     endif
 endif
-LDLIBS += -lm -lquadmath -lblas -lfftw3 -lfftw3_threads
+LDLIBS += -lm -lquadmath -fopenmp -lblas -lfftw3 -lfftw3_threads

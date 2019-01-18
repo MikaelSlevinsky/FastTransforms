@@ -116,8 +116,8 @@ X(lowrankmatrix) * X(calloc_lowrankmatrix)(char N, int m, int n, int r) {
     L->U = (FLT *) calloc(m*r, sizeof(FLT));
     L->S = (FLT *) calloc(sz, sizeof(FLT));
     L->V = (FLT *) calloc(n*r, sizeof(FLT));
-    L->t1 = (FLT *) calloc(r*FT_GET_NUM_THREADS(), sizeof(FLT));
-    L->t2 = (FLT *) calloc(r*FT_GET_NUM_THREADS(), sizeof(FLT));
+    L->t1 = (FLT *) calloc(r*FT_GET_MAX_THREADS(), sizeof(FLT));
+    L->t2 = (FLT *) calloc(r*FT_GET_MAX_THREADS(), sizeof(FLT));
     L->m = m;
     L->n = n;
     L->r = r;
@@ -133,8 +133,8 @@ X(lowrankmatrix) * X(malloc_lowrankmatrix)(char N, int m, int n, int r) {
     L->U = (FLT *) malloc(m*r*sizeof(FLT));
     L->S = (FLT *) malloc(sz*sizeof(FLT));
     L->V = (FLT *) malloc(n*r*sizeof(FLT));
-    L->t1 = (FLT *) calloc(r*FT_GET_NUM_THREADS(), sizeof(FLT));
-    L->t2 = (FLT *) calloc(r*FT_GET_NUM_THREADS(), sizeof(FLT));
+    L->t1 = (FLT *) calloc(r*FT_GET_MAX_THREADS(), sizeof(FLT));
+    L->t2 = (FLT *) calloc(r*FT_GET_MAX_THREADS(), sizeof(FLT));
     L->m = m;
     L->n = n;
     L->r = r;
