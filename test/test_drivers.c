@@ -811,7 +811,7 @@ int main(int argc, const char * argv[]) {
     printf("\nTesting the accuracy of tetrahedral harmonic drivers.\n\n");
     printf("err9 = [\n");
     for (int i = 0; i < IERR; i++) {
-        N = 64*pow(2, i)+J;
+        N = 16*pow(2, i)+J;
         L = M = N;
 
         A = tetones(N, L, M);
@@ -838,7 +838,7 @@ int main(int argc, const char * argv[]) {
     printf("\nTesting the accuracy of tetrahedral harmonic transforms.\n\n");
     printf("err10 = [\n");
     for (int i = 0; i < IERR; i++) {
-        N = 64*pow(2, i)+J;
+        N = 16*pow(2, i)+J;
         L = M = N;
 
         A = tetrand(N, L, M);

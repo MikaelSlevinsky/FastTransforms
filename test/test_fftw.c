@@ -315,7 +315,7 @@ int main(int argc, const char * argv[]) {
     printf("\nTesting the accuracy of tetrahedral harmonic transforms + FFTW synthesis and analysis.\n\n");
     printf("err5 = [\n");
     for (int i = 0; i < IERR; i++) {
-        N = 64*pow(2, i)+J;
+        N = 16*pow(2, i)+J;
         L = M = N;
 
         A = tetrand(N, L, M);
