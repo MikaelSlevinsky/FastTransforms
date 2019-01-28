@@ -682,11 +682,11 @@ void ft_execute_tri2cheb(const ft_harmonic_plan * P, double * A, const int N, co
         cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1, N, A, N);
     if ((P->gamma != -0.5) || (P->beta != -0.5))
         cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P2, N, A, N);
-    chebyshev_normalization(A, N, M);
+    chebyshev_normalization_2d(A, N, M);
 }
 
 void ft_execute_cheb2tri(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    chebyshev_normalization_t(A, N, M);
+    chebyshev_normalization_2d_t(A, N, M);
     if ((P->beta != -0.5) || (P->gamma != -0.5))
         cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P2inv, N, A, N);
     if ((P->alpha != -0.5) || (P->beta + P->gamma != -1.5))
@@ -849,92 +849,66 @@ static void alternate_sign_t(double * A, const int N, const int M) {
             A[j+i*M] = -A[j+i*M];
 }
 
-static void chebyshev_normalization(double * A, const int N, const int M) {
-    A[0] *= M_1_PI;
-    for (int i = 1; i < N; i++)
-        A[i] *= M_SQRT2*M_1_PI;
-    for (int j = 1; j < M; j++)
-        A[j*N] *= M_SQRT2*M_1_PI;
-    for (int j = 1; j < M; j++)
-        for (int i = 1; i < N; i++)
-            A[i+j*N] *= M_2_PI;
+static void chebyshev_normalization_2d(double * A, const int N, const int M) {
+    for (int i = 0; i < N; i++)
+        A[i] *= M_SQRT1_2;
+    for (int j = 0; j < M; j++)
+        A[j*N] *= M_SQRT1_2;
+    for (int i = 0; i < N*M; i++)
+        A[i] *= M_2_PI;
 }
 
-static void chebyshev_normalization_t(double * A, const int N, const int M) {
-    A[0] *= M_PI;
-    for (int i = 1; i < N; i++)
-        A[i] *= M_SQRT1_2*M_PI;
-    for (int j = 1; j < M; j++)
-        A[j*N] *= M_SQRT1_2*M_PI;
-    for (int j = 1; j < M; j++)
-        for (int i = 1; i < N; i++)
-            A[i+j*N] *= M_PI_2;
+static void chebyshev_normalization_2d_t(double * A, const int N, const int M) {
+    for (int i = 0; i < N; i++)
+        A[i] *= M_SQRT2;
+    for (int j = 0; j < M; j++)
+        A[j*N] *= M_SQRT2;
+    for (int i = 0; i < N*M; i++)
+        A[i] *= M_PI_2;
 }
 
 static void chebyshev_normalization_3d(double * A, const int N, const int L, const int M) {
-    A[0] *= M_1_PI*M_1_SQRT_PI;
-    for (int i = 1; i < N; i++)
-        A[i] *= M_SQRT2*M_1_PI*M_1_SQRT_PI;
-    for (int j = 1; j < L; j++)
-        A[j*N] *= M_SQRT2*M_1_PI*M_1_SQRT_PI;
-    for (int k = 1; k < M; k++)
-        A[k*L*N] *= M_SQRT2*M_1_PI*M_1_SQRT_PI;
-    for (int j = 1; j < L; j++)
-        for (int i = 1; i < N; i++)
-            A[i+j*N] *= M_2_PI*M_1_SQRT_PI;
-    for (int k = 1; k < M; k++)
-        for (int i = 1; i < N; i++)
-            A[i+k*L*N] *= M_2_PI*M_1_SQRT_PI;
-    for (int k = 1; k < M; k++)
-        for (int j = 1; j < L; j++)
-            A[N*(j+k*L)] *= M_2_PI*M_1_SQRT_PI;
-    for (int k = 1; k < M; k++)
-        for (int j = 1; j < L; j++)
-            for (int i = 1; i < N; i++)
-                A[i+N*(j+k*L)] *= M_2_PI*M_SQRT2*M_1_SQRT_PI;
+    for (int j = 0; j < L; j++)
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_SQRT1_2;
+    for (int k = 0; k < M; k++)
+        for (int i = 0; i < N; i++)
+            A[i+k*L*N] *= M_SQRT1_2;
+    for (int k = 0; k < M; k++)
+        for (int j = 0; j < L; j++)
+            A[(j+k*L)*N] *= M_SQRT1_2;
+    for (int i = 0; i < N*L*M; i++)
+        A[i] *= M_2_PI_POW_1P5;
 }
 
 static void chebyshev_normalization_3d_t(double * A, const int N, const int L, const int M) {
-    A[0] *= M_PI*M_SQRT_PI;
-    for (int i = 1; i < N; i++)
-        A[i] *= M_SQRT1_2*M_PI*M_SQRT_PI;
-    for (int j = 1; j < L; j++)
-        A[j*N] *= M_SQRT1_2*M_PI*M_SQRT_PI;
-    for (int k = 1; k < M; k++)
-        A[k*L*N] *= M_SQRT1_2*M_PI*M_SQRT_PI;
-    for (int j = 1; j < L; j++)
-        for (int i = 1; i < N; i++)
-            A[i+j*N] *= M_PI_2*M_SQRT_PI;
-    for (int k = 1; k < M; k++)
-        for (int i = 1; i < N; i++)
-            A[i+k*L*N] *= M_PI_2*M_SQRT_PI;
-    for (int k = 1; k < M; k++)
-        for (int j = 1; j < L; j++)
-            A[N*(j+k*L)] *= M_PI_2*M_SQRT_PI;
-    for (int k = 1; k < M; k++)
-        for (int j = 1; j < L; j++)
-            for (int i = 1; i < N; i++)
-                A[i+N*(j+k*L)] *= M_PI_2*M_SQRT1_2*M_SQRT_PI;
+    for (int j = 0; j < L; j++)
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_SQRT2;
+    for (int k = 0; k < M; k++)
+        for (int i = 0; i < N; i++)
+            A[i+k*L*N] *= M_SQRT2;
+    for (int k = 0; k < M; k++)
+        for (int j = 0; j < L; j++)
+            A[(j+k*L)*N] *= M_SQRT2;
+    for (int i = 0; i < N*L*M; i++)
+        A[i] *= M_PI_2_POW_1P5;
 }
 
 static void partial_chebyshev_normalization(double * A, const int N, const int M) {
-    for (int j = 1; j < M; j += 4) {
+    for (int j = 1; j < M; j += 4)
         for (int i = 0; i < N; i++)
-            A[i+j*N] *= M_SQRT2*M_1_SQRT_PI;
-    }
-    for (int j = 2; j < M; j += 4) {
+            A[i+j*N] *= M_2_PI_POW_0P5;
+    for (int j = 2; j < M; j += 4)
         for (int i = 0; i < N; i++)
-            A[i+j*N] *= M_SQRT2*M_1_SQRT_PI;
-    }
+            A[i+j*N] *= M_2_PI_POW_0P5;
 }
 
 static void partial_chebyshev_normalization_t(double * A, const int N, const int M) {
-    for (int j = 1; j < M; j += 4) {
+    for (int j = 1; j < M; j += 4)
         for (int i = 0; i < N; i++)
-            A[i+j*N] *= M_SQRT1_2*M_SQRT_PI;
-    }
-    for (int j = 2; j < M; j += 4) {
+            A[i+j*N] *= M_PI_2_POW_0P5;
+    for (int j = 2; j < M; j += 4)
         for (int i = 0; i < N; i++)
-            A[i+j*N] *= M_SQRT1_2*M_SQRT_PI;
-    }
+            A[i+j*N] *= M_PI_2_POW_0P5;
 }

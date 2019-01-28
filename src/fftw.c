@@ -198,8 +198,8 @@ void ft_execute_tet_synthesis(const ft_tetrahedron_fftw_plan * P, double * X, co
         for (int j = 0; j < L; j++)
             for (int i = 0; i < N; i++)
                 X[i+j*N] *= 2.0;
-        for (int j = 0; j < L; j++)
-            for (int k = 0; k < M; k++)
+        for (int k = 0; k < M; k++)
+            for (int j = 0; j < L; j++)
                 X[(j+k*L)*N] *= 2.0;
         for (int k = 0; k < M; k++)
             for (int i = 0; i < N; i++)
@@ -216,8 +216,8 @@ void ft_execute_tet_analysis(const ft_tetrahedron_fftw_plan * P, double * X, con
         for (int j = 0; j < L; j++)
             for (int i = 0; i < N; i++)
                 X[i+j*N] *= 0.5;
-        for (int j = 0; j < L; j++)
-            for (int k = 0; k < M; k++)
+        for (int k = 0; k < M; k++)
+            for (int j = 0; j < L; j++)
                 X[(j+k*L)*N] *= 0.5;
         for (int k = 0; k < M; k++)
             for (int i = 0; i < N; i++)
