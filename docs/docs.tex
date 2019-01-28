@@ -118,7 +118,7 @@ Since {\tt spinsph2fourier} only transforms columns of the arrays, the routine i
 
 Triangular harmonics are:
 \begin{equation}
-\tilde{P}_{\ell,m}^{(\alpha,\beta,\gamma)}(x,y) = (2(1-x))^m \tilde{P}_{\ell-m}^{(2m+\beta+\gamma+1,\alpha)}(2x-1) \tilde{P}_m^{(\gamma,\beta)}\left(\frac{2y}{1-x}-1\right),
+\tilde{P}_{\ell,m}^{(\alpha,\beta,\gamma)}(x,y) = (2-2x)^m \tilde{P}_{\ell-m}^{(2m+\beta+\gamma+1,\alpha)}(2x-1) \tilde{P}_m^{(\gamma,\beta)}\left(\frac{2y}{1-x}-1\right),
 \end{equation}
 where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-$n$ expansion in triangular harmonics is given by:
 \begin{equation}
@@ -191,7 +191,7 @@ Since {\tt disk2cxf} only transforms columns of the arrays, the routine is indif
 
 Tetrahedral harmonics are:
 \begin{align}
-\tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z) & = (2-2x)^{\ell+m} \tilde{P}_{k-\ell-m}^{(2\ell+2m+\beta+\gamma+\delta+1,\alpha)}(2x-1)\nonumber\\
+\tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z) & = (2-2x)^{\ell+m} \tilde{P}_{k-\ell-m}^{(2\ell+2m+\beta+\gamma+\delta+2,\alpha)}(2x-1)\nonumber\\
 & \quad \times \left(2-\frac{2y}{1-x}\right)^m \tilde{P}_m^{(2m+\gamma+\delta+1,\beta)}\left(\frac{2y}{1-x}-1\right)\\
 & \quad \times \tilde{P}_m^{(\delta,\gamma)}\left(\frac{2z}{1-x-y}-1\right),\nonumber
 \end{align}
