@@ -195,12 +195,15 @@ ft_tetrahedron_fftw_plan * ft_plan_tet_analysis(const int N, const int L, const 
 
 void ft_execute_tet_synthesis(const ft_tetrahedron_fftw_plan * P, double * X, const int N, const int L, const int M) {
     if (N > 1 && L > 1 && M > 1) {
-        for (int i = 0; i < N; i++)
-            X[i] *= 2.0;
         for (int j = 0; j < L; j++)
-            X[j*N] *= 2.0;
+            for (int i = 0; i < N; i++)
+                X[i+j*N] *= 2.0;
+        for (int j = 0; j < L; j++)
+            for (int k = 0; k < M; k++)
+                X[(j+k*L)*N] *= 2.0;
         for (int k = 0; k < M; k++)
-            X[k*L*N] *= 2.0;
+            for (int i = 0; i < N; i++)
+                X[i+k*L*N] *= 2.0;
         fftw_execute_r2r(P->planxyz, X, X);
         for (int i = 0; i < N*L*M; i++)
             X[i] *= 0.125;
@@ -210,12 +213,15 @@ void ft_execute_tet_synthesis(const ft_tetrahedron_fftw_plan * P, double * X, co
 void ft_execute_tet_analysis(const ft_tetrahedron_fftw_plan * P, double * X, const int N, const int L, const int M) {
     if (N > 1 && L > 1 && M > 1) {
         fftw_execute_r2r(P->planxyz, X, X);
-        for (int i = 0; i < N; i++)
-            X[i] *= 0.5;
         for (int j = 0; j < L; j++)
-            X[j*N] *= 0.5;
+            for (int i = 0; i < N; i++)
+                X[i+j*N] *= 0.5;
+        for (int j = 0; j < L; j++)
+            for (int k = 0; k < M; k++)
+                X[(j+k*L)*N] *= 0.5;
         for (int k = 0; k < M; k++)
-            X[k*L*N] *= 0.5;
+            for (int i = 0; i < N; i++)
+                X[i+k*L*N] *= 0.5;
         for (int i = 0; i < N*L*M; i++)
             X[i] /= N*L*M;
     }
