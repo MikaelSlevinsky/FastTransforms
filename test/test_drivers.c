@@ -11,12 +11,15 @@ int main(int argc, const char * argv[]) {
     static double * Ac;
     static double * B;
     ft_rotation_plan * RP;
+    ft_rotation_plan * RP1;
+    ft_rotation_plan * RP2;
     ft_spin_rotation_plan * SRP;
     ft_harmonic_plan * P;
-    //double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
-    double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
+    ft_tetrahedral_harmonic_plan * TP;
+    //double alpha = -0.5, beta = -0.5, gamma = -0.5, delta = -0.5; // best case scenario
+    double alpha = 0.0, beta = 0.0, gamma = 0.0, delta = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 
-    int IERR, ITIME, J, N, M, NLOOPS;
+    int IERR, ITIME, J, N, L, M, NLOOPS;
 
 
     if (argc > 1) {
@@ -805,8 +808,58 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    printf("\nTesting the accuracy of spin-weighted spherical harmonic drivers.\n\n");
+    printf("\nTesting the accuracy of tetrahedral harmonic drivers.\n\n");
     printf("err9 = [\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 64*pow(2, i)+J;
+        L = M = N;
+
+        A = tetones(N, L, M);
+        //Ac = aligned_copymat(A, N, L*M);
+        B = copymat(A, N, L*M);
+
+        RP1 = ft_plan_rottriangle(N, alpha, beta, gamma + delta + 1.0);
+        RP2 = ft_plan_rottriangle(N, beta, gamma, delta);
+
+        ft_execute_tet_hi2lo(RP1, RP2, A, L, M);
+        ft_execute_tet_lo2hi(RP1, RP2, A, L, M);
+
+        printf("%d  %1.2e  ", N, norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
+        printf("%1.2e\n", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+
+        free(A);
+        //VFREE(Ac);
+        free(B);
+        ft_destroy_rotation_plan(RP1);
+        ft_destroy_rotation_plan(RP2);
+    }
+    printf("];\n");
+
+    printf("\nTesting the accuracy of tetrahedral harmonic transforms.\n\n");
+    printf("err10 = [\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 64*pow(2, i)+J;
+        L = M = N;
+
+        A = tetrand(N, L, M);
+        B = copymat(A, N, L*M);
+
+        TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
+
+        ft_execute_tet2cheb(TP, A, N, L, M);
+        ft_execute_cheb2tet(TP, A, N, L, M);
+
+        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
+        printf("%1.2e\n", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+
+        free(A);
+        free(B);
+        ft_destroy_tetrahedral_harmonic_plan(TP);
+    }
+    printf("];\n");
+
+    printf("\nTesting the accuracy of spin-weighted spherical harmonic drivers.\n\n");
+    printf("err11 = [\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
@@ -846,7 +899,7 @@ int main(int argc, const char * argv[]) {
     printf("];\n");
 
     printf("\nTiming spin-weighted spherical harmonic drivers.\n\n");
-    printf("t9 = [\n");
+    printf("t10 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;

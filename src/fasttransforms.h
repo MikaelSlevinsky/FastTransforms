@@ -69,6 +69,17 @@ void ft_kernel_disk_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double *
 void ft_kernel_disk_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double * A);
 void ft_kernel_disk_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double * A);
 
+void ft_kernel_tet_hi2lo(const ft_rotation_plan * RP, const int L, const int m, double * A);
+void ft_kernel_tet_lo2hi(const ft_rotation_plan * RP, const int L, const int m, double * A);
+
+void ft_kernel_tet_hi2lo_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A);
+void ft_kernel_tet_lo2hi_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A);
+
+void ft_kernel_tet_hi2lo_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A);
+void ft_kernel_tet_lo2hi_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A);
+
+void ft_kernel_tet_hi2lo_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A);
+void ft_kernel_tet_lo2hi_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A);
 
 typedef struct {
     double * s1;
@@ -146,6 +157,9 @@ void ft_execute_disk_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double *
 void ft_execute_disk_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void ft_execute_disk_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
+void ft_execute_tet_hi2lo(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M);
+void ft_execute_tet_lo2hi(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M);
+
 void ft_execute_spinsph_hi2lo(const ft_spin_rotation_plan * SRP, double * A, const int M);
 void ft_execute_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, double * A, const int M);
 
@@ -190,6 +204,29 @@ ft_harmonic_plan * ft_plan_disk2cxf(const int n);
 void ft_execute_disk2cxf(const ft_harmonic_plan * P, double * A, const int N, const int M);
 void ft_execute_cxf2disk(const ft_harmonic_plan * P, double * A, const int N, const int M);
 
+typedef struct {
+    ft_rotation_plan * RP1;
+    ft_rotation_plan * RP2;
+    double * B;
+    double * P1;
+    double * P2;
+    double * P3;
+    double * P1inv;
+    double * P2inv;
+    double * P3inv;
+    double alpha;
+    double beta;
+    double gamma;
+    double delta;
+} ft_tetrahedral_harmonic_plan;
+
+void ft_destroy_tetrahedral_harmonic_plan(ft_tetrahedral_harmonic_plan * P);
+
+ft_tetrahedral_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha, const double beta, const double gamma, const double delta);
+
+void ft_execute_tet2cheb(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M);
+void ft_execute_cheb2tet(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M);
+
 
 typedef struct {
     fftw_plan plantheta1;
@@ -226,6 +263,19 @@ ft_triangle_fftw_plan * ft_plan_tri_analysis(const int N, const int M);
 
 void ft_execute_tri_synthesis(const ft_triangle_fftw_plan * P, double * X, const int N, const int M);
 void ft_execute_tri_analysis(const ft_triangle_fftw_plan * P, double * X, const int N, const int M);
+
+typedef struct {
+    fftw_plan planxyz;
+} ft_tetrahedron_fftw_plan;
+
+void ft_destroy_tetrahedron_fftw_plan(ft_tetrahedron_fftw_plan * P);
+
+ft_tetrahedron_fftw_plan * ft_plan_tet_with_kind(const int N, const int L, const int M, const fftw_r2r_kind kind0, const fftw_r2r_kind kind1, const fftw_r2r_kind kind2);
+ft_tetrahedron_fftw_plan * ft_plan_tet_synthesis(const int N, const int L, const int M);
+ft_tetrahedron_fftw_plan * ft_plan_tet_analysis(const int N, const int L, const int M);
+
+void ft_execute_tet_synthesis(const ft_tetrahedron_fftw_plan * P, double * X, const int N, const int L, const int M);
+void ft_execute_tet_analysis(const ft_tetrahedron_fftw_plan * P, double * X, const int N, const int L, const int M);
 
 typedef struct {
     fftw_plan planr1;

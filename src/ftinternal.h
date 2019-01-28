@@ -78,6 +78,9 @@ static void alternate_sign_t(double * A, const int N, const int M);
 static void chebyshev_normalization(double * A, const int N, const int M);
 static void chebyshev_normalization_t(double * A, const int N, const int M);
 
+static void chebyshev_normalization_3d(double * A, const int N, const int L, const int M);
+static void chebyshev_normalization_3d_t(double * A, const int N, const int L, const int M);
+
 static void partial_chebyshev_normalization(double * A, const int N, const int M);
 static void partial_chebyshev_normalization_t(double * A, const int N, const int M);
 

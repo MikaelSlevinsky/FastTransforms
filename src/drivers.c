@@ -441,6 +441,29 @@ void ft_execute_disk_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, doubl
 }
 
 
+void ft_execute_tet_hi2lo(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M) {
+    int N = RP1->n;
+    #pragma omp parallel
+    for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
+        for (int l = 0; l < L-m; l++) {
+            ft_kernel_tri_hi2lo(RP1, l+m, A+N*(l+N*m));
+        }
+        ft_kernel_tet_hi2lo(RP2, L, m, A+N*N*m);
+    }
+}
+
+void ft_execute_tet_lo2hi(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M) {
+    int N = RP1->n;
+    #pragma omp parallel
+    for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
+        ft_kernel_tet_lo2hi(RP2, L, m, A+N*N*m);
+        for (int l = 0; l < L-m; l++) {
+            ft_kernel_tri_lo2hi(RP1, l+m, A+N*(l+N*m));
+        }
+    }
+}
+
+
 void ft_execute_spinsph_hi2lo(const ft_spin_rotation_plan * SRP, double * A, const int M) {
     int N = SRP->n;
     ft_kernel_spinsph_hi2lo(SRP, 0, A);
@@ -717,6 +740,103 @@ void ft_execute_cxf2disk(const ft_harmonic_plan * P, double * A, const int N, co
     ft_execute_disk_lo2hi_AVX512(P->RP, A, P->B, M);
 }
 
+void ft_destroy_tetrahedral_harmonic_plan(ft_tetrahedral_harmonic_plan * P) {
+    ft_destroy_rotation_plan(P->RP1);
+    ft_destroy_rotation_plan(P->RP2);
+    VFREE(P->B);
+    free(P->P1);
+    free(P->P2);
+    free(P->P3);
+    free(P->P1inv);
+    free(P->P2inv);
+    free(P->P3inv);
+    free(P);
+}
+
+ft_tetrahedral_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha, const double beta, const double gamma, const double delta) {
+    ft_tetrahedral_harmonic_plan * P = (ft_tetrahedral_harmonic_plan *) malloc(sizeof(ft_tetrahedral_harmonic_plan));
+    P->RP1 = ft_plan_rottriangle(n, alpha, beta, gamma + delta + 1.0);
+    P->RP2 = ft_plan_rottriangle(n, beta, gamma, delta);
+    P->B = (double *) VMALLOC(ALIGNB(n) * n * n * sizeof(double));
+    P->P1 = plan_jac2jac(1, 1, n, beta + gamma + delta + 2.0, alpha, -0.5);
+    double * P12 = plan_jac2jac(1, 1, n, alpha, -0.5, -0.5);
+    alternate_sign(P12, n, n);
+    alternate_sign_t(P12, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P12, n, P->P1, n);
+    free(P12);
+    P->P2 = plan_jac2jac(1, 1, n, gamma + delta + 1.0, beta, -0.5);
+    double * P22 = plan_jac2jac(1, 1, n, beta, -0.5, -0.5);
+    alternate_sign(P22, n, n);
+    alternate_sign_t(P22, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P22, n, P->P2, n);
+    free(P22);
+    P->P3 = plan_jac2jac(1, 1, n, delta, gamma, -0.5);
+    double * P32 = plan_jac2jac(1, 1, n, gamma, -0.5, -0.5);
+    alternate_sign(P32, n, n);
+    alternate_sign_t(P32, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P32, n, P->P3, n);
+    free(P32);
+    P->P1inv = plan_jac2jac(1, 1, n, -0.5, -0.5, alpha);
+    double * P12inv = plan_jac2jac(1, 1, n, -0.5, alpha, beta + gamma + delta + 2.0);
+    alternate_sign(P->P1inv, n, n);
+    alternate_sign_t(P->P1inv, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P12inv, n, P->P1inv, n);
+    free(P12inv);
+    P->P2inv = plan_jac2jac(1, 1, n, -0.5, -0.5, beta);
+    double * P22inv = plan_jac2jac(1, 1, n, -0.5, beta, gamma + delta + 1.0);
+    alternate_sign(P->P2inv, n, n);
+    alternate_sign_t(P->P2inv, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P22inv, n, P->P2inv, n);
+    free(P22inv);
+    P->P3inv = plan_jac2jac(1, 1, n, -0.5, -0.5, gamma);
+    double * P32inv = plan_jac2jac(1, 1, n, -0.5, gamma, beta);
+    alternate_sign(P->P3inv, n, n);
+    alternate_sign_t(P->P3inv, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P32inv, n, P->P3inv, n);
+    free(P32inv);
+    P->alpha = alpha;
+    P->beta = beta;
+    P->gamma = gamma;
+    P->delta = delta;
+    return P;
+}
+
+void ft_execute_tet2cheb(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M) {
+    ft_execute_tet_hi2lo(P->RP1, P->RP2, A, L, M);
+    if ((P->beta + P->gamma + P->delta != -2.5) || (P->alpha != -0.5))
+        #pragma omp parallel for
+        for (int m = 0; m < M; m++)
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P1, N, A+N*L*m, N);
+    if ((P->gamma + P->delta != -1.5) || (P->beta != -0.5))
+        #pragma omp parallel for
+        for (int m = 0; m < M; m++)
+            cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, L, 1.0, P->P2, N, A+N*L*m, N);
+    if ((P->delta != -0.5) || (P->gamma != -0.5))
+        #pragma omp parallel for
+        for (int n = 0; n < N; n++)
+            for (int l = 0; l < L; l++)
+                cblas_dtrmv(CblasColMajor, CblasUpper, CblasTrans, CblasNonUnit, N, P->P3, N, A+n+N*l, N*L);
+    chebyshev_normalization_3d(A, N, L, M);
+}
+
+void ft_execute_cheb2tet(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M) {
+    chebyshev_normalization_3d_t(A, N, L, M);
+    if ((P->gamma != -0.5) || (P->delta != -0.5))
+        #pragma omp parallel for
+        for (int n = 0; n < N; n++)
+            for (int l = 0; l < L; l++)
+                cblas_dtrmv(CblasColMajor, CblasUpper, CblasTrans, CblasNonUnit, N, P->P3inv, N, A+n+N*l, N*L);
+    if ((P->beta != -0.5) || (P->gamma + P->delta != -1.5))
+        #pragma omp parallel for
+        for (int m = 0; m < M; m++)
+            cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, L, 1.0, P->P2inv, N, A+N*L*m, N);
+    if ((P->alpha != -0.5) || (P->beta + P->gamma + P->delta != -2.5))
+        #pragma omp parallel for
+        for (int m = 0; m < M; m++)
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P1inv, N, A+N*L*m, N);
+    ft_execute_tet_lo2hi(P->RP1, P->RP2, A, L, M);
+}
+
 static void alternate_sign(double * A, const int N, const int M) {
     for (int j = 0; j < M; j++)
         for (int i = 0; i < N; i += 2)
@@ -749,6 +869,52 @@ static void chebyshev_normalization_t(double * A, const int N, const int M) {
     for (int j = 1; j < M; j++)
         for (int i = 1; i < N; i++)
             A[i+j*N] *= M_PI_2;
+}
+
+static void chebyshev_normalization_3d(double * A, const int N, const int L, const int M) {
+    A[0] *= M_1_PI*M_1_SQRT_PI;
+    for (int i = 1; i < N; i++)
+        A[i] *= M_SQRT2*M_1_PI*M_1_SQRT_PI;
+    for (int j = 1; j < L; j++)
+        A[j*N] *= M_SQRT2*M_1_PI*M_1_SQRT_PI;
+    for (int k = 1; k < M; k++)
+        A[k*L*N] *= M_SQRT2*M_1_PI*M_1_SQRT_PI;
+    for (int j = 1; j < L; j++)
+        for (int i = 1; i < N; i++)
+            A[i+j*N] *= M_2_PI*M_1_SQRT_PI;
+    for (int k = 1; k < M; k++)
+        for (int i = 1; i < N; i++)
+            A[i+k*L*N] *= M_2_PI*M_1_SQRT_PI;
+    for (int k = 1; k < M; k++)
+        for (int j = 1; j < L; j++)
+            A[N*(j+k*L)] *= M_2_PI*M_1_SQRT_PI;
+    for (int k = 1; k < M; k++)
+        for (int j = 1; j < L; j++)
+            for (int i = 1; i < N; i++)
+                A[i+N*(j+k*L)] *= M_2_PI*M_SQRT2*M_1_SQRT_PI;
+}
+
+static void chebyshev_normalization_3d_t(double * A, const int N, const int L, const int M) {
+    A[0] *= M_PI*M_SQRT_PI;
+    for (int i = 1; i < N; i++)
+        A[i] *= M_SQRT1_2*M_PI*M_SQRT_PI;
+    for (int j = 1; j < L; j++)
+        A[j*N] *= M_SQRT1_2*M_PI*M_SQRT_PI;
+    for (int k = 1; k < M; k++)
+        A[k*L*N] *= M_SQRT1_2*M_PI*M_SQRT_PI;
+    for (int j = 1; j < L; j++)
+        for (int i = 1; i < N; i++)
+            A[i+j*N] *= M_PI_2*M_SQRT_PI;
+    for (int k = 1; k < M; k++)
+        for (int i = 1; i < N; i++)
+            A[i+k*L*N] *= M_PI_2*M_SQRT_PI;
+    for (int k = 1; k < M; k++)
+        for (int j = 1; j < L; j++)
+            A[N*(j+k*L)] *= M_PI_2*M_SQRT_PI;
+    for (int k = 1; k < M; k++)
+        for (int j = 1; j < L; j++)
+            for (int i = 1; i < N; i++)
+                A[i+N*(j+k*L)] *= M_PI_2*M_SQRT1_2*M_SQRT_PI;
 }
 
 static void partial_chebyshev_normalization(double * A, const int N, const int M) {

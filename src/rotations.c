@@ -376,6 +376,147 @@ void ft_kernel_disk_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, doubl
         apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+8*l+2, A+8*(l+1)+2);
 }
 
+#undef s
+#undef c
+
+#define s(l,m) s[l+(m)*(2*n+1-(m))/2]
+#define c(l,m) c[l+(m)*(2*n+1-(m))/2]
+
+void ft_kernel_tet_hi2lo(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+    int n = RP->n;
+    double s, c;
+    for (int j = m-1; j >= 0; j--) {
+        for (int l = L-2-j; l >= 0; l--) {
+            s = RP->s(l, j);
+            c = RP->c(l, j);
+            for (int k = 0; k < n; k++)
+                apply_givens(s, c, A+k+n*l, A+k+n*(l+1));
+        }
+    }
+}
+
+void ft_kernel_tet_lo2hi(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+    int n = RP->n;
+    double s, c;
+    for (int j = 0; j < m; j++) {
+        for (int l = 0; l <= L-2-j; l++) {
+            s = RP->s(l, j);
+            c = RP->c(l, j);
+            for (int k = 0; k < n; k++)
+                apply_givens_t(s, c, A+k+n*l, A+k+n*(l+1));
+        }
+    }
+}
+
+void ft_kernel_tet_hi2lo_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+    int n = RP->n;
+    int nb = ALIGNB(n);
+    double s, c;
+    for (int j = m-1; j >= 0; j--) {
+        for (int l = L-2-j; l >= 0; l--) {
+            s = RP->s(l, j);
+            c = RP->c(l, j);
+            for (int k = 0; k < n-n%2; k += 2)
+                apply_givens_SSE(s, c, A+k+nb*l, A+k+nb*(l+1));
+            for (int k = n-n%2; k < n; k++)
+                apply_givens(s, c, A+k+nb*l, A+k+nb*(l+1));
+        }
+    }
+}
+
+void ft_kernel_tet_lo2hi_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+    int n = RP->n;
+    int nb = ALIGNB(n);
+    double s, c;
+    for (int j = 0; j < m; j++) {
+        for (int l = 0; l <= L-2-j; l++) {
+            s = RP->s(l, j);
+            c = RP->c(l, j);
+            for (int k = 0; k < n-n%2; k += 2)
+                apply_givens_t_SSE(s, c, A+k+nb*l, A+k+nb*(l+1));
+            for (int k = n-n%2; k < n; k++)
+                apply_givens_t(s, c, A+k+nb*l, A+k+nb*(l+1));
+        }
+    }
+}
+
+void ft_kernel_tet_hi2lo_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+    int n = RP->n;
+    int nb = ALIGNB(n);
+    double s, c;
+    for (int j = m-1; j >= 0; j--) {
+        for (int l = L-2-j; l >= 0; l--) {
+            s = RP->s(l, j);
+            c = RP->c(l, j);
+            for (int k = 0; k < n-n%4; k += 4)
+                apply_givens_AVX(s, c, A+k+nb*l, A+k+nb*(l+1));
+            for (int k = n-n%4; k < n-n%2; k += 2)
+                apply_givens_SSE(s, c, A+k+nb*l, A+k+nb*(l+1));
+            for (int k = n-n%2; k < n; k++)
+                apply_givens(s, c, A+k+nb*l, A+k+nb*(l+1));
+        }
+    }
+}
+
+void ft_kernel_tet_lo2hi_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+    int n = RP->n;
+    int nb = ALIGNB(n);
+    double s, c;
+    for (int j = 0; j < m; j++) {
+        for (int l = 0; l <= L-2-j; l++) {
+            s = RP->s(l, j);
+            c = RP->c(l, j);
+            for (int k = 0; k < n-n%4; k += 4)
+                apply_givens_t_AVX(s, c, A+k+nb*l, A+k+nb*(l+1));
+            for (int k = n-n%4; k < n-n%2; k += 2)
+                apply_givens_t_SSE(s, c, A+k+nb*l, A+k+nb*(l+1));
+            for (int k = n-n%2; k < n; k++)
+                apply_givens_t(s, c, A+k+nb*l, A+k+nb*(l+1));
+        }
+    }
+}
+
+void ft_kernel_tet_hi2lo_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+    int n = RP->n;
+    int nb = ALIGNB(n);
+    double s, c;
+    for (int j = m-1; j >= 0; j--) {
+        for (int l = L-2-j; l >= 0; l--) {
+            s = RP->s(l, j);
+            c = RP->c(l, j);
+            for (int k = 0; k < n-n%8; k += 8)
+                apply_givens_AVX512(s, c, A+k+nb*l, A+k+nb*(l+1));
+            for (int k = n-n%8; k < n-n%4; k += 4)
+                apply_givens_AVX(s, c, A+k+nb*l, A+k+nb*(l+1));
+            for (int k = n-n%4; k < n-n%2; k += 2)
+                apply_givens_SSE(s, c, A+k+nb*l, A+k+nb*(l+1));
+            for (int k = n-n%2; k < n; k++)
+                apply_givens(s, c, A+k+nb*l, A+k+nb*(l+1));
+        }
+    }
+}
+
+void ft_kernel_tet_lo2hi_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+    int n = RP->n;
+    int nb = ALIGNB(n);
+    double s, c;
+    for (int j = 0; j < m; j++) {
+        for (int l = 0; l <= L-2-j; l++) {
+            s = RP->s(l, j);
+            c = RP->c(l, j);
+            for (int k = 0; k < n-n%8; k += 8)
+                apply_givens_t_AVX512(s, c, A+k+nb*l, A+k+nb*(l+1));
+            for (int k = n-n%8; k < n-n%4; k += 4)
+                apply_givens_t_AVX(s, c, A+k+nb*l, A+k+nb*(l+1));
+            for (int k = n-n%4; k < n-n%2; k += 2)
+                apply_givens_t_SSE(s, c, A+k+nb*l, A+k+nb*(l+1));
+            for (int k = n-n%2; k < n; k++)
+                apply_givens_t(s, c, A+k+nb*l, A+k+nb*(l+1));
+        }
+    }
+}
+
+
 void ft_destroy_spin_rotation_plan(ft_spin_rotation_plan * SRP) {
     free(SRP->s1);
     free(SRP->c1);
