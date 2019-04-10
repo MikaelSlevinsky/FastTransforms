@@ -9,9 +9,9 @@ install:
   - set CC=gcc-7
 
 build_script:
-  - "%CC%" --version
-  - "%CC%" -v
-  - "%CC%" test_win.c -o test_win
+  - CC --version
+  - CC -v
+  - CC test_win.c -o test_win
 
 test_script:
   - test_win.exe
