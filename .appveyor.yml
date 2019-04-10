@@ -8,9 +8,9 @@ install:
   - set PATH=C:\mingw-w64\bin;%PATH%
 
 build_script:
-  - msvc --version
-  - msvc -v
-  - msvc test_win.c -o test_win
+  - g++ --version
+  - g++ -v
+  - g++ test_win.c -o test_win
 
 test_script:
   - ./test_win
