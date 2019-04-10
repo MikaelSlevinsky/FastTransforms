@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <cblas.h>
+#include <openblas\cblas.h>
 #include <fftw3.h>
 
 static inline double stirlingseries(const double z) {
