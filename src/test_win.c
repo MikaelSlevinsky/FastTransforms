@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <cblas.h>
 
 static inline double stirlingseries(const double z) {
     double iz = 1.0/z;
@@ -36,12 +37,66 @@ static inline double stirlingseries(const double z) {
         return 0.0;
 }
 
+#define A(i,j) A[(i)+n*(j)]
+
+void printmat(char * MAT, char * FMT, double * A, int n, int m) {
+    printf("%s = \n", MAT);
+    if (n > 0 && m > 0) {
+        if (signbit(A(0,0))) {printf("[");}
+        else {printf("[ ");}
+        printf(FMT, A(0,0));
+        for (int j = 1; j < m; j++) {
+            if (signbit(A(0,j))) {printf("  ");}
+            else {printf("   ");}
+            printf(FMT, A(0,j));
+        }
+        for (int i = 1; i < n-1; i++) {
+            printf("\n");
+            if (signbit(A(i,0))) {printf(" ");}
+            else {printf("  ");}
+            printf(FMT, A(i,0));
+            for (int j = 1; j < m; j++) {
+                if (signbit(A(i,j))) {printf("  ");}
+                else {printf("   ");}
+                printf(FMT, A(i,j));
+            }
+        }
+        if (n > 1) {
+            printf("\n");
+            if (signbit(A(n-1,0))) {printf(" ");}
+            else {printf("  ");}
+            printf(FMT, A(n-1,0));
+            for (int j = 1; j < m; j++) {
+                if (signbit(A(n-1,j))) {printf("  ");}
+                else {printf("   ");}
+                printf(FMT, A(n-1,j));
+            }
+        }
+        printf("]\n");
+    }
+}
+
 int main(void) {
     double z = 10.0;
     double s = stirlingseries(z);
 
     printf("Hello, World!\n");
     printf("The Stirling series evaluated at z = %3.1f is s(z) = %17.16e.\n", z, s);
+
+    int n = 10;
+
+    double * A = (double *) calloc(n*n, sizeof(double));
+    double * B = (double *) calloc(n*n, sizeof(double));
+    for (int j = 0; j < n; j++)
+        for (int i = 0; i < n; i++)
+            A[i+j*n] = B[i+j*n] = 1.0/(i+j*n+1.0);
+
+    printmat("A", "%1.3f", A, n, n);
+    printmat("B", "%1.3f", A, n, n);
+
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
+
+    printmat("triu(A)*B", "%1.3f", B, n, n);
 
     return 0;
 }
