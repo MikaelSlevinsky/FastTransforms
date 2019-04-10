@@ -18,7 +18,7 @@ build_script:
   - gcc --version
   - gcc -v
   - gcc test_win.c -o test_win
-  - make lib
+  - mingw32-make lib
 
 test_script:
   - test_win.exe
