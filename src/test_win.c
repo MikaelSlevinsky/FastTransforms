@@ -102,7 +102,11 @@ int main(void) {
 
     //cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
 
-    printmat("triu(A)*B", "%1.3f", B, n, n);
+    printmat("B=DCT(A)", "%1.3f", B, n, n);
+
+    fftw_free(P);
+    free(A);
+    free(B);
 
     return 0;
 }
