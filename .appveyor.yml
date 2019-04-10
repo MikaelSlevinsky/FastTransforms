@@ -4,12 +4,8 @@ image:
   - Visual Studio 2015
   - Visual Studio 2017
 
-matrix:
-  COMPILER: MinGW
-  #COMPILER: MinGW-w64
-
 install:
-  - if [%COMPILER%]==[MinGW] set PATH=C:\MinGW\bin;%PATH%
+  - set PATH=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\bin;%PATH%
 
 build_script:
   - gcc --version
