@@ -46,8 +46,8 @@ else ifeq ($(BLAS), OPENBLAS)
     endif
 endif
 ifeq ($(UNAME), Windows)
-    CFLAGS += -I\c:\tools\vcpkg\installed\x86-windows\include
-    LDFLAGS += -L\c:\tools\vcpkg\installed\x86-windows\bin
+    CFLAGS += -I c:\tools\vcpkg\installed\x86-windows\include
+    LDFLAGS += -L c:\tools\vcpkg\installed\x86-windows\bin
 endif
 
 LDLIBS += -lm -lblas -lfftw3 -lfftw3_threads
