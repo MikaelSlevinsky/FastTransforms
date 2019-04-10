@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "c:\tools\vcpkg\installed\x86-windows\include\cblas.h"
+#include <cblas.h>
 
 static inline double stirlingseries(const double z) {
     double iz = 1.0/z;
