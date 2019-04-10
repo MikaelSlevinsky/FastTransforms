@@ -46,7 +46,7 @@ else ifeq ($(BLAS), OPENBLAS)
     endif
 endif
 ifeq ($(UNAME), Windows)
-    CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include
+    CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include -Ic:\tools\vcpkg\installed\x64-windows\include\openblas
     LDFLAGS += -Lc:\tools\vcpkg\installed\x64-windows\bin
 endif
 
