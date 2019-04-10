@@ -1,19 +1,15 @@
 # Documentation: http://docs.travis-ci.com/user/languages/c/
-platform: x64
-
 image:
   - Visual Studio 2015
   - Visual Studio 2017
 
+cache: c:\tools\vcpkg\installed\
+
 install:
+  - set PATH=%PATH%;c:\tools\vcpkg
   - set PATH=%PATH%;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin\
   - set CC=gcc-7
-  - pwd
-  - cd c:\tools\vcpkg
-  - pwd
   - vcpkg integrate install
-  - cd c:\projects\fasttransforms
-  - pwd
   - vcpkg install openblas:x64-windows
   - vcpkg install fftw3:x64-windows
   #- nuget Install-Package OpenBLAS -Version 0.2.14.1
