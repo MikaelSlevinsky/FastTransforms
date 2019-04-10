@@ -10,6 +10,9 @@ install:
   - set PATH=%PATH%;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin\
   - set CC=gcc
   - set BLAS=OPENBLAS
+  - cd c:\tools\vcpkg\installed\
+  - ls -all
+  - cd c:\projects\fasttransforms\
   - vcpkg integrate install
   - vcpkg install openblas:x64-windows fftw3:x64-windows
 
