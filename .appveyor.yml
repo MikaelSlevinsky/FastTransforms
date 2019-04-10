@@ -8,9 +8,9 @@ install:
   - set PATH=%PATH%;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\bin
 
 build_script:
-  - gcc --version
-  - gcc -v
-  - gcc test_win.c -o test_win
+  - g++ --version
+  - g++ -v
+  - g++ test_win.c -o test_win
 
 test_script:
   - test_win.exe
