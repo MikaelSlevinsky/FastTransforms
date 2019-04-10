@@ -5,7 +5,7 @@ image:
   - Visual Studio 2017
 
 install:
-  - set PATH=C:\mingw-w64\bin;%PATH%
+  - set PATH=%PATH%;C:\MinGW\bin
 
 build_script:
   - g++ --version
