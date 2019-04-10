@@ -4,6 +4,13 @@ image:
   - Visual Studio 2015
   - Visual Studio 2017
 
+matrix:
+  COMPILER: MinGW
+  #COMPILER: MinGW-w64
+
+install:
+  - if [%COMPILER%]==[MinGW] set PATH=C:\MinGW\bin;%PATH%
+
 build_script:
   - gcc --version
   - gcc -v
