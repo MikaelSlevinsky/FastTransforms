@@ -20,7 +20,8 @@ install:
 
 build_script:
   - gcc --version
-  - mingw32-make test_win
+  - gcc test_win.c -I./src -I c:\tools\vcpkg\installed\x86-windows\include -L c:\tools\vcpkg\installed\x86-windows\bin -lblas -o test_win
+  #- mingw32-make test_win
 
 test_script:
   - test_win.exe
