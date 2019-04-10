@@ -4,13 +4,9 @@ image:
   - Visual Studio 2015
   - Visual Studio 2017
 
-install: eval "${MATRIX_EVAL}"
-
 build_script:
   - gcc --version
   - gcc -v
-  - $CC --version
-  - $CC -v
   - gcc test_win.c -o test_win
 
 test_script:
