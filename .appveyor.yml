@@ -1,12 +1,11 @@
 # Documentation: http://docs.travis-ci.com/user/languages/c/
 matrix:
-  include:
-    # Minimum system requirements
-    - os: Visual Studio 2013
-      env: MATRIX_EVAL="export CC=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\gcc-7"
-    # Recommended system requirements
-    - os: Visual Studio 2017
-      env: MATRIX_EVAL="export CC=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\gcc-7"
+  # Minimum system requirements
+  - os: Visual Studio 2013
+    env: MATRIX_EVAL="export CC=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\gcc-7"
+  # Recommended system requirements
+  - os: Visual Studio 2017
+    env: MATRIX_EVAL="export CC=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\gcc-7"
 
 install: eval "${MATRIX_EVAL}"
 
