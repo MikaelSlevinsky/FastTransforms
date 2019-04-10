@@ -9,9 +9,12 @@ install:
   - set CC=gcc-7
   - pwd
   - cd c:\tools\vcpkg
-    vcpkg integrate install
+  - pwd
+  - vcpkg integrate install
+  - cd c:\projects\fasttransforms
   - pwd
   - vcpkg install fftw3
+  - vcpkg install openblas
   #- nuget Install-Package OpenBLAS -Version 0.2.14.1
   #- nuget Install-Package libfftw -Version 3.3.4
 
