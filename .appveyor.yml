@@ -14,8 +14,8 @@ install:
   - vcpkg integrate install
   - cd c:\projects\fasttransforms
   - pwd
-  - vcpkg install openblas
-  - vcpkg install fftw3
+  - vcpkg install openblas:x64-windows
+  - vcpkg install fftw3:x64-windows
   #- nuget Install-Package OpenBLAS -Version 0.2.14.1
   #- nuget Install-Package libfftw -Version 3.3.4
 
