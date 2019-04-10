@@ -16,8 +16,6 @@ install:
 
 build_script:
   - gcc --version
-  - gcc -v
-  - gcc test_win.c -o test_win
   - mingw32-make test_win
 
 test_script:
