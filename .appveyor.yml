@@ -15,6 +15,3 @@ build_script:
 
 test_script:
   - ./test_win
-
-notifications:
-  email: false
