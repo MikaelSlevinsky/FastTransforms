@@ -13,7 +13,7 @@ lib:
 	$(CC) $(CFLAGS) $(LIBFLAGS) $(OBJ) $(LDFLAGS) $(LDLIBS) -o lib$(LIB).$(SLIB)
 
 test_win:
-	$(CC) src/test_win.c $(CFLAGS) $(LDFLAGS) -lfftw3 -lfftw3_threads -o test_win
+	$(CC) src/test_win.c $(CFLAGS) $(LDFLAGS) -lfftw3 -o test_win
 
 tests:
 	$(CC) src/ftutilities.c test/test_transforms.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_transforms
