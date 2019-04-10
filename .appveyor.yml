@@ -13,4 +13,4 @@ build_script:
   - g++ test_win.c -o test_win
 
 test_script:
-  - ./test_win
+  - test_win.exe
