@@ -43,9 +43,11 @@ else ifeq ($(BLAS), OPENBLAS)
         LDFLAGS += -L/usr/local/opt/openblas/lib
         CFLAGS += -I/usr/local/opt/fftw/include
         LDFLAGS += -L/usr/local/opt/fftw/lib
-    else ifeq ($(UNAME), Windows)
-        CFLAGS += -Ic:\tools\vcpkg\installed\x86-windows\include
-        LDFLAGS += -Lc:\tools\vcpkg\installed\x86-windows\bin
     endif
 endif
+ifeq ($(UNAME), Windows)
+    CFLAGS += -Ic:\tools\vcpkg\installed\x86-windows\include
+    LDFLAGS += -Lc:\tools\vcpkg\installed\x86-windows\bin
+endif
+
 LDLIBS += -lm -lblas -lfftw3 -lfftw3_threads
