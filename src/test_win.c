@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <cblas.h>
 #include <fftw3.h>
 
 static inline double stirlingseries(const double z) {
@@ -94,15 +95,15 @@ int main(void) {
     printmat("A", "%1.3f", A, n, n);
     //printmat("B", "%1.3f", A, n, n);
 
-    //double * X = fftw_malloc(n*n*sizeof(double));
     fftw_plan P = fftw_plan_r2r_2d(n, n, A, B, FFTW_REDFT10, FFTW_REDFT10, FFTW_ESTIMATE);
-    //fftw_free(X);
 
     fftw_execute_r2r(P, A, B);
 
-    //cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
-
     printmat("B=DCT(A)", "%1.3f", B, n, n);
+
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
+
+    printmat("triu(A)*B", "%1.3f", B, n, n);
 
     fftw_free(P);
     free(A);
