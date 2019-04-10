@@ -9,10 +9,9 @@ install:
   - set PATH=%PATH%;c:\tools\vcpkg
   - set PATH=%PATH%;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin\
   - set CC=gcc
+  - set BLAS=OPENBLAS
   - vcpkg integrate install
   - vcpkg install openblas:x64-windows fftw3:x64-windows
-  #- nuget Install-Package OpenBLAS -Version 0.2.14.1
-  #- nuget Install-Package libfftw -Version 3.3.4
 
 build_script:
   - gcc --version
