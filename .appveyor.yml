@@ -1,6 +1,7 @@
 # Documentation: http://docs.travis-ci.com/user/languages/c/
+platform: x64
+
 image:
-  - Visual Studio 2013
   - Visual Studio 2015
   - Visual Studio 2017
 
@@ -13,8 +14,8 @@ install:
   - vcpkg integrate install
   - cd c:\projects\fasttransforms
   - pwd
-  - vcpkg install fftw3
   - vcpkg install openblas
+  - vcpkg install fftw3
   #- nuget Install-Package OpenBLAS -Version 0.2.14.1
   #- nuget Install-Package libfftw -Version 3.3.4
 
