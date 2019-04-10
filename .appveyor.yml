@@ -7,13 +7,14 @@ image:
 install:
   - set PATH=%PATH%;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin\
   - set CC=gcc-7
+  - vcpkg install fftw3
   #- nuget Install-Package OpenBLAS -Version 0.2.14.1
   #- nuget Install-Package libfftw -Version 3.3.4
 
 build_script:
-  - $CC --version
-  - $CC -v
-  - $CC test_win.c -o test_win
+  - gcc --version
+  - gcc -v
+  - gcc test_win.c -o test_win
 
 test_script:
   - test_win.exe
