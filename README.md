@@ -8,7 +8,7 @@ If you feel you need help getting started, please do not hesitate to e-mail me. 
 
 ## Installation Notes
 
-Generically, the library makes use of OpenBLAS and FFTW3, which are easily installed via package managers such as Homebrew or apt-get. When `FastTransforms` is compiled with OpenMP, the environment variable that controls multithreading is `OMP_NUM_THREADS`.
+Generically, the library makes use of OpenBLAS and FFTW3, which are easily installed via package managers such as Homebrew, apt-get, or vcpkg. When `FastTransforms` is compiled with OpenMP, the environment variable that controls multithreading is `OMP_NUM_THREADS`.
 
 ### macOS
 
