@@ -22,6 +22,7 @@ install:
 build_script:
   - gcc --version
   - mingw32-make test_win
+  - mingw32-make lib
   - mingw32-make examples
 
 test_script:
