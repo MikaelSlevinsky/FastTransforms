@@ -45,5 +45,8 @@ else ifeq ($(BLAS), OPENBLAS)
         LDFLAGS += -L/usr/local/opt/fftw/lib
     endif
 endif
+ifeq ($(UNAME), Windows)
+    LDFLAGS += -L.
+endif
 
 LDLIBS += -lm -lblas -lfftw3 -lfftw3_threads
