@@ -6,6 +6,12 @@ all:
 	make tests
 	make examples
 
+win:
+	make assembly
+	make lib
+	make wintests
+	make examples
+
 assembly:
 	$(CC) -S $(CFLAGS) test/test_assembly.c -o test_assembly.s
 
