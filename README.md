@@ -33,10 +33,10 @@ export CC=gcc-8 && export BLAS=OPENBLAS && make
 
 ### Windows
 
-We use `gcc-7` distributed through MinGW-w64 on Visual Studio 2015 and 2017. Sample installation:
+We use GCC 7.2.0 distributed through MinGW-w64 on Visual Studio 2015 and 2017. Sample installation:
 ```
 vcpkg install openblas:x64-windows fftw3:x64-windows
-set CC=gcc-7 && set BLAS=OPENBLAS && mingw32-make win
+set CC=gcc && set BLAS=OPENBLAS && mingw32-make win
 ```
 See the [AppVeyor build](https://github.com/MikaelSlevinsky/FastTransforms/blob/master/.appveyor.yml) for further details.
 
