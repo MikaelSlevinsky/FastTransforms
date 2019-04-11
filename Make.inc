@@ -45,9 +45,5 @@ else ifeq ($(BLAS), OPENBLAS)
         LDFLAGS += -L/usr/local/opt/fftw/lib
     endif
 endif
-ifeq ($(UNAME), Windows)
-    CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include
-    LDFLAGS += -Lc:\tools\vcpkg\installed\x64-windows\bin
-endif
 
 LDLIBS += -lm -lblas -lfftw3 -lfftw3_threads
