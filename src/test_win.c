@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <openblas\cblas.h>
+#include <cblas.h>
 #include <fftw3.h>
 
 static inline double stirlingseries(const double z) {
@@ -94,6 +94,9 @@ int main(void) {
 
     printmat("A", "%1.3f", A, n, n);
     //printmat("B", "%1.3f", A, n, n);
+
+    fftw_init_threads();
+    fftw_plan_with_nthreads(4);
 
     fftw_plan P = fftw_plan_r2r_2d(n, n, A, B, FFTW_REDFT10, FFTW_REDFT10, FFTW_ESTIMATE);
 
