@@ -49,4 +49,9 @@ ifeq ($(UNAME), Windows)
     LDFLAGS += -L.
 endif
 
-LDLIBS += -lm -lblas -lfftw3 -lfftw3_threads
+LDLIBS += -lm -lblas -lfftw3
+ifeq ($(UNAME), Linux)
+    LDLIBS += -lfftw3_threads
+else ifeq ($(UNAME), Darwin)
+    LDLIBS += -lfftw3_threads
+endif
