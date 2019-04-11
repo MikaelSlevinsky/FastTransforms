@@ -28,6 +28,6 @@ build_script:
 test_script:
   - test_transforms.exe
   - test_rotations.exe
-  - OMP_NUM_THREADS=4 test_drivers.exe 3 3 0
+  - test_drivers.exe 3 3 0
   - additiontheorem.exe
   - holomorphic.exe
