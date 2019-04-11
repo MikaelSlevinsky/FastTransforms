@@ -21,11 +21,13 @@ install:
 
 build_script:
   - gcc --version
-  - mingw32-make test_win
   - mingw32-make lib
+  - mingw32-make wintests
   - mingw32-make examples
 
 test_script:
-  - test_win.exe
+  - test_transforms.exe
+  - test_rotations.exe
+  - OMP_NUM_THREADS=4 test_drivers.exe 3 3 0
   - additiontheorem.exe
   - holomorphic.exe
