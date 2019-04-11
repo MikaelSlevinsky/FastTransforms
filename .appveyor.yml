@@ -8,7 +8,7 @@ cache: c:\tools\vcpkg\installed\
 install:
   - set PATH=%PATH%;c:\tools\vcpkg
   - set PATH=%PATH%;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin\
-  - set CC=gcc-7 && set BLAS=OPENBLAS
+  - set CC=gcc && set BLAS=OPENBLAS
   - vcpkg integrate install
   - vcpkg install openblas:x64-windows fftw3:x64-windows
   - mklink c:\projects\fasttransforms\src\cblas.h c:\tools\vcpkg\installed\x64-windows\include\openblas\cblas.h
