@@ -27,5 +27,5 @@ build_script:
 
 test_script:
   - test_win.exe
-  - ./additiontheorem.exe
-  - ./holomorphic.exe
+  - additiontheorem.exe
+  - holomorphic.exe
