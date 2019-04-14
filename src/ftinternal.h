@@ -47,39 +47,10 @@
 #define VMALLOC(s) _mm_malloc(s, ALIGN_SIZE*8)
 #define VFREE(s) _mm_free(s)
 
-static inline double stirlingseries(const double z);
-static inline double Aratio(const int n, const double alpha, const double beta);
-static inline double Analphabeta(const int n, const double alpha, const double beta);
-static inline double lambda(const double x);
-static inline double lambda2(const double x, const double l1, const double l2);
-
 double * plan_leg2cheb(const int normleg, const int normcheb, const int n);
 double * plan_cheb2leg(const int normcheb, const int normleg, const int n);
 double * plan_ultra2ultra(const int normultra1, const int normultra2, const int n, const double lambda1, const double lambda2);
 double * plan_jac2jac(const int normjac1, const int normjac2, const int n, const double alpha, const double beta, const double gamma);
-
-
-static inline void apply_givens(const double S, const double C, double * X, double * Y);
-static inline void apply_givens_t(const double S, const double C, double * X, double * Y);
-
-static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y);
-static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y);
-
-static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y);
-static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y);
-
-static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y);
-static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y);
-
-
-static void alternate_sign(double * A, const int N, const int M);
-static void alternate_sign_t(double * A, const int N, const int M);
-
-static void chebyshev_normalization(double * A, const int N, const int M);
-static void chebyshev_normalization_t(double * A, const int N, const int M);
-
-static void partial_chebyshev_normalization(double * A, const int N, const int M);
-static void partial_chebyshev_normalization_t(double * A, const int N, const int M);
 
 void permute(const double * A, double * B, const int N, const int M, const int L);
 void permute_t(double * A, const double * B, const int N, const int M, const int L);
@@ -100,12 +71,7 @@ void swap(double * A, double * B, const int N);
 void warp(double * A, const int N, const int M, const int L);
 void warp_t(double * A, const int N, const int M, const int L);
 
-
 // A bitwise OR ('|') of zero or more of the following: FFTW_ESTIMATE FFTW_MEASURE FFTW_PATIENT FFTW_EXHAUSTIVE FFTW_WISDOM_ONLY FFTW_DESTROY_INPUT FFTW_PRESERVE_INPUT FFTW_UNALIGNED
 #define FT_FFTW_FLAGS FFTW_MEASURE | FFTW_DESTROY_INPUT
-
-static inline void colswap(const double * X, double * Y, const int N, const int M);
-static inline void colswap_t(double * X, const double * Y, const int N, const int M);
-
 
 #endif //FTINTERNAL_H

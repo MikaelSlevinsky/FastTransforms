@@ -9,6 +9,107 @@ void ft_destroy_rotation_plan(ft_rotation_plan * RP) {
     free(RP);
 }
 
+static inline void apply_givens(const double S, const double C, double * X, double * Y) {
+    double x = C*X[0] + S*Y[0];
+    double y = C*Y[0] - S*X[0];
+
+    X[0] = x;
+    Y[0] = y;
+}
+
+static inline void apply_givens_t(const double S, const double C, double * X, double * Y) {
+    double x = C*X[0] - S*Y[0];
+    double y = C*Y[0] + S*X[0];
+
+    X[0] = x;
+    Y[0] = y;
+}
+
+#if __SSE2__
+    static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
+        double2 x = vload2(X);
+        double2 y = vload2(Y);
+
+        vstore2(X, C*x + S*y);
+        vstore2(Y, C*y - S*x);
+    }
+
+    static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y) {
+        double2 x = vload2(X);
+        double2 y = vload2(Y);
+
+        vstore2(X, C*x - S*y);
+        vstore2(Y, C*y + S*x);
+    }
+#else
+    static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
+        apply_givens(S, C, X, Y);
+        apply_givens(S, C, X+1, Y+1);
+    }
+
+    static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y) {
+        apply_givens_t(S, C, X, Y);
+        apply_givens_t(S, C, X+1, Y+1);
+    }
+#endif
+
+
+#if __AVX__
+    static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
+        double4 x = vload4(X);
+        double4 y = vload4(Y);
+
+        vstore4(X, C*x + S*y);
+        vstore4(Y, C*y - S*x);
+    }
+
+    static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y) {
+        double4 x = vload4(X);
+        double4 y = vload4(Y);
+
+        vstore4(X, C*x - S*y);
+        vstore4(Y, C*y + S*x);
+    }
+#else
+    static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
+        apply_givens_SSE(S, C, X, Y);
+        apply_givens_SSE(S, C, X+2, Y+2);
+    }
+
+    static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y) {
+        apply_givens_t_SSE(S, C, X, Y);
+        apply_givens_t_SSE(S, C, X+2, Y+2);
+    }
+#endif
+
+#if __AVX512F__
+    static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {
+        double8 x = vload8(X);
+        double8 y = vload8(Y);
+
+        vstore8(X, C*x + S*y);
+        vstore8(Y, C*y - S*x);
+    }
+
+    static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y) {
+        double8 x = vload8(X);
+        double8 y = vload8(Y);
+
+        vstore8(X, C*x - S*y);
+        vstore8(Y, C*y + S*x);
+    }
+#else
+    static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {
+        apply_givens_AVX(S, C, X, Y);
+        apply_givens_AVX(S, C, X+4, Y+4);
+    }
+
+    static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y) {
+        apply_givens_t_AVX(S, C, X, Y);
+        apply_givens_t_AVX(S, C, X+4, Y+4);
+    }
+#endif
+
 #define s(l,m) s[l+(m)*(2*n+1-(m))/2]
 #define c(l,m) c[l+(m)*(2*n+1-(m))/2]
 
@@ -891,105 +992,3 @@ void ft_kernel_spinsph_lo2hi_AVX512(const ft_spin_rotation_plan * SRP, const int
         }
     }
 }
-
-
-static inline void apply_givens(const double S, const double C, double * X, double * Y) {
-    double x = C*X[0] + S*Y[0];
-    double y = C*Y[0] - S*X[0];
-
-    X[0] = x;
-    Y[0] = y;
-}
-
-static inline void apply_givens_t(const double S, const double C, double * X, double * Y) {
-    double x = C*X[0] - S*Y[0];
-    double y = C*Y[0] + S*X[0];
-
-    X[0] = x;
-    Y[0] = y;
-}
-
-#if __SSE2__
-    static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
-        double2 x = vload2(X);
-        double2 y = vload2(Y);
-
-        vstore2(X, C*x + S*y);
-        vstore2(Y, C*y - S*x);
-    }
-
-    static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y) {
-        double2 x = vload2(X);
-        double2 y = vload2(Y);
-
-        vstore2(X, C*x - S*y);
-        vstore2(Y, C*y + S*x);
-    }
-#else
-    static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
-        apply_givens(S, C, X, Y);
-        apply_givens(S, C, X+1, Y+1);
-    }
-
-    static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y) {
-        apply_givens_t(S, C, X, Y);
-        apply_givens_t(S, C, X+1, Y+1);
-    }
-#endif
-
-
-#if __AVX__
-    static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
-        double4 x = vload4(X);
-        double4 y = vload4(Y);
-
-        vstore4(X, C*x + S*y);
-        vstore4(Y, C*y - S*x);
-    }
-
-    static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y) {
-        double4 x = vload4(X);
-        double4 y = vload4(Y);
-
-        vstore4(X, C*x - S*y);
-        vstore4(Y, C*y + S*x);
-    }
-#else
-    static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
-        apply_givens_SSE(S, C, X, Y);
-        apply_givens_SSE(S, C, X+2, Y+2);
-    }
-
-    static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y) {
-        apply_givens_t_SSE(S, C, X, Y);
-        apply_givens_t_SSE(S, C, X+2, Y+2);
-    }
-#endif
-
-#if __AVX512F__
-    static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {
-        double8 x = vload8(X);
-        double8 y = vload8(Y);
-
-        vstore8(X, C*x + S*y);
-        vstore8(Y, C*y - S*x);
-    }
-
-    static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y) {
-        double8 x = vload8(X);
-        double8 y = vload8(Y);
-
-        vstore8(X, C*x - S*y);
-        vstore8(Y, C*y + S*x);
-    }
-#else
-    static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {
-        apply_givens_AVX(S, C, X, Y);
-        apply_givens_AVX(S, C, X+4, Y+4);
-    }
-
-    static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y) {
-        apply_givens_t_AVX(S, C, X, Y);
-        apply_givens_t_AVX(S, C, X+4, Y+4);
-    }
-#endif
