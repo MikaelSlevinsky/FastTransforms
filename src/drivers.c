@@ -3,6 +3,62 @@
 #include "fasttransforms.h"
 #include "ftinternal.h"
 
+static void alternate_sign(double * A, const int N, const int M) {
+    for (int j = 0; j < M; j++)
+        for (int i = 0; i < N; i += 2)
+            A[i+j*N] = -A[i+j*N];
+}
+
+static void alternate_sign_t(double * A, const int N, const int M) {
+    for (int i = 0; i < N; i += 2)
+        for (int j = 0; j < M; j++)
+            A[j+i*M] = -A[j+i*M];
+}
+
+static void chebyshev_normalization(double * A, const int N, const int M) {
+    A[0] *= M_1_PI;
+    for (int i = 1; i < N; i++)
+        A[i] *= M_SQRT2*M_1_PI;
+    for (int j = 1; j < M; j++)
+        A[j*N] *= M_SQRT2*M_1_PI;
+    for (int j = 1; j < M; j++)
+        for (int i = 1; i < N; i++)
+            A[i+j*N] *= M_2_PI;
+}
+
+static void chebyshev_normalization_t(double * A, const int N, const int M) {
+    A[0] *= M_PI;
+    for (int i = 1; i < N; i++)
+        A[i] *= M_SQRT1_2*M_PI;
+    for (int j = 1; j < M; j++)
+        A[j*N] *= M_SQRT1_2*M_PI;
+    for (int j = 1; j < M; j++)
+        for (int i = 1; i < N; i++)
+            A[i+j*N] *= M_PI_2;
+}
+
+static void partial_chebyshev_normalization(double * A, const int N, const int M) {
+    for (int j = 1; j < M; j += 4) {
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_SQRT2*M_1_SQRT_PI;
+    }
+    for (int j = 2; j < M; j += 4) {
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_SQRT2*M_1_SQRT_PI;
+    }
+}
+
+static void partial_chebyshev_normalization_t(double * A, const int N, const int M) {
+    for (int j = 1; j < M; j += 4) {
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_SQRT1_2*M_SQRT_PI;
+    }
+    for (int j = 2; j < M; j += 4) {
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_SQRT1_2*M_SQRT_PI;
+    }
+}
+
 void ft_set_num_threads(const int n) {FT_SET_NUM_THREADS(n);}
 
 void ft_execute_sph_hi2lo(const ft_rotation_plan * RP, double * A, const int M) {

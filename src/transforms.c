@@ -99,9 +99,9 @@ double * plan_cheb2leg(const int normcheb, const int normleg, const int n) {
         sclrow[i] = normleg ? 1.0/sqrt(i+0.5) : 1.0;
         sclcol[i] = normcheb ? i ? M_SQRT2/M_SQRT_PI : M_1_SQRT_PI : 1.0;
     }
-    if (n >= 0)
+    if (n > 0)
         A(0,0) = sclrow[0]*1.0*sclcol[0];
-    if (n >= 1)
+    if (n > 1)
         A(1,1) = sclrow[1]*1.0*sclcol[1];
     for (int j = 2; j < n; j++)
         A(j,j) = sclrow[j]*M_SQRT_PI_2/lam[j]*sclcol[j];

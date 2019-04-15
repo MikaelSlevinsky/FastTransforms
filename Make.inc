@@ -45,4 +45,13 @@ else ifeq ($(BLAS), OPENBLAS)
         LDFLAGS += -L/usr/local/opt/fftw/lib
     endif
 endif
-LDLIBS += -lm -lblas -lfftw3 -lfftw3_threads
+ifeq ($(UNAME), Windows)
+    LDFLAGS += -L.
+endif
+
+LDLIBS += -lm -lblas -lfftw3
+ifeq ($(UNAME), Linux)
+    LDLIBS += -lfftw3_threads
+else ifeq ($(UNAME), Darwin)
+    LDLIBS += -lfftw3_threads
+endif
