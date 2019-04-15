@@ -990,15 +990,12 @@ ft_tetrahedral_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha,
 void ft_execute_tet2cheb(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M) {
     ft_execute_tet_hi2lo_AVX512(P->RP1, P->RP2, A, P->B, L, M);
     if ((P->beta + P->gamma + P->delta != -2.5) || (P->alpha != -0.5))
-        #pragma omp parallel for
         for (int m = 0; m < M; m++)
             cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P1, N, A+N*L*m, N);
     if ((P->gamma + P->delta != -1.5) || (P->beta != -0.5))
-        #pragma omp parallel for
         for (int m = 0; m < M; m++)
             cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, L, 1.0, P->P2, N, A+N*L*m, N);
     if ((P->delta != -0.5) || (P->gamma != -0.5))
-        #pragma omp parallel for
         for (int n = 0; n < N; n++)
             for (int l = 0; l < L; l++)
                 cblas_dtrmv(CblasColMajor, CblasUpper, CblasTrans, CblasNonUnit, N, P->P3, N, A+n+N*l, N*L);
@@ -1008,16 +1005,13 @@ void ft_execute_tet2cheb(const ft_tetrahedral_harmonic_plan * P, double * A, con
 void ft_execute_cheb2tet(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M) {
     chebyshev_normalization_3d_t(A, N, L, M);
     if ((P->gamma != -0.5) || (P->delta != -0.5))
-        #pragma omp parallel for
         for (int n = 0; n < N; n++)
             for (int l = 0; l < L; l++)
                 cblas_dtrmv(CblasColMajor, CblasUpper, CblasTrans, CblasNonUnit, N, P->P3inv, N, A+n+N*l, N*L);
     if ((P->beta != -0.5) || (P->gamma + P->delta != -1.5))
-        #pragma omp parallel for
         for (int m = 0; m < M; m++)
             cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, L, 1.0, P->P2inv, N, A+N*L*m, N);
     if ((P->alpha != -0.5) || (P->beta + P->gamma + P->delta != -2.5))
-        #pragma omp parallel for
         for (int m = 0; m < M; m++)
             cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P1inv, N, A+N*L*m, N);
     ft_execute_tet_lo2hi_AVX512(P->RP1, P->RP2, A, P->B, L, M);
