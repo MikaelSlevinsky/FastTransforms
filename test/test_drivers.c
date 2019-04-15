@@ -815,7 +815,7 @@ int main(int argc, const char * argv[]) {
         L = M = N;
 
         A = tetones(N, L, M);
-        //Ac = aligned_copymat(A, N, L*M);
+        Ac = aligned_copymat(A, N, L*M);
         B = copymat(A, N, L*M);
 
         RP1 = ft_plan_rottriangle(N, alpha, beta, gamma + delta + 1.0);
@@ -825,11 +825,131 @@ int main(int argc, const char * argv[]) {
         ft_execute_tet_lo2hi(RP1, RP2, A, L, M);
 
         printf("%d  %1.2e  ", N, norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
+        printf("%1.2e  ", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+
+        ft_execute_tet_hi2lo_SSE(RP1, RP2, A, Ac, L, M);
+        ft_execute_tet_lo2hi(RP1, RP2, A, L, M);
+
+        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
+        printf("%1.2e  ", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+
+        ft_execute_tet_hi2lo(RP1, RP2, A, L, M);
+        ft_execute_tet_lo2hi_SSE(RP1, RP2, A, Ac, L, M);
+
+        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
+        printf("%1.2e  ", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+
+        ft_execute_tet_hi2lo_AVX(RP1, RP2, A, Ac, L, M);
+        ft_execute_tet_lo2hi_SSE(RP1, RP2, A, Ac, L, M);
+
+        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
+        printf("%1.2e  ", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+
+        ft_execute_tet_hi2lo_SSE(RP1, RP2, A, Ac, L, M);
+        ft_execute_tet_lo2hi_AVX(RP1, RP2, A, Ac, L, M);
+
+        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
+        printf("%1.2e  ", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+
+        ft_execute_tet_hi2lo_AVX512(RP1, RP2, A, Ac, L, M);
+        ft_execute_tet_lo2hi_AVX(RP1, RP2, A, Ac, L, M);
+
+        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
+        printf("%1.2e  ", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+
+        ft_execute_tet_hi2lo_AVX(RP1, RP2, A, Ac, L, M);
+        ft_execute_tet_lo2hi_AVX512(RP1, RP2, A, Ac, L, M);
+
+        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
         printf("%1.2e\n", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
 
         free(A);
-        //VFREE(Ac);
+        VFREE(Ac);
         free(B);
+        ft_destroy_rotation_plan(RP1);
+        ft_destroy_rotation_plan(RP2);
+    }
+    printf("];\n");
+
+    printf("\nTiming tetrahedral harmonic drivers.\n\n");
+    printf("t9 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 16*pow(2, i)+J;
+        L = M = N;
+        NLOOPS = 1 + pow(512/N, 2);
+
+        A = tetones(N, L, M);
+        B = aligned_copymat(A, N, L*M);
+
+        RP1 = ft_plan_rottriangle(N, alpha, beta, gamma + delta + 1.0);
+        RP2 = ft_plan_rottriangle(N, beta, gamma, delta);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_tet_hi2lo(RP1, RP2, A, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_tet_lo2hi(RP1, RP2, A, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_tet_hi2lo_SSE(RP1, RP2, A, B, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_tet_lo2hi_SSE(RP1, RP2, A, B, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_tet_hi2lo_AVX(RP1, RP2, A, B, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_tet_lo2hi_AVX(RP1, RP2, A, B, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_tet_hi2lo_AVX512(RP1, RP2, A, B, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_tet_lo2hi_AVX512(RP1, RP2, A, B, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+
+        free(A);
+        VFREE(B);
         ft_destroy_rotation_plan(RP1);
         ft_destroy_rotation_plan(RP2);
     }
@@ -843,7 +963,6 @@ int main(int argc, const char * argv[]) {
 
         A = tetrand(N, L, M);
         B = copymat(A, N, L*M);
-
         TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
 
         ft_execute_tet2cheb(TP, A, N, L, M);
@@ -854,6 +973,37 @@ int main(int argc, const char * argv[]) {
 
         free(A);
         free(B);
+        ft_destroy_tetrahedral_harmonic_plan(TP);
+    }
+    printf("];\n");
+
+    printf("\nTiming tetrahedral harmonic transforms.\n\n");
+    printf("t10 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 16*pow(2, i)+J;
+        L = M = N;
+        NLOOPS = 1 + pow(512/N, 2);
+
+        A = tetrand(N, L, M);
+        TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_tet2cheb(TP, A, N, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_cheb2tet(TP, A, N, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+
+        free(A);
         ft_destroy_tetrahedral_harmonic_plan(TP);
     }
     printf("];\n");

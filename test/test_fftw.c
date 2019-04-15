@@ -340,5 +340,47 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
+    printf("\nTiming tetrahedral harmonic transforms + FFTW synthesis and analysis.\n\n");
+    printf("t5 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 16*pow(2, i)+J;
+        L = M = N;
+        NLOOPS = 1 + pow(512/N, 2);
+
+        A = tetrand(N, L, M);
+        TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
+        SS = ft_plan_tet_synthesis(N, L, M);
+        SA = ft_plan_tet_analysis(N, L, M);
+
+        ft_execute_tet_synthesis(SS, A, N, L, M);
+        ft_execute_tet_analysis(SA, A, N, L, M);
+        ft_execute_tet_synthesis(SS, A, N, L, M);
+        ft_execute_tet_analysis(SA, A, N, L, M);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_tet2cheb(TP, A, N, L, M);
+            ft_execute_tet_synthesis(SS, A, N, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_tet_analysis(SA, A, N, L, M);
+            ft_execute_cheb2tet(TP, A, N, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+
+        free(A);
+        ft_destroy_tetrahedral_harmonic_plan(TP);
+        ft_destroy_tetrahedron_fftw_plan(SS);
+        ft_destroy_tetrahedron_fftw_plan(SA);
+    }
+    printf("];\n");
+
     return 0;
 }
