@@ -899,7 +899,7 @@ int main(int argc, const char * argv[]) {
     printf("];\n");
 
     printf("\nTiming spin-weighted spherical harmonic drivers.\n\n");
-    printf("t10 = [\n");
+    printf("t11 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
