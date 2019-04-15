@@ -134,6 +134,24 @@ double * diskrand(int n, int m) {
     return A;
 }
 
+double * tetones(int n, int l, int m) {
+    double * A = (double *) calloc(n * l * m, sizeof(double));
+    for (int k = 0; k < m; k++)
+        for (int j = 0; j < l-k; j++)
+            for (int i = 0; i < n-j-k; i++)
+                A[i+l*(j+n*k)] = 1.0;
+    return A;
+}
+
+double * tetrand(int n, int l, int m) {
+    double * A = (double *) calloc(n * l * m, sizeof(double));
+    for (int k = 0; k < m; k++)
+        for (int j = 0; j < l-k; j++)
+            for (int i = 0; i < n-j-k; i++)
+                A[i+l*(j+n*k)] = 2.0*(((double) rand())/RAND_MAX)-1.0;
+    return A;
+}
+
 double * spinsphones(int n, int m, int s) {
     double * A = (double *) calloc(n * m, sizeof(double));
     for (int i = 0; i < n-s; i++)

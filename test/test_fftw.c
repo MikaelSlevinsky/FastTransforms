@@ -7,13 +7,15 @@ int main(int argc, const char * argv[]) {
     static double * A;
     static double * B;
     ft_harmonic_plan * P;
+    ft_tetrahedral_harmonic_plan * TP;
     ft_sphere_fftw_plan * PS, * PA;
     ft_triangle_fftw_plan * QS, * QA;
     ft_disk_fftw_plan * RS, * RA;
-    //double alpha = -0.5, beta = -0.5, gamma = -0.5; // best case scenario
-    double alpha = 0.0, beta = 0.0, gamma = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
+    ft_tetrahedron_fftw_plan * SS, * SA;
+    //double alpha = -0.5, beta = -0.5, gamma = -0.5, delta = -0.5; // best case scenario
+    double alpha = 0.0, beta = 0.0, gamma = 0.0, delta = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 
-    int IERR, ITIME, J, N, M, NLOOPS;
+    int IERR, ITIME, J, N, L, M, NLOOPS;
 
 
     if (argc > 1) {
@@ -307,6 +309,76 @@ int main(int argc, const char * argv[]) {
         ft_destroy_harmonic_plan(P);
         ft_destroy_disk_fftw_plan(RS);
         ft_destroy_disk_fftw_plan(RA);
+    }
+    printf("];\n");
+
+    printf("\nTesting the accuracy of tetrahedral harmonic transforms + FFTW synthesis and analysis.\n\n");
+    printf("err5 = [\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 16*pow(2, i)+J;
+        L = M = N;
+
+        A = tetrand(N, L, M);
+        B = copymat(A, N, L*M);
+        TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
+        SS = ft_plan_tet_synthesis(N, L, M);
+        SA = ft_plan_tet_analysis(N, L, M);
+
+        ft_execute_tet2cheb(TP, A, N, L, M);
+        ft_execute_tet_synthesis(SS, A, N, L, M);
+        ft_execute_tet_analysis(SA, A, N, L, M);
+        ft_execute_cheb2tet(TP, A, N, L, M);
+
+        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
+        printf("%1.2e\n", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+
+        free(A);
+        free(B);
+        ft_destroy_tetrahedral_harmonic_plan(TP);
+        ft_destroy_tetrahedron_fftw_plan(SS);
+        ft_destroy_tetrahedron_fftw_plan(SA);
+    }
+    printf("];\n");
+
+    printf("\nTiming tetrahedral harmonic transforms + FFTW synthesis and analysis.\n\n");
+    printf("t5 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 16*pow(2, i)+J;
+        L = M = N;
+        NLOOPS = 1 + pow(512/N, 2);
+
+        A = tetrand(N, L, M);
+        TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
+        SS = ft_plan_tet_synthesis(N, L, M);
+        SA = ft_plan_tet_analysis(N, L, M);
+
+        ft_execute_tet_synthesis(SS, A, N, L, M);
+        ft_execute_tet_analysis(SA, A, N, L, M);
+        ft_execute_tet_synthesis(SS, A, N, L, M);
+        ft_execute_tet_analysis(SA, A, N, L, M);
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_tet2cheb(TP, A, N, L, M);
+            ft_execute_tet_synthesis(SS, A, N, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
+
+        gettimeofday(&start, NULL);
+        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+            ft_execute_tet_analysis(SA, A, N, L, M);
+            ft_execute_cheb2tet(TP, A, N, L, M);
+        }
+        gettimeofday(&end, NULL);
+
+        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+
+        free(A);
+        ft_destroy_tetrahedral_harmonic_plan(TP);
+        ft_destroy_tetrahedron_fftw_plan(SS);
+        ft_destroy_tetrahedron_fftw_plan(SA);
     }
     printf("];\n");
 
