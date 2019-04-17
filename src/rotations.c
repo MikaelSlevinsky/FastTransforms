@@ -511,7 +511,7 @@ void ft_kernel_tet_lo2hi(const ft_rotation_plan * RP, const int L, const int m, 
 
 void ft_kernel_tet_hi2lo_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
-    int nb = ALIGNB(n);
+    int nb = VALIGN(n);
     double s, c;
     for (int j = m-1; j >= 0; j--) {
         for (int l = L-2-j; l >= 0; l--) {
@@ -527,7 +527,7 @@ void ft_kernel_tet_hi2lo_SSE(const ft_rotation_plan * RP, const int L, const int
 
 void ft_kernel_tet_lo2hi_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
-    int nb = ALIGNB(n);
+    int nb = VALIGN(n);
     double s, c;
     for (int j = 0; j < m; j++) {
         for (int l = 0; l <= L-2-j; l++) {
@@ -543,7 +543,7 @@ void ft_kernel_tet_lo2hi_SSE(const ft_rotation_plan * RP, const int L, const int
 
 void ft_kernel_tet_hi2lo_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
-    int nb = ALIGNB(n);
+    int nb = VALIGN(n);
     double s, c;
     for (int j = m-1; j >= 0; j--) {
         for (int l = L-2-j; l >= 0; l--) {
@@ -561,7 +561,7 @@ void ft_kernel_tet_hi2lo_AVX(const ft_rotation_plan * RP, const int L, const int
 
 void ft_kernel_tet_lo2hi_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
-    int nb = ALIGNB(n);
+    int nb = VALIGN(n);
     double s, c;
     for (int j = 0; j < m; j++) {
         for (int l = 0; l <= L-2-j; l++) {
@@ -579,7 +579,7 @@ void ft_kernel_tet_lo2hi_AVX(const ft_rotation_plan * RP, const int L, const int
 
 void ft_kernel_tet_hi2lo_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
-    int nb = ALIGNB(n);
+    int nb = VALIGN(n);
     double s, c;
     for (int j = m-1; j >= 0; j--) {
         for (int l = L-2-j; l >= 0; l--) {
@@ -599,7 +599,7 @@ void ft_kernel_tet_hi2lo_AVX512(const ft_rotation_plan * RP, const int L, const 
 
 void ft_kernel_tet_lo2hi_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
-    int nb = ALIGNB(n);
+    int nb = VALIGN(n);
     double s, c;
     for (int j = 0; j < m; j++) {
         for (int l = 0; l <= L-2-j; l++) {

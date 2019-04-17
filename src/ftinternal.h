@@ -106,7 +106,7 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
     #define vstore2(u, v) (_mm_store_pd(u, v))
 #endif
 
-#define ALIGNB(N) (N + ALIGN_SIZE-1-(N+ALIGN_SIZE-1)%ALIGN_SIZE)
+#define VALIGN(N) ((N + ALIGN_SIZE - 1) & -ALIGN_SIZE)
 #define VMALLOC(s) _mm_malloc(s, ALIGN_SIZE*8)
 #define VFREE(s) _mm_free(s)
 

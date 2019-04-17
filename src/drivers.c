@@ -105,7 +105,7 @@ void ft_execute_sph_lo2hi(const ft_rotation_plan * RP, double * A, const int M) 
 
 void ft_execute_sph_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_sph(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
@@ -115,7 +115,7 @@ void ft_execute_sph_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * 
 
 void ft_execute_sph_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_sph(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
@@ -125,7 +125,7 @@ void ft_execute_sph_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * 
 
 void ft_execute_sph_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     warp(A, N, M, 2);
     permute_sph(A, B, N, M, 4);
     for (int m = 2; m <= (M%8)/2; m++)
@@ -141,7 +141,7 @@ void ft_execute_sph_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * 
 
 void ft_execute_sph_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     warp(A, N, M, 2);
     permute_sph(A, B, N, M, 4);
     for (int m = 2; m <= (M%8)/2; m++)
@@ -157,7 +157,7 @@ void ft_execute_sph_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * 
 
 void ft_execute_sph_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     int M_star = M%16;
     warp(A, N, M, 4);
     warp(A, N, M_star, 2);
@@ -180,7 +180,7 @@ void ft_execute_sph_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double
 
 void ft_execute_sph_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     int M_star = M%16;
     warp(A, N, M, 4);
     warp(A, N, M_star, 2);
@@ -221,7 +221,7 @@ void ft_execute_sphv_lo2hi(const ft_rotation_plan * RP, double * A, const int M)
 
 void ft_execute_sphv_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_sph(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2-1; m += FT_GET_NUM_THREADS())
@@ -231,7 +231,7 @@ void ft_execute_sphv_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double *
 
 void ft_execute_sphv_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_sph(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2-1; m += FT_GET_NUM_THREADS())
@@ -241,7 +241,7 @@ void ft_execute_sphv_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double *
 
 void ft_execute_sphv_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     warp(A+2*N, N, M-2, 2);
     permute_sph(A+2*N, B+2*NB, N, M-2, 4);
     for (int m = 2; m <= ((M-2)%8)/2; m++)
@@ -257,7 +257,7 @@ void ft_execute_sphv_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double *
 
 void ft_execute_sphv_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     warp(A+2*N, N, M-2, 2);
     permute_sph(A+2*N, B+2*NB, N, M-2, 4);
     for (int m = 2; m <= ((M-2)%8)/2; m++)
@@ -273,7 +273,7 @@ void ft_execute_sphv_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double *
 
 void ft_execute_sphv_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     int M_star = (M-2)%16;
     warp(A+2*N, N, M-2, 4);
     warp(A+2*N, N, M_star, 2);
@@ -296,7 +296,7 @@ void ft_execute_sphv_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, doubl
 
 void ft_execute_sphv_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     int M_star = (M-2)%16;
     warp(A+2*N, N, M-2, 4);
     warp(A+2*N, N, M_star, 2);
@@ -331,7 +331,7 @@ void ft_execute_tri_lo2hi(const ft_rotation_plan * RP, double * A, const int M) 
 
 void ft_execute_tri_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_tri(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = M%2+2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
@@ -341,7 +341,7 @@ void ft_execute_tri_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * 
 
 void ft_execute_tri_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_tri(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = M%2+2*FT_GET_THREAD_NUM(); m < M; m += 2*FT_GET_NUM_THREADS())
@@ -351,7 +351,7 @@ void ft_execute_tri_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * 
 
 void ft_execute_tri_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_tri(A, B, N, M, 4);
     for (int m = M%2; m < M%8; m += 2)
         ft_kernel_tri_hi2lo_SSE(RP, m, B+NB*m);
@@ -363,7 +363,7 @@ void ft_execute_tri_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * 
 
 void ft_execute_tri_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_tri(A, B, N, M, 4);
     for (int m = M%2; m < M%8; m += 2)
         ft_kernel_tri_lo2hi_SSE(RP, m, B+NB*m);
@@ -375,7 +375,7 @@ void ft_execute_tri_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * 
 
 void ft_execute_tri_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_tri(A, B, N, M, 8);
     for (int m = M%2; m < M%8; m += 2)
         ft_kernel_tri_hi2lo_SSE(RP, m, B+NB*m);
@@ -389,7 +389,7 @@ void ft_execute_tri_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double
 
 void ft_execute_tri_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_tri(A, B, N, M, 8);
     for (int m = M%2; m < M%8; m += 2)
         ft_kernel_tri_lo2hi_SSE(RP, m, B+NB*m);
@@ -422,7 +422,7 @@ void ft_execute_disk_lo2hi(const ft_rotation_plan * RP, double * A, const int M)
 
 void ft_execute_disk_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_disk(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
@@ -432,7 +432,7 @@ void ft_execute_disk_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double *
 
 void ft_execute_disk_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_disk(A, B, N, M, 2);
     #pragma omp parallel
     for (int m = 2 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
@@ -442,7 +442,7 @@ void ft_execute_disk_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double *
 
 void ft_execute_disk_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     warp(A, N, M, 2);
     permute_disk(A, B, N, M, 4);
     for (int m = 2; m <= (M%8)/2; m++)
@@ -458,7 +458,7 @@ void ft_execute_disk_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double *
 
 void ft_execute_disk_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     warp(A, N, M, 2);
     permute_disk(A, B, N, M, 4);
     for (int m = 2; m <= (M%8)/2; m++)
@@ -474,7 +474,7 @@ void ft_execute_disk_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double *
 
 void ft_execute_disk_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     int M_star = M%16;
     warp(A, N, M, 4);
     warp(A, N, M_star, 2);
@@ -497,7 +497,7 @@ void ft_execute_disk_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, doubl
 
 void ft_execute_disk_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     int M_star = M%16;
     warp(A, N, M, 4);
     warp(A, N, M_star, 2);
@@ -541,7 +541,7 @@ void ft_execute_tet_lo2hi(const ft_rotation_plan * RP1, const ft_rotation_plan *
 
 void ft_execute_tet_hi2lo_SSE(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
     int N = RP1->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     #pragma omp parallel
     for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
         permute_tri(A+N*L*m, B+NB*L*m, N, L-m, 2);
@@ -558,7 +558,7 @@ void ft_execute_tet_hi2lo_SSE(const ft_rotation_plan * RP1, const ft_rotation_pl
 
 void ft_execute_tet_lo2hi_SSE(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
     int N = RP1->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     #pragma omp parallel
     for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
         permute(A+N*L*m, B+NB*L*m, N, L, 1);
@@ -575,7 +575,7 @@ void ft_execute_tet_lo2hi_SSE(const ft_rotation_plan * RP1, const ft_rotation_pl
 
 void ft_execute_tet_hi2lo_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
     int N = RP1->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     #pragma omp parallel
     for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
         permute_tri(A+N*L*m, B+NB*L*m, N, L-m, 4);
@@ -594,7 +594,7 @@ void ft_execute_tet_hi2lo_AVX(const ft_rotation_plan * RP1, const ft_rotation_pl
 
 void ft_execute_tet_lo2hi_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
     int N = RP1->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     #pragma omp parallel
     for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
         permute(A+N*L*m, B+NB*L*m, N, L, 1);
@@ -613,7 +613,7 @@ void ft_execute_tet_lo2hi_AVX(const ft_rotation_plan * RP1, const ft_rotation_pl
 
 void ft_execute_tet_hi2lo_AVX512(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
     int N = RP1->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     #pragma omp parallel
     for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
         permute_tri(A+N*L*m, B+NB*L*m, N, L-m, 8);
@@ -634,7 +634,7 @@ void ft_execute_tet_hi2lo_AVX512(const ft_rotation_plan * RP1, const ft_rotation
 
 void ft_execute_tet_lo2hi_AVX512(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
     int N = RP1->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     #pragma omp parallel
     for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
         permute(A+N*L*m, B+NB*L*m, N, L, 1);
@@ -676,7 +676,7 @@ void ft_execute_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, double * A, con
 
 void ft_execute_spinsph_hi2lo_SSE(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_spinsph(A, B, N, M, 2);
     ft_kernel_spinsph_hi2lo(SRP, 0, B);
     #pragma omp parallel
@@ -687,7 +687,7 @@ void ft_execute_spinsph_hi2lo_SSE(const ft_spin_rotation_plan * SRP, double * A,
 
 void ft_execute_spinsph_lo2hi_SSE(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     permute_spinsph(A, B, N, M, 2);
     ft_kernel_spinsph_lo2hi(SRP, 0, B);
     #pragma omp parallel
@@ -698,7 +698,7 @@ void ft_execute_spinsph_lo2hi_SSE(const ft_spin_rotation_plan * SRP, double * A,
 
 void ft_execute_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     warp(A, N, M, 2);
     permute_spinsph(A, B, N, M, 4);
     ft_kernel_spinsph_hi2lo(SRP, 0, B);
@@ -715,7 +715,7 @@ void ft_execute_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, double * A,
 
 void ft_execute_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     warp(A, N, M, 2);
     permute_spinsph(A, B, N, M, 4);
     ft_kernel_spinsph_lo2hi(SRP, 0, B);
@@ -732,7 +732,7 @@ void ft_execute_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, double * A,
 
 void ft_execute_spinsph_hi2lo_AVX512(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     int M_star = M%16;
     warp(A, N, M, 4);
     warp(A, N, M_star, 2);
@@ -757,7 +757,7 @@ void ft_execute_spinsph_hi2lo_AVX512(const ft_spin_rotation_plan * SRP, double *
 void ft_execute_spinsph_lo2hi_AVX512(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M) {
     int N = SRP->n;
     int M_star = M%16;
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     warp(A, N, M, 4);
     warp(A, N, M_star, 2);
     permute_spinsph(A, B, N, M, 8);
@@ -792,7 +792,7 @@ void ft_destroy_harmonic_plan(ft_harmonic_plan * P) {
 ft_harmonic_plan * ft_plan_sph2fourier(const int n) {
     ft_harmonic_plan * P = (ft_harmonic_plan *) malloc(sizeof(ft_harmonic_plan));
     P->RP = ft_plan_rotsphere(n);
-    P->B = (double *) VMALLOC(ALIGNB(n) * (2*n-1) * sizeof(double));
+    P->B = (double *) VMALLOC(VALIGN(n) * (2*n-1) * sizeof(double));
     P->P1 = plan_leg2cheb(1, 0, n);
     P->P2 = plan_ultra2ultra(1, 0, n, 1.5, 1.0);
     P->P1inv = plan_cheb2leg(0, 1, n);
@@ -835,7 +835,7 @@ void ft_execute_fourier2sphv(const ft_harmonic_plan * P, double * A, const int N
 ft_harmonic_plan * ft_plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma) {
     ft_harmonic_plan * P = (ft_harmonic_plan *) malloc(sizeof(ft_harmonic_plan));
     P->RP = ft_plan_rottriangle(n, alpha, beta, gamma);
-    P->B = (double *) VMALLOC(ALIGNB(n) * n * sizeof(double));
+    P->B = (double *) VMALLOC(VALIGN(n) * n * sizeof(double));
     P->P1 = plan_jac2jac(1, 1, n, beta + gamma + 1.0, alpha, -0.5);
     double * P12 = plan_jac2jac(1, 1, n, alpha, -0.5, -0.5);
     alternate_sign(P12, n, n);
@@ -887,7 +887,7 @@ void ft_execute_cheb2tri(const ft_harmonic_plan * P, double * A, const int N, co
 ft_harmonic_plan * ft_plan_disk2cxf(const int n) {
     ft_harmonic_plan * P = (ft_harmonic_plan *) malloc(sizeof(ft_harmonic_plan));
     P->RP = ft_plan_rotdisk(n);
-    P->B = (double *) VMALLOC(ALIGNB(n) * (4*n-3) * sizeof(double));
+    P->B = (double *) VMALLOC(VALIGN(n) * (4*n-3) * sizeof(double));
     P->P1 = plan_leg2cheb(1, 0, n);
     P->P2 = plan_jac2jac(1, 1, n, 1.0, 0.0, 0.5);
     alternate_sign(P->P2, n, n);
@@ -947,7 +947,7 @@ ft_tetrahedral_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha,
     ft_tetrahedral_harmonic_plan * P = (ft_tetrahedral_harmonic_plan *) malloc(sizeof(ft_tetrahedral_harmonic_plan));
     P->RP1 = ft_plan_rottriangle(n, alpha, beta, gamma + delta + 1.0);
     P->RP2 = ft_plan_rottriangle(n, beta, gamma, delta);
-    P->B = (double *) VMALLOC(ALIGNB(n) * n * n * sizeof(double));
+    P->B = (double *) VMALLOC(VALIGN(n) * n * n * sizeof(double));
     P->P1 = plan_jac2jac(1, 1, n, beta + gamma + delta + 2.0, alpha, -0.5);
     double * P12 = plan_jac2jac(1, 1, n, alpha, -0.5, -0.5);
     alternate_sign(P12, n, n);
