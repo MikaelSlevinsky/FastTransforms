@@ -18,47 +18,51 @@ static void alternate_sign_t(double * A, const int N, const int M) {
 static void chebyshev_normalization_2d(double * A, const int N, const int M) {
     for (int i = 0; i < N; i++)
         A[i] *= M_SQRT1_2;
-    for (int j = 0; j < M; j++)
+    for (int j = 0; j < M; j++) {
         A[j*N] *= M_SQRT1_2;
-    for (int i = 0; i < N*M; i++)
-        A[i] *= M_2_PI;
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_2_PI;
+    }
 }
 
 static void chebyshev_normalization_2d_t(double * A, const int N, const int M) {
     for (int i = 0; i < N; i++)
         A[i] *= M_SQRT2;
-    for (int j = 0; j < M; j++)
+    for (int j = 0; j < M; j++) {
         A[j*N] *= M_SQRT2;
-    for (int i = 0; i < N*M; i++)
-        A[i] *= M_PI_2;
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_PI_2;
+    }
 }
 
 static void chebyshev_normalization_3d(double * A, const int N, const int L, const int M) {
     for (int j = 0; j < L; j++)
         for (int i = 0; i < N; i++)
             A[i+j*N] *= M_SQRT1_2;
-    for (int k = 0; k < M; k++)
+    for (int k = 0; k < M; k++) {
         for (int i = 0; i < N; i++)
             A[i+k*L*N] *= M_SQRT1_2;
-    for (int k = 0; k < M; k++)
-        for (int j = 0; j < L; j++)
+        for (int j = 0; j < L; j++) {
             A[(j+k*L)*N] *= M_SQRT1_2;
-    for (int i = 0; i < N*L*M; i++)
-        A[i] *= M_2_PI_POW_1P5;
+            for (int i = 0; i < N; i++)
+                A[i+(j+k*L)*N] *= M_2_PI_POW_1P5;
+        }
+    }
 }
 
 static void chebyshev_normalization_3d_t(double * A, const int N, const int L, const int M) {
     for (int j = 0; j < L; j++)
         for (int i = 0; i < N; i++)
             A[i+j*N] *= M_SQRT2;
-    for (int k = 0; k < M; k++)
+    for (int k = 0; k < M; k++) {
         for (int i = 0; i < N; i++)
             A[i+k*L*N] *= M_SQRT2;
-    for (int k = 0; k < M; k++)
-        for (int j = 0; j < L; j++)
+        for (int j = 0; j < L; j++) {
             A[(j+k*L)*N] *= M_SQRT2;
-    for (int i = 0; i < N*L*M; i++)
-        A[i] *= M_PI_2_POW_1P5;
+            for (int i = 0; i < N; i++)
+                A[i+(j+k*L)*N] *= M_PI_2_POW_1P5;
+        }
+    }
 }
 
 static void partial_chebyshev_normalization(double * A, const int N, const int M) {
