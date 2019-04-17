@@ -76,6 +76,20 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     free(z);
 }
 
+FLT X(test_barycentric)(char KIND, int n, FLT (*f)(FLT x), FLT pt) {
+    FLT num = 0, den = 0, t, fcpt = f(pt);
+    FLT * xc = X(chebyshev_points)(KIND, n);
+    FLT * lc = X(chebyshev_barycentric_weights)(KIND, n);
+    for (int i = 0; i < n; i++) {
+        t = lc[i]/(pt-xc[i]);
+        num += f(xc[i])*t;
+        den += t;
+    }
+    free(xc);
+    free(lc);
+    return X(fabs)((num/den-fcpt)/fcpt);
+}
+
 void X(test_hierarchical)(int * checksum) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("\t\t\t\t\t\t\t |   or Calculation Time\n");
@@ -84,29 +98,11 @@ void X(test_hierarchical)(int * checksum) {
     int nmin = 500, nmax = 2000;
     FLT err = 0;
 
-    for (int n = 40; n < 42; n++) {
-        FLT num = 0, den = 0, pt = 0.125;
-        FLT fcpt = X(exp)(pt);
-        FLT * xc = X(chebyshev_points)('1', n);
-        FLT * lc = X(chebyshev_barycentric_weights)('1', n);
-        for (int i = 0; i < n; i++) {
-            num += X(exp)(xc[i])*lc[i]/(pt-xc[i]);
-            den += lc[i]/(pt-xc[i]);
-        }
-        err += X(fabs)((num/den-fcpt)/fcpt);
-        free(xc);
-        free(lc);
-        xc = X(chebyshev_points)('2', n);
-        lc = X(chebyshev_barycentric_weights)('2', n);
-        num = den = 0;
-        for (int i = 0; i < n; i++) {
-            num += X(exp)(xc[i])*lc[i]/(pt-xc[i]);
-            den += lc[i]/(pt-xc[i]);
-        }
-        err += X(fabs)((num/den-fcpt)/fcpt);
-        free(xc);
-        free(lc);
-    }
+    err += X(test_barycentric)('1', 40, X(exp), 0.125);
+    err += X(test_barycentric)('2', 40, X(sin), 0.125);
+    err += X(test_barycentric)('1', 41, X(cos), 0.125);
+    err += X(test_barycentric)('2', 81, X(tanh), 0.125);
+
     printf("Approximation by second-kind barycentric interpolant \t |%20.2e ", (double) err);
     X(checktest)(err, 16, checksum);
 
