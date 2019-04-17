@@ -42,6 +42,7 @@ examples:
 clean:
 	rm -f lib$(LIB).$(SLIB)
 	rm -f additiontheorem
+	rm -f calculus
 	rm -f holomorphic
 	rm -f test_*
 

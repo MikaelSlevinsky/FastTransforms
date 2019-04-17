@@ -24,9 +24,12 @@ build_script:
   - mingw32-make examples
 
 test_script:
+  - set OMP_NUM_THREADS=4
   - test_transforms.exe
   - test_rotations.exe
-  - set OMP_NUM_THREADS=4
+  - test_arrow.exe
+  - test_tridiagonal.exe
+  - test_hierarchical.exe
   - test_drivers.exe 3 3 0
   - additiontheorem.exe
   - calculus.exe
