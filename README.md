@@ -1,6 +1,6 @@
 # FastTransforms
 
-[![Travis](https://travis-ci.org/MikaelSlevinsky/FastTransforms.svg?branch=master)](https://travis-ci.org/MikaelSlevinsky/FastTransforms)
+[![Travis](https://travis-ci.org/MikaelSlevinsky/FastTransforms.svg?branch=master)](https://travis-ci.org/MikaelSlevinsky/FastTransforms) [![Build status](https://ci.appveyor.com/api/projects/status/er98t0q3bsx4a5l9/branch/master?svg=true)](https://ci.appveyor.com/project/MikaelSlevinsky/fasttransforms/branch/master)
 
 `FastTransforms` provides computational kernels and driver routines for two-dimensional harmonic polynomial transforms. The algorithms are backward stable with a runtime complexity of O(n<sup>3</sup>), where n is the polynomial degree, they are vectorized by Intel SSE, AVX, and AVX-512 intrinsics, and are parallelized by OpenMP.
 
@@ -8,7 +8,7 @@ If you feel you need help getting started, please do not hesitate to e-mail me. 
 
 ## Installation Notes
 
-Generically, the library makes use of OpenBLAS and FFTW3, which are easily installed via package managers such as Homebrew or apt-get. When `FastTransforms` is compiled with OpenMP, the environment variable that controls multithreading is `OMP_NUM_THREADS`.
+Generically, the library makes use of OpenBLAS and FFTW3, which are easily installed via package managers such as Homebrew, apt-get, or vcpkg. When `FastTransforms` is compiled with OpenMP, the environment variable that controls multithreading is `OMP_NUM_THREADS`.
 
 ### macOS
 
@@ -30,6 +30,15 @@ Sample installation:
 apt-get install gcc-8 libblas-dev libopenblas-base libfftw3-dev
 export CC=gcc-8 && export BLAS=OPENBLAS && make
 ```
+
+### Windows
+
+We use GCC 7.2.0 distributed through MinGW-w64 on Visual Studio 2015 and 2017. Sample installation:
+```
+vcpkg install openblas:x64-windows fftw3:x64-windows
+set CC=gcc && set BLAS=OPENBLAS && mingw32-make win
+```
+See the [AppVeyor build](https://github.com/MikaelSlevinsky/FastTransforms/blob/master/.appveyor.yml) for further details.
 
 ## Performance Benchmark
 

@@ -3,6 +3,82 @@
 #include "fasttransforms.h"
 #include "ftinternal.h"
 
+static void alternate_sign(double * A, const int N, const int M) {
+    for (int j = 0; j < M; j++)
+        for (int i = 0; i < N; i += 2)
+            A[i+j*N] = -A[i+j*N];
+}
+
+static void alternate_sign_t(double * A, const int N, const int M) {
+    for (int i = 0; i < N; i += 2)
+        for (int j = 0; j < M; j++)
+            A[j+i*M] = -A[j+i*M];
+}
+
+static void chebyshev_normalization_2d(double * A, const int N, const int M) {
+    for (int i = 0; i < N; i++)
+        A[i] *= M_SQRT1_2;
+    for (int j = 0; j < M; j++)
+        A[j*N] *= M_SQRT1_2;
+    for (int i = 0; i < N*M; i++)
+        A[i] *= M_2_PI;
+}
+
+static void chebyshev_normalization_2d_t(double * A, const int N, const int M) {
+    for (int i = 0; i < N; i++)
+        A[i] *= M_SQRT2;
+    for (int j = 0; j < M; j++)
+        A[j*N] *= M_SQRT2;
+    for (int i = 0; i < N*M; i++)
+        A[i] *= M_PI_2;
+}
+
+static void chebyshev_normalization_3d(double * A, const int N, const int L, const int M) {
+    for (int j = 0; j < L; j++)
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_SQRT1_2;
+    for (int k = 0; k < M; k++)
+        for (int i = 0; i < N; i++)
+            A[i+k*L*N] *= M_SQRT1_2;
+    for (int k = 0; k < M; k++)
+        for (int j = 0; j < L; j++)
+            A[(j+k*L)*N] *= M_SQRT1_2;
+    for (int i = 0; i < N*L*M; i++)
+        A[i] *= M_2_PI_POW_1P5;
+}
+
+static void chebyshev_normalization_3d_t(double * A, const int N, const int L, const int M) {
+    for (int j = 0; j < L; j++)
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_SQRT2;
+    for (int k = 0; k < M; k++)
+        for (int i = 0; i < N; i++)
+            A[i+k*L*N] *= M_SQRT2;
+    for (int k = 0; k < M; k++)
+        for (int j = 0; j < L; j++)
+            A[(j+k*L)*N] *= M_SQRT2;
+    for (int i = 0; i < N*L*M; i++)
+        A[i] *= M_PI_2_POW_1P5;
+}
+
+static void partial_chebyshev_normalization(double * A, const int N, const int M) {
+    for (int j = 1; j < M; j += 4)
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_2_PI_POW_0P5;
+    for (int j = 2; j < M; j += 4)
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_2_PI_POW_0P5;
+}
+
+static void partial_chebyshev_normalization_t(double * A, const int N, const int M) {
+    for (int j = 1; j < M; j += 4)
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_PI_2_POW_0P5;
+    for (int j = 2; j < M; j += 4)
+        for (int i = 0; i < N; i++)
+            A[i+j*N] *= M_PI_2_POW_0P5;
+}
+
 void ft_set_num_threads(const int n) {FT_SET_NUM_THREADS(n);}
 
 void ft_execute_sph_hi2lo(const ft_rotation_plan * RP, double * A, const int M) {
@@ -296,14 +372,13 @@ void ft_execute_tri_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * 
 void ft_execute_tri_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
     int NB = ALIGNB(N);
-    int M_star = M%16;
     permute_tri(A, B, N, M, 8);
-    for (int m = M%2; m < M_star%8; m += 2)
+    for (int m = M%2; m < M%8; m += 2)
         ft_kernel_tri_hi2lo_SSE(RP, m, B+NB*m);
-    for (int m = M_star%8; m < M%16; m += 4)
+    for (int m = M%8; m < M%16; m += 4)
         ft_kernel_tri_hi2lo_AVX(RP, m, B+NB*m);
     #pragma omp parallel
-    for (int m = M_star + 8*FT_GET_THREAD_NUM(); m < M; m += 8*FT_GET_NUM_THREADS())
+    for (int m = M%16 + 8*FT_GET_THREAD_NUM(); m < M; m += 8*FT_GET_NUM_THREADS())
         ft_kernel_tri_hi2lo_AVX512(RP, m, B+NB*m);
     permute_t_tri(A, B, N, M, 8);
 }
@@ -311,14 +386,13 @@ void ft_execute_tri_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double
 void ft_execute_tri_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     int N = RP->n;
     int NB = ALIGNB(N);
-    int M_star = M%16;
     permute_tri(A, B, N, M, 8);
-    for (int m = M%2; m < M_star%8; m += 2)
+    for (int m = M%2; m < M%8; m += 2)
         ft_kernel_tri_lo2hi_SSE(RP, m, B+NB*m);
-    for (int m = M_star%8; m < M%16; m += 4)
+    for (int m = M%8; m < M%16; m += 4)
         ft_kernel_tri_lo2hi_AVX(RP, m, B+NB*m);
     #pragma omp parallel
-    for (int m = M_star + 8*FT_GET_THREAD_NUM(); m < M; m += 8*FT_GET_NUM_THREADS())
+    for (int m = M%16 + 8*FT_GET_THREAD_NUM(); m < M; m += 8*FT_GET_NUM_THREADS())
         ft_kernel_tri_lo2hi_AVX512(RP, m, B+NB*m);
     permute_t_tri(A, B, N, M, 8);
 }
@@ -438,6 +512,141 @@ void ft_execute_disk_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, doubl
     permute_t_disk(A, B, N, M, 8);
     warp(A, N, M_star, 2);
     warp_t(A, N, M, 4);
+}
+
+
+void ft_execute_tet_hi2lo(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M) {
+    int N = RP1->n;
+    #pragma omp parallel
+    for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
+        for (int l = 0; l < L-m; l++)
+            ft_kernel_tri_hi2lo(RP1, l+m, A+N*(l+L*m));
+        ft_kernel_tet_hi2lo(RP2, L, m, A+N*L*m);
+    }
+}
+
+void ft_execute_tet_lo2hi(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M) {
+    int N = RP1->n;
+    #pragma omp parallel
+    for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
+        ft_kernel_tet_lo2hi(RP2, L, m, A+N*L*m);
+        for (int l = 0; l < L-m; l++)
+            ft_kernel_tri_lo2hi(RP1, l+m, A+N*(l+L*m));
+    }
+}
+
+void ft_execute_tet_hi2lo_SSE(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
+    int N = RP1->n;
+    int NB = ALIGNB(N);
+    #pragma omp parallel
+    for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
+        permute_tri(A+N*L*m, B+NB*L*m, N, L-m, 2);
+        if ((L-m)%2)
+            ft_kernel_tri_hi2lo(RP1, m, B+NB*L*m);
+        for (int l = (L-m)%2; l < L-m; l += 2)
+            ft_kernel_tri_hi2lo_SSE(RP1, l+m, B+NB*(l+L*m));
+        permute_t_tri(A+N*L*m, B+NB*L*m, N, L-m, 2);
+        permute(A+N*L*m, B+NB*L*m, N, L, 1);
+        ft_kernel_tet_hi2lo_SSE(RP2, L, m, B+NB*L*m);
+        permute_t(A+N*L*m, B+NB*L*m, N, L, 1);
+    }
+}
+
+void ft_execute_tet_lo2hi_SSE(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
+    int N = RP1->n;
+    int NB = ALIGNB(N);
+    #pragma omp parallel
+    for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
+        permute(A+N*L*m, B+NB*L*m, N, L, 1);
+        ft_kernel_tet_lo2hi_SSE(RP2, L, m, B+NB*L*m);
+        permute_t(A+N*L*m, B+NB*L*m, N, L, 1);
+        permute_tri(A+N*L*m, B+NB*L*m, N, L-m, 2);
+        if ((L-m)%2)
+            ft_kernel_tri_lo2hi(RP1, m, B+NB*L*m);
+        for (int l = (L-m)%2; l < L-m; l += 2)
+            ft_kernel_tri_lo2hi_SSE(RP1, l+m, B+NB*(l+L*m));
+        permute_t_tri(A+N*L*m, B+NB*L*m, N, L-m, 2);
+    }
+}
+
+void ft_execute_tet_hi2lo_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
+    int N = RP1->n;
+    int NB = ALIGNB(N);
+    #pragma omp parallel
+    for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
+        permute_tri(A+N*L*m, B+NB*L*m, N, L-m, 4);
+        if ((L-m)%2)
+            ft_kernel_tri_hi2lo(RP1, m, B+NB*L*m);
+        for (int l = (L-m)%2; l < (L-m)%8; l += 2)
+            ft_kernel_tri_hi2lo_SSE(RP1, l+m, B+NB*(l+L*m));
+        for (int l = (L-m)%8; l < L-m; l += 4)
+            ft_kernel_tri_hi2lo_AVX(RP1, l+m, B+NB*(l+L*m));
+        permute_t_tri(A+N*L*m, B+NB*L*m, N, L-m, 4);
+        permute(A+N*L*m, B+NB*L*m, N, L, 1);
+        ft_kernel_tet_hi2lo_AVX(RP2, L, m, B+NB*L*m);
+        permute_t(A+N*L*m, B+NB*L*m, N, L, 1);
+    }
+}
+
+void ft_execute_tet_lo2hi_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
+    int N = RP1->n;
+    int NB = ALIGNB(N);
+    #pragma omp parallel
+    for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
+        permute(A+N*L*m, B+NB*L*m, N, L, 1);
+        ft_kernel_tet_lo2hi_AVX(RP2, L, m, B+NB*L*m);
+        permute_t(A+N*L*m, B+NB*L*m, N, L, 1);
+        permute_tri(A+N*L*m, B+NB*L*m, N, L-m, 4);
+        if ((L-m)%2)
+            ft_kernel_tri_lo2hi(RP1, m, B+NB*L*m);
+        for (int l = (L-m)%2; l < (L-m)%8; l += 2)
+            ft_kernel_tri_lo2hi_SSE(RP1, l+m, B+NB*(l+L*m));
+        for (int l = (L-m)%8; l < L-m; l += 4)
+            ft_kernel_tri_lo2hi_AVX(RP1, l+m, B+NB*(l+L*m));
+        permute_t_tri(A+N*L*m, B+NB*L*m, N, L-m, 4);
+    }
+}
+
+void ft_execute_tet_hi2lo_AVX512(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
+    int N = RP1->n;
+    int NB = ALIGNB(N);
+    #pragma omp parallel
+    for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
+        permute_tri(A+N*L*m, B+NB*L*m, N, L-m, 8);
+        if ((L-m)%2)
+            ft_kernel_tri_hi2lo(RP1, m, B+NB*L*m);
+        for (int l = (L-m)%2; l < (L-m)%8; l += 2)
+            ft_kernel_tri_hi2lo_SSE(RP1, l+m, B+NB*(l+L*m));
+        for (int l = (L-m)%8; l < (L-m)%16; l += 4)
+            ft_kernel_tri_hi2lo_AVX(RP1, l+m, B+NB*(l+L*m));
+        for (int l = (L-m)%16; l < L-m; l += 8)
+            ft_kernel_tri_hi2lo_AVX512(RP1, l+m, B+NB*(l+L*m));
+        permute_t_tri(A+N*L*m, B+NB*L*m, N, L-m, 8);
+        permute(A+N*L*m, B+NB*L*m, N, L, 1);
+        ft_kernel_tet_hi2lo_AVX512(RP2, L, m, B+NB*L*m);
+        permute_t(A+N*L*m, B+NB*L*m, N, L, 1);
+    }
+}
+
+void ft_execute_tet_lo2hi_AVX512(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
+    int N = RP1->n;
+    int NB = ALIGNB(N);
+    #pragma omp parallel
+    for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
+        permute(A+N*L*m, B+NB*L*m, N, L, 1);
+        ft_kernel_tet_lo2hi_AVX512(RP2, L, m, B+NB*L*m);
+        permute_t(A+N*L*m, B+NB*L*m, N, L, 1);
+        permute_tri(A+N*L*m, B+NB*L*m, N, L-m, 8);
+        if ((L-m)%2)
+            ft_kernel_tri_lo2hi(RP1, m, B+NB*L*m);
+        for (int l = (L-m)%2; l < (L-m)%8; l += 2)
+            ft_kernel_tri_lo2hi_SSE(RP1, l+m, B+NB*(l+L*m));
+        for (int l = (L-m)%8; l < (L-m)%16; l += 4)
+            ft_kernel_tri_lo2hi_AVX(RP1, l+m, B+NB*(l+L*m));
+        for (int l = (L-m)%16; l < L-m; l += 8)
+            ft_kernel_tri_lo2hi_AVX512(RP1, l+m, B+NB*(l+L*m));
+        permute_t_tri(A+N*L*m, B+NB*L*m, N, L-m, 8);
+    }
 }
 
 
@@ -659,11 +868,11 @@ void ft_execute_tri2cheb(const ft_harmonic_plan * P, double * A, const int N, co
         cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1, N, A, N);
     if ((P->gamma != -0.5) || (P->beta != -0.5))
         cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P2, N, A, N);
-    chebyshev_normalization(A, N, M);
+    chebyshev_normalization_2d(A, N, M);
 }
 
 void ft_execute_cheb2tri(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    chebyshev_normalization_t(A, N, M);
+    chebyshev_normalization_2d_t(A, N, M);
     if ((P->beta != -0.5) || (P->gamma != -0.5))
         cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P2inv, N, A, N);
     if ((P->alpha != -0.5) || (P->beta + P->gamma != -1.5))
@@ -717,58 +926,93 @@ void ft_execute_cxf2disk(const ft_harmonic_plan * P, double * A, const int N, co
     ft_execute_disk_lo2hi_AVX512(P->RP, A, P->B, M);
 }
 
-static void alternate_sign(double * A, const int N, const int M) {
-    for (int j = 0; j < M; j++)
-        for (int i = 0; i < N; i += 2)
-            A[i+j*N] = -A[i+j*N];
+void ft_destroy_tetrahedral_harmonic_plan(ft_tetrahedral_harmonic_plan * P) {
+    ft_destroy_rotation_plan(P->RP1);
+    ft_destroy_rotation_plan(P->RP2);
+    VFREE(P->B);
+    free(P->P1);
+    free(P->P2);
+    free(P->P3);
+    free(P->P1inv);
+    free(P->P2inv);
+    free(P->P3inv);
+    free(P);
 }
 
-static void alternate_sign_t(double * A, const int N, const int M) {
-    for (int i = 0; i < N; i += 2)
-        for (int j = 0; j < M; j++)
-            A[j+i*M] = -A[j+i*M];
+ft_tetrahedral_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha, const double beta, const double gamma, const double delta) {
+    ft_tetrahedral_harmonic_plan * P = (ft_tetrahedral_harmonic_plan *) malloc(sizeof(ft_tetrahedral_harmonic_plan));
+    P->RP1 = ft_plan_rottriangle(n, alpha, beta, gamma + delta + 1.0);
+    P->RP2 = ft_plan_rottriangle(n, beta, gamma, delta);
+    P->B = (double *) VMALLOC(ALIGNB(n) * n * n * sizeof(double));
+    P->P1 = plan_jac2jac(1, 1, n, beta + gamma + delta + 2.0, alpha, -0.5);
+    double * P12 = plan_jac2jac(1, 1, n, alpha, -0.5, -0.5);
+    alternate_sign(P12, n, n);
+    alternate_sign_t(P12, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P12, n, P->P1, n);
+    free(P12);
+    P->P2 = plan_jac2jac(1, 1, n, gamma + delta + 1.0, beta, -0.5);
+    double * P22 = plan_jac2jac(1, 1, n, beta, -0.5, -0.5);
+    alternate_sign(P22, n, n);
+    alternate_sign_t(P22, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P22, n, P->P2, n);
+    free(P22);
+    P->P3 = plan_jac2jac(1, 1, n, delta, gamma, -0.5);
+    double * P32 = plan_jac2jac(1, 1, n, gamma, -0.5, -0.5);
+    alternate_sign(P32, n, n);
+    alternate_sign_t(P32, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P32, n, P->P3, n);
+    free(P32);
+    P->P1inv = plan_jac2jac(1, 1, n, -0.5, -0.5, alpha);
+    double * P12inv = plan_jac2jac(1, 1, n, -0.5, alpha, beta + gamma + delta + 2.0);
+    alternate_sign(P->P1inv, n, n);
+    alternate_sign_t(P->P1inv, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P12inv, n, P->P1inv, n);
+    free(P12inv);
+    P->P2inv = plan_jac2jac(1, 1, n, -0.5, -0.5, beta);
+    double * P22inv = plan_jac2jac(1, 1, n, -0.5, beta, gamma + delta + 1.0);
+    alternate_sign(P->P2inv, n, n);
+    alternate_sign_t(P->P2inv, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P22inv, n, P->P2inv, n);
+    free(P22inv);
+    P->P3inv = plan_jac2jac(1, 1, n, -0.5, -0.5, gamma);
+    double * P32inv = plan_jac2jac(1, 1, n, -0.5, gamma, beta);
+    alternate_sign(P->P3inv, n, n);
+    alternate_sign_t(P->P3inv, n, n);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P32inv, n, P->P3inv, n);
+    free(P32inv);
+    P->alpha = alpha;
+    P->beta = beta;
+    P->gamma = gamma;
+    P->delta = delta;
+    return P;
 }
 
-static void chebyshev_normalization(double * A, const int N, const int M) {
-    A[0] *= M_1_PI;
-    for (int i = 1; i < N; i++)
-        A[i] *= M_SQRT2*M_1_PI;
-    for (int j = 1; j < M; j++)
-        A[j*N] *= M_SQRT2*M_1_PI;
-    for (int j = 1; j < M; j++)
-        for (int i = 1; i < N; i++)
-            A[i+j*N] *= M_2_PI;
+void ft_execute_tet2cheb(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M) {
+    ft_execute_tet_hi2lo_AVX512(P->RP1, P->RP2, A, P->B, L, M);
+    if ((P->beta + P->gamma + P->delta != -2.5) || (P->alpha != -0.5))
+        for (int m = 0; m < M; m++)
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P1, N, A+N*L*m, N);
+    if ((P->gamma + P->delta != -1.5) || (P->beta != -0.5))
+        for (int m = 0; m < M; m++)
+            cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, L, 1.0, P->P2, N, A+N*L*m, N);
+    if ((P->delta != -0.5) || (P->gamma != -0.5))
+        for (int n = 0; n < N; n++)
+            for (int l = 0; l < L; l++)
+                cblas_dtrmv(CblasColMajor, CblasUpper, CblasTrans, CblasNonUnit, N, P->P3, N, A+n+N*l, N*L);
+    chebyshev_normalization_3d(A, N, L, M);
 }
 
-static void chebyshev_normalization_t(double * A, const int N, const int M) {
-    A[0] *= M_PI;
-    for (int i = 1; i < N; i++)
-        A[i] *= M_SQRT1_2*M_PI;
-    for (int j = 1; j < M; j++)
-        A[j*N] *= M_SQRT1_2*M_PI;
-    for (int j = 1; j < M; j++)
-        for (int i = 1; i < N; i++)
-            A[i+j*N] *= M_PI_2;
-}
-
-static void partial_chebyshev_normalization(double * A, const int N, const int M) {
-    for (int j = 1; j < M; j += 4) {
-        for (int i = 0; i < N; i++)
-            A[i+j*N] *= M_SQRT2*M_1_SQRT_PI;
-    }
-    for (int j = 2; j < M; j += 4) {
-        for (int i = 0; i < N; i++)
-            A[i+j*N] *= M_SQRT2*M_1_SQRT_PI;
-    }
-}
-
-static void partial_chebyshev_normalization_t(double * A, const int N, const int M) {
-    for (int j = 1; j < M; j += 4) {
-        for (int i = 0; i < N; i++)
-            A[i+j*N] *= M_SQRT1_2*M_SQRT_PI;
-    }
-    for (int j = 2; j < M; j += 4) {
-        for (int i = 0; i < N; i++)
-            A[i+j*N] *= M_SQRT1_2*M_SQRT_PI;
-    }
+void ft_execute_cheb2tet(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M) {
+    chebyshev_normalization_3d_t(A, N, L, M);
+    if ((P->gamma != -0.5) || (P->delta != -0.5))
+        for (int n = 0; n < N; n++)
+            for (int l = 0; l < L; l++)
+                cblas_dtrmv(CblasColMajor, CblasUpper, CblasTrans, CblasNonUnit, N, P->P3inv, N, A+n+N*l, N*L);
+    if ((P->beta != -0.5) || (P->gamma + P->delta != -1.5))
+        for (int m = 0; m < M; m++)
+            cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, L, 1.0, P->P2inv, N, A+N*L*m, N);
+    if ((P->alpha != -0.5) || (P->beta + P->gamma + P->delta != -2.5))
+        for (int m = 0; m < M; m++)
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P1inv, N, A+N*L*m, N);
+    ft_execute_tet_lo2hi_AVX512(P->RP1, P->RP2, A, P->B, L, M);
 }

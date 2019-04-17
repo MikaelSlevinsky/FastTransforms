@@ -1,14 +1,14 @@
 #include "ftutilities.h"
 
 int main(void) {
-    struct timeval start, end;
+    //struct timeval start, end;
 
     static double * A;
     static double * B;
 
     char * FMT = "%3.0f";
 
-    int N, M, NLOOPS;
+    int N, M;//, NLOOPS;
 
     for (int i = 0; i < 1; i++) {
         N = 8*pow(2, i);

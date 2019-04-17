@@ -17,6 +17,8 @@
 
 \author{Richard Mika\"el Slevinsky\thanks{Email: Richard.Slevinsky@umanitoba.ca}}
 
+\date{}
+
 \maketitle
 
 \section{Introduction}
@@ -72,7 +74,7 @@ g_n^0 & 0 & 0 & \cdots & g_n^{-n} & g_n^n\\
 \end{equation}
 That is:
 \begin{equation}
-g_n(\theta,\varphi) = \sum_{\ell=0}^n\sum_{m=-n}^{+n} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m~{\rm even},\\ \sin((\ell+1)\theta) & m~{\rm odd}.\end{array}\right.
+f_n(\theta,\varphi) = \sum_{\ell=0}^n\sum_{m=-n}^{+n} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m~{\rm even},\\ \sin((\ell+1)\theta) & m~{\rm odd}.\end{array}\right.
 \end{equation}
 Since {\tt sph2fourier} only transforms columns of the arrays, the routine is indifferent to the choice of longitudinal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
 
@@ -110,7 +112,7 @@ g_n^0 & 0 & 0 & \cdots & g_n^{-n} & g_n^n\\
 \end{equation}
 That is:
 \begin{equation}
-g_n(\theta,\varphi) = \sum_{\ell=0}^n\sum_{m=-n}^{+n} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m+s~{\rm even},\\ \sin((\ell+1)\theta) & m+s~{\rm odd}.\end{array}\right.
+f_n(\theta,\varphi) = \sum_{\ell=0}^n\sum_{m=-n}^{+n} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m+s~{\rm even},\\ \sin((\ell+1)\theta) & m+s~{\rm odd}.\end{array}\right.
 \end{equation}
 Since {\tt spinsph2fourier} only transforms columns of the arrays, the routine is indifferent to the choice of longitudinal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
 
@@ -118,14 +120,14 @@ Since {\tt spinsph2fourier} only transforms columns of the arrays, the routine i
 
 Triangular harmonics are:
 \begin{equation}
-\tilde{P}_{\ell,m}^{(\alpha,\beta,\gamma)}(x,y) = (2(1-x))^m \tilde{P}_{\ell-m}^{(2m+\beta+\gamma+1,\alpha)}(2x-1) \tilde{P}_m^{(\gamma,\beta)}\left(\frac{2y}{1-x}-1\right),
+\tilde{P}_{\ell,m}^{(\alpha,\beta,\gamma)}(x,y) = (2-2x)^m \tilde{P}_{\ell-m}^{(2m+\beta+\gamma+1,\alpha)}(2x-1) \tilde{P}_m^{(\gamma,\beta)}\left(\frac{2y}{1-x}-1\right),
 \end{equation}
 where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-$n$ expansion in triangular harmonics is given by:
 \begin{equation}
 f_n(x,y) = \sum_{\ell=0}^{n}\sum_{m = 0}^\ell f_\ell^m \tilde{P}_{\ell,m}^{(\alpha,\beta,\gamma)}(x,y).
 \end{equation}
 If triangular harmonic expansion coefficients are organized into the array:
-\[
+\begin{equation}
 F = \begin{pmatrix}
 f_0^0 & f_1^1 & f_2^2 & \cdots & f_n^n\\
 %f_1^0 & f_2^1 & f_3^2 & \cdots & 0\\
@@ -134,9 +136,9 @@ f_{n-2}^0 & f_{n-1}^1 & f_n^2 & \iddots & \vdots\\
 f_{n-1}^0 & f_n^1 & 0 & \cdots & 0\\
 f_n^0 & 0 & 0 & \cdots & 0\\
 \end{pmatrix},
-\]
+\end{equation}
 then {\tt tri2cheb} returns the bivariate Chebyshev coefficients:
-\[
+\begin{equation}
 G = \begin{pmatrix}
 g_0^0 & g_0^1 & \cdots & g_0^n\\
 g_1^0 & g_1^1 & \cdots & g_1^n\\
@@ -144,11 +146,11 @@ g_1^0 & g_1^1 & \cdots & g_1^n\\
 %g_{n-1}^0 & g_{n-1}^1& \cdots & g_{n-1}^n\\
 g_n^0 & g_n^1 & \cdots & g_n^n\\
 \end{pmatrix}.
-\]
+\end{equation}
 That is:
-\[
-g_n(x,y) = \sum_{\ell=0}^n\sum_{m=0}^n g_\ell^m T_\ell(2x-1) T_m\left(\frac{2y}{1-x}-1\right).
-\]
+\begin{equation}
+f_n(x,y) = \sum_{\ell=0}^n\sum_{m=0}^n g_\ell^m T_\ell(2x-1) T_m\left(\frac{2y}{1-x}-1\right).
+\end{equation}
 
 \subsection{{\tt disk2cxf}}
 
@@ -183,9 +185,37 @@ g_{2n}^0 & 0 & 0 & g_{2n}^{-2} & g_{2n}^2 & \cdots & g_{2n}^{-2n} & g_{2n}^{2n}\
 \end{equation}
 That is:
 \begin{equation}
-g_{2n}(r,\theta) = \sum_{\ell=0}^{n}\sum_{m=-2n}^{+2n} g_{2\ell}^m \frac{e^{\ii m\theta}}{\sqrt{2\pi}} \left\{\begin{array}{lr} T_{2\ell}(r) & m~{\rm even},\\ T_{2\ell+1}(r) & m~{\rm odd}.\end{array}\right.
+f_{2n}(r,\theta) = \sum_{\ell=0}^{n}\sum_{m=-2n}^{+2n} g_{2\ell}^m \frac{e^{\ii m\theta}}{\sqrt{2\pi}} \left\{\begin{array}{lr} T_{2\ell}(r) & m~{\rm even},\\ T_{2\ell+1}(r) & m~{\rm odd}.\end{array}\right.
 \end{equation}
 Since {\tt disk2cxf} only transforms columns of the arrays, the routine is indifferent to the choice of azimuthal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
+
+\subsection{{\tt tet2cheb}}
+
+Tetrahedral harmonics are:
+\begin{align}
+\tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z) & = (2-2x)^{\ell+m} \tilde{P}_{k-\ell-m}^{(2\ell+2m+\beta+\gamma+\delta+2,\alpha)}(2x-1)\nonumber\\
+& \quad \times \left(2-\frac{2y}{1-x}\right)^m \tilde{P}_\ell^{(2m+\gamma+\delta+1,\beta)}\left(\frac{2y}{1-x}-1\right)\\
+& \quad \times \tilde{P}_m^{(\delta,\gamma)}\left(\frac{2z}{1-x-y}-1\right),\nonumber
+\end{align}
+where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-$n$ expansion in tetrahedral harmonics is given by:
+\begin{align}
+f_n(x,y,z) & = \sum_{k=0}^n\sum_{\ell=0}^k\sum_{m=0}^{k-\ell} f_{k,\ell}^m \tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z),\\
+& = \sum_{m=0}^n\sum_{\ell=0}^{n-m}\sum_{k=\ell+m}^n f_{k,\ell}^m \tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z).
+\end{align}
+If tetrahedral harmonic expansion coefficients are organized into the rank-$3$ array whose $m^{\rm th}$ slice is:
+\begin{equation}
+F[0:n-m,0:n-m,m] = \begin{pmatrix}
+f_{m,0}^m & f_{1+m,1}^m & f_{2+m,2}^m & \cdots & f_{n,n-m}^m\\
+\vdots & \vdots &  \vdots & \iddots & 0\\
+f_{n-2,0}^m & f_{n-1,1}^m & f_{n,2}^m & \iddots & \vdots\\
+f_{n-1,0}^m & f_{n,1}^m & 0 & \cdots & 0\\
+f_{n,0}^m & 0 & 0 & \cdots & 0\\
+\end{pmatrix},
+\end{equation}
+then {\tt tet2cheb} returns the trivariate Chebyshev coefficients stored in the rank-$3$ array $G$. That is:
+\begin{equation}
+f_n(x,y,z) = \sum_{k=0}^n\sum_{\ell=0}^n\sum_{m=0}^n g_{k,\ell}^m T_k(2x-1) T_\ell\left(\frac{2y}{1-x}-1\right) T_m\left(\frac{2z}{1-x-y}-1\right).
+\end{equation}
 
 \begin{thebibliography}{1}
 

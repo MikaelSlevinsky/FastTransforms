@@ -69,5 +69,4 @@ dkms.conf
 # Docs
 *.aux
 *.log
-*.pdf
 *.synctex.gz

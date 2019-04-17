@@ -3,6 +3,28 @@
 #include "fasttransforms.h"
 #include "ftinternal.h"
 
+static inline void colswap(const double * X, double * Y, const int N, const int M) {
+    for (int i = 0; i < N; i++)
+        Y[i] = X[i];
+    for (int j = 1; j < (M+1)/2; j++) {
+        for (int i = 0; i < N; i++)
+            Y[i+j*N] = X[i+2*j*N];
+        for (int i = 0; i < N; i++)
+            Y[i+(M-j)*N] = -X[i+(2*j-1)*N];
+    }
+}
+
+static inline void colswap_t(double * X, const double * Y, const int N, const int M) {
+    for (int i = 0; i < N; i++)
+        X[i] = Y[i];
+    for (int j = 1; j < (M+1)/2; j++) {
+        for (int i = 0; i < N; i++)
+            X[i+2*j*N] = Y[i+j*N];
+        for (int i = 0; i < N; i++)
+            X[i+(2*j-1)*N] = -Y[i+(M-j)*N];
+    }
+}
+
 void ft_destroy_sphere_fftw_plan(ft_sphere_fftw_plan * P) {
     fftw_destroy_plan(P->plantheta1);
     fftw_destroy_plan(P->plantheta2);
@@ -177,6 +199,57 @@ void ft_execute_tri_analysis(const ft_triangle_fftw_plan * P, double * X, const 
 }
 
 
+void ft_destroy_tetrahedron_fftw_plan(ft_tetrahedron_fftw_plan * P) {
+    fftw_destroy_plan(P->planxyz);
+    free(P);
+}
+
+ft_tetrahedron_fftw_plan * ft_plan_tet_with_kind(const int N, const int L, const int M, const fftw_r2r_kind kind0, const fftw_r2r_kind kind1, const fftw_r2r_kind kind2) {
+    ft_tetrahedron_fftw_plan * P = (ft_tetrahedron_fftw_plan *) malloc(sizeof(ft_tetrahedron_fftw_plan));
+    double * X = fftw_malloc(N*L*M*sizeof(double));
+    P->planxyz = fftw_plan_r2r_3d(N, L, M, X, X, kind0, kind1, kind2, FT_FFTW_FLAGS);
+    fftw_free(X);
+    return P;
+}
+
+ft_tetrahedron_fftw_plan * ft_plan_tet_synthesis(const int N, const int L, const int M) {return ft_plan_tet_with_kind(N, L, M, FFTW_REDFT01, FFTW_REDFT01, FFTW_REDFT01);}
+ft_tetrahedron_fftw_plan * ft_plan_tet_analysis(const int N, const int L, const int M) {return ft_plan_tet_with_kind(N, L, M, FFTW_REDFT10, FFTW_REDFT10, FFTW_REDFT10);}
+
+void ft_execute_tet_synthesis(const ft_tetrahedron_fftw_plan * P, double * X, const int N, const int L, const int M) {
+    if (N > 1 && L > 1 && M > 1) {
+        for (int j = 0; j < L; j++)
+            for (int i = 0; i < N; i++)
+                X[i+j*N] *= 2.0;
+        for (int k = 0; k < M; k++)
+            for (int j = 0; j < L; j++)
+                X[(j+k*L)*N] *= 2.0;
+        for (int k = 0; k < M; k++)
+            for (int i = 0; i < N; i++)
+                X[i+k*L*N] *= 2.0;
+        fftw_execute_r2r(P->planxyz, X, X);
+        for (int i = 0; i < N*L*M; i++)
+            X[i] *= 0.125;
+    }
+}
+
+void ft_execute_tet_analysis(const ft_tetrahedron_fftw_plan * P, double * X, const int N, const int L, const int M) {
+    if (N > 1 && L > 1 && M > 1) {
+        fftw_execute_r2r(P->planxyz, X, X);
+        for (int j = 0; j < L; j++)
+            for (int i = 0; i < N; i++)
+                X[i+j*N] *= 0.5;
+        for (int k = 0; k < M; k++)
+            for (int j = 0; j < L; j++)
+                X[(j+k*L)*N] *= 0.5;
+        for (int k = 0; k < M; k++)
+            for (int i = 0; i < N; i++)
+                X[i+k*L*N] *= 0.5;
+        for (int i = 0; i < N*L*M; i++)
+            X[i] /= N*L*M;
+    }
+}
+
+
 void ft_destroy_disk_fftw_plan(ft_disk_fftw_plan * P) {
     fftw_destroy_plan(P->planr1);
     fftw_destroy_plan(P->planr2);
@@ -262,28 +335,5 @@ void ft_execute_disk_analysis(const ft_disk_fftw_plan * P, double * X, const int
     for (int j = 3; j < M; j += 4) {
         X[j*N] *= 0.5;
         X[(j+1)*N] *= 0.5;
-    }
-}
-
-
-static inline void colswap(const double * X, double * Y, const int N, const int M) {
-    for (int i = 0; i < N; i++)
-        Y[i] = X[i];
-    for (int j = 1; j < (M+1)/2; j++) {
-        for (int i = 0; i < N; i++)
-            Y[i+j*N] = X[i+2*j*N];
-        for (int i = 0; i < N; i++)
-            Y[i+(M-j)*N] = -X[i+(2*j-1)*N];
-    }
-}
-
-static inline void colswap_t(double * X, const double * Y, const int N, const int M) {
-    for (int i = 0; i < N; i++)
-        X[i] = Y[i];
-    for (int j = 1; j < (M+1)/2; j++) {
-        for (int i = 0; i < N; i++)
-            X[i+2*j*N] = Y[i+j*N];
-        for (int i = 0; i < N; i++)
-            X[i+(2*j-1)*N] = -Y[i+(M-j)*N];
     }
 }
