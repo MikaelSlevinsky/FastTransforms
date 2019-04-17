@@ -212,7 +212,7 @@ void X(test_arrow)(int * checksum) {
     //    X(gemv)('T', n, n, 1, FQ, FQ+j*n, 0, QtQ+j*n);
     err = X(norm_2arg)(QtQ, Id, n*n)/X(norm_1arg)(Id, n*n);
     printf("FMM accelerated orthogonality of eigenvectors \t\t |%20.2e ", (double) err);
-    X(checktest)(err, n, checksum);
+    X(checktest)(err, n*n, checksum);
     printf("Time to create eigenvectors hierarchically \t\t |%20.6f s\n", elapsed(&start, &end, 1));
 
     X(destroy_symmetric_arrow)(A);
