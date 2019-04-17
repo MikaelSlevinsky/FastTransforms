@@ -116,14 +116,14 @@ void X(test_tridiagonal)(int * checksum) {
 
     FLT * BV = (FLT *) calloc(n*n, sizeof(FLT));
     FLT * VtBV = (FLT *) calloc(n*n, sizeof(FLT));
-    FLT * I = (FLT *) calloc(n*n, sizeof(FLT));
+    FLT * Id = (FLT *) calloc(n*n, sizeof(FLT));
     for (int i = 0; i < n; i++)
-        I[i+i*n] = 1;
+        Id[i+i*n] = 1;
     for (int j = 0; j < n; j++) {
         X(stmv)('N', 1, S, V+j*n, 0, BV+j*n);
         X(gemv)('T', n, n, 1, V, BV+j*n, 0, VtBV+j*n);
     }
-    err = X(norm_2arg)(VtBV, I, n*n)/X(norm_1arg)(I, n*n);
+    err = X(norm_2arg)(VtBV, Id, n*n)/X(norm_1arg)(Id, n*n);
     printf("Numerical B-orthogonality of generalized eigenvectors \t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
@@ -133,7 +133,7 @@ void X(test_tridiagonal)(int * checksum) {
     FLT * QtQ = (FLT *) calloc(n*n, sizeof(FLT));
     for (int j = 0; j < n; j++)
         X(gemv)('T', n, n, 1, V, V+j*n, 0, QtQ+j*n);
-    err = X(norm_2arg)(QtQ, I, n*(n-(mu-m)/2))/X(norm_1arg)(I, n*(n-(mu-m)/2));
+    err = X(norm_2arg)(QtQ, Id, n*(n-(mu-m)/2))/X(norm_1arg)(Id, n*(n-(mu-m)/2));
     printf("Numerical RRᵀ-orthogonality of gen. eigenvectors \t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
@@ -150,7 +150,7 @@ void X(test_tridiagonal)(int * checksum) {
     free(V);
     free(BV);
     free(VtBV);
-    free(I);
+    free(Id);
     free(QtQ);
     free(lambda);
     free(lambda_true);

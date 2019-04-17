@@ -172,14 +172,14 @@ void X(test_arrow)(int * checksum) {
     X(symmetric_arrow_eigen) * F = X(symmetric_arrow_eig)(A);
     FLT * Q = F->Q;
     FLT * QtQ = (FLT *) calloc(n*n, sizeof(FLT));
-    FLT * I = (FLT *) calloc(n*n, sizeof(FLT));
+    FLT * Id = (FLT *) calloc(n*n, sizeof(FLT));
     for (int i = 0; i < n; i++)
-        I[i+i*n] = 1;
+        Id[i+i*n] = 1;
     gettimeofday(&start, NULL);
     for (int j = 0; j < n; j++)
         X(gemv)('T', n, n, 1, Q, Q+j*n, 0, QtQ+j*n);
     gettimeofday(&end, NULL);
-    err = X(norm_2arg)(QtQ, I, n*n)/X(norm_1arg)(I, n*n);
+    err = X(norm_2arg)(QtQ, Id, n*n)/X(norm_1arg)(Id, n*n);
     free(QtQ);
     printf("Numerical orthogonality of eigenvectors \t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
@@ -193,10 +193,10 @@ void X(test_arrow)(int * checksum) {
         FQ[j+j*n] = 1;
     #pragma omp parallel for
     for (int j = FFMM->ib; j < n; j++) {
-        X(himv)('N', 1, FFMM->Q, I+FFMM->ib+j*n, 0, FQ+FFMM->ib+j*n);
+        X(himv)('N', 1, FFMM->Q, Id+FFMM->ib+j*n, 0, FQ+FFMM->ib+j*n);
         FLT t = 0;
         for (int i = 0; i < n-FFMM->ib; i++)
-             t += FFMM->q[i]*I[i+FFMM->ib+j*n];
+             t += FFMM->q[i]*Id[i+FFMM->ib+j*n];
         (FQ+j*n)[n-1] = t;
     }
     for (int j = 0; j < FFMM->ib; j++)
@@ -210,7 +210,7 @@ void X(test_arrow)(int * checksum) {
     gettimeofday(&end, NULL);
     //for (int j = 0; j < n; j++)
     //    X(gemv)('T', n, n, 1, FQ, FQ+j*n, 0, QtQ+j*n);
-    err = X(norm_2arg)(QtQ, I, n*n)/X(norm_1arg)(I, n*n);
+    err = X(norm_2arg)(QtQ, Id, n*n)/X(norm_1arg)(Id, n*n);
     printf("FMM accelerated orthogonality of eigenvectors \t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
     printf("Time to create eigenvectors hierarchically \t\t |%20.6f s\n", elapsed(&start, &end, 1));
@@ -237,5 +237,5 @@ void X(test_arrow)(int * checksum) {
     free(cond);
     free(FQ);
     free(QtQ);
-    free(I);
+    free(Id);
 }
