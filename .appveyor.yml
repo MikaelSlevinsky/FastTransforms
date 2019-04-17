@@ -29,4 +29,5 @@ test_script:
   - set OMP_NUM_THREADS=4
   - test_drivers.exe 3 3 0
   - additiontheorem.exe
+  - calculus.exe
   - holomorphic.exe

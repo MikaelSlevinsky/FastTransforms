@@ -40,6 +40,7 @@ script:
   - OMP_NUM_THREADS=4 ./test_fftw 3 3 0
   - make examples
   - ./additiontheorem
+  - ./calculus
   - ./holomorphic
 
 notifications:
