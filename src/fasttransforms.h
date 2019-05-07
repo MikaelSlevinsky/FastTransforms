@@ -1,3 +1,7 @@
+/*!
+ \file fasttransforms.h
+ \brief fasttransforms.h is the main header file for FastTransforms.
+*/
 #ifndef FASTTRANSFORMS_H
 #define FASTTRANSFORMS_H
 
@@ -17,14 +21,17 @@
     #define FT_SET_NUM_THREADS(x)
 #endif
 
+/// Set the number of OpenMP threads.
 void ft_set_num_threads(const int n);
 
+/// Data structure to store sines and cosines of Givens rotations.
 typedef struct {
     double * s;
     double * c;
     int n;
 } ft_rotation_plan;
 
+/// Destroy a \ref ft_rotation_plan.
 void ft_destroy_rotation_plan(ft_rotation_plan * RP);
 
 ft_rotation_plan * ft_plan_rotsphere(const int n);
@@ -193,24 +200,34 @@ typedef struct {
     double gamma;
 } ft_harmonic_plan;
 
+/// Destroy a \ref ft_harmonic_plan.
 void ft_destroy_harmonic_plan(ft_harmonic_plan * P);
 
+/// Plan a spherical harmonic transform.
 ft_harmonic_plan * ft_plan_sph2fourier(const int n);
 
+/// Transform a spherical harmonic expansion to a bivariate Fourier series.
 void ft_execute_sph2fourier(const ft_harmonic_plan * P, double * A, const int N, const int M);
+/// Transform a bivariate Fourier series to a spherical harmonic expansion.
 void ft_execute_fourier2sph(const ft_harmonic_plan * P, double * A, const int N, const int M);
 
 void ft_execute_sphv2fourier(const ft_harmonic_plan * P, double * A, const int N, const int M);
 void ft_execute_fourier2sphv(const ft_harmonic_plan * P, double * A, const int N, const int M);
 
+/// Plan a triangular harmonic transform.
 ft_harmonic_plan * ft_plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma);
 
+/// Transform a triangular harmonic expansion to a bivariate Chebyshev series.
 void ft_execute_tri2cheb(const ft_harmonic_plan * P, double * A, const int N, const int M);
+/// Transform a bivariate Chebyshev series to a triangular harmonic expansion.
 void ft_execute_cheb2tri(const ft_harmonic_plan * P, double * A, const int N, const int M);
 
+/// Plan a disk harmonic transform.
 ft_harmonic_plan * ft_plan_disk2cxf(const int n);
 
+/// Transform a disk harmonic expansion to a Chebyshev--Fourier series.
 void ft_execute_disk2cxf(const ft_harmonic_plan * P, double * A, const int N, const int M);
+/// Transform a Chebyshev--Fourier series to a disk harmonic expansion.
 void ft_execute_cxf2disk(const ft_harmonic_plan * P, double * A, const int N, const int M);
 
 typedef struct {
@@ -231,9 +248,12 @@ typedef struct {
 
 void ft_destroy_tetrahedral_harmonic_plan(ft_tetrahedral_harmonic_plan * P);
 
+/// Plan a tetrahedral harmonic transform.
 ft_tetrahedral_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha, const double beta, const double gamma, const double delta);
 
+/// Transform a tetrahedral harmonic expansion to a trivariate Chebyshev series.
 void ft_execute_tet2cheb(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M);
+/// Transform a trivariate Chebyshev series to a tetrahedral harmonic expansion.
 void ft_execute_cheb2tet(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M);
 
 

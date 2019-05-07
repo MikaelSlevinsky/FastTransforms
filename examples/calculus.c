@@ -1,13 +1,18 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include "fasttransforms.h"
-#include "ftutilities.h"
+#include <fasttransforms.h>
+#include <ftutilities.h>
 
 double f(double x, double y) {return 1.0/(1.0+x*x+y*y);};
 double fx(double x, double y) {return -2.0*x/(1.0+x*x+y*y)/(1.0+x*x+y*y);};
 double fy(double x, double y) {return -2.0*y/(1.0+x*x+y*y)/(1.0+x*x+y*y);};
 
+/*!
+  \example calculus.c
+  In this example, we sample a bivariate function:
+  \f[
+  f(x,y) = \frac{1}{1+x^2+y^2},
+  \f]
+  on the reference triangle with vertices \f$(0,0)\f$, \f$(0,1)\f$, and \f$(1,0)\f$ and analyze it in a Proriol series. Then, we find Proriol series for each component of its gradient by term-by-term differentiation of our expansion, and we compare them with the "true" Proriol series by sampling an exact expression for the gradient.
+*/
 int main(void) {
     printf("In this example, we sample a bivariate function "MAGENTA("f(x,y)")" on the reference triangle\n");
     printf("with vertices "MAGENTA("(0,0)")", "MAGENTA("(0,1)")", and "MAGENTA("(1,0)")" and analyze it in a Proriol series.\n");

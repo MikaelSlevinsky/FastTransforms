@@ -1,14 +1,31 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include "fasttransforms.h"
-#include "ftutilities.h"
+#include <fasttransforms.h>
+#include <ftutilities.h>
 
-double dot3(double * x, double * y);
-void normalize3(double * x);
-double P4(double x);
-double * z(double theta, double phi);
+typedef struct {
+    double x;
+    double y;
+    double z;
+} double3;
 
+double dot3(double3 x, double3 y) {return x.x*y.x+x.y*y.y+x.z*y.z;};
+
+void normalize3(double3 * x) {
+    double nrm = sqrt(dot3(* x, * x));
+    x->x /= nrm; x->y /= nrm; x->z /= nrm;
+}
+
+double P4(double x) {double x2 = x*x; return ((35.0*x2-30.0)*x2+3.0)/8.0;};
+
+double3 z(double theta, double phi) {return (double3) {sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)};};
+
+/*!
+  \example additiontheorem.c
+  This example confirms numerically that:
+  \f[
+  f(z) = \frac{P_4(z\cdot y) - P_4(x\cdot y)}{z\cdot y - x\cdot y},
+  \f]
+  is actually a degree-\f$3\f$ polynomial on \f$\mathbb{S}^2\f$, where \f$P_4\f$ is the degree-\f$4\f$ Legendre polynomial, and \f$x,y,z \in \mathbb{S}^2\f$.
+*/
 int main(void) {
     printf("\nThis example confirms numerically that\n");
     printf("\n");
@@ -39,20 +56,10 @@ int main(void) {
 
     char * FMT = "%1.3f";
 
-    ft_harmonic_plan * P;
-    ft_sphere_fftw_plan * PA;
-
-    double x[] = {0.0,0.0,1.0};
-    double y[] = {0.123,0.456,0.789};
-    normalize3(y);
-
     int N = 5;
     int M = 2*N-1;
 
     printf("\n\n"MAGENTA("N = %i")", and "MAGENTA("M = %i")"\n\n", N, M);
-
-    PA = ft_plan_sph_analysis(N, M);
-    P = ft_plan_sph2fourier(N);
 
     double theta[N], phi[M], F[N*M];
 
@@ -66,8 +73,12 @@ int main(void) {
     printmat("Longitudinal grid "MAGENTA("φ"), FMT, phi, 1, M);
     printf("\n");
 
-    printf("Arbitrarily, we place "MAGENTA("x")" at the North pole: "MAGENTA("x = (%1.3f,%1.3f,%1.3f)ᵀ")".\n\n",x[0],x[1],x[2]);
-    printf("Another vector is completely free: "MAGENTA("y = (%1.3f,%1.3f,%1.3f)ᵀ")".\n\n",y[0],y[1],y[2]);
+    double3 x = {0.0,0.0,1.0};
+    double3 y = {0.123,0.456,0.789};
+    normalize3(&y);
+
+    printf("Arbitrarily, we place "MAGENTA("x")" at the North pole: "MAGENTA("x = (%1.3f,%1.3f,%1.3f)ᵀ")".\n\n", x.x, x.y, x.z);
+    printf("Another vector is completely free: "MAGENTA("y = (%1.3f,%1.3f,%1.3f)ᵀ")".\n\n", y.x, y.y, y.z);
     printf("Thus "MAGENTA("z ∈ 𝕊²")" is our variable vector.\n\n");
 
     for (int m = 0; m < M; m++)
@@ -78,6 +89,9 @@ int main(void) {
 
     printmat("F", FMT, F, N, M);
     printf("\n");
+
+    ft_harmonic_plan * P = ft_plan_sph2fourier(N);
+    ft_sphere_fftw_plan * PA = ft_plan_sph_analysis(N, M);
 
     ft_execute_sph_analysis(PA, F, N, M);
     ft_execute_fourier2sph(P, F, N, M);
@@ -132,21 +146,4 @@ int main(void) {
     ft_destroy_sphere_fftw_plan(PA);
 
     return 0;
-}
-
-double dot3(double * x, double * y) {return x[0]*y[0]+x[1]*y[1]+x[2]*y[2];};
-
-void normalize3(double * x) {
-    double nrm = sqrt(dot3(x, x));
-    x[0] /= nrm; x[1] /= nrm; x[2] /= nrm;
-}
-
-double P4(double x) {return (35.0*pow(x, 4)-30.0*pow(x, 2)+3.0)/8.0;};
-
-double * z(double theta, double phi) {
-    double * ret = malloc(3*sizeof(double));
-    ret[0] = sin(theta)*cos(phi);
-    ret[1] = sin(theta)*sin(phi);
-    ret[2] = cos(theta);
-    return ret;
 }

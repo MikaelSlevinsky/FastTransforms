@@ -1,11 +1,16 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include "fasttransforms.h"
-#include "ftutilities.h"
+#include <fasttransforms.h>
+#include <ftutilities.h>
 
-double f(double x, double y);
+double f(double x, double y) {return (x*x-y*y+1.0)/((x*x-y*y+1.0)*(x*x-y*y+1.0)+(2.0*x*y+1.0)*(2.0*x*y+1.0));};
 
+/*!
+  \example holomorphic.c
+  In this example, we explore integration of a harmonic function:
+  \f[
+  f(x,y) = \frac{x^2-y^2+1}{(x^2-y^2+1)^2+(2xy+1)^2},
+  \f]
+  over the unit disk. In this case, we know from complex analysis that the integral of a holomorphic function is equal to \f$\pi\times f(0,0)\f$.
+*/
 int main(void) {
     printf("In this example, we explore integration of a harmonic function over \n");
     printf("the unit disk. In this case, we know from complex analysis that the \n");
@@ -32,16 +37,10 @@ int main(void) {
 
     char * FMT = "%1.3f";
 
-    ft_harmonic_plan * P;
-    ft_disk_fftw_plan * PA;
-
     int N = 5;
     int M = 4*N-3;
 
     printf("\n\n"MAGENTA("N = %i")", and "MAGENTA("M = %i")"\n\n", N, M);
-
-    P = ft_plan_disk2cxf(N);
-    PA = ft_plan_disk_analysis(N, M);
 
     double r[N], theta[M], F[N*M];
 
@@ -63,6 +62,9 @@ int main(void) {
 
     printmat("F", FMT, F, N, M);
     printf("\n");
+
+    ft_harmonic_plan * P = ft_plan_disk2cxf(N);
+    ft_disk_fftw_plan * PA = ft_plan_disk_analysis(N, M);
 
     ft_execute_disk_analysis(PA, F, N, M);
     ft_execute_cxf2disk(P, F, N, M);
@@ -87,5 +89,3 @@ int main(void) {
 
     return 0;
 }
-
-double f(double x, double y) {return (x*x-y*y+1.0)/((x*x-y*y+1.0)*(x*x-y*y+1.0)+(2.0*x*y+1.0)*(2.0*x*y+1.0));};

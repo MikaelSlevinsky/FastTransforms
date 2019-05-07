@@ -1,0 +1,342 @@
+/*!
+
+\page orthogonalpolynomials Classical Orthogonal Polynomials
+\brief Theory and Definitions of Classical Orthogonal Polynomials
+
+\f$
+\def\ud{{\rm\,d}}
+\def\ii{{\rm i}}
+\def\fl{{\rm\,fl}}
+
+\def\abs#1{\left|{#1}\right|}
+\def\norm#1{\left\|{#1}\right\|}
+\def\conj#1{\overline{#1}}
+\f$
+
+On this page, we review standard notation that is used to discuss classical orthogonal polynomials. In particular, \f$L^2(D,\ud\mu)\f$ will be the Hilbert space of square integrable functions defined on \f$D\subset\mathbb{R}^d\f$ with positive Borel measure \f$\ud\mu\f$. The classical orthogonal polynomials are all defined on a subset of the real line:
+
+- Jacobi polynomials, \f$P_n^{(\alpha,\beta)}(x)\f$, are orthogonal polynomials with respect to \f$L^2([-1,1], (1-x)^\alpha(1+x)^\beta{\rm\,d}x)\f$;
+- Hermite polynomials, \f$H_n(x)\f$, are orthogonal polynomials with respect to \f$L^2(\mathbb{R}, e^{-x^2}{\rm\,d}x)\f$; and,
+- generalized Laguerre polynomials, \f$L_n^{(\alpha)}(x)\f$, are orthogonal polynomials with respect to \f$L^2(\mathbb{R}^+, e^{-x}{\rm\,d}x)\f$.
+
+We use the standard normalizations defined by <a href="https://dlmf.nist.gov/18">DLMF</a>. When an orthogonal polynomial appears with a tilde overtop, this implies orthonormalization.
+
+Let \f$\{\phi_n(x)\}_{n\in\mathbb{N}_0}\f$ be a family of orthogonal functions with respect to \f$L^2(\hat{D},\ud\hat{\mu})\f$ and let \f$\{\psi_n(x)\}_{n\in\mathbb{N}_0}\f$ be another family of orthogonal functions with respect to \f$L^2(D,\ud\mu)\f$. The connection coefficients:
+\f[
+c_{\ell,n} = \frac{\langle \psi_\ell, \phi_n\rangle_{\ud\mu}}{\langle \psi_\ell, \psi_\ell\rangle_{\ud\mu}},
+\f]
+allow for the expansion:
+\f[
+\phi_n(x) = \sum_{\ell=0}^\infty c_{\ell,n} \psi_\ell(x).
+\f]
+
+The fast and backward stable transforms are based on <em>generator-represented</em> solutions to the connection problems. That is, rather than using recurrence relations to evaluate the orthogonal polynomials, we convert their expansions using sequences of Givens rotations. This procedure is more accurate because, heuristically, Givens rotations are a fair-trade in terms of the energy of the signal, while recurrence relations create energy at each step. The generator-represented solutions to the connection problem may be distilled to three results that relate different weighted orthonormal polynomials that are orthonormal functions with respect to the same Hilbert space.
+
+Let \f$I_{m\times n}\f$ denote the rectangular identity matrix with ones on the main diagonal and zeros everywhere else.
+
+- Let \f$G_n\f$ denote the Givens rotation:
+\f[
+G_n = \begin{pmatrix}
+1 & \cdots & 0 & 0 & \cdots & 0\\
+\vdots & \ddots & \vdots & \vdots & & \vdots\\
+0 & \cdots & c_n & s_n & \cdots & 0\\
+0 & \cdots & -s_n & c_n & \cdots & 0\\
+\vdots & & \vdots & \vdots & \ddots & \vdots\\
+0 & \cdots & 0 & 0 & \cdots & 1\\
+\end{pmatrix},
+\f]
+where the sines \f$s_n = \sin\theta_n\f$ and the cosines \f$c_n = \cos\theta_n\f$, for some \f$\theta_n\in[0,2\pi)\f$, are in the intersections of the \f$n^{\rm th}\f$ and \f$n+1^{\rm st}\f$ rows and columns, embedded in the identity of a conformable size.
+
+  Then:
+
+  - The connection coefficients between \f$(1-x)\tilde{P}_n^{(\alpha+2,\beta)}(x)\f$ and \f$\tilde{P}_{\ell}^{(\alpha,\beta)}(x)\f$ are:
+\f[
+c_{\ell,n}^{(\alpha,\beta)} = \left\{\begin{array}{ccc} (\alpha+1)\sqrt{\frac{(2\ell+\alpha+\beta+1)\Gamma(\ell+\alpha+\beta+1)\Gamma(\ell+\alpha+1)}{\Gamma(\ell+\beta+1)\Gamma(\ell+1)}\frac{(2n+\alpha+\beta+3)\Gamma(n+\beta+1)\Gamma(n+1)}{\Gamma(n+\alpha+\beta+3)\Gamma(n+\alpha+3)}}, & {\rm for} & \ell \le n,\\
+-\sqrt{\frac{(n+1)(n+\beta+1)}{(n+\alpha+2)(n+\alpha+\beta+2)}}, & {\rm for} & \ell = n+1,\\
+0, & & {\rm otherwise}.
+\end{array} \right.
+\f]
+Furthermore, the matrix of connection coefficients \f$C^{(\alpha,\beta)} \in \mathbb{R}^{(n+2)\times (n+1)}\f$ may be represented via the product of \f$n+1\f$ Givens rotations:
+\f[
+C^{(\alpha,\beta)} = G_0^{(\alpha,\beta)}G_1^{(\alpha,\beta)}\cdots G_{n-1}^{(\alpha,\beta)}G_n^{(\alpha,\beta)} I_{(n+2)\times (n+1)},
+\f]
+where the sines and cosines for the Givens rotations are given by:
+\f[
+s_n^{(\alpha,\beta)} = \sqrt{\frac{(n+1)(n+\beta+1)}{(n+\alpha+2)(n+\alpha+\beta+2)}},\quad{\rm and}\quad c_n^{(\alpha,\beta)} = \sqrt{\frac{(\alpha+1)(2n+\alpha+\beta+3)}{(n+\alpha+2)(n+\alpha+\beta+2)}}.
+\f]
+  Since \f$P_n^{(\alpha,\beta)}(-x) = (-1)^n P_n^{(\beta,\alpha)}(x)\f$, the connection coefficients between \f$(1+x)\tilde{P}_n^{(\alpha,\beta+2)}(x)\f$ and \f$\tilde{P}_{\ell}^{(\alpha,\beta)}(x)\f$ are easily obtained by reversing the roles of \f$\alpha\f$ and \f$\beta\f$ above and multiplying each coefficient by \f$(-1)^{n-\ell}\f$. For the Givens rotations, this negates the sines.
+
+  - The connection coefficients between \f$x\tilde{L}_n^{(\alpha+2)}(x)\f$ and \f$\tilde{L}_{\ell}^{(\alpha)}(x)\f$ are:
+\f[
+c_{\ell,n}^{(\alpha)} = \left\{\begin{array}{ccc} (\alpha+1)\sqrt{\frac{\Gamma(\ell+\alpha+1)}{\Gamma(\ell+1)}\frac{\Gamma(n+1)}{\Gamma(n+\alpha+3)}}, & {\rm for} & \ell \le n,\\
+-\sqrt{\frac{n+1}{n+\alpha+2}}, & {\rm for} & \ell = n+1,\\
+0, & & {\rm otherwise}.
+\end{array} \right.
+\f]
+Furthermore, the matrix of connection coefficients \f$C^{(\alpha)} \in \mathbb{R}^{(n+2)\times (n+1)}\f$ may be represented via the product of \f$n+1\f$ Givens rotations:
+\f[
+C^{(\alpha)} = G_0^{(\alpha)}G_1^{(\alpha)}\cdots G_{n-1}^{(\alpha)}G_n^{(\alpha)} I_{(n+2)\times (n+1)},
+\f]
+where the sines and cosines for the Givens rotations are given by:
+\f[
+s_n^{(\alpha)} = \sqrt{\frac{n+1}{n+\alpha+2}},\quad{\rm and}\quad c_n^{(\alpha)} = \sqrt{\frac{\alpha+1}{n+\alpha+2}}.
+\f]
+
+- Let \f$G_n\f$ denote the real Givens rotation:
+\f[
+G_n = \begin{pmatrix}
+1 & \cdots & 0 & 0 & 0 & \cdots & 0\\
+\vdots & \ddots & \vdots & \vdots & \vdots & & \vdots\\
+0 & \cdots & c_n & 0 & s_n & \cdots & 0\\
+0& \cdots & 0 & 1 & 0 & \cdots & 0\\
+0 & \cdots & -s_n & 0 & c_n & \cdots & 0\\
+\vdots & & \vdots & \vdots & \vdots & \ddots & \vdots\\
+0 & \cdots & 0 & 0 & 0 & \cdots & 1\\
+\end{pmatrix},
+\f]
+where the sines \f$s_n = \sin\theta_n\f$ and the cosines \f$c_n = \cos\theta_n\f$, for some \f$\theta_n\in[0,2\pi)\f$, are in the intersections of the \f$n^{\rm th}\f$ and \f$n+2^{\rm nd}\f$ rows and columns, embedded in the identity of a conformable size. 
+
+  Then:
+  - The connection coefficients between \f$(1-x^2)\tilde{P}_n^{(m+2,m+2)}(x)\f$ and \f$\tilde{P}_\ell^{(m,m)}(x)\f$ are:
+\f[
+c_{\ell,n}^{m} = \left\{\begin{array}{ccc} (2m+2)\sqrt{\frac{(2\ell+2m+1)(\ell+2m)!}{\ell!}\frac{(2n+2m+5)n!}{(n+2m+4)!}}, & {\rm for} & \ell \le n,\quad \ell+n\hbox{ even},\\
+-\sqrt{\frac{(n+1)(n+2)}{(n+2m+3)(n+2m+4)}}, & {\rm for} & \ell = n+2,\\
+0, & & {\rm otherwise}.
+\end{array} \right.
+\f]
+Furthermore, the matrix of connection coefficients \f$C^{(m)} \in \mathbb{R}^{(n+3)\times (n+1)}\f$ may be represented via the product of \f$n+1\f$ Givens rotations:
+\f[
+C^{(m)} = G_0^{(m)}G_1^{(m)}\cdots G_{n-1}^{(m)}G_n^{(m)} I_{(n+3)\times (n+1)},
+\f]
+where the sines and cosines for the Givens rotations are given by:
+\f[
+s_n^m = \sqrt{\frac{(n+1)(n+2)}{(n+2m+3)(n+2m+4)}},\quad{\rm and}\quad c_n^m = \sqrt{\frac{(2m+2)(2n+2m+5)}{(n+2m+3)(n+2m+4)}}.
+\f]
+
+*/
+
+/*!
+
+\page transforms FastTransforms
+\brief What FastTransforms actually computes
+
+\f$
+\def\ud{{\rm\,d}}
+\def\ii{{\rm i}}
+\def\fl{{\rm\,fl}}
+
+\def\abs#1{\left|{#1}\right|}
+\def\norm#1{\left\|{#1}\right\|}
+\def\conj#1{\overline{#1}}
+\f$
+
+\tableofcontents
+
+FastTransforms provides computational kernels and driver routines for multivariate orthogonal polynomial transforms. The algorithms are \f$2\f$-normwise backward stable with a runtime complexity of \f$\mathcal{O}(n^{d+1})\f$, where \f$n\f$ is the polynomial degree and \f$d\f$ is the spatial dimension of the problem.
+
+The transforms are separated into computational kernels that offer SSE, AVX, and AVX-512 vectorization on applicable Intel processors, and driver routines that are easily parallelized by OpenMP.
+
+\section FT1 What FastTransforms actually computes
+
+For every subsection below, the title of the subsection, of the form <tt>a2b</tt>, refers conceptually to the transform and the available functions are as follows:
+
+- <tt>ft_plan_a2b</tt>, is a pre-computation,
+- <tt>ft_execute_a2b</tt>, is a forward execution,
+- <tt>ft_execute_b2a</tt>, is a backward execution,
+- <tt>ft_execute_a_hi2lo</tt>, is a conversion to a tensor-product basis,
+- <tt>ft_execute_a_lo2hi</tt>, is a conversion from a tensor-product basis,
+- <tt>ft_kernel_a_hi2lo</tt>, is an orthonormal conversion from high to low order,
+- <tt>ft_kernel_a_lo2hi</tt>, is an orthonormal conversion from low to high order.
+
+The <tt>ft_execute_*</tt> functions are drivers that perform transforms as defined below. They are composed of computational kernels, of the form <tt>ft_kernel_*</tt>, that are designed to be sufficiently generic to be assembled for different parallelism and compute paradigms. Generally, the pre-computations construct a \ref ft_harmonic_plan, which may be destroyed by a call to \ref ft_destroy_harmonic_plan.
+
+\subsection sph2fourier
+
+\anchor sh
+Spherical harmonics are:
+\f[
+Y_\ell^m(\theta,\varphi) = \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} (-1)^{\abs{m}}\sqrt{(\ell+\frac{1}{2})\frac{(\ell-\abs{m})!}{(\ell+\abs{m})!}} P_\ell^{\abs{m}}(\cos\theta),
+\f]
+where \f$P_\ell^m(\cos\theta)\f$ are the associated Legendre functions. A degree-\f$n\f$ expansion in spherical harmonics is given by:
+\f[
+f_n(\theta,\varphi) = \sum_{\ell=0}^{n}\sum_{m=-\ell}^{+\ell} f_\ell^m Y_\ell^m(\theta,\varphi).
+\f]
+If spherical harmonic expansion coefficients are organized into the array:
+\f[
+F = \begin{pmatrix}
+f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_n^{-n} & f_n^n\\
+f_1^0 & f_2^{-1} & f_2^1 & f_3^{-2} & f_3^2 & \cdots & 0 & 0\\
+\vdots & \vdots & \vdots &  \vdots &  \vdots & \ddots & \vdots & \vdots\\
+f_{n-2}^0 & f_{n-1}^{-1} & f_{n-1}^1 & f_n^{-2} & f_n^2 &  & \vdots & \vdots\\
+f_{n-1}^0 & f_n^{-1} & f_n^1 & 0 & 0 & \cdots & 0 & 0\\
+f_n^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+\end{pmatrix},
+\f]
+then \ref ft_plan_sph2fourier creates the appropriate \ref ft_harmonic_plan, and \ref ft_execute_sph2fourier returns the bivariate Fourier coefficients:
+\f[
+G = \begin{pmatrix}
+g_0^0 & g_0^{-1} & g_0^1 & \cdots & g_0^{-n} & g_0^n\\
+g_1^0 & g_1^{-1} & g_1^1 & \cdots & g_1^{-n} & g_1^n\\
+\vdots & \vdots & \vdots & \ddots & \vdots & \vdots\\
+g_{n-1}^0 & g_{n-1}^{-1} & g_{n-1}^1& \cdots & g_{n-1}^{-n} & g_{n-1}^n\\
+g_n^0 & 0 & 0 & \cdots & g_n^{-n} & g_n^n\\
+\end{pmatrix}.
+\f]
+That is:
+\f[
+f_n(\theta,\varphi) = \sum_{\ell=0}^n\sum_{m=-n}^{+n} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m~{\rm even},\\ \sin((\ell+1)\theta) & m~{\rm odd},\end{array}\right.
+\f]
+and \ref ft_execute_fourier2sph converts them back. Since the routines only transform columns of the arrays, they are indifferent to the choice of longitudinal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
+
+
+\subsection disk2cxf
+
+Disk harmonics are Zernike polynomials:
+\f[
+Z_\ell^m(r,\theta) = \sqrt{2\ell+2} r^{\abs{m}}P_{\frac{\ell-\abs{m}}{2}}^{(0,\abs{m})}(2r^2-1)\frac{e^{\ii m\theta}}{\sqrt{2\pi}}.
+\f]
+A degree-\f$2n\f$ expansion in disk harmonics is given by:
+\f[
+f_{2n}(r,\theta) = \sum_{\ell=0}^{2n}\sum_{m=-\ell,2}^{+\ell} f_\ell^m Z_\ell^m(r,\theta),
+\f]
+where the \f$,2\f$ in the inner summation index implies that the inner summation runs from \f$m=-\ell\f$ in steps of \f$2\f$ up to \f$+\ell\f$. If disk harmonic expansion coefficients are organized into the array:
+\f[
+F = \begin{pmatrix}
+f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_{2n}^{-2n} & f_{2n}^{2n}\\
+f_2^0 & f_3^{-1} & f_3^1 & f_4^{-2} & f_4^2 & \cdots & 0 & 0\\
+\vdots & \vdots & \vdots &  \vdots &  \vdots & \ddots & \vdots & \vdots\\
+f_{2n-4}^0 & f_{2n-3}^{-1} & f_{2n-3}^1 & f_{2n-2}^{-2} & f_{2n-2}^2 &  & \vdots & \vdots\\
+f_{2n-2}^0 & f_{2n-1}^{-1} & f_{2n-1}^1 & f_{2n}^{-2} & f_{2n}^2 & \cdots & 0 & 0\\
+f_{2n}^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+\end{pmatrix},
+\f]
+then \ref ft_plan_disk2cxf creates the appropriate \ref ft_harmonic_plan, and \ref ft_execute_dixk2cxf returns the even Chebyshev--Fourier coefficients:
+\f[
+G = \begin{pmatrix}
+g_0^0 & g_0^{-1} & g_0^1 & g_0^{-2} & g_0^2 & \cdots & g_0^{-2n} & g_0^{2n}\\
+g_2^0 & g_2^{-1} & g_2^1 & g_2^{-2} & g_2^2 & \cdots & g_2^{-2n} & g_2^{2n}\\
+\vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots\\
+g_{2n-2}^0 & g_{2n-2}^{-1} & g_{2n-2}^1 & g_{2n-2}^{-2} & g_{2n-2}^2 & \cdots & g_{2n-2}^{-2n} & g_{2n-2}^{2n}\\
+g_{2n}^0 & 0 & 0 & g_{2n}^{-2} & g_{2n}^2 & \cdots & g_{2n}^{-2n} & g_{2n}^{2n}\\
+\end{pmatrix}.
+\f]
+That is:
+\f[
+f_{2n}(r,\theta) = \sum_{\ell=0}^{n}\sum_{m=-2n}^{+2n} g_{2\ell}^m \frac{e^{\ii m\theta}}{\sqrt{2\pi}} \left\{\begin{array}{lr} T_{2\ell}(r) & m~{\rm even},\\ T_{2\ell+1}(r) & m~{\rm odd},\end{array}\right.
+\f]
+and \ref ft_execute_cxf2disk converts them back. Since \ref ft_execute_disk2cxf only transforms columns of the arrays, the routine is indifferent to the choice of azimuthal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
+
+
+\subsection tri2cheb
+
+Triangular harmonics are:
+\f[
+\tilde{P}_{\ell,m}^{(\alpha,\beta,\gamma)}(x,y) = (2-2x)^m \tilde{P}_{\ell-m}^{(2m+\beta+\gamma+1,\alpha)}(2x-1) \tilde{P}_m^{(\gamma,\beta)}\left(\frac{2y}{1-x}-1\right),
+\f]
+where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-\f$n\f$ expansion in triangular harmonics is given by:
+\f[
+f_n(x,y) = \sum_{\ell=0}^{n}\sum_{m = 0}^\ell f_\ell^m \tilde{P}_{\ell,m}^{(\alpha,\beta,\gamma)}(x,y).
+\f]
+If triangular harmonic expansion coefficients are organized into the array:
+\f[
+F = \begin{pmatrix}
+f_0^0 & f_1^1 & f_2^2 & \cdots & f_n^n\\
+\vdots & \vdots &  \vdots & \ddots & 0\\
+f_{n-2}^0 & f_{n-1}^1 & f_n^2 & & \vdots\\
+f_{n-1}^0 & f_n^1 & 0 & \cdots & 0\\
+f_n^0 & 0 & 0 & \cdots & 0\\
+\end{pmatrix},
+\f]
+then \ref ft_plan_tri2cheb creates the appropriate \ref ft_harmonic_plan, and \ref ft_execute_tri2cheb returns the bivariate Chebyshev coefficients:
+\f[
+G = \begin{pmatrix}
+g_0^0 & g_0^1 & \cdots & g_0^n\\
+g_1^0 & g_1^1 & \cdots & g_1^n\\
+\vdots & \vdots & \ddots & \vdots\\
+g_n^0 & g_n^1 & \cdots & g_n^n\\
+\end{pmatrix}.
+\f]
+That is:
+\f[
+f_n(x,y) = \sum_{\ell=0}^n\sum_{m=0}^n g_\ell^m T_\ell(2x-1) T_m\left(\frac{2y}{1-x}-1\right),
+\f]
+and \ref ft_execute_cheb2tri converts them back.
+
+
+\subsection tet2cheb
+
+Tetrahedral harmonics are:
+\f[
+\tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z) = (2-2x)^{\ell+m} \tilde{P}_{k-\ell-m}^{(2\ell+2m+\beta+\gamma+\delta+2,\alpha)}(2x-1) \left(2-\frac{2y}{1-x}\right)^m \tilde{P}_\ell^{(2m+\gamma+\delta+1,\beta)}\left(\frac{2y}{1-x}-1\right) \tilde{P}_m^{(\delta,\gamma)}\left(\frac{2z}{1-x-y}-1\right),
+\f]
+where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-\f$n\f$ expansion in tetrahedral harmonics is given by:
+\f[
+f_n(x,y,z) = \sum_{k=0}^n\sum_{\ell=0}^k\sum_{m=0}^{k-\ell} f_{k,\ell}^m \tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z) = \sum_{m=0}^n\sum_{\ell=0}^{n-m}\sum_{k=\ell+m}^n f_{k,\ell}^m \tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z).
+\f]
+If tetrahedral harmonic expansion coefficients are organized into the rank-\f$3\f$ array whose \f$m^{\rm th}\f$ slice is:
+\f[
+F[0:n-m,0:n-m,m] = \begin{pmatrix}
+f_{m,0}^m & f_{1+m,1}^m & f_{2+m,2}^m & \cdots & f_{n,n-m}^m\\
+\vdots & \vdots &  \vdots & \ddots & 0\\
+f_{n-2,0}^m & f_{n-1,1}^m & f_{n,2}^m & & \vdots\\
+f_{n-1,0}^m & f_{n,1}^m & 0 & \cdots & 0\\
+f_{n,0}^m & 0 & 0 & \cdots & 0\\
+\end{pmatrix},
+\f]
+then \ref ft_plan_tet2cheb creates the appropriate \ref ft_tetrahedral_harmonic_plan, and \ref ft_execute_tet2cheb returns the trivariate Chebyshev coefficients stored in the rank-\f$3\f$ array \f$G\f$. That is:
+\f[
+f_n(x,y,z) = \sum_{k=0}^n\sum_{\ell=0}^n\sum_{m=0}^n g_{k,\ell}^m T_k(2x-1) T_\ell\left(\frac{2y}{1-x}-1\right) T_m\left(\frac{2z}{1-x-y}-1\right).
+\f]
+
+\section FT2 Under construction
+
+\subsection spinsph2fourier
+
+Spin-weighted spherical harmonics are:
+\f{align*}
+Y_{\ell,m}^s(\theta,\varphi) & = \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \sqrt{(\ell+\tfrac{1}{2})\frac{(\ell+\ell_0)!(\ell-\ell_0)!}{(\ell+\ell_1)!(\ell-\ell_1)!}}\nonumber\\
+& \times \sin^{\abs{m+s}}(\tfrac{\theta}{2})\cos^{\abs{m-s}}(\tfrac{\theta}{2}) P_{\ell-\ell_0}^{(\abs{m+s},\abs{m-s})}(\cos\theta).
+\f}
+where \f$P_n^{(\alpha,\beta)}(\cos\theta)\f$ are the Jacobi polynomials and \f$\ell_0 = \max\{\abs{m},\abs{s}\}\f$ and \f$\ell_1 = \min\{\abs{m},\abs{s}\}\f$. A degree-\f$n\f$ expansion in spin-weighted spherical harmonics is given by:
+\f[
+f_n^s(\theta,\varphi) = \sum_{\ell=\ell_0}^{n}\sum_{m=-\ell}^{+\ell} f_\ell^m Y_{\ell,m}^s(\theta,\varphi).
+\f]
+If spin-weighted spherical harmonic expansion coefficients with \f$s=2\f$, for example, are organized into the array:
+\f[
+F = \begin{pmatrix}
+f_2^0 & f_2^{-1} & f_2^1 & f_2^{-2} & f_2^2 & \cdots & f_n^{-n} & f_n^n\\
+f_3^0 & f_3^{-1} & f_3^1 & f_3^{-2} & f_3^2 & \cdots & 0 & 0\\
+\vdots & \vdots & \vdots &  \vdots &  \vdots & \ddots & \vdots & \vdots\\
+f_{n}^0 & f_{n}^{-1} & f_{n}^1 & f_n^{-2} & f_n^2 &  & \vdots & \vdots\\
+0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+\end{pmatrix},
+\f]
+then \c ft_execute_spinsph2fourier returns the bivariate Fourier coefficients:
+\f[
+G = \begin{pmatrix}
+g_0^0 & g_0^{-1} & g_0^1 & \cdots & g_0^{-n} & g_0^n\\
+g_1^0 & g_1^{-1} & g_1^1 & \cdots & g_1^{-n} & g_1^n\\
+\vdots & \vdots & \vdots & \ddots & \vdots & \vdots\\
+g_{n-1}^0 & g_{n-1}^{-1} & g_{n-1}^1& \cdots & g_{n-1}^{-n} & g_{n-1}^n\\
+g_n^0 & 0 & 0 & \cdots & g_n^{-n} & g_n^n\\
+\end{pmatrix}.
+\f]
+That is:
+\f[
+f_n(\theta,\varphi) = \sum_{\ell=0}^n\sum_{m=-n}^{+n} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m+s~{\rm even},\\ \sin((\ell+1)\theta) & m+s~{\rm odd}.\end{array}\right.
+\f]
+Since \c ft_execute_spinsph2fourier only transforms columns of the arrays, the routine is indifferent to the choice of longitudinal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
+
+\subsection sgl2ccf
+
+Spherical Gauss--Laguerre functions are:
+\f[
+\psi_{k\ell m}(r,\theta,\varphi) = r^\ell \tilde{L}_{k-\ell}^{(2\ell+2)}(r) Y_\ell^m(\theta,\varphi),
+\f]
+where the \f$Y_\ell^m(\theta,\varphi)\f$ are \ref sh "spherical harmonics", and the \f$\tilde{L}_n^{(\alpha)}(r)\f$ are normalized generalized Laguerre polynomials. A degree-\f$n\f$ expansion in spherical Gauss--Laguerre functions is given by:
+\f[
+f_n(r,\theta,\varphi) = \sum_{k=0}^n\sum_{\ell=0}^k\sum_{m=-\ell}^{+\ell}f_{k,\ell}^m \psi_{k\ell m}(r,\theta,\varphi).
+\f]
+
+*/
