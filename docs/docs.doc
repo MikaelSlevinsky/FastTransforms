@@ -210,7 +210,7 @@ f_{2n-2}^0 & f_{2n-1}^{-1} & f_{2n-1}^1 & f_{2n}^{-2} & f_{2n}^2 & \cdots & 0 & 
 f_{2n}^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
 \end{pmatrix},
 \f]
-then \ref ft_plan_disk2cxf creates the appropriate \ref ft_harmonic_plan, and \ref ft_execute_dixk2cxf returns the even Chebyshev--Fourier coefficients:
+then \ref ft_plan_disk2cxf creates the appropriate \ref ft_harmonic_plan, and \ref ft_execute_disk2cxf returns the even Chebyshev--Fourier coefficients:
 \f[
 G = \begin{pmatrix}
 g_0^0 & g_0^{-1} & g_0^1 & g_0^{-2} & g_0^2 & \cdots & g_0^{-2n} & g_0^{2n}\\
