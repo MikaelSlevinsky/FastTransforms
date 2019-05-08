@@ -13,7 +13,9 @@
 \def\conj#1{\overline{#1}}
 \f$
 
-On this page, we review standard notation that is used to discuss classical orthogonal polynomials. In particular, \f$L^2(D,\ud\mu)\f$ will be the Hilbert space of square integrable functions defined on \f$D\subset\mathbb{R}^d\f$ with positive Borel measure \f$\ud\mu\f$. The classical orthogonal polynomials are all defined on a subset of the real line:
+\tableofcontents
+
+We begin by reviewing standard notation that is used to discuss classical orthogonal polynomials. In particular, \f$L^2(D,\ud\mu)\f$ will be the Hilbert space of square integrable functions defined on \f$D\subset\mathbb{R}^d\f$ with positive Borel measure \f$\ud\mu\f$. Classical orthogonal polynomials are all defined on a subset of the real line:
 
 - Jacobi polynomials, \f$P_n^{(\alpha,\beta)}(x)\f$, are orthogonal polynomials with respect to \f$L^2([-1,1], (1-x)^\alpha(1+x)^\beta\ud x)\f$;
 - Hermite polynomials, \f$H_n(x)\f$, are orthogonal polynomials with respect to \f$L^2(\mathbb{R}, e^{-x^2}\ud x)\f$; and,
@@ -30,7 +32,7 @@ allow for the expansion:
 \phi_n(x) = \sum_{\ell=0}^\infty c_{\ell,n} \psi_\ell(x).
 \f]
 
-The fast and backward stable transforms are based on <em>generator-represented</em> solutions to the connection problems. That is, rather than using recurrence relations to evaluate the orthogonal polynomials, we convert their expansions using sequences of Givens rotations. This procedure is more accurate because, heuristically, Givens rotations are a fair-trade in terms of the energy of the signal, while recurrence relations create energy at each step. The generator-represented solutions to the connection problem may be distilled to three results that relate different weighted orthonormal polynomials with respect to the same Hilbert space.
+The fast and backward stable transforms in this library are based on <em>generator-represented</em> solutions to the connection problems. That is, rather than using recurrence relations to evaluate orthogonal polynomials, we convert their expansions using sequences of Givens rotations. This procedure is more accurate because Givens rotations are \f$2\f$-norm preserving, while recurrence relations inject new energy at each step. The generator-represented solutions to the connection problem may be distilled to three results that relate different weighted orthonormal polynomials with respect to the same Hilbert space.
 
 Let \f$I_{m\times n}\f$ denote the rectangular identity matrix with ones on the main diagonal and zeros everywhere else.
 
