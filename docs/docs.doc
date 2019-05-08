@@ -38,7 +38,9 @@ The fast and backward stable transforms in this library are based on <em>generat
 
 Let \f$I_{m\times n}\f$ denote the rectangular identity matrix with ones on the main diagonal and zeros everywhere else.
 
-- Let \f$G_n\f$ denote the Givens rotation:
+\subsection JCP The Jacobi connection problem
+
+Let \f$G_n\f$ denote the Givens rotation:
 \f[
 G_n = \begin{pmatrix}
 1 & \cdots & 0 & 0 & \cdots & 0\\
@@ -51,9 +53,7 @@ G_n = \begin{pmatrix}
 \f]
 where the sines \f$s_n = \sin\theta_n\f$ and the cosines \f$c_n = \cos\theta_n\f$, for some \f$\theta_n\in[0,2\pi)\f$, are in the intersections of the \f$n^{\rm th}\f$ and \f$n+1^{\rm st}\f$ rows and columns, embedded in the identity of a conformable size.
 
-  Then:
-
-  - The connection coefficients between \f$(1-x)\tilde{P}_n^{(\alpha+2,\beta)}(x)\f$ and \f$\tilde{P}_{\ell}^{(\alpha,\beta)}(x)\f$ are:
+The connection coefficients between \f$(1-x)\tilde{P}_n^{(\alpha+2,\beta)}(x)\f$ and \f$\tilde{P}_{\ell}^{(\alpha,\beta)}(x)\f$ are:
 \f[
 c_{\ell,n}^{(\alpha,\beta)} = \left\{\begin{array}{ccc} (\alpha+1)\sqrt{\frac{(2\ell+\alpha+\beta+1)\Gamma(\ell+\alpha+\beta+1)\Gamma(\ell+\alpha+1)}{\Gamma(\ell+\beta+1)\Gamma(\ell+1)}\frac{(2n+\alpha+\beta+3)\Gamma(n+\beta+1)\Gamma(n+1)}{\Gamma(n+\alpha+\beta+3)\Gamma(n+\alpha+3)}}, & {\rm for} & \ell \le n,\\
 -\sqrt{\frac{(n+1)(n+\beta+1)}{(n+\alpha+2)(n+\alpha+\beta+2)}}, & {\rm for} & \ell = n+1,\\
@@ -68,9 +68,13 @@ where the sines and cosines for the Givens rotations are given by:
 \f[
 s_n^{(\alpha,\beta)} = \sqrt{\frac{(n+1)(n+\beta+1)}{(n+\alpha+2)(n+\alpha+\beta+2)}},\quad{\rm and}\quad c_n^{(\alpha,\beta)} = \sqrt{\frac{(\alpha+1)(2n+\alpha+\beta+3)}{(n+\alpha+2)(n+\alpha+\beta+2)}}.
 \f]
-  Since \f$P_n^{(\alpha,\beta)}(-x) = (-1)^n P_n^{(\beta,\alpha)}(x)\f$, the connection coefficients between \f$(1+x)\tilde{P}_n^{(\alpha,\beta+2)}(x)\f$ and \f$\tilde{P}_{\ell}^{(\alpha,\beta)}(x)\f$ are easily obtained by reversing the roles of \f$\alpha\f$ and \f$\beta\f$ above and multiplying each coefficient by \f$(-1)^{n-\ell}\f$. For the Givens rotations, this negates the sines.
+Since \f$P_n^{(\alpha,\beta)}(-x) = (-1)^n P_n^{(\beta,\alpha)}(x)\f$, the connection coefficients between \f$(1+x)\tilde{P}_n^{(\alpha,\beta+2)}(x)\f$ and \f$\tilde{P}_{\ell}^{(\alpha,\beta)}(x)\f$ are easily obtained by reversing the roles of \f$\alpha\f$ and \f$\beta\f$ above and multiplying each coefficient by \f$(-1)^{n-\ell}\f$. For the Givens rotations, this negates the sines.
 
-  - The connection coefficients between \f$x\tilde{L}_n^{(\alpha+2)}(x)\f$ and \f$\tilde{L}_{\ell}^{(\alpha)}(x)\f$ are:
+\subsection LCP The generalized Laguerre connection problem
+
+Let \f$G_n\f$ denote the real Givens rotation as above.
+
+The connection coefficients between \f$x\tilde{L}_n^{(\alpha+2)}(x)\f$ and \f$\tilde{L}_{\ell}^{(\alpha)}(x)\f$ are:
 \f[
 c_{\ell,n}^{(\alpha)} = \left\{\begin{array}{ccc} (\alpha+1)\sqrt{\frac{\Gamma(\ell+\alpha+1)}{\Gamma(\ell+1)}\frac{\Gamma(n+1)}{\Gamma(n+\alpha+3)}}, & {\rm for} & \ell \le n,\\
 -\sqrt{\frac{n+1}{n+\alpha+2}}, & {\rm for} & \ell = n+1,\\
@@ -86,7 +90,11 @@ where the sines and cosines for the Givens rotations are given by:
 s_n^{(\alpha)} = \sqrt{\frac{n+1}{n+\alpha+2}},\quad{\rm and}\quad c_n^{(\alpha)} = \sqrt{\frac{\alpha+1}{n+\alpha+2}}.
 \f]
 
-- Let \f$G_n\f$ denote the real Givens rotation:
+\subsection UCP The ultraspherical connection problem
+
+Ultraspherical polynomials are proportional to Jacobi polynomials with the parameters equal, say \f$\beta=\alpha\f$. The connection coefficients respect their even-odd symmetry and this is reflected in the Givens rotations as well.
+
+Let \f$G_n\f$ denote the real Givens rotation:
 \f[
 G_n = \begin{pmatrix}
 1 & \cdots & 0 & 0 & 0 & \cdots & 0\\
@@ -100,21 +108,20 @@ G_n = \begin{pmatrix}
 \f]
 where the sines \f$s_n = \sin\theta_n\f$ and the cosines \f$c_n = \cos\theta_n\f$, for some \f$\theta_n\in[0,2\pi)\f$, are in the intersections of the \f$n^{\rm th}\f$ and \f$n+2^{\rm nd}\f$ rows and columns, embedded in the identity of a conformable size.
 
-  Then:
-  - The connection coefficients between \f$(1-x^2)\tilde{P}_n^{(m+2,m+2)}(x)\f$ and \f$\tilde{P}_\ell^{(m,m)}(x)\f$ are:
+The connection coefficients between \f$(1-x^2)\tilde{P}_n^{(\alpha+2,\alpha+2)}(x)\f$ and \f$\tilde{P}_\ell^{(\alpha,\alpha)}(x)\f$ are:
 \f[
-c_{\ell,n}^{m} = \left\{\begin{array}{ccc} (2m+2)\sqrt{\frac{(2\ell+2m+1)(\ell+2m)!}{\ell!}\frac{(2n+2m+5)n!}{(n+2m+4)!}}, & {\rm for} & \ell \le n,\quad \ell+n\hbox{ even},\\
--\sqrt{\frac{(n+1)(n+2)}{(n+2m+3)(n+2m+4)}}, & {\rm for} & \ell = n+2,\\
+c_{\ell,n}^{(\alpha)} = \left\{\begin{array}{ccc} (2\alpha+2)\sqrt{\frac{(2\ell+2\alpha+1)\Gamma(\ell+2\alpha+1)}{\Gamma(\ell+1)}\frac{(2n+2\alpha+5)\Gamma(n+1)}{\Gamma(n+2\alpha+5)}}, & {\rm for} & \ell \le n,\quad \ell+n\hbox{ even},\\
+-\sqrt{\frac{(n+1)(n+2)}{(n+2\alpha+3)(n+2\alpha+4)}}, & {\rm for} & \ell = n+2,\\
 0, & & {\rm otherwise}.
 \end{array} \right.
 \f]
-Furthermore, the matrix of connection coefficients \f$C^{(m)} \in \mathbb{R}^{(n+3)\times (n+1)}\f$ may be represented via the product of \f$n+1\f$ Givens rotations:
+Furthermore, the matrix of connection coefficients \f$C^{(\alpha)} \in \mathbb{R}^{(n+3)\times (n+1)}\f$ may be represented via the product of \f$n+1\f$ Givens rotations:
 \f[
-C^{(m)} = G_0^{(m)}G_1^{(m)}\cdots G_{n-1}^{(m)}G_n^{(m)} I_{(n+3)\times (n+1)},
+C^{(\alpha)} = G_0^{(\alpha)}G_1^{(\alpha)}\cdots G_{n-1}^{(\alpha)}G_n^{(\alpha)} I_{(n+3)\times (n+1)},
 \f]
 where the sines and cosines for the Givens rotations are given by:
 \f[
-s_n^m = \sqrt{\frac{(n+1)(n+2)}{(n+2m+3)(n+2m+4)}},\quad{\rm and}\quad c_n^m = \sqrt{\frac{(2m+2)(2n+2m+5)}{(n+2m+3)(n+2m+4)}}.
+s_n^{(\alpha)} = \sqrt{\frac{(n+1)(n+2)}{(n+2\alpha+3)(n+2\alpha+4)}},\quad{\rm and}\quad c_n^{(\alpha)} = \sqrt{\frac{(2\alpha+2)(2n+2\alpha+5)}{(n+2\alpha+3)(n+2\alpha+4)}}.
 \f]
 
 */
