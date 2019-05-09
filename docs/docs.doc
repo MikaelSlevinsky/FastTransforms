@@ -159,7 +159,7 @@ For every subsection below, the title of the subsection, of the form <tt>a2b</tt
 - <tt>ft_kernel_a_hi2lo</tt>, is an orthonormal conversion from high to low order,
 - <tt>ft_kernel_a_lo2hi</tt>, is an orthonormal conversion from low to high order.
 
-The <tt>ft_execute_*</tt> functions are drivers that perform transforms as defined below. They are composed of computational kernels, of the form <tt>ft_kernel_*</tt>, that are designed to be sufficiently generic to be assembled for different parallelism and compute paradigms. Generally, the pre-computations construct a \ref ft_harmonic_plan, which may be destroyed by a call to \ref ft_destroy_harmonic_plan.
+The <tt>ft_execute_*</tt> functions are drivers that perform transforms as defined below. They are composed of computational kernels, of the form <tt>ft_kernel_*</tt>, that are designed to be sufficiently generic to be assembled for different parallelism and compute paradigms. For good use of SIMD, the computational kernels rely on row-major ordering of the coefficients, and for trivial shared memory parallelism, the driver routines rely on column-major ordering of the coefficients. Local permutations are utilized to balance the use of SIMD and OpenMP multithreading. Generally, the pre-computations construct a \ref ft_harmonic_plan, which may be destroyed by a call to \ref ft_destroy_harmonic_plan.
 
 \subsection sph2fourier
 
@@ -349,5 +349,59 @@ where the \f$Y_\ell^m(\theta,\varphi)\f$ are \ref sh "spherical harmonics", and 
 \f[
 f_n(r,\theta,\varphi) = \sum_{k=0}^n\sum_{\ell=0}^k\sum_{m=-\ell}^{+\ell}f_{k,\ell}^m \psi_{k,\ell,m}(r,\theta,\varphi).
 \f]
+
+*/
+
+/*!
+
+\page synthesisanalysis FFTW Synthesis and Analysis
+\brief FFTW Synthesis and Analysis
+
+\f$
+\def\ud{{\rm\,d}}
+\def\ii{{\rm i}}
+\def\fl{{\rm\,fl}}
+
+\def\abs#1{\left|{#1}\right|}
+\def\norm#1{\left\|{#1}\right\|}
+\def\conj#1{\overline{#1}}
+\f$
+
+\tableofcontents
+
+FastTransforms provides templates for FFTW synthesis and analysis on the sphere, disk, and triangle. Data structures within the \c ft_* namespace are provided, along with destructors. Convenience methods are provided to plan and execute the transforms at particular points.
+
+\section FT1 FFTW Synthesis and Analysis
+
+\subsection ft_fftw_sphere_plan
+
+On the sphere, the \f$N\times M\f$ equiangular grids are:
+\f{align*}
+\theta_n & = \frac{2n+1}{2N}\pi,\quad {\rm for} \quad 0 \le n < N,\\
+\varphi_m & = \frac{2m}{M}\pi,\quad {\rm for} \quad 0 \le m < M.
+\f}
+
+\subsection ft_fftw_disk_plan
+
+On the disk, the \f$N\times M\f$ radial--azimuthal grids are:
+\f{align*}
+r_n & = \cos\left(\frac{2n+1}{4N}\pi\right) = \sin\left(\frac{2N-2n-1}{4N}\pi\right),\quad {\rm for} \quad 0 \le n < N,\\
+\theta_m & = \frac{2m}{M}\pi,\quad {\rm for} \quad 0 \le m < M.
+\f}
+
+\subsection ft_fftw_triangle_plan
+
+On the reference triangle with vertices \f$(0,0)\f$, \f$(0,1)\f$, and \f$(1,0)\f$, the \f$N\times M\f$ mapped tensor product grids are:
+\f{align*}
+x = \frac{1+u}{2}, & \quad {\rm and} \quad y = \frac{(1-u)(1+v)}{4},\quad{\rm where},\\
+u_n & = \cos\left(\frac{2n+1}{2N}\pi\right),\quad {\rm for} \quad 0 \le n < N,\\
+v_m & = \cos\left(\frac{2m+1}{2M}\pi\right),\quad {\rm for} \quad 0 \le m < M.
+\f}
+As in the radial grid on the disk, slightly more accuracy can be maintained from:
+\f{align*}
+x_n & = \left[\sin\left(\frac{2N-2n-1}{4N}\pi\right)\right]^2,\quad {\rm for} \quad 0 \le n < N,\\
+w_m & = \left[\sin\left(\frac{2M-2m-1}{4M}\pi\right)\right]^2,\quad {\rm for} \quad 0 \le m < M,\\
+y_{n,m} & = x_{N-1-n}w_m.
+\f}
 
 */

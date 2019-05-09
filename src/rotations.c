@@ -132,16 +132,12 @@ ft_rotation_plan * ft_plan_rotsphere(const int n) {
     return RP;
 }
 
-// Convert a single vector of spherical harmonics of order m to 0/1.
-
 void ft_kernel_sph_hi2lo(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = m-2; j >= 0; j -= 2)
         for (int l = n-3-j; l >= 0; l--)
             apply_givens(RP->s(l, j), RP->c(l, j), A+l, A+l+2);
 }
-
-// Convert a single vector of spherical harmonics of order 0/1 to m.
 
 void ft_kernel_sph_lo2hi(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
@@ -150,9 +146,6 @@ void ft_kernel_sph_lo2hi(const ft_rotation_plan * RP, const int m, double * A) {
             apply_givens_t(RP->s(l, j), RP->c(l, j), A+l, A+l+2);
 }
 
-// Convert a pair of vectors of spherical harmonics of order m to 0/1.
-// The pair of vectors are stored in A in row-major ordering.
-
 void ft_kernel_sph_hi2lo_SSE(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = m-2; j >= 0; j -= 2)
@@ -160,18 +153,12 @@ void ft_kernel_sph_hi2lo_SSE(const ft_rotation_plan * RP, const int m, double * 
             apply_givens_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+2));
 }
 
-// Convert a pair of vectors of spherical harmonics of order 0/1 to m.
-// The pair of vectors are stored in A in row-major ordering.
-
 void ft_kernel_sph_lo2hi_SSE(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = m%2; j < m-1; j += 2)
         for (int l = 0; l <= n-3-j; l++)
             apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+2));
 }
-
-// Convert four vectors of spherical harmonics of order m, m, m+2, m+2 to 0/1.
-// The four vectors are stored in A in row-major ordering.
 
 void ft_kernel_sph_hi2lo_AVX(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
@@ -182,9 +169,6 @@ void ft_kernel_sph_hi2lo_AVX(const ft_rotation_plan * RP, const int m, double * 
             apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+2));
 }
 
-// Convert four vectors of spherical harmonics of order 0/1 to m, m, m+2, m+2.
-// The four vectors are stored in A in row-major ordering.
-
 void ft_kernel_sph_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = m%2; j < m-1; j += 2)
@@ -193,9 +177,6 @@ void ft_kernel_sph_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * 
     for (int l = 0; l <= n-3-m; l++)
         apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+2)+2);
 }
-
-// Convert eight vectors of spherical harmonics of order m, m, m+2, m+2, m+4, m+4, m+6, m+6 to 0/1.
-// The eight vectors are stored in A in row-major ordering.
 
 void ft_kernel_sph_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
@@ -210,9 +191,6 @@ void ft_kernel_sph_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double
         for (int l = n-3-j; l >= 0; l--)
             apply_givens_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+2));
 }
-
-// Convert eight vectors of spherical harmonics of order 0/1 to m, m, m+2, m+2, m+4, m+4, m+6, m+6.
-// The eight vectors are stored in A in row-major ordering.
 
 void ft_kernel_sph_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
@@ -247,8 +225,6 @@ ft_rotation_plan * ft_plan_rottriangle(const int n, const double alpha, const do
     return RP;
 }
 
-// Convert a single vector of triangular harmonics of order m to 0.
-
 void ft_kernel_tri_hi2lo(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = m-1; j >= 0; j--)
@@ -256,16 +232,12 @@ void ft_kernel_tri_hi2lo(const ft_rotation_plan * RP, const int m, double * A) {
             apply_givens(RP->s(l, j), RP->c(l, j), A+l, A+l+1);
 }
 
-// Convert a single vector of triangular harmonics of order 0 to m.
-
 void ft_kernel_tri_lo2hi(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = 0; j < m; j++)
         for (int l = 0; l <= n-2-j; l++)
             apply_givens_t(RP->s(l, j), RP->c(l, j), A+l, A+l+1);
 }
-
-// Convert two vectors of triangular harmonics of order m and m+1 to 0.
 
 void ft_kernel_tri_hi2lo_SSE(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
@@ -276,8 +248,6 @@ void ft_kernel_tri_hi2lo_SSE(const ft_rotation_plan * RP, const int m, double * 
             apply_givens_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+1));
 }
 
-// Convert two vectors of triangular harmonics of order 0 to m and m+1.
-
 void ft_kernel_tri_lo2hi_SSE(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = 0; j < m; j++)
@@ -286,8 +256,6 @@ void ft_kernel_tri_lo2hi_SSE(const ft_rotation_plan * RP, const int m, double * 
     for (int l = 0; l <= n-2-m; l++)
         apply_givens_t(RP->s(l, m), RP->c(l, m), A+2*l+1, A+2*(l+1)+1);
 }
-
-// Convert four vectors of triangular harmonics of order m, m+1, m+2, m+3 to 0.
 
 void ft_kernel_tri_hi2lo_AVX(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
@@ -303,8 +271,6 @@ void ft_kernel_tri_hi2lo_AVX(const ft_rotation_plan * RP, const int m, double * 
             apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+1));
 }
 
-// Convert four vectors of triangular harmonics of order 0 to m, m+1, m+2, m+3.
-
 void ft_kernel_tri_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = 0; j < m; j++)
@@ -318,8 +284,6 @@ void ft_kernel_tri_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * 
     for (int l = 0; l <= n-2-m; l++)
         apply_givens_t(RP->s(l, m), RP->c(l, m), A+4*l+1, A+4*(l+1)+1);
 }
-
-// Convert eight vectors of triangular harmonics of order m, m+1, m+2, m+3, m+4, m+5, m+6, m+7 to 0.
 
 void ft_kernel_tri_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
@@ -344,8 +308,6 @@ void ft_kernel_tri_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double
         for (int l = n-2-j; l >= 0; l--)
             apply_givens_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+1));
 }
-
-// Convert eight vectors of triangular harmonics of order 0 to m, m+1, m+2, m+3, m+4, m+5, m+6, m+7.
 
 void ft_kernel_tri_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
@@ -395,16 +357,12 @@ ft_rotation_plan * ft_plan_rotdisk(const int n) {
     return RP;
 }
 
-// Convert a single vector of disk harmonics of order m to 0/1.
-
 void ft_kernel_disk_hi2lo(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = m-2; j >= 0; j -= 2)
         for (int l = n-2-(j+1)/2; l >= 0; l--)
             apply_givens(RP->s(l, j), RP->c(l, j), A+l, A+l+1);
 }
-
-// Convert a single vector of disk harmonics of order 0/1 to m.
 
 void ft_kernel_disk_lo2hi(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
@@ -413,16 +371,12 @@ void ft_kernel_disk_lo2hi(const ft_rotation_plan * RP, const int m, double * A) 
             apply_givens_t(RP->s(l, j), RP->c(l, j), A+l, A+l+1);
 }
 
-// Convert a pair of vectors of disk harmonics of order m to 0/1.
-
 void ft_kernel_disk_hi2lo_SSE(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;
     for (int j = m-2; j >= 0; j -= 2)
         for (int l = n-2-(j+1)/2; l >= 0; l--)
             apply_givens_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+1));
 }
-
-// Convert a pair of vectors of disk harmonics of order 0/1 to m.
 
 void ft_kernel_disk_lo2hi_SSE(const ft_rotation_plan * RP, const int m, double * A) {
     int n = RP->n;

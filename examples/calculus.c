@@ -59,12 +59,16 @@ int main(void) {
     Py = ft_plan_tri2cheb(N, alpha, beta+1.0, gamma+1.0);
     PA = ft_plan_tri_analysis(N, M);
 
-    double u[N], v[M], F[N*M], Fx[N*M], Fy[N*M], Gx[N*M], Gy[N*M];
+    double u[N], x[N], v[M], w[M], F[N*M], Fx[N*M], Fy[N*M], Gx[N*M], Gy[N*M];
 
-    for (int n = 0; n < N; n++)
+    for (int n = 0; n < N; n++) {
         u[n] = sin((N-2.0*n-1.0)*M_PI/(2*N));
-    for (int m = 0; m < M; m++)
+        x[n] = pow(sin((2.0*N-2.0*n-1.0)*M_PI/(4*N)), 2);
+    }
+    for (int m = 0; m < M; m++) {
         v[m] = sin((M-2.0*m-1.0)*M_PI/(2*M));
+        w[m] = pow(sin((2.0*M-2.0*m-1.0)*M_PI/(4*M)), 2);
+    }
 
     printmat(MAGENTA("u")" grid", FMT, u, N, 1);
     printf("\n");
@@ -73,7 +77,7 @@ int main(void) {
 
     for (int m = 0; m < M; m++)
         for (int n = 0; n < N; n++)
-            F[n+N*m] = f((1.0+u[n])/2.0, (1.0-u[n])*(1.0+v[m])/4.0);
+            F[n+N*m] = f(x[n], x[N-1-n]*w[m]);
 
     printf("On the mapped tensor product grid, our function samples are:\n\n");
 
@@ -92,14 +96,14 @@ int main(void) {
 
     for (int m = 0; m < M; m++)
         for (int n = 0; n < N; n++)
-            Fx[n+N*m] = fx((1.0+u[n])/2.0, (1.0-u[n])*(1.0+v[m])/4.0);
+            Fx[n+N*m] = fx(x[n], x[N-1-n]*w[m]);
 
     printmat("Fx", FMT, Fx, N, M);
     printf("\n");
 
     for (int m = 0; m < M; m++)
         for (int n = 0; n < N; n++)
-            Fy[n+N*m] = fy((1.0+u[n])/2.0, (1.0-u[n])*(1.0+v[m])/4.0);
+            Fy[n+N*m] = fy(x[n], x[N-1-n]*w[m]);
 
     printmat("Fy", FMT, Fy, N, M);
     printf("\n");
