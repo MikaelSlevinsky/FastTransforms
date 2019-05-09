@@ -371,7 +371,7 @@ f_n(r,\theta,\varphi) = \sum_{k=0}^n\sum_{\ell=0}^k\sum_{m=-\ell}^{+\ell}f_{k,\e
 
 FastTransforms provides templates for FFTW synthesis and analysis on the sphere, disk, and triangle. Data structures within the \c ft_* namespace are provided, along with destructors. Convenience methods are provided to plan and execute the transforms at particular points.
 
-\section FT1 FFTW Synthesis and Analysis
+\section SA1 FFTW Synthesis and Analysis
 
 \subsection ft_fftw_sphere_plan
 
