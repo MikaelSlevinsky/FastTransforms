@@ -34,7 +34,7 @@ allow for the expansion:
 \phi_n(x) = \sum_{\ell=0}^\infty c_{\ell,n} \psi_\ell(x).
 \f]
 
-The fast and backward stable transforms in this library are based on <em>generator-represented</em> solutions to the connection problems. That is, rather than using recurrence relations to evaluate orthogonal polynomials, we convert their expansions using sequences of Givens rotations. This procedure is more accurate because Givens rotations are \f$2\f$-norm preserving, while recurrence relations inject new energy at each step. The generator-represented solutions to the connection problem may be distilled to three results that relate different weighted orthonormal polynomials with respect to the same Hilbert space.
+The fast and backward stable transforms in this library are based on <em>data-sparse</em> factorizations of the connection problems. That is, rather than using recurrence relations to evaluate orthogonal polynomials, we convert their expansions using sequences of Givens rotations. This procedure is more accurate because Givens rotations are \f$2\f$-norm preserving, while recurrence relations inject new energy at each step. The Givens rotation solutions to the connection problem may be distilled to three results that relate different weighted orthonormal polynomials with respect to the same Hilbert space.
 
 Let \f$I_{m\times n}\f$ denote the rectangular identity matrix with ones on the main diagonal and zeros everywhere else.
 
