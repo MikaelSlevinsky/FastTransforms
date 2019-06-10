@@ -1,8 +1,16 @@
-#include "fasttransforms.h"
-#include "ftutilities.h"
+#include <fasttransforms.h>
+#include <ftutilities.h>
 
 double f(double x, double y) {return (x*x-y*y+1.0)/((x*x-y*y+1.0)*(x*x-y*y+1.0)+(2.0*x*y+1.0)*(2.0*x*y+1.0));};
 
+/*!
+  \example holomorphic.c
+  In this example, we explore integration of a harmonic function:
+  \f[
+  f(x,y) = \frac{x^2-y^2+1}{(x^2-y^2+1)^2+(2xy+1)^2},
+  \f]
+  over the unit disk. In this case, we know from complex analysis that the integral of a holomorphic function is equal to \f$\pi\times f(0,0)\f$.
+*/
 int main(void) {
     printf("In this example, we explore integration of a harmonic function over \n");
     printf("the unit disk. In this case, we know from complex analysis that the \n");

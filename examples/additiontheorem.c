@@ -1,5 +1,5 @@
-#include "fasttransforms.h"
-#include "ftutilities.h"
+#include <fasttransforms.h>
+#include <ftutilities.h>
 
 typedef struct {
     double x;
@@ -18,6 +18,14 @@ double P4(double x) {double x2 = x*x; return ((35.0*x2-30.0)*x2+3.0)/8.0;};
 
 double3 z(double theta, double phi) {return (double3) {sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)};};
 
+/*!
+  \example additiontheorem.c
+  This example confirms numerically that:
+  \f[
+  f(z) = \frac{P_4(z\cdot y) - P_4(x\cdot y)}{z\cdot y - x\cdot y},
+  \f]
+  is actually a degree-\f$3\f$ polynomial on \f$\mathbb{S}^2\f$, where \f$P_4\f$ is the degree-\f$4\f$ Legendre polynomial, and \f$x,y,z \in \mathbb{S}^2\f$.
+*/
 int main(void) {
     printf("\nThis example confirms numerically that\n");
     printf("\n");

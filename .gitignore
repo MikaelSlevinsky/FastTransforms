@@ -67,6 +67,5 @@ Mkfile.old
 dkms.conf
 
 # Docs
-*.aux
-*.log
-*.synctex.gz
+!Doxyfile
+docs/html

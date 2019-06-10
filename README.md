@@ -1,8 +1,10 @@
 # FastTransforms
 
-[![Travis](https://travis-ci.org/MikaelSlevinsky/FastTransforms.svg?branch=master)](https://travis-ci.org/MikaelSlevinsky/FastTransforms) [![Build status](https://ci.appveyor.com/api/projects/status/er98t0q3bsx4a5l9/branch/master?svg=true)](https://ci.appveyor.com/project/MikaelSlevinsky/fasttransforms/branch/master)
+[![Travis](https://travis-ci.org/MikaelSlevinsky/FastTransforms.svg?branch=master)](https://travis-ci.org/MikaelSlevinsky/FastTransforms) [![Build status](https://ci.appveyor.com/api/projects/status/er98t0q3bsx4a5l9/branch/master?svg=true)](https://ci.appveyor.com/project/MikaelSlevinsky/fasttransforms/branch/master) [![](https://img.shields.io/badge/docs-master-blue.svg)](https://MikaelSlevinsky.github.io/FastTransforms)
 
-`FastTransforms` provides computational kernels and driver routines for two-dimensional harmonic polynomial transforms. The algorithms are backward stable with a runtime complexity of O(n<sup>3</sup>), where n is the polynomial degree, they are vectorized by Intel SSE, AVX, and AVX-512 intrinsics, and are parallelized by OpenMP.
+[FastTransforms](https://github.com/MikaelSlevinsky/FastTransforms) provides computational kernels and driver routines for multivariate orthogonal polynomial transforms. The algorithms are 2-normwise backward stable with a runtime complexity of O(n<sup>d+1</sup>), where n is the polynomial degree and d is the spatial dimension of the problem.
+
+The transforms are separated into computational kernels that offer SSE, AVX, and AVX-512 vectorization on applicable Intel processors, and driver routines that are easily parallelized by OpenMP.
 
 If you feel you need help getting started, please do not hesitate to e-mail me. If you use this library for your research, please cite the references.
 
