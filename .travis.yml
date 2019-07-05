@@ -36,9 +36,10 @@ script:
   - make tests
   - ./test_transforms
   - ./test_rotations
-  - OMP_NUM_THREADS=4 ./test_arrow
   - ./test_tridiagonal
   - ./test_hierarchical
+  - ./test_dprk
+  - ./test_tdc
   - OMP_NUM_THREADS=4 ./test_drivers 3 3 0
   - OMP_NUM_THREADS=4 ./test_fftw 3 3 0
   - make examples

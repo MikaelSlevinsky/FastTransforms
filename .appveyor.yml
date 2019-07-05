@@ -27,9 +27,10 @@ test_script:
   - set OMP_NUM_THREADS=4
   - test_transforms.exe
   - test_rotations.exe
-  - test_arrow.exe
   - test_tridiagonal.exe
   - test_hierarchical.exe
+  - test_dprk.exe
+  - test_tdc.exe
   - test_drivers.exe 3 3 0
   - additiontheorem.exe
   - calculus.exe

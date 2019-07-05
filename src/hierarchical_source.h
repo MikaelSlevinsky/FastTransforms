@@ -4,7 +4,7 @@ Notes:
  - lowrankmatrix has two forms determined by the (integer) character constant N:
    when N == '2', L = UVᵀ, whereas when N == '3', L = USVᵀ. There are temporary
    arrays to allow fast linear algebra without further memory allocation.
- - a hierarchicalmatrix is self-referential (and therefore incompletely initialized).
+ - hierarchicalmatrix is self-referential (and therefore incompletely initialized).
    It stores pointers to hierarchical, dense, and low-rank matrices, and a hash table
    to determine which type of matrix is active in the current block under consideration.
    A hash value of 0 is provided with an initial `malloc`, which corresponds to
@@ -43,6 +43,7 @@ struct X(hmat) {
 
 FLT * X(chebyshev_points)(char KIND, int n);
 FLT * X(chebyshev_barycentric_weights)(char KIND, int n);
+void * X(barycentricmatrix)(FLT * A, FLT * x, int m, FLT * y, FLT * l, int n);
 
 void X(destroy_densematrix)(X(densematrix) * A);
 void X(destroy_lowrankmatrix)(X(lowrankmatrix) * A);
@@ -51,6 +52,7 @@ void X(destroy_hierarchicalmatrix)(X(hierarchicalmatrix) * A);
 X(densematrix) * X(calloc_densematrix)(int m, int n);
 X(densematrix) * X(malloc_densematrix)(int m, int n);
 X(densematrix) * X(sample_densematrix)(FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j);
+X(densematrix) * X(sample_accurately_densematrix)(FLT (*f)(FLT x, FLT ylo, FLT yhi), FLT * x, FLT * ylo, FLT * yhi, unitrange i, unitrange j);
 
 X(lowrankmatrix) * X(calloc_lowrankmatrix)(char N, int m, int n, int r);
 X(lowrankmatrix) * X(malloc_lowrankmatrix)(char N, int m, int n, int r);
@@ -60,8 +62,7 @@ X(hierarchicalmatrix) * X(malloc_hierarchicalmatrix)(const int M, const int N);
 X(hierarchicalmatrix) * X(create_hierarchicalmatrix)(const int M, const int N, FLT (*f)(FLT, FLT), const int m, const int n);
 
 X(hierarchicalmatrix) * X(sample_hierarchicalmatrix) (FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j);
-X(hierarchicalmatrix) * X(sample_hierarchicalmatrix1)(FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j);
-X(hierarchicalmatrix) * X(sample_hierarchicalmatrix2)(FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j);
+X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix) (FLT (*f)(FLT x, FLT y), FLT (*f2)(FLT x, FLT ylo, FLT yhi), FLT * x, FLT * y, FLT * ylo, FLT * yhi, unitrange i, unitrange j);
 
 int X(size_densematrix)(X(densematrix) * A, int k);
 int X(size_lowrankmatrix)(X(lowrankmatrix) * L, int k);
@@ -93,3 +94,8 @@ FLT X(cauchykernel)(FLT x, FLT y);
 FLT X(coulombkernel)(FLT x, FLT y);
 FLT X(coulombprimekernel)(FLT x, FLT y);
 FLT X(logkernel)(FLT x, FLT y);
+
+FLT X(cauchykernel2)(FLT x, FLT ylo, FLT yhi);
+FLT X(coulombkernel2)(FLT x, FLT ylo, FLT yhi);
+FLT X(coulombprimekernel2)(FLT x, FLT ylo, FLT yhi);
+FLT X(logkernel2)(FLT x, FLT ylo, FLT yhi);

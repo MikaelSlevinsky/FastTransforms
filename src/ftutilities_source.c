@@ -1,5 +1,5 @@
-void X(checktest)(FLT err, int n, int * checksum) {
-    if (X(fabs)(err) < n*X(eps)()) printf(GREEN("✓")"\n");
+void X(checktest)(FLT err, FLT cst, int * checksum) {
+    if (X(fabs)(err) < cst*X(eps)()) printf(GREEN("✓")"\n");
     else {printf(RED("×")"\n"); (*checksum)++;}
 }
 

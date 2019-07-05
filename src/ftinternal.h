@@ -114,6 +114,7 @@ double * plan_leg2cheb(const int normleg, const int normcheb, const int n);
 double * plan_cheb2leg(const int normcheb, const int normleg, const int n);
 double * plan_ultra2ultra(const int normultra1, const int normultra2, const int n, const double lambda1, const double lambda2);
 double * plan_jac2jac(const int normjac1, const int normjac2, const int n, const double alpha, const double beta, const double gamma);
+double * eigenplan_jac2jac(const int normjac1, const int normjac2, const int n, const double alpha, const double beta, const double gamma, const double delta);
 
 void permute(const double * A, double * B, const int N, const int M, const int L);
 void permute_t(double * A, const double * B, const int N, const int M, const int L);

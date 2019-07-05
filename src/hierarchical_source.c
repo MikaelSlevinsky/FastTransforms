@@ -2,13 +2,13 @@ FLT * X(chebyshev_points)(char KIND, int n) {
     int nd2 = n/2;
     FLT * x = (FLT *) malloc(n*sizeof(FLT));
     if (KIND == '1') {
-        for (int k = 0; k < nd2+1; k++)
+        for (int k = 0; k <=nd2; k++)
             x[k] = X(__sinpi)((n-2*k-ONE(FLT))/(2*n));
         for (int k = 0; k < nd2; k++)
             x[n-1-k] = -x[k];
     }
     else if (KIND == '2') {
-        for (int k = 0; k < nd2+1; k++)
+        for (int k = 0; k <=nd2; k++)
             x[k] = X(__sinpi)((n-2*k-ONE(FLT))/(2*n-2));
         for (int k = 0; k < nd2; k++)
             x[n-1-k] = -x[k];
@@ -20,7 +20,7 @@ FLT * X(chebyshev_barycentric_weights)(char KIND, int n) {
     int nd2 = n/2;
     FLT * l = (FLT *) malloc(n*sizeof(FLT));
     if (KIND == '1') {
-        for (int k = 0; k < nd2+1; k++)
+        for (int k = 0; k <=nd2; k++)
             l[k] = X(__sinpi)((2*k+ONE(FLT))/(2*n));
         for (int k = 0; k < nd2; k++)
             l[n-1-k] = l[k];
@@ -29,14 +29,46 @@ FLT * X(chebyshev_barycentric_weights)(char KIND, int n) {
     }
     else if (KIND == '2') {
         l[0] = ONE(FLT)/TWO(FLT);
-        for (int k = 1; k < nd2+1; k++)
-            l[k] = ONE(FLT);
+        for (int k = 1; k <=nd2; k++)
+            l[k] = 1;
         for (int k = 0; k < nd2; k++)
             l[n-1-k] = l[k];
         for (int k = 1; k < n; k += 2)
             l[k] *= -1;
     }
     return l;
+}
+
+// Evaluate a polynomial interpolant of degree n-1 through the distinct points
+// y_j, 0 ≤ j < n at the distinct points x_i, 0 ≤ i < m. This is effected by a
+// matrix-vector product with A_{i,j} and the polynomial interpolant's ordinates.
+void * X(barycentricmatrix)(FLT * A, FLT * x, int m, FLT * y, FLT * l, int n) {
+    int k;
+    FLT yj, lj, temp;
+    for (int j = 0; j < n; j++) {
+        yj = y[j];
+        lj = l[j];
+        for (int i = 0; i < m; i++)
+            A[i+m*j] = lj/(x[i]-yj);
+    }
+    for (int i = 0; i < m; i++) {
+        k = -1;
+        temp = 0;
+        for (int j = 0; j < n; j++) {
+            if (X(isfinite)(A[i+m*j])) temp += A[i+m*j];
+            else {k = j; break;}
+        }
+        if (k != -1) {
+            for (int j = 0; j < n; j++)
+                A[i+m*j] = 0;
+            A[i+m*k] = 1;
+        }
+        else {
+            temp = 1/temp;
+            for (int j = 0; j < n; j++)
+                A[i+m*j] *= temp;
+        }
+    }
 }
 
 
@@ -108,6 +140,16 @@ X(densematrix) * X(sample_densematrix)(FLT (*f)(FLT x, FLT y), FLT * x, FLT * y,
     return AD;
 }
 
+X(densematrix) * X(sample_accurately_densematrix)(FLT (*f)(FLT x, FLT ylo, FLT yhi), FLT * x, FLT * ylo, FLT * yhi, unitrange i, unitrange j) {
+    int M = i.stop-i.start;
+    X(densematrix) * AD = X(malloc_densematrix)(M, j.stop-j.start);
+    FLT * A = AD->A;
+    for (int n = j.start; n < j.stop; n++)
+        for (int m = i.start; m < i.stop; m++)
+            A[m-i.start+M*(n-j.start)] = f(x[m], ylo[n], yhi[n]);
+    return AD;
+}
+
 X(lowrankmatrix) * X(calloc_lowrankmatrix)(char N, int m, int n, int r) {
     int sz = 0;
     if (N == '2') sz = r;
@@ -143,11 +185,11 @@ X(lowrankmatrix) * X(malloc_lowrankmatrix)(char N, int m, int n, int r) {
 }
 
 X(lowrankmatrix) * X(sample_lowrankmatrix)(FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j) {
-    int M = i.stop-i.start, N = j.stop-j.start, r = BLOCKRANK, k;
+    int M = i.stop-i.start, N = j.stop-j.start, r = BLOCKRANK;
     X(lowrankmatrix) * L = X(malloc_lowrankmatrix)('3', M, N, r);
 
-    FLT xcpq, lcpq, temp;
-    FLT * xc = X(chebyshev_points)('1', r);
+    FLT * xc1 = X(chebyshev_points)('1', r);
+    FLT * xc2 = X(chebyshev_points)('1', r);
     FLT * lc = X(chebyshev_barycentric_weights)('1', r);
 
     FLT a = x[i.start], b = x[i.stop-1];
@@ -155,62 +197,20 @@ X(lowrankmatrix) * X(sample_lowrankmatrix)(FLT (*f)(FLT x, FLT y), FLT * x, FLT 
     FLT ab2 = (a+b)/2, ba2 = (b-a)/2;
     FLT cd2 = (c+d)/2, dc2 = (d-c)/2;
 
-    FLT * S = L->S, * U = L->U, * V = L->V;
+    for (int p = 0; p < r; p++)
+        xc1[p] = ab2+ba2*xc1[p];
+    for (int q = 0; q < r; q++)
+        xc2[q] = cd2+dc2*xc2[q];
+
     for (int q = 0; q < r; q++)
         for (int p = 0; p < r; p++)
-            S[p+r*q] = f(ab2+ba2*xc[p], cd2+dc2*xc[q]);
+            L->S[p+r*q] = f(xc1[p], xc2[q]);
 
-    for (int p = 0; p < r; p++) {
-        xcpq = ab2+ba2*xc[p];
-        lcpq = lc[p];
-        for (int m = i.start; m < i.stop; m++)
-            U[m-i.start+M*p] = lcpq/(x[m]-xcpq);
-    }
-    for (int m = 0; m < i.stop-i.start; m++) {
-        k = -1;
-        temp = 0;
-        for (int p = 0; p < r; p++) {
-            if (X(isfinite)(U[m+M*p])) temp += U[m+M*p];
-            else {k = p; break;}
-        }
-        if (k != -1) {
-            for (int p = 0; p < r; p++)
-                U[m+M*p] = 0;
-            U[m+M*k] = 1;
-        }
-        else {
-            temp = 1/temp;
-            for (int p = 0; p < r; p++)
-                U[m+M*p] *= temp;
-        }
-    }
+    X(barycentricmatrix)(L->U, x+i.start, M, xc1, lc, r);
+    X(barycentricmatrix)(L->V, y+j.start, N, xc2, lc, r);
 
-    for (int q = 0; q < r; q++) {
-        xcpq = cd2+dc2*xc[q];
-        lcpq = lc[q];
-        for (int n = j.start; n < j.stop; n++)
-            V[n-j.start+N*q] = lcpq/(y[n]-xcpq);
-    }
-    for (int n = 0; n < j.stop-j.start; n++) {
-        k = -1;
-        temp = 0;
-        for (int q = 0; q < r; q++) {
-            if (X(isfinite)(V[n+N*q])) temp += V[n+N*q];
-            else {k = q; break;}
-        }
-        if (k != -1) {
-            for (int q = 0; q < r; q++)
-                V[n+N*q] = 0;
-            V[n+N*k] = 1;
-        }
-        else {
-            temp = 1/temp;
-            for (int q = 0; q < r; q++)
-                V[n+N*q] *= temp;
-        }
-    }
-
-    free(xc);
+    free(xc1);
+    free(xc2);
     free(lc);
 
     return L;
@@ -247,47 +247,78 @@ X(hierarchicalmatrix) * X(create_hierarchicalmatrix)(const int M, const int N, F
     return H;
 }
 
+// Assumes x and y are increasing sequences
+static FLT X(dist)(FLT * x, FLT * y, unitrange i, unitrange j) {
+    if (y[j.start] > x[i.stop-1])
+        return y[j.start] - x[i.stop-1];
+    else if (y[j.start] >= x[i.start])
+        return ZERO(FLT);
+    else if (y[j.stop-1] >= x[i.start])
+        return ZERO(FLT);
+    else
+        return x[i.start] - y[j.stop-1];
+}
+
+// Assumes x is an increasing sequence
+static FLT X(diam)(FLT * x, unitrange i) {return x[i.stop-1] - x[i.start];}
 
 X(hierarchicalmatrix) * X(sample_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j) {
     int M = 2, N = 2;
     X(hierarchicalmatrix) * H = X(malloc_hierarchicalmatrix)(M, N);
     X(hierarchicalmatrix) ** HH = H->hierarchicalmatrices;
     X(densematrix) ** HD = H->densematrices;
+    X(lowrankmatrix) ** HL = H->lowrankmatrices;
 
     unitrange i1, i2, j1, j2;
     X(indsplit)(x, i, &i1, &i2, x[i.start], x[i.stop-1]);
     X(indsplit)(y, j, &j1, &j2, y[j.start], y[j.stop-1]);
 
-    if ((i1.stop-i1.start)*(j1.stop-j1.start) < BLOCKSIZE*BLOCKSIZE) {
+    if (i1.stop-i1.start < BLOCKSIZE || j1.stop-j1.start < BLOCKSIZE) {
         HD[0] = X(sample_densematrix)(f, x, y, i1, j1);
         H->hash(0, 0) = 2;
+    }
+    else if (X(dist)(x, y, i1, j1) >= MIN(X(diam)(x, i1), X(diam)(y, j1))) {
+        HL[0] = X(sample_lowrankmatrix)(f, x, y, i1, j1);
+        H->hash(0, 0) = 3;
     }
     else {
         HH[0] = X(sample_hierarchicalmatrix)(f, x, y, i1, j1);
         H->hash(0, 0) = 1;
     }
 
-    if ((i2.stop-i2.start)*(j1.stop-j1.start) < BLOCKSIZE*BLOCKSIZE) {
+    if (i2.stop-i2.start < BLOCKSIZE || j1.stop-j1.start < BLOCKSIZE) {
         HD[1] = X(sample_densematrix)(f, x, y, i2, j1);
         H->hash(1, 0) = 2;
     }
+    else if (X(dist)(x, y, i2, j1) >= MIN(X(diam)(x, i2), X(diam)(y, j1))) {
+        HL[1] = X(sample_lowrankmatrix)(f, x, y, i2, j1);
+        H->hash(1, 0) = 3;
+    }
     else {
-        HH[1] = X(sample_hierarchicalmatrix1)(f, x, y, i2, j1);
+        HH[1] = X(sample_hierarchicalmatrix)(f, x, y, i2, j1);
         H->hash(1, 0) = 1;
     }
 
-    if ((i1.stop-i1.start)*(j2.stop-j2.start) < BLOCKSIZE*BLOCKSIZE) {
+    if (i1.stop-i1.start < BLOCKSIZE || j2.stop-j2.start < BLOCKSIZE) {
         HD[2] = X(sample_densematrix)(f, x, y, i1, j2);
         H->hash(0, 1) = 2;
     }
+    else if (X(dist)(x, y, i1, j2) >= MIN(X(diam)(x, i1), X(diam)(y, j2))) {
+        HL[2] = X(sample_lowrankmatrix)(f, x, y, i1, j2);
+        H->hash(0, 1) = 3;
+    }
     else {
-        HH[2] = X(sample_hierarchicalmatrix2)(f, x, y, i1, j2);
+        HH[2] = X(sample_hierarchicalmatrix)(f, x, y, i1, j2);
         H->hash(0, 1) = 1;
     }
 
-    if ((i2.stop-i2.start)*(j2.stop-j2.start) < BLOCKSIZE*BLOCKSIZE) {
+    if (i2.stop-i2.start < BLOCKSIZE || j2.stop-j2.start < BLOCKSIZE) {
         HD[3] = X(sample_densematrix)(f, x, y, i2, j2);
         H->hash(1, 1) = 2;
+    }
+    else if (X(dist)(x, y, i2, j2) >= MIN(X(diam)(x, i2), X(diam)(y, j2))) {
+        HL[3] = X(sample_lowrankmatrix)(f, x, y, i2, j2);
+        H->hash(1, 1) = 3;
     }
     else {
         HH[3] = X(sample_hierarchicalmatrix)(f, x, y, i2, j2);
@@ -297,7 +328,7 @@ X(hierarchicalmatrix) * X(sample_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT
     return H;
 }
 
-X(hierarchicalmatrix) * X(sample_hierarchicalmatrix1)(FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j) {
+X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT (*f2)(FLT x, FLT ylo, FLT yhi), FLT * x, FLT * y, FLT * ylo, FLT * yhi, unitrange i, unitrange j) {
     int M = 2, N = 2;
     X(hierarchicalmatrix) * H = X(malloc_hierarchicalmatrix)(M, N);
     X(hierarchicalmatrix) ** HH = H->hierarchicalmatrices;
@@ -308,49 +339,57 @@ X(hierarchicalmatrix) * X(sample_hierarchicalmatrix1)(FLT (*f)(FLT x, FLT y), FL
     X(indsplit)(x, i, &i1, &i2, x[i.start], x[i.stop-1]);
     X(indsplit)(y, j, &j1, &j2, y[j.start], y[j.stop-1]);
 
-    HL[0] = X(sample_lowrankmatrix)(f, x, y, i1, j1);
-    H->hash(0, 0) = 3;
-    HL[1] = X(sample_lowrankmatrix)(f, x, y, i2, j1);
-    H->hash(1, 0) = 3;
-    if ((i1.stop-i1.start)*(j2.stop-j2.start) < BLOCKSIZE*BLOCKSIZE) {
-        HD[2] = X(sample_densematrix)(f, x, y, i1, j2);
-        H->hash(0, 1) = 2;
+    if (i1.stop-i1.start < BLOCKSIZE || j1.stop-j1.start < BLOCKSIZE) {
+        HD[0] = X(sample_accurately_densematrix)(f2, x, ylo, yhi, i1, j1);
+        H->hash(0, 0) = 2;
+    }
+    else if (X(dist)(x, y, i1, j1) >= MIN(X(diam)(x, i1), X(diam)(y, j1))) {
+        HL[0] = X(sample_lowrankmatrix)(f, x, y, i1, j1);
+        H->hash(0, 0) = 3;
     }
     else {
-        HH[2] = X(sample_hierarchicalmatrix1)(f, x, y, i1, j2);
-        H->hash(0, 1) = 1;
+        HH[0] = X(sample_accurately_hierarchicalmatrix)(f, f2, x, y, ylo, yhi, i1, j1);
+        H->hash(0, 0) = 1;
     }
-    HL[3] = X(sample_lowrankmatrix)(f, x, y, i2, j2);
-    H->hash(1, 1) = 3;
 
-    return H;
-}
-
-X(hierarchicalmatrix) * X(sample_hierarchicalmatrix2)(FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j) {
-    int M = 2, N = 2;
-    X(hierarchicalmatrix) * H = X(malloc_hierarchicalmatrix)(M, N);
-    X(hierarchicalmatrix) ** HH = H->hierarchicalmatrices;
-    X(densematrix) ** HD = H->densematrices;
-    X(lowrankmatrix) ** HL = H->lowrankmatrices;
-
-    unitrange i1, i2, j1, j2;
-    X(indsplit)(x, i, &i1, &i2, x[i.start], x[i.stop-1]);
-    X(indsplit)(y, j, &j1, &j2, y[j.start], y[j.stop-1]);
-
-    HL[0] = X(sample_lowrankmatrix)(f, x, y, i1, j1);
-    H->hash(0, 0) = 3;
-    if ((i2.stop-i2.start)*(j1.stop-j1.start) < BLOCKSIZE*BLOCKSIZE) {
-        HD[1] = X(sample_densematrix)(f, x, y, i2, j1);
+    if (i2.stop-i2.start < BLOCKSIZE || j1.stop-j1.start < BLOCKSIZE) {
+        HD[1] = X(sample_accurately_densematrix)(f2, x, ylo, yhi, i2, j1);
         H->hash(1, 0) = 2;
     }
+    else if (X(dist)(x, y, i2, j1) >= MIN(X(diam)(x, i2), X(diam)(y, j1))) {
+        HL[1] = X(sample_lowrankmatrix)(f, x, y, i2, j1);
+        H->hash(1, 0) = 3;
+    }
     else {
-        HH[1] = X(sample_hierarchicalmatrix2)(f, x, y, i2, j1);
+        HH[1] = X(sample_accurately_hierarchicalmatrix)(f, f2, x, y, ylo, yhi, i2, j1);
         H->hash(1, 0) = 1;
     }
-    HL[2] = X(sample_lowrankmatrix)(f, x, y, i1, j2);
-    H->hash(0, 1) = 3;
-    HL[3] = X(sample_lowrankmatrix)(f, x, y, i2, j2);
-    H->hash(1, 1) = 3;
+
+    if (i1.stop-i1.start < BLOCKSIZE || j2.stop-j2.start < BLOCKSIZE) {
+        HD[2] = X(sample_accurately_densematrix)(f2, x, ylo, yhi, i1, j2);
+        H->hash(0, 1) = 2;
+    }
+    else if (X(dist)(x, y, i1, j2) >= MIN(X(diam)(x, i1), X(diam)(y, j2))) {
+        HL[2] = X(sample_lowrankmatrix)(f, x, y, i1, j2);
+        H->hash(0, 1) = 3;
+    }
+    else {
+        HH[2] = X(sample_accurately_hierarchicalmatrix)(f, f2, x, y, ylo, yhi, i1, j2);
+        H->hash(0, 1) = 1;
+    }
+
+    if (i2.stop-i2.start < BLOCKSIZE || j2.stop-j2.start < BLOCKSIZE) {
+        HD[3] = X(sample_accurately_densematrix)(f2, x, ylo, yhi, i2, j2);
+        H->hash(1, 1) = 2;
+    }
+    else if (X(dist)(x, y, i2, j2) >= MIN(X(diam)(x, i2), X(diam)(y, j2))) {
+        HL[3] = X(sample_lowrankmatrix)(f, x, y, i2, j2);
+        H->hash(1, 1) = 3;
+    }
+    else {
+        HH[3] = X(sample_accurately_hierarchicalmatrix)(f, f2, x, y, ylo, yhi, i2, j2);
+        H->hash(1, 1) = 1;
+    }
 
     return H;
 }
@@ -488,14 +527,14 @@ void X(scale_columns_hierarchicalmatrix)(FLT alpha, FLT * x, X(hierarchicalmatri
 
 // y ← α*A*x + β*y, y ← α*Aᵀ*x + β*y
 void X(gemv)(char TRANS, int m, int n, FLT alpha, FLT * A, FLT * x, FLT beta, FLT * y) {
-    FLT xj, t;
+    FLT t;
     if (TRANS == 'N') {
         for (int i = 0; i < m; i++)
             y[i] = beta*y[i];
         for (int j = 0; j < n; j++) {
-            xj = alpha*x[j];
+            t = alpha*x[j];
             for (int i = 0; i < m; i++)
-                y[i] += A[i]*xj;
+                y[i] += A[i]*t;
             A += m;
         }
     }
@@ -522,23 +561,23 @@ void X(lrmv)(char TRANS, FLT alpha, X(lowrankmatrix) * L, FLT * x, FLT beta, FLT
     FLT * t1 = L->t1+r*FT_GET_THREAD_NUM(), * t2 = L->t2+r*FT_GET_THREAD_NUM();
     if (TRANS == 'N') {
         if (L->N == '2') {
-            X(gemv)('T', n, r, ONE(FLT), L->V, x, ZERO(FLT), t1);
+            X(gemv)('T', n, r, 1, L->V, x, 0, t1);
             X(gemv)('N', m, r, alpha, L->U, t1, beta, y);
         }
         else if (L->N == '3') {
-            X(gemv)('T', n, r, ONE(FLT), L->V, x, ZERO(FLT), t1);
-            X(gemv)('N', r, r, ONE(FLT), L->S, t1, ZERO(FLT), t2);
+            X(gemv)('T', n, r, 1, L->V, x, 0, t1);
+            X(gemv)('N', r, r, 1, L->S, t1, 0, t2);
             X(gemv)('N', m, r, alpha, L->U, t2, beta, y);
         }
     }
     else if (TRANS == 'T') {
         if (L->N == '2') {
-            X(gemv)('T', m, r, ONE(FLT), L->U, x, ZERO(FLT), t1);
+            X(gemv)('T', m, r, 1, L->U, x, 0, t1);
             X(gemv)('N', n, r, alpha, L->V, t1, beta, y);
         }
         else if (L->N == '3') {
-            X(gemv)('T', m, r, ONE(FLT), L->U, x, ZERO(FLT), t1);
-            X(gemv)('T', r, r, ONE(FLT), L->S, t1, ZERO(FLT), t2);
+            X(gemv)('T', m, r, 1, L->U, x, 0, t1);
+            X(gemv)('T', r, r, 1, L->S, t1, 0, t2);
             X(gemv)('N', n, r, alpha, L->V, t2, beta, y);
         }
     }
@@ -556,15 +595,15 @@ void X(himv)(char TRANS, FLT alpha, X(hierarchicalmatrix) * H, FLT * x, FLT beta
             for (int m = 0; m < M; m++) {
                 switch (H->hash(m, n)) {
                     case 1: {
-                        X(himv)(TRANS, alpha, H->hierarchicalmatrices(m, n), x+q, ONE(FLT), y+p);
+                        X(himv)(TRANS, alpha, H->hierarchicalmatrices(m, n), x+q, 1, y+p);
                         break;
                     }
                     case 2: {
-                        X(demv)(TRANS, alpha, H->densematrices(m, n), x+q, ONE(FLT), y+p);
+                        X(demv)(TRANS, alpha, H->densematrices(m, n), x+q, 1, y+p);
                         break;
                     }
                     case 3: {
-                        X(lrmv)(TRANS, alpha, H->lowrankmatrices(m, n), x+q, ONE(FLT), y+p);
+                        X(lrmv)(TRANS, alpha, H->lowrankmatrices(m, n), x+q, 1, y+p);
                         break;
                     }
                 }
@@ -581,15 +620,15 @@ void X(himv)(char TRANS, FLT alpha, X(hierarchicalmatrix) * H, FLT * x, FLT beta
             for (int n = 0; n < N; n++) {
                 switch (H->hash(m, n)) {
                     case 1: {
-                        X(himv)(TRANS, alpha, H->hierarchicalmatrices(m, n), x+q, ONE(FLT), y+p);
+                        X(himv)(TRANS, alpha, H->hierarchicalmatrices(m, n), x+q, 1, y+p);
                         break;
                     }
                     case 2: {
-                        X(demv)(TRANS, alpha, H->densematrices(m, n), x+q, ONE(FLT), y+p);
+                        X(demv)(TRANS, alpha, H->densematrices(m, n), x+q, 1, y+p);
                         break;
                     }
                     case 3: {
-                        X(lrmv)(TRANS, alpha, H->lowrankmatrices(m, n), x+q, ONE(FLT), y+p);
+                        X(lrmv)(TRANS, alpha, H->lowrankmatrices(m, n), x+q, 1, y+p);
                         break;
                     }
                 }
@@ -632,3 +671,10 @@ FLT X(cauchykernel)(FLT x, FLT y) {return 1/(x-y);}
 FLT X(coulombkernel)(FLT x, FLT y) {return 1/((x-y)*(x-y));}
 FLT X(coulombprimekernel)(FLT x, FLT y) {return 1/(((x-y)*(x-y))*(x-y));}
 FLT X(logkernel)(FLT x, FLT y) {return X(log)(X(fabs)(x-y));}
+
+static FLT X(minus)(FLT x, FLT y) {return x - y;}
+
+FLT X(cauchykernel2)(FLT x, FLT ylo, FLT yhi) {return 1/(X(minus)(x, yhi) - ylo);}
+FLT X(coulombkernel2)(FLT x, FLT ylo, FLT yhi) {return 1/((X(minus)(x, yhi) - ylo)*(X(minus)(x, yhi) - ylo));}
+FLT X(coulombprimekernel2)(FLT x, FLT ylo, FLT yhi) {return 1/(((X(minus)(x, yhi) - ylo)*(X(minus)(x, yhi) - ylo))*(X(minus)(x, yhi) - ylo));}
+FLT X(logkernel2)(FLT x, FLT ylo, FLT yhi) {return X(log)(X(fabs)(X(minus)(x, yhi) - ylo));}

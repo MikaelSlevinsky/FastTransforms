@@ -27,7 +27,7 @@ int main(void) {
             }
         }
         printf("(n×n) = (%4ix%4i): \t\t\t\t\t |%20.2e ", n, n, err);
-        checktest(err, (int) 2*sqrt(n), &checksum);
+        checktest(err, 2*sqrt(n), &checksum);
         free(C);
     }
 
@@ -73,7 +73,7 @@ int main(void) {
                 }
             }
             printf("(n×n) = (%4ix%4i), (%+1.2f) → (%+1.2f): \t\t |%20.2e ", n, n, lambda1, lambda2, err);
-            checktest(err, (int) 4*pow(n, fabs(lambda2-lambda1)), &checksum);
+            checktest(err, 4*pow(n, fabs(lambda2-lambda1)), &checksum);
         }
         free(C);
     }
@@ -149,16 +149,27 @@ int main(void) {
             }
             for (int normjac1 = 0; normjac1 <= 1; normjac1++) {
                 for (int normjac2 = 0; normjac2 <= 1; normjac2++) {
+                    /*
                     A = plan_jac2jac(normjac1, normjac2, n, alpha, beta, gamma);
                     B = plan_jac2jac(normjac2, normjac1, n, gamma, beta, alpha);
                     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
                     err += norm_2arg(B, C, n*n)/norm_1arg(C, n*n);
                     free(A);
                     free(B);
+                    */
+                    //*
+                    A = eigenplan_jac2jac(normjac1, normjac2, n, alpha, beta, gamma, beta);
+                    B = eigenplan_jac2jac(normjac2, normjac1, n, gamma, beta, alpha, beta);
+                    //B = plan_jac2jac(normjac2, normjac1, n, gamma, beta, alpha);
+                    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
+                    err += norm_2arg(B, C, n*n)/norm_1arg(C, n*n);
+                    free(A);
+                    free(B);
+                    //*/
                 }
             }
             printf("(n×n) = (%4ix%4i), (%+1.2f, %+1.2f) → (%+1.2f, %+1.2f): \t |%20.2e ", n, n, alpha, beta, gamma, beta, err);
-            checktest(err, (int) 32*pow(n, MAX(fabs(gamma-alpha), fabs(beta))), &checksum);
+            checktest(err, 8*pow(n, 0.5+MAX(fabs(gamma-alpha), fabs(beta))), &checksum);
         }
         free(C);
     }

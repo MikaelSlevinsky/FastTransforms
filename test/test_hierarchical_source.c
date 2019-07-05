@@ -95,7 +95,7 @@ void X(test_hierarchical)(int * checksum) {
     printf("\t\t\t\t\t\t\t |   or Calculation Time\n");
     printf("---------------------------------------------------------|----------------------\n");
 
-    int nmin = 500, nmax = 2000;
+    int nmin = 512, nmax = 2048;
     FLT err = 0;
 
     err += X(test_barycentric)('1', 40, X(exp), 0.125);

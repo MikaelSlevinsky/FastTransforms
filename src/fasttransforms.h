@@ -21,7 +21,7 @@
     #define FT_SET_NUM_THREADS(x)
 #endif
 
-#include "adc.h"
+#include "tdc.h"
 
 /// Set the number of OpenMP threads.
 void ft_set_num_threads(const int n);
