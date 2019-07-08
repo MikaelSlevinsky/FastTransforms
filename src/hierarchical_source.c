@@ -672,9 +672,9 @@ FLT X(coulombkernel)(FLT x, FLT y) {return 1/((x-y)*(x-y));}
 FLT X(coulombprimekernel)(FLT x, FLT y) {return 1/(((x-y)*(x-y))*(x-y));}
 FLT X(logkernel)(FLT x, FLT y) {return Y(log)(Y(fabs)(x-y));}
 
-static FLT X(minus)(FLT x, FLT y) {return x - y;}
+static FLT X(diff)(FLT x, FLT y) {return x - y;}
 
-FLT X(cauchykernel2)(FLT x, FLT ylo, FLT yhi) {return 1/(X(minus)(x, yhi) - ylo);}
-FLT X(coulombkernel2)(FLT x, FLT ylo, FLT yhi) {return 1/((X(minus)(x, yhi) - ylo)*(X(minus)(x, yhi) - ylo));}
-FLT X(coulombprimekernel2)(FLT x, FLT ylo, FLT yhi) {return 1/(((X(minus)(x, yhi) - ylo)*(X(minus)(x, yhi) - ylo))*(X(minus)(x, yhi) - ylo));}
-FLT X(logkernel2)(FLT x, FLT ylo, FLT yhi) {return Y(log)(Y(fabs)(X(minus)(x, yhi) - ylo));}
+FLT X(cauchykernel2)(FLT x, FLT ylo, FLT yhi) {return 1/(X(diff)(x, yhi) - ylo);}
+FLT X(coulombkernel2)(FLT x, FLT ylo, FLT yhi) {return 1/((X(diff)(x, yhi) - ylo)*(X(diff)(x, yhi) - ylo));}
+FLT X(coulombprimekernel2)(FLT x, FLT ylo, FLT yhi) {return 1/(((X(diff)(x, yhi) - ylo)*(X(diff)(x, yhi) - ylo))*(X(diff)(x, yhi) - ylo));}
+FLT X(logkernel2)(FLT x, FLT ylo, FLT yhi) {return Y(log)(Y(fabs)(X(diff)(x, yhi) - ylo));}

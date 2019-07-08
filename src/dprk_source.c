@@ -92,8 +92,6 @@ X(symmetric_dpr1) * X(symmetric_dpr1_inv)(X(symmetric_dpr1) * A) {
     return B;
 }
 
-static FLT X(diff)(FLT x, FLT y) {return x - y;}
-
 void X(symmetric_dpr1_synthesize)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lambdahi) {
     int n = A->n;
     FLT * d = A->d, * z = A->z, rho = A->rho, zk;

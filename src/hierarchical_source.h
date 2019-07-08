@@ -95,6 +95,8 @@ FLT X(coulombkernel)(FLT x, FLT y);
 FLT X(coulombprimekernel)(FLT x, FLT y);
 FLT X(logkernel)(FLT x, FLT y);
 
+static FLT X(diff)(FLT x, FLT y);
+
 FLT X(cauchykernel2)(FLT x, FLT ylo, FLT yhi);
 FLT X(coulombkernel2)(FLT x, FLT ylo, FLT yhi);
 FLT X(coulombprimekernel2)(FLT x, FLT ylo, FLT yhi);
