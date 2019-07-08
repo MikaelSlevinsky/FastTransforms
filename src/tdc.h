@@ -11,16 +11,14 @@ typedef struct {
     int stop;
 } unitrange;
 
-#define CONCAT(prefix, name, suffix) prefix ## name ## suffix
-
 #define hash(m,n) hash[(m)+(n)*M]
 #define hierarchicalmatrices(m,n) hierarchicalmatrices[(m)+(n)*M]
 #define densematrices(m,n) densematrices[(m)+(n)*M]
 #define lowrankmatrices(m,n) lowrankmatrices[(m)+(n)*M]
-#define fmmblocks(m,n) fmmblocks[(m)+(n)*M]
 
 #define FLT float
-#define X(name) CONCAT(, name, f)
+#define X(name) FT_CONCAT(ft_, name, f)
+#define Y(name) FT_CONCAT(, name, f)
 #include "tridiagonal_source.h"
 #include "triangular_banded_source.h"
 #include "hierarchical_source.h"
@@ -28,9 +26,11 @@ typedef struct {
 #include "tdc_source.h"
 #undef FLT
 #undef X
+#undef Y
 
 #define FLT double
-#define X(name) CONCAT(, name, )
+#define X(name) FT_CONCAT(ft_, name, )
+#define Y(name) FT_CONCAT(, name, )
 #include "tridiagonal_source.h"
 #include "triangular_banded_source.h"
 #include "hierarchical_source.h"
@@ -38,9 +38,11 @@ typedef struct {
 #include "tdc_source.h"
 #undef FLT
 #undef X
+#undef Y
 
 #define FLT long double
-#define X(name) CONCAT(, name, l)
+#define X(name) FT_CONCAT(ft_, name, l)
+#define Y(name) FT_CONCAT(, name, l)
 #include "tridiagonal_source.h"
 #include "triangular_banded_source.h"
 #include "hierarchical_source.h"
@@ -48,9 +50,11 @@ typedef struct {
 #include "tdc_source.h"
 #undef FLT
 #undef X
+#undef Y
 
 #define FLT __float128
-#define X(name) CONCAT(, name, q)
+#define X(name) FT_CONCAT(ft_, name, q)
+#define Y(name) FT_CONCAT(, name, q)
 #include "tridiagonal_source.h"
 #include "triangular_banded_source.h"
 #include "hierarchical_source.h"
@@ -58,5 +62,6 @@ typedef struct {
 #include "tdc_source.h"
 #undef FLT
 #undef X
+#undef Y
 
 #endif // TDC_H

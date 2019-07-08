@@ -1,4 +1,4 @@
-void X(test_tdc)(int * checksum) {
+void Y(test_tdc)(int * checksum) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
 

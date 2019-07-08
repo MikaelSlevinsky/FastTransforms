@@ -21,6 +21,8 @@
     #define FT_SET_NUM_THREADS(x)
 #endif
 
+#define FT_CONCAT(prefix, name, suffix) prefix ## name ## suffix
+
 #include "tdc.h"
 
 /// Set the number of OpenMP threads.

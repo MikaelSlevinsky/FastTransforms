@@ -56,8 +56,6 @@ static inline quadruple __sinpiq(quadruple x) {return sinq(M_PIq*x);}
 static inline long double __tanpil(long double x) {return tanl(M_PIl*x);}
 static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
 
-#define CONCAT(prefix, name, suffix) prefix ## name ## suffix
-
 #define ZERO(FLT) ((FLT) 0)
 #define ONE(FLT) ((FLT) 1)
 #define TWO(FLT) ((FLT) 2)

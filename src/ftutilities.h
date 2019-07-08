@@ -10,6 +10,8 @@
 #include <sys/time.h>
 #include "ftinternal.h"
 
+#define FT_CONCAT(prefix, name, suffix) prefix ## name ## suffix
+
 #define RED(string) "\x1b[31m" string "\x1b[0m"
 #define GREEN(string) "\x1b[32m" string "\x1b[0m"
 #define YELLOW(string) "\x1b[33m" string "\x1b[0m"
@@ -32,27 +34,35 @@ double * spinsphrand(int n, int m, int s);
 double elapsed(struct timeval * start, struct timeval * end, int N);
 
 #define FLT float
-#define X(name) CONCAT(, name, f)
+#define X(name) FT_CONCAT(ft_, name, f)
+#define Y(name) FT_CONCAT(, name, f)
 #include "ftutilities_source.h"
 #undef FLT
 #undef X
+#undef Y
 
 #define FLT double
-#define X(name) CONCAT(, name, )
+#define X(name) FT_CONCAT(ft_, name, )
+#define Y(name) FT_CONCAT(, name, )
 #include "ftutilities_source.h"
 #undef FLT
 #undef X
+#undef Y
 
 #define FLT long double
-#define X(name) CONCAT(, name, l)
+#define X(name) FT_CONCAT(ft_, name, l)
+#define Y(name) FT_CONCAT(, name, l)
 #include "ftutilities_source.h"
 #undef FLT
 #undef X
+#undef Y
 
 #define FLT quadruple
-#define X(name) CONCAT(, name, q)
+#define X(name) FT_CONCAT(ft_, name, q)
+#define Y(name) FT_CONCAT(, name, q)
 #include "ftutilities_source.h"
 #undef FLT
 #undef X
+#undef Y
 
 #endif //FTUTILITIES_H

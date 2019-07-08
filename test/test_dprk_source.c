@@ -4,16 +4,16 @@ FLT X(secular_cond)(X(symmetric_dpr1) * A, FLT lambdalo, FLT lambdahi) {
     int n = A->n;
     FLT * d = A->d, * z = A->z, rho = A->rho, ret = ZERO(FLT);
     for (int i = 0; i < n; i++)
-        ret += X(fabs)(z[i]*z[i]/(X(diff)(d[i], lambdahi) - lambdalo));
-    return X(fabs)(1/rho)+ret;
+        ret += Y(fabs)(z[i]*z[i]/(X(diff)(d[i], lambdahi) - lambdalo));
+    return Y(fabs)(1/rho)+ret;
 }
 
 FLT X(generalized_secular_cond)(X(symmetric_dpr1) * A, X(symmetric_idpr1) * B, FLT lambdalo, FLT lambdahi) {
     int n = A->n;
     FLT * d = A->d, * z = A->z, rho = A->rho, sigma = B->sigma, ret = ZERO(FLT);
     for (int i = 0; i < n; i++)
-        ret += X(fabs)(z[i]*z[i]/(X(diff)(d[i], lambdahi) - lambdalo));
-    return X(fabs)(1/(sigma*(X(diff)(rho/sigma, lambdahi) - lambdalo)))+ret;
+        ret += Y(fabs)(z[i]*z[i]/(X(diff)(d[i], lambdahi) - lambdalo));
+    return Y(fabs)(1/(sigma*(X(diff)(rho/sigma, lambdahi) - lambdalo)))+ret;
 }
 
 void X(test_permute)(int * checksum) {
@@ -59,7 +59,7 @@ X(symmetric_idpr1) * X(test_symmetric_idpr1)(int n) {
 }
 
 
-void X(test_dprk)(int * checksum) {
+void Y(test_dprk)(int * checksum) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
 

@@ -22,7 +22,9 @@ int main(void) {
 }
 
 #define FLT double
-#define X(name) CONCAT(, name, )
+#define X(name) FT_CONCAT(ft_, name, )
+#define Y(name) FT_CONCAT(, name, )
 #include "test_triangular_banded_source.c"
 #undef FLT
 #undef X
+#undef Y

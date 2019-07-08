@@ -183,8 +183,8 @@ double * plan_jac2jac(const int normjac1, const int normjac2, const int n, const
 }
 
 double * eigenplan_jac2jac(const int normjac1, const int normjac2, const int n, const double alpha, const double beta, const double gamma, const double delta) {
-    triangular_banded * A = malloc_triangular_banded(n, 2);
-    triangular_banded * B = malloc_triangular_banded(n, 2);
+    ft_triangular_banded * A = ft_malloc_triangular_banded(n, 2);
+    ft_triangular_banded * B = ft_malloc_triangular_banded(n, 2);
     double v;
     /*
     if (n > 0)
@@ -217,47 +217,47 @@ double * eigenplan_jac2jac(const int normjac1, const int normjac2, const int n, 
     }
     */
     if (n > 0)
-        set_triangular_banded_index(A, 0, 0, 0);
+        ft_set_triangular_banded_index(A, 0, 0, 0);
     if (n > 1) {
         v = (gamma+delta+2)*((gamma-delta)/(gamma+delta+4)*(1+(gamma+delta-alpha-beta)/2) - (gamma-alpha+beta-delta)/2);
-        set_triangular_banded_index(A, v, 0, 1);
+        ft_set_triangular_banded_index(A, v, 0, 1);
     }
     if (n > 2) {
         v = -(gamma+delta+3)*(gamma+2)/(gamma+delta+4)*(delta+2)/(gamma+delta+5)*(gamma-alpha+delta-beta+2);
-        set_triangular_banded_index(A, v, 0, 2);
+        ft_set_triangular_banded_index(A, v, 0, 2);
     }
     for (int i = 1; i < n; i++) {
         v = i*(i+alpha+beta+1);
-        set_triangular_banded_index(A, v, i, i);
+        ft_set_triangular_banded_index(A, v, i, i);
     }
     for (int i = 1; i < n-1; i++) {
         v = ((gamma-delta)/(2*i+gamma+delta+2)/(2*i+gamma+delta+4)*((i+1)*(i+gamma+delta+2)+(gamma+delta+2)*(gamma+delta-alpha-beta)/2) - (gamma-alpha+beta-delta)/2) / ((i+gamma+delta+1)/(2*i+gamma+delta+1)/(2*i+gamma+delta+2));
-        set_triangular_banded_index(A, v, i, i+1);
+        ft_set_triangular_banded_index(A, v, i, i+1);
     }
     for (int i = 1; i < n-2; i++) {
         v = -(i+gamma+delta+3)*(i+gamma+2)/(2*i+gamma+delta+4)*(i+delta+2)/(2*i+gamma+delta+5)*(i+gamma-alpha+delta-beta+2) / ((i+gamma+delta+1)/(2*i+gamma+delta+1)*(i+gamma+delta+2)/(2*i+gamma+delta+2));
-        set_triangular_banded_index(A, v, i, i+2);
+        ft_set_triangular_banded_index(A, v, i, i+2);
     }
     if (n > 0)
-        set_triangular_banded_index(B, 1, 0, 0);
+        ft_set_triangular_banded_index(B, 1, 0, 0);
     if (n > 1) {
         v = (gamma-delta)/(gamma+delta+4);
-        set_triangular_banded_index(B, v, 0, 1);
+        ft_set_triangular_banded_index(B, v, 0, 1);
     }
     if (n > 2) {
         v = -(gamma+2)/(gamma+delta+4)*(delta+2)/(gamma+delta+5);
-        set_triangular_banded_index(B, v, 0, 2);
+        ft_set_triangular_banded_index(B, v, 0, 2);
     }
     for (int i = 1; i < n; i++) {
-        set_triangular_banded_index(B, 1, i, i);
+        ft_set_triangular_banded_index(B, 1, i, i);
     }
     for (int i = 1; i < n-1; i++) {
         v = (gamma-delta)/(i+gamma+delta+1)*(2*i+gamma+delta+1)/(2*i+gamma+delta+4);
-        set_triangular_banded_index(B, v, i, i+1);
+        ft_set_triangular_banded_index(B, v, i, i+1);
     }
     for (int i = 1; i < n-2; i++) {
         v = -(i+gamma+2)/(2*i+gamma+delta+4)*(i+delta+2)/(2*i+gamma+delta+5) /( (i+gamma+delta+1)/(2*i+gamma+delta+1)*(i+gamma+delta+2)/(2*i+gamma+delta+2) );
-        set_triangular_banded_index(B, v, i, i+2);
+        ft_set_triangular_banded_index(B, v, i, i+2);
     }
 
     double * V = (double *) calloc(n*n, sizeof(double));
@@ -270,7 +270,7 @@ double * eigenplan_jac2jac(const int normjac1, const int normjac2, const int n, 
     for (int i = 2; i < n; i++)
         V[i+i*n] = lambda2(2*i+1, alpha+beta, gamma+delta)*lambda2(i+1, gamma+delta, alpha+beta);
 
-    triangular_banded_eigenvectors(A, B, V);
+    ft_triangular_banded_eigenvectors(A, B, V);
 
     double * sclrow = (double *) calloc(n, sizeof(double));
     double * sclcol = (double *) calloc(n, sizeof(double));
@@ -282,8 +282,8 @@ double * eigenplan_jac2jac(const int normjac1, const int normjac2, const int n, 
         for (int i = j; i >= 0; i--)
             V[i+j*n] *= sclrow[i]*sclcol[j];
 
-    destroy_triangular_banded(A);
-    destroy_triangular_banded(B);
+    ft_destroy_triangular_banded(A);
+    ft_destroy_triangular_banded(B);
     free(sclrow);
     free(sclcol);
 

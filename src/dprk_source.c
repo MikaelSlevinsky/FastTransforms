@@ -39,7 +39,7 @@ X(symmetric_idpr1) * X(symmetric_idpr1_factorize)(X(symmetric_idpr1) * A) {
         y[i] = z[i];
         tau += z[i]*z[i];
     }
-    tau = sigma/(1+X(sqrt)(1+sigma*tau));
+    tau = sigma/(1+Y(sqrt)(1+sigma*tau));
 
     X(symmetric_idpr1) * B = (X(symmetric_idpr1) *) malloc(sizeof(X(symmetric_idpr1)));
     B->z = y;
@@ -103,7 +103,7 @@ void X(symmetric_dpr1_synthesize)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * l
             zk *= (X(diff)(lambdahi[i], d[k]) + lambdalo[i])/(d[i] - d[k]);
         for (int i = k+1; i < n; i++)
             zk *= (X(diff)(lambdahi[i], d[k]) + lambdalo[i])/(d[i] - d[k]);
-        z[k] = X(copysign)(X(sqrt)(zk), z[k]);
+        z[k] = Y(copysign)(Y(sqrt)(zk), z[k]);
     }
 }
 
@@ -119,7 +119,7 @@ void X(symmetric_definite_dpr1_synthesize)(X(symmetric_dpr1) * A, X(symmetric_id
         zsum += z[k];
     }
     for (int k = 0; k < n; k++)
-        B->z[k] = z[k] = X(copysign)(X(sqrt)(z[k]/(1-sigma*zsum)), B->z[k]);
+        B->z[k] = z[k] = Y(copysign)(Y(sqrt)(z[k]/(1-sigma*zsum)), B->z[k]);
 }
 
 // x ← A*x, x ← Aᵀ*x
@@ -320,7 +320,7 @@ FLT X(first_pick_zero_update)(X(symmetric_dpr1) * A, FLT lambdalo, FLT lambdahi)
     FLT a = alpha/(X(diff)(lambdahi, d0) + lambdalo);
     FLT b = fp + f/(X(diff)(lambdahi, d0) + lambdalo);
     FLT c = -f;
-    return 2*c/(b+X(sqrt)(b*b-4*a*c));
+    return 2*c/(b+Y(sqrt)(b*b-4*a*c));
 }
 
 FLT X(first_generalized_pick_zero_update)(X(symmetric_dpr1) * A, X(symmetric_idpr1) * B, FLT lambdalo, FLT lambdahi) {
@@ -337,7 +337,7 @@ FLT X(first_generalized_pick_zero_update)(X(symmetric_dpr1) * A, X(symmetric_idp
     FLT a = alpha/(X(diff)(lambdahi, d0) + lambdalo);
     FLT b = fp + f/(X(diff)(lambdahi, d0) + lambdalo);
     FLT c = -f;
-    return 2*c/(b+X(sqrt)(b*b-4*a*c));
+    return 2*c/(b+Y(sqrt)(b*b-4*a*c));
 }
 
 FLT X(last_pick_zero_update)(X(symmetric_dpr1) * A, FLT lambdalo, FLT lambdahi) {
@@ -354,7 +354,7 @@ FLT X(last_pick_zero_update)(X(symmetric_dpr1) * A, FLT lambdalo, FLT lambdahi) 
     FLT a = alpha/(X(diff)(lambdahi, dn) + lambdalo);
     FLT b = fp + f/(X(diff)(lambdahi, dn) + lambdalo);
     FLT c = -f;
-    return 2*c/(b+X(sqrt)(b*b-4*a*c));
+    return 2*c/(b+Y(sqrt)(b*b-4*a*c));
 }
 
 FLT X(last_generalized_pick_zero_update)(X(symmetric_dpr1) * A, X(symmetric_idpr1) * B, FLT lambdalo, FLT lambdahi) {
@@ -371,7 +371,7 @@ FLT X(last_generalized_pick_zero_update)(X(symmetric_dpr1) * A, X(symmetric_idpr
     FLT a = alpha/(X(diff)(lambdahi, dn) + lambdalo);
     FLT b = fp + f/(X(diff)(lambdahi, dn) + lambdalo);
     FLT c = -f;
-    return 2*c/(b+X(sqrt)(b*b-4*a*c));
+    return 2*c/(b+Y(sqrt)(b*b-4*a*c));
 }
 
 FLT X(pick_zero_update)(X(symmetric_dpr1) * A, FLT x0, FLT x1, FLT lambdalo, FLT lambdahi) {
@@ -386,7 +386,7 @@ FLT X(pick_zero_update)(X(symmetric_dpr1) * A, FLT x0, FLT x1, FLT lambdalo, FLT
     FLT a = alpha/((X(diff)(x0, lambdahi) - lambdalo)*(X(diff)(lambdahi, x1) + lambdalo));
     FLT b = fp - (c1+c2)*f;
     FLT c = -f;
-    return 2*c/(b+X(sqrt)(b*b-4*a*c));
+    return 2*c/(b+Y(sqrt)(b*b-4*a*c));
 }
 
 FLT X(generalized_pick_zero_update)(X(symmetric_dpr1) * A, X(symmetric_idpr1) * B, FLT x0, FLT x1, FLT lambdalo, FLT lambdahi) {
@@ -401,7 +401,7 @@ FLT X(generalized_pick_zero_update)(X(symmetric_dpr1) * A, X(symmetric_idpr1) * 
     FLT a = alpha/((X(diff)(x0, lambdahi) - lambdalo)*(X(diff)(lambdahi, x1) + lambdalo));
     FLT b = fp - (c1+c2)*f;
     FLT c = -f;
-    return 2*c/(b+X(sqrt)(b*b-4*a*c));
+    return 2*c/(b+Y(sqrt)(b*b-4*a*c));
 }
 
 /*
@@ -421,7 +421,7 @@ void X(pick_zero_update_FMM)(X(symmetric_dpr1) * A, FLT * b2, FLT * lambda, FLT 
         a = alpha/((Aa[j-1] - lambda[j])*(lambda[j] - Aa[j]));
         b = fp[j] - (c1+c2)*f[j];
         c = -f[j];
-        delta[j] = 2*c/(b+X(sqrt)(b*b-4*a*c));
+        delta[j] = 2*c/(b+Y(sqrt)(b*b-4*a*c));
     }
 }
 */
@@ -430,21 +430,21 @@ void X(pick_zero_update_FMM)(X(symmetric_dpr1) * A, FLT * b2, FLT * lambda, FLT 
 void X(symmetric_dpr1_deflate)(X(symmetric_dpr1) * A, int * p) {
     int n = A->n, iz;
     FLT * d = A->d, * z = A->z, rho = A->rho;
-    FLT absrho = X(fabs)(rho), nrmz = 0;
+    FLT absrho = Y(fabs)(rho), nrmz = 0;
     for (int i = 0; i < n; i++)
         nrmz += z[i]*z[i];
-    nrmz = X(sqrt)(nrmz);
+    nrmz = Y(sqrt)(nrmz);
     // absolute sort based on the rank-one modification `z`.
     X(quicksort_2arg)(z, d, p, 0, n-1, X(ltabs));
     // `|z[iz]|` is the first value that surpasses ` √ |ρ| ||z||_2 × ϵ` in magnitude.
     for (iz = 0; iz < n; iz++)
-        if (X(fabs)(z[iz]) > X(sqrt)(absrho)*nrmz*X(eps)()) break;
+        if (Y(fabs)(z[iz]) > Y(sqrt)(absrho)*nrmz*Y(eps)()) break;
     // re-sort based on ensuring the elements of `d` with non-negligible
     // corresponding `z` are increasing.
     X(quicksort_2arg)(d, z, p, iz, n-1, X(lt));
     // Deflation based on a Givens rotation to zero-out an entry in `z`.
     for (int i = iz; i < n-1; i++)
-        if (X(fabs)(d[i]-d[i+1]) < MAX(X(fabs)(d[i]), X(fabs)(d[i+1]))*X(eps)())
+        if (Y(fabs)(d[i]-d[i+1]) < MAX(Y(fabs)(d[i]), Y(fabs)(d[i+1]))*Y(eps)())
             printf("Diagonal entries are too close!\n");
     for (int i = iz; i < n; i++) {
         d[i-iz] = d[i];
@@ -460,7 +460,7 @@ int X(symmetric_dpr1_deflate2)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lamb
     X(quicksort_4arg)(lambdalo, lambdahi, d, z, p, 0, n-1, X(ltabs));
     // Find all sufficiently small λ_{lo}
     for (id = 0; id < n; id++)
-        if (X(fabs)(lambdalo[id]) > X(sqrt)(X(floatmin)())) break;
+        if (Y(fabs)(lambdalo[id]) > Y(sqrt)(Y(floatmin)())) break;
     // re-sort based on ensuring the elements of `d` with non-negligible
     // corresponding `z` are increasing.
     X(quicksort_4arg)(d, z, lambdalo, lambdahi, p, id, n-1, X(lt));
@@ -471,25 +471,25 @@ int X(symmetric_dpr1_deflate2)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lamb
 void X(symmetric_definite_dpr1_deflate)(X(symmetric_dpr1) * A, X(symmetric_idpr1) * B, int * p) {
     int n = A->n, iz;
     FLT * d = A->d, * z = A->z, rho = A->rho, sigma = B->sigma;
-    FLT absrho = X(fabs)(rho), abssigma = X(fabs)(sigma), nrmz = 0;
+    FLT absrho = Y(fabs)(rho), abssigma = Y(fabs)(sigma), nrmz = 0;
     for (int i = 0; i < n; i++)
         nrmz += z[i]*z[i];
-    nrmz = X(sqrt)(nrmz);
+    nrmz = Y(sqrt)(nrmz);
     // absolute sort based on the rank-one modification `z`.
     X(quicksort_2arg)(z, d, p, 0, n-1, X(ltabs));
     // `|z[iz]|` is the first value that surpasses ` √ (|ρ|+|σ|) ||z||_2 × ϵ` in magnitude.
     for (iz = 0; iz < n; iz++)
-        if (X(fabs)(z[iz]) > X(sqrt)(absrho+abssigma)*nrmz*X(eps)()) break;
+        if (Y(fabs)(z[iz]) > Y(sqrt)(absrho+abssigma)*nrmz*Y(eps)()) break;
     // re-sort based on ensuring the elements of `d` with non-negligible
     // corresponding `z` are increasing.
     X(quicksort_2arg)(d, z, p, iz, n-1, X(lt));
     // Deflation based on a Givens rotation to zero-out an entry in `z`.
     for (int i = iz; i < n-1; i++)
-        if (X(fabs)(d[i]-d[i+1]) < MAX(X(fabs)(d[i]), X(fabs)(d[i+1]))*X(eps)())
+        if (Y(fabs)(d[i]-d[i+1]) < MAX(Y(fabs)(d[i]), Y(fabs)(d[i+1]))*Y(eps)())
             printf("Diagonal entries are too close!\n");
     // Deflation based on removal of an entry from `d`.
     for (int i = 0; i < n; i++)
-        if (X(fabs)(d[i]-rho/sigma) < MAX(X(fabs)(d[i]), absrho/abssigma)*X(eps)())
+        if (Y(fabs)(d[i]-rho/sigma) < MAX(Y(fabs)(d[i]), absrho/abssigma)*Y(eps)())
             printf("One diagonal entry is too close to ρ/σ!\n");
     for (int i = iz; i < n; i++) {
         d[i-iz] = d[i];
@@ -505,7 +505,7 @@ int X(symmetric_definite_dpr1_deflate2)(X(symmetric_dpr1) * A, X(symmetric_idpr1
     X(quicksort_4arg)(lambdalo, lambdahi, d, z, p, 0, n-1, X(ltabs));
     // Find all sufficiently small λ_{lo}
     for (id = 0; id < n; id++)
-        if (X(fabs)(lambdalo[id]) > X(sqrt)(X(floatmin)())) break;
+        if (Y(fabs)(lambdalo[id]) > Y(sqrt)(Y(floatmin)())) break;
     // re-sort based on ensuring the elements of `d` with non-negligible
     // corresponding `z` are increasing.
     X(quicksort_4arg)(d, z, lambdalo, lambdahi, p, id, n-1, X(lt));
@@ -532,41 +532,41 @@ void X(symmetric_dpr1_eigvals)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lamb
             FLT lambdak = (x0+x1)/2;
             lambdahi[j] = X(secular)(A, 0, lambdak) > 0 ? x0 : x1;
             lambdak = lambdak - lambdahi[j];
-            FLT deltak = 1+n*X(fabs)(lambdak);
-            while (X(fabs)(deltak) > MAX(n*X(fabs)(lambdak)*X(eps)(), X(floatmin)())) {
+            FLT deltak = 1+n*Y(fabs)(lambdak);
+            while (Y(fabs)(deltak) > MAX(n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
                 deltak = X(pick_zero_update)(A, x0, x1, lambdak, lambdahi[j]);
-                if (X(isfinite)(deltak)) lambdak += deltak;
+                if (Y(isfinite)(deltak)) lambdak += deltak;
                 else break;
             }
             deltak = X(pick_zero_update)(A, x0, x1, lambdak, lambdahi[j]);
-            if (X(isfinite)(deltak)) lambdak += deltak;
+            if (Y(isfinite)(deltak)) lambdak += deltak;
             lambdalo[j] = lambdak;
         }
         FLT lambdak = X(exterior_initial_guess)(d[n-1], nrmz2, rho);
         lambdahi[n-1] = d[n-1];
         lambdak = lambdak - lambdahi[n-1];
-        FLT deltak = 1+n*X(fabs)(lambdak);
-        while (X(fabs)(deltak) > MAX(n*X(fabs)(lambdak)*X(eps)(), X(floatmin)())) {
+        FLT deltak = 1+n*Y(fabs)(lambdak);
+        while (Y(fabs)(deltak) > MAX(n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
             deltak = X(last_pick_zero_update)(A, lambdak, lambdahi[n-1]);
-            if (X(isfinite)(deltak)) lambdak += deltak;
+            if (Y(isfinite)(deltak)) lambdak += deltak;
             else break;
         }
         deltak = X(last_pick_zero_update)(A, lambdak, lambdahi[n-1]);
-        if (X(isfinite)(deltak)) lambdak += deltak;
+        if (Y(isfinite)(deltak)) lambdak += deltak;
         lambdalo[n-1] = lambdak;
     }
     else {
         FLT lambdak = X(exterior_initial_guess)(d[0], nrmz2, rho);
         lambdahi[0] = d[0];
         lambdak = lambdak - lambdahi[0];
-        FLT deltak = 1+n*X(fabs)(lambdak);
-        while (X(fabs)(deltak) > MAX(n*X(fabs)(lambdak)*X(eps)(), X(floatmin)())) {
+        FLT deltak = 1+n*Y(fabs)(lambdak);
+        while (Y(fabs)(deltak) > MAX(n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
             deltak = X(first_pick_zero_update)(A, lambdak, lambdahi[0]);
-            if (X(isfinite)(deltak)) lambdak += deltak;
+            if (Y(isfinite)(deltak)) lambdak += deltak;
             else break;
         }
         deltak = X(first_pick_zero_update)(A, lambdak, lambdahi[0]);
-        if (X(isfinite)(deltak)) lambdak += deltak;
+        if (Y(isfinite)(deltak)) lambdak += deltak;
         lambdalo[0] = lambdak;
         for (int j = 1; j < n; j++) {
             FLT x0 = d[j-1];
@@ -574,14 +574,14 @@ void X(symmetric_dpr1_eigvals)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lamb
             FLT lambdak = (x0+x1)/2;
             lambdahi[j] = X(secular)(A, 0, lambdak) < 0 ? x0 : x1;
             lambdak = lambdak - lambdahi[j];
-            FLT deltak = 1+n*X(fabs)(lambdak);
-            while (X(fabs)(deltak) > MAX(n*X(fabs)(lambdak)*X(eps)(), X(floatmin)())) {
+            FLT deltak = 1+n*Y(fabs)(lambdak);
+            while (Y(fabs)(deltak) > MAX(n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
                 deltak = X(pick_zero_update)(A, x0, x1, lambdak, lambdahi[j]);
-                if (X(isfinite)(deltak)) lambdak += deltak;
+                if (Y(isfinite)(deltak)) lambdak += deltak;
                 else break;
             }
             deltak = X(pick_zero_update)(A, x0, x1, lambdak, lambdahi[j]);
-            if (X(isfinite)(deltak)) lambdak += deltak;
+            if (Y(isfinite)(deltak)) lambdak += deltak;
             lambdalo[j] = lambdak;
         }
     }
@@ -591,7 +591,7 @@ void X(symmetric_dpr1_eigvals)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lamb
 void X(symmetric_definite_dpr1_eigvals)(X(symmetric_dpr1) * A, X(symmetric_idpr1) * B, FLT * lambdalo, FLT * lambdahi) {
     int i, n = A->n;
     FLT * d = A->d, * z = A->z, rho = A->rho, sigma = B->sigma;
-    FLT absrho = X(fabs)(rho), abssigma = X(fabs)(sigma), tau = rho/sigma;
+    FLT absrho = Y(fabs)(rho), abssigma = Y(fabs)(sigma), tau = rho/sigma;
     if (sigma == 0)
         X(symmetric_dpr1_eigvals)(A, lambdalo, lambdahi);
     else if (sigma > 0) {
@@ -625,14 +625,14 @@ void X(symmetric_definite_dpr1_eigvals)(X(symmetric_dpr1) * A, X(symmetric_idpr1
             else {
                 lambdahi[j] = X(generalized_secular)(A, B, 0, lambdak) > 0 ? x0 : x1;
                 lambdak = lambdak - lambdahi[j];
-                deltak = 1+n*X(fabs)(lambdak);
-                while (X(fabs)(deltak) > MAX(n*X(fabs)(lambdak)*X(eps)(), X(floatmin)())) {
+                deltak = 1+n*Y(fabs)(lambdak);
+                while (Y(fabs)(deltak) > MAX(n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
                     deltak = X(generalized_pick_zero_update)(A, B, x0, x1, lambdak, lambdahi[j]);
-                    if (X(isfinite)(deltak)) lambdak += deltak;
+                    if (Y(isfinite)(deltak)) lambdak += deltak;
                     else break;
                 }
                 deltak = X(generalized_pick_zero_update)(A, B, x0, x1, lambdak, lambdahi[j]);
-                if (X(isfinite)(deltak)) lambdak += deltak;
+                if (Y(isfinite)(deltak)) lambdak += deltak;
                 lambdalo[j] = lambdak;
             }
         }
@@ -653,17 +653,17 @@ void X(symmetric_definite_dpr1_eigvals)(X(symmetric_dpr1) * A, X(symmetric_idpr1
             int kx0 = 1, kx1 = 1;
             int kden = kx0+kx1;
             int k = 1;
-            FLT x0 = X(exterior_initial_guess)(d[0], nrmz2, -X(fabs)(rho));
+            FLT x0 = X(exterior_initial_guess)(d[0], nrmz2, -Y(fabs)(rho));
             while (X(generalized_secular)(A, B, x0) > 0) {
                 //printf("This is f(x_0): %17.16e.\n", X(generalized_secular)(A, B, x0));
                 //printf("No: Problem!\n");
                 k += 1;
-                x0 = X(exterior_initial_guess)(d[0], nrmz2, -k*X(fabs)(rho));
+                x0 = X(exterior_initial_guess)(d[0], nrmz2, -k*Y(fabs)(rho));
             }
             FLT x1 = d[0];
             FLT lambdak = x0;//(x0+x1)/2;
             FLT deltak = ONE(FLT);
-            while (X(fabs)(deltak) > MAX(n*X(eps)()*X(fabs)(lambdak), X(floatmin)())) {
+            while (Y(fabs)(deltak) > MAX(n*Y(eps)()*Y(fabs)(lambdak), Y(floatmin)())) {
                 deltak = X(first_generalized_pick_zero_update)(A, B, lambdak);
                 if ((x0 > lambdak+deltak) || (lambdak+deltak > x1)) {
                     if (X(generalized_secular)(A, B, lambdak) > 0) {
@@ -676,7 +676,7 @@ void X(symmetric_definite_dpr1_eigvals)(X(symmetric_dpr1) * A, X(symmetric_idpr1
                     }
                     lambdak = (kx0*x0+kx1*x1)/kden;
                 }
-                else if (X(isfinite)(deltak)) lambdak += deltak;
+                else if (Y(isfinite)(deltak)) lambdak += deltak;
                 else break;
             }
             lambda[0] = lambdak;
@@ -688,7 +688,7 @@ void X(symmetric_definite_dpr1_eigvals)(X(symmetric_dpr1) * A, X(symmetric_idpr1
             FLT x1 = d[1];
             FLT lambdak = (x0+x1)/2;
             FLT deltak = ONE(FLT);
-            while (X(fabs)(deltak) > MAX(n*X(eps)()*X(fabs)(lambdak), X(floatmin)())) {
+            while (Y(fabs)(deltak) > MAX(n*Y(eps)()*Y(fabs)(lambdak), Y(floatmin)())) {
                 deltak = X(generalized_pick_zero_update)(A, B, x0, x1, lambdak);
                 if ((x0 > lambdak+deltak) || (lambdak+deltak > x1)) {
                     if (X(generalized_secular)(A, B, lambdak) > 0) {
@@ -701,7 +701,7 @@ void X(symmetric_definite_dpr1_eigvals)(X(symmetric_dpr1) * A, X(symmetric_idpr1
                     }
                     lambdak = (kx0*x0+kx1*x1)/kden;
                 }
-                else if (X(isfinite)(deltak)) lambdak += deltak;
+                else if (Y(isfinite)(deltak)) lambdak += deltak;
                 else break;
             }
             lambda[0] = lambdak;
@@ -722,7 +722,7 @@ void X(symmetric_definite_dpr1_eigvals)(X(symmetric_dpr1) * A, X(symmetric_idpr1
             }
             FLT lambdak = (x0+x1)/2;
             FLT deltak = ONE(FLT);
-            while (X(fabs)(deltak) > MAX(n*X(eps)()*X(fabs)(lambdak), X(floatmin)())) {
+            while (Y(fabs)(deltak) > MAX(n*Y(eps)()*Y(fabs)(lambdak), Y(floatmin)())) {
                 deltak = X(generalized_pick_zero_update)(A, B, x0, x1, lambdak);
                 if ((x0 > lambdak+deltak) || (lambdak+deltak > x1)) {
                     if (X(generalized_secular)(A, B, lambdak) > 0) {
@@ -735,7 +735,7 @@ void X(symmetric_definite_dpr1_eigvals)(X(symmetric_dpr1) * A, X(symmetric_idpr1
                     }
                     lambdak = (kx0*x0+kx1*x1)/kden;
                 }
-                else if (X(isfinite)(deltak)) lambdak += deltak;
+                else if (Y(isfinite)(deltak)) lambdak += deltak;
                 else break;
                 //printf("This is j: %i, d_{j-1} < λ_k < d_j: %17.16e < %17.16e < %17.16e, and f(λ_k): %17.16e.\n", j, d[j-1], lambdak, d[j], X(generalized_secular)(A, B, lambdak));
             }
@@ -749,7 +749,7 @@ void X(symmetric_definite_dpr1_eigvals)(X(symmetric_dpr1) * A, X(symmetric_idpr1
             FLT x1 = d[n-1];
             FLT lambdak = (x0+x1)/2;
             FLT deltak = ONE(FLT);
-            while (X(fabs)(deltak) > MAX(n*X(eps)()*X(fabs)(lambdak), X(floatmin)())) {
+            while (Y(fabs)(deltak) > MAX(n*Y(eps)()*Y(fabs)(lambdak), Y(floatmin)())) {
                 deltak = X(generalized_pick_zero_update)(A, B, x0, x1, lambdak);
                 if ((x0 > lambdak+deltak) || (lambdak+deltak > x1)) {
                     if (X(generalized_secular)(A, B, lambdak) > 0) {
@@ -762,7 +762,7 @@ void X(symmetric_definite_dpr1_eigvals)(X(symmetric_dpr1) * A, X(symmetric_idpr1
                     }
                     lambdak = (kx0*x0+kx1*x1)/kden;
                 }
-                else if (X(isfinite)(deltak)) lambdak += deltak;
+                else if (Y(isfinite)(deltak)) lambdak += deltak;
                 else break;
             }
             lambda[n-1] = lambdak;
@@ -773,18 +773,18 @@ void X(symmetric_definite_dpr1_eigvals)(X(symmetric_dpr1) * A, X(symmetric_idpr1
             int kden = kx0+kx1;
             int k = 1;
             FLT x0 = d[n-1];
-            FLT x1 = X(exterior_initial_guess)(d[n-1], nrmz2, X(fabs)(rho));
+            FLT x1 = X(exterior_initial_guess)(d[n-1], nrmz2, Y(fabs)(rho));
             while (X(generalized_secular)(A, B, x1) < 0) {
                 //printf("This is f(x_1): %17.16e.\n", X(generalized_secular)(A, B, x1));
                 //printf("No: Problem!\n");
                 k += 1;
-                x1 = X(exterior_initial_guess)(d[n-1], nrmz2, k*X(fabs)(rho));
+                x1 = X(exterior_initial_guess)(d[n-1], nrmz2, k*Y(fabs)(rho));
             }
             //printf("This is f(x_1): %17.16e.\n", X(generalized_secular)(A, B, x1));
             // Iterate.
             FLT lambdak = x1;//(x0+x1)/2;
             FLT deltak = ONE(FLT);
-            while (X(fabs)(deltak) > MAX(n*X(eps)()*X(fabs)(lambdak), X(floatmin)())) {
+            while (Y(fabs)(deltak) > MAX(n*Y(eps)()*Y(fabs)(lambdak), Y(floatmin)())) {
                 deltak = X(last_generalized_pick_zero_update)(A, B, lambdak);
                 //printf("This is deltak: %17.16e.\n", deltak);
                 if ((x0 > lambdak+deltak) || (lambdak+deltak > x1)) {
@@ -798,7 +798,7 @@ void X(symmetric_definite_dpr1_eigvals)(X(symmetric_dpr1) * A, X(symmetric_idpr1
                     }
                     lambdak = (kx0*x0+kx1*x1)/kden;
                 }
-                else if (X(isfinite)(deltak)) lambdak += deltak;
+                else if (Y(isfinite)(deltak)) lambdak += deltak;
                 else break;
             }
             lambda[n-1] = lambdak;
@@ -831,9 +831,9 @@ FLT * X(symmetric_dpr1_eigvals_FMM)(X(symmetric_dpr1) * A, int ib) {
 
     lambdak = X(first_initial_guess)(a[ib], nrmb2, c);
     deltak = ONE(FLT);
-    while (X(fabs)(deltak) > MAX(n*X(eps)()*X(fabs)(lambdak), X(floatmin)())) {
+    while (Y(fabs)(deltak) > MAX(n*Y(eps)()*Y(fabs)(lambdak), Y(floatmin)())) {
         deltak = X(first_pick_zero_update)(A, lambdak, ib);
-        if (X(isfinite)(deltak)) lambdak += deltak;
+        if (Y(isfinite)(deltak)) lambdak += deltak;
         else break;
     }
     lambda[ib] = lambdak;
@@ -845,19 +845,19 @@ FLT * X(symmetric_dpr1_eigvals_FMM)(X(symmetric_dpr1) * A, int ib) {
     FLT * fpp = (FLT *) malloc(n*sizeof(FLT));
     for (int j = ib+1; j < n-1; j++)
         lambda[j] = (a[j]+a[j-1])/2;
-    while (nrmd > MAX(n*X(eps)()*nrml, X(floatmin)())) {
+    while (nrmd > MAX(n*Y(eps)()*nrml, Y(floatmin)())) {
         X(pick_zero_update_FMM)(A, b2, lambda, delta, f, fp, fpp, ib);
         nrmd = nrml = 0;
         for (int j = ib+1; j < n-1; j++) {
-            if (X(isfinite)(delta[j])) {
+            if (Y(isfinite)(delta[j])) {
                 lambda[j] += delta[j];
                 nrmd += delta[j]*delta[j];
                 nrml += lambda[j]*lambda[j];
             }
             else continue;
         }
-        nrmd = X(sqrt)(nrmd);
-        nrml = X(sqrt)(nrml);
+        nrmd = Y(sqrt)(nrmd);
+        nrml = Y(sqrt)(nrml);
     }
     free(b2);
     free(delta);
@@ -867,9 +867,9 @@ FLT * X(symmetric_dpr1_eigvals_FMM)(X(symmetric_dpr1) * A, int ib) {
 
     lambdak = X(last_initial_guess)(a[n-2], nrmb2, c);
     deltak = ONE(FLT);
-    while (X(fabs)(deltak) > MAX(n*X(eps)()*X(fabs)(lambdak), X(floatmin)())) {
+    while (Y(fabs)(deltak) > MAX(n*Y(eps)()*Y(fabs)(lambdak), Y(floatmin)())) {
         deltak = X(last_pick_zero_update)(A, lambdak);
-        if (X(isfinite)(deltak)) lambdak += deltak;
+        if (Y(isfinite)(deltak)) lambdak += deltak;
         else break;
     }
     lambda[n-1] = lambdak;
@@ -890,14 +890,14 @@ FLT * X(symmetric_dpr1_eigvecs)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lam
         nrm = 0;
         for (int i = 0; i < n; i++)
             nrm += Q[i+j*n]*Q[i+j*n];
-        nrm = X(copysign)(1/X(sqrt)(nrm), Q[j+j*n]);
+        nrm = Y(copysign)(1/Y(sqrt)(nrm), Q[j+j*n]);
         for (int i = 0; i < n; i++)
             Q[i+j*n] *= nrm;
         /*
         k = -1;
         nrm = 0;
         for (int i = 0; i < n; i++) {
-            if (X(isfinite)(Q[i+j*n])) nrm += Q[i+j*n]*Q[i+j*n];
+            if (Y(isfinite)(Q[i+j*n])) nrm += Q[i+j*n]*Q[i+j*n];
             else {k = i; break;}
         }
         if (k != -1) {
@@ -906,7 +906,7 @@ FLT * X(symmetric_dpr1_eigvecs)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lam
             Q[k+j*n] = 1;
         }
         else {
-            nrm = X(copysign)(1/X(sqrt)(nrm), Q[j+j*n]);
+            nrm = Y(copysign)(1/Y(sqrt)(nrm), Q[j+j*n]);
             for (int i = 0; i < n; i++)
                 Q[i+j*n] *= nrm;
         }
@@ -925,7 +925,7 @@ X(hierarchicalmatrix) * X(symmetric_dpr1_eigvecs_FMM)(X(symmetric_dpr1) * A, FLT
     X(scale_rows_hierarchicalmatrix)(1, z, N);
     X(himv)('T', 1, N, z, 0, q);
     for (int j = 0; j < m; j++)
-        q[j] = X(sqrt)(1/q[j]);
+        q[j] = Y(sqrt)(1/q[j]);
     X(scale_rows_hierarchicalmatrix)(1, z, Q);
     X(scale_columns_hierarchicalmatrix)(1, q, Q);
     X(destroy_hierarchicalmatrix)(N);
@@ -947,14 +947,14 @@ FLT * X(symmetric_definite_dpr1_eigvecs)(X(symmetric_dpr1) * A, X(symmetric_idpr
             nrm1 += V[i+j*n]*V[i+j*n];
             nrm2 += V[i+j*n]*z[i];
         }
-        nrm = X(copysign)(1/X(sqrt)(nrm1+sigma*nrm2*nrm2), V[j+j*n]);
+        nrm = Y(copysign)(1/Y(sqrt)(nrm1+sigma*nrm2*nrm2), V[j+j*n]);
         for (int i = 0; i < n; i++)
             V[i+j*n] *= nrm;
         /*
         k = -1;
         nrm1 = nrm2 = 0;
         for (int i = 0; i < n; i++) {
-            if (X(isfinite)(V[i+j*n])) {
+            if (Y(isfinite)(V[i+j*n])) {
                 nrm1 += V[i+j*n]*V[i+j*n];
                 nrm2 += V[i+j*n]*z[i];
             }
@@ -963,10 +963,10 @@ FLT * X(symmetric_definite_dpr1_eigvecs)(X(symmetric_dpr1) * A, X(symmetric_idpr
         if (k != -1) {
             for (int i = 0; i < n; i++)
                 V[i+j*n] = 0;
-            V[k+j*n] = X(sqrt)(1/(1+sigma*z[k]*z[k]));
+            V[k+j*n] = Y(sqrt)(1/(1+sigma*z[k]*z[k]));
         }
         else {
-            nrm = X(copysign)(1/X(sqrt)(nrm1+sigma*nrm2*nrm2), V[j+j*n]);
+            nrm = Y(copysign)(1/Y(sqrt)(nrm1+sigma*nrm2*nrm2), V[j+j*n]);
             for (int i = 0; i < n; i++)
                 V[i+j*n] *= nrm;
         }
@@ -989,7 +989,7 @@ X(hierarchicalmatrix) * X(symmetric_definite_dpr1_eigvecs_FMM)(X(symmetric_dpr1)
         v[j] *= v[j];
     X(himv)('T', 1, N, z, sigma, v);
     for (int j = 0; j < m; j++)
-        v[j] = X(sqrt)(1/v[j]);
+        v[j] = Y(sqrt)(1/v[j]);
     X(scale_columns_hierarchicalmatrix)(1, v, V);
     X(destroy_hierarchicalmatrix)(N);
     free(v);
@@ -1127,7 +1127,7 @@ X(symmetric_dpr1_eigen) * X(symmetric_definite_dpr1_eig)(X(symmetric_dpr1) * A, 
     int id = X(symmetric_definite_dpr1_deflate2)(A, B, lambdalo+iz, lambdahi+iz, p2);
     FLT * v = (FLT *) malloc(id*sizeof(FLT));
     for (int i = 0; i < id; i++)
-        v[i] = X(sqrt)(1/(1+B->sigma*B->z[i]*B->z[i]));
+        v[i] = Y(sqrt)(1/(1+B->sigma*B->z[i]*B->z[i]));
     int * p = (int *) malloc(n*sizeof(int));
     for (int i = 0; i < iz; i++)
         p[i] = p1[i];
@@ -1180,7 +1180,7 @@ X(symmetric_dpr1_eigen_FMM) * X(symmetric_definite_dpr1_eig_FMM)(X(symmetric_dpr
     int id = X(symmetric_definite_dpr1_deflate2)(A, B, lambdalo+iz, lambdahi+iz, p2);
     FLT * v = (FLT *) malloc(id*sizeof(FLT));
     for (int i = 0; i < id; i++)
-        v[i] = X(sqrt)(1/(1+B->sigma*B->z[i]*B->z[i]));
+        v[i] = Y(sqrt)(1/(1+B->sigma*B->z[i]*B->z[i]));
     int * p = (int *) malloc(n*sizeof(int));
     for (int i = 0; i < iz; i++)
         p[i] = p1[i];
@@ -1448,7 +1448,7 @@ int X(lt   )(FLT x, FLT y) {return x <  y;}
 int X(le   )(FLT x, FLT y) {return x <= y;}
 int X(gt   )(FLT x, FLT y) {return x >  y;}
 int X(ge   )(FLT x, FLT y) {return x >= y;}
-int X(ltabs)(FLT x, FLT y) {return X(fabs)(x) <  X(fabs)(y);}
-int X(leabs)(FLT x, FLT y) {return X(fabs)(x) <= X(fabs)(y);}
-int X(gtabs)(FLT x, FLT y) {return X(fabs)(x) >  X(fabs)(y);}
-int X(geabs)(FLT x, FLT y) {return X(fabs)(x) >= X(fabs)(y);}
+int X(ltabs)(FLT x, FLT y) {return Y(fabs)(x) <  Y(fabs)(y);}
+int X(leabs)(FLT x, FLT y) {return Y(fabs)(x) <= Y(fabs)(y);}
+int X(gtabs)(FLT x, FLT y) {return Y(fabs)(x) >  Y(fabs)(y);}
+int X(geabs)(FLT x, FLT y) {return Y(fabs)(x) >= Y(fabs)(y);}

@@ -1,4 +1,4 @@
-void X(test_tridiagonal)(int * checksum) {
+void Y(test_tridiagonal)(int * checksum) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
 
@@ -71,7 +71,7 @@ void X(test_tridiagonal)(int * checksum) {
 
     FLT * lambda_true = (FLT *) calloc(n, sizeof(FLT));
     for (int i = 0; i < n; i++)
-        lambda_true[i] = X(pow)(2*X(__sinpi)((i+ONE(FLT))/(2*n+2)), 2);
+        lambda_true[i] = Y(pow)(2*Y(__sinpi)((i+ONE(FLT))/(2*n+2)), 2);
     err = X(norm_2arg)(lambda, lambda_true, n)/X(norm_1arg)(lambda_true, n);
     printf("Symmetric tridiagonal eigenvalues \t\t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
@@ -87,10 +87,10 @@ void X(test_tridiagonal)(int * checksum) {
     D->b = d;
     D->n = n;
     X(symmetric_tridiagonal) * C = X(symmetric_tridiagonal_congruence)(A, D, V);
-    err = X(pow)(C->a[n-1]-1, 2);
+    err = Y(pow)(C->a[n-1]-1, 2);
     for (int i = 0; i < n-1; i++)
-        err += X(pow)(C->a[i]-1, 2) + X(pow)(C->b[i]-0, 2);
-    err = X(sqrt)(err);
+        err += Y(pow)(C->a[i]-1, 2) + Y(pow)(C->b[i]-0, 2);
+    err = Y(sqrt)(err);
     printf("Self-congruence transformations (Ax = λAx) \t\t |%20.2e ", (double) err);
     X(checktest)(err, n*n, checksum);
 

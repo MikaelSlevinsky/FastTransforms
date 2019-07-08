@@ -87,10 +87,10 @@ FLT X(test_barycentric)(char KIND, int n, FLT (*f)(FLT x), FLT pt) {
     }
     free(xc);
     free(lc);
-    return X(fabs)((num/den-fcpt)/fcpt);
+    return Y(fabs)((num/den-fcpt)/fcpt);
 }
 
-void X(test_hierarchical)(int * checksum) {
+void Y(test_hierarchical)(int * checksum) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("\t\t\t\t\t\t\t |   or Calculation Time\n");
     printf("---------------------------------------------------------|----------------------\n");
@@ -98,10 +98,10 @@ void X(test_hierarchical)(int * checksum) {
     int nmin = 512, nmax = 2048;
     FLT err = 0;
 
-    err += X(test_barycentric)('1', 40, X(exp), 0.125);
-    err += X(test_barycentric)('2', 40, X(sin), 0.125);
-    err += X(test_barycentric)('1', 41, X(cos), 0.125);
-    err += X(test_barycentric)('2', 81, X(tanh), 0.125);
+    err += X(test_barycentric)('1', 40, Y(exp), 0.125);
+    err += X(test_barycentric)('2', 40, Y(sin), 0.125);
+    err += X(test_barycentric)('1', 41, Y(cos), 0.125);
+    err += X(test_barycentric)('2', 81, Y(tanh), 0.125);
 
     printf("Approximation by second-kind barycentric interpolant \t |%20.2e ", (double) err);
     X(checktest)(err, 16, checksum);

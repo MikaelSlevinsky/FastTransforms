@@ -21,13 +21,13 @@ int main(void) {
                 A = plan_leg2cheb(normleg, normcheb, n);
                 B = plan_cheb2leg(normcheb, normleg, n);
                 cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
-                err += norm_2arg(B, C, n*n)/norm_1arg(C, n*n);
+                err += ft_norm_2arg(B, C, n*n)/ft_norm_1arg(C, n*n);
                 free(A);
                 free(B);
             }
         }
         printf("(n×n) = (%4ix%4i): \t\t\t\t\t |%20.2e ", n, n, err);
-        checktest(err, 2*sqrt(n), &checksum);
+        ft_checktest(err, 2*sqrt(n), &checksum);
         free(C);
     }
 
@@ -67,13 +67,13 @@ int main(void) {
                     A = plan_ultra2ultra(normultra1, normultra2, n, lambda1, lambda2);
                     B = plan_ultra2ultra(normultra2, normultra1, n, lambda2, lambda1);
                     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
-                    err += norm_2arg(B, C, n*n)/norm_1arg(C, n*n);
+                    err += ft_norm_2arg(B, C, n*n)/ft_norm_1arg(C, n*n);
                     free(A);
                     free(B);
                 }
             }
             printf("(n×n) = (%4ix%4i), (%+1.2f) → (%+1.2f): \t\t |%20.2e ", n, n, lambda1, lambda2, err);
-            checktest(err, 4*pow(n, fabs(lambda2-lambda1)), &checksum);
+            ft_checktest(err, 4*pow(n, fabs(lambda2-lambda1)), &checksum);
         }
         free(C);
     }
@@ -153,7 +153,7 @@ int main(void) {
                     A = plan_jac2jac(normjac1, normjac2, n, alpha, beta, gamma);
                     B = plan_jac2jac(normjac2, normjac1, n, gamma, beta, alpha);
                     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
-                    err += norm_2arg(B, C, n*n)/norm_1arg(C, n*n);
+                    err += ft_norm_2arg(B, C, n*n)/ft_norm_1arg(C, n*n);
                     free(A);
                     free(B);
                     */
@@ -162,14 +162,14 @@ int main(void) {
                     B = eigenplan_jac2jac(normjac2, normjac1, n, gamma, beta, alpha, beta);
                     //B = plan_jac2jac(normjac2, normjac1, n, gamma, beta, alpha);
                     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
-                    err += norm_2arg(B, C, n*n)/norm_1arg(C, n*n);
+                    err += ft_norm_2arg(B, C, n*n)/ft_norm_1arg(C, n*n);
                     free(A);
                     free(B);
                     //*/
                 }
             }
             printf("(n×n) = (%4ix%4i), (%+1.2f, %+1.2f) → (%+1.2f, %+1.2f): \t |%20.2e ", n, n, alpha, beta, gamma, beta, err);
-            checktest(err, 8*pow(n, 0.5+MAX(fabs(gamma-alpha), fabs(beta))), &checksum);
+            ft_checktest(err, 8*pow(n, 0.5+MAX(fabs(gamma-alpha), fabs(beta))), &checksum);
         }
         free(C);
     }

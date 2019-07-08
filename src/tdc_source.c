@@ -45,8 +45,8 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
         y[s-1] = sign;
         y[s] = 1;
 
-        FLT rho = -sign*X(fabs)(T->b[s-1]);
-        FLT sigma = -sign*X(fabs)(S->b[s-1]);
+        FLT rho = -sign*Y(fabs)(T->b[s-1]);
+        FLT sigma = -sign*Y(fabs)(S->b[s-1]);
 
         X(symmetric_tridiagonal) * T1 = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
         FLT * at1 = (FLT *) malloc(s*sizeof(FLT));
@@ -55,7 +55,7 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
             at1[i] = T->a[i];
             bt1[i] = T->b[i];
         }
-        at1[s-1] = T->a[s-1] + sign*X(fabs)(rho);
+        at1[s-1] = T->a[s-1] + sign*Y(fabs)(rho);
         T1->a = at1;
         T1->b = bt1;
         T1->n = s;
@@ -67,7 +67,7 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
             as1[i] = S->a[i];
             bs1[i] = S->b[i];
         }
-        as1[s-1] = S->a[s-1] + sign*X(fabs)(sigma);
+        as1[s-1] = S->a[s-1] + sign*Y(fabs)(sigma);
         S1->a = as1;
         S1->b = bs1;
         S1->n = s;
@@ -79,7 +79,7 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
             at2[i-s+1] = T->a[i+1];
             bt2[i-s] = T->b[i];
         }
-        at2[0] = T->a[s] + sign*X(fabs)(rho);
+        at2[0] = T->a[s] + sign*Y(fabs)(rho);
         T2->a = at2;
         T2->b = bt2;
         T2->n = n-s;
@@ -91,7 +91,7 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
             as2[i-s+1] = S->a[i+1];
             bs2[i-s] = S->b[i];
         }
-        as2[0] = S->a[s] + sign*X(fabs)(sigma);
+        as2[0] = S->a[s] + sign*Y(fabs)(sigma);
         S2->a = as2;
         S2->b = bs2;
         S2->n = n-s;
@@ -164,8 +164,8 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
         y[s-1] = sign;
         y[s] = 1;
 
-        FLT rho = -sign*X(fabs)(T->b[s-1]);
-        FLT sigma = -sign*X(fabs)(S->b[s-1]);
+        FLT rho = -sign*Y(fabs)(T->b[s-1]);
+        FLT sigma = -sign*Y(fabs)(S->b[s-1]);
 
         X(symmetric_tridiagonal) * T1 = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
         FLT * at1 = (FLT *) malloc(s*sizeof(FLT));
@@ -174,7 +174,7 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
             at1[i] = T->a[i];
             bt1[i] = T->b[i];
         }
-        at1[s-1] = T->a[s-1] + sign*X(fabs)(rho);
+        at1[s-1] = T->a[s-1] + sign*Y(fabs)(rho);
         T1->a = at1;
         T1->b = bt1;
         T1->n = s;
@@ -186,7 +186,7 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
             as1[i] = S->a[i];
             bs1[i] = S->b[i];
         }
-        as1[s-1] = S->a[s-1] + sign*X(fabs)(sigma);
+        as1[s-1] = S->a[s-1] + sign*Y(fabs)(sigma);
         S1->a = as1;
         S1->b = bs1;
         S1->n = s;
@@ -198,7 +198,7 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
             at2[i-s+1] = T->a[i+1];
             bt2[i-s] = T->b[i];
         }
-        at2[0] = T->a[s] + sign*X(fabs)(rho);
+        at2[0] = T->a[s] + sign*Y(fabs)(rho);
         T2->a = at2;
         T2->b = bt2;
         T2->n = n-s;
@@ -210,7 +210,7 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
             as2[i-s+1] = S->a[i+1];
             bs2[i-s] = S->b[i];
         }
-        as2[0] = S->a[s] + sign*X(fabs)(sigma);
+        as2[0] = S->a[s] + sign*Y(fabs)(sigma);
         S2->a = as2;
         S2->b = bs2;
         S2->n = n-s;

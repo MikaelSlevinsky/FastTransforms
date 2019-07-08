@@ -17,10 +17,10 @@ X(bidiagonal) * X(symmetric_tridiagonal_cholesky)(X(symmetric_tridiagonal) * A) 
     FLT * c = (FLT *) calloc(n, sizeof(FLT));
     FLT * d = (FLT *) calloc(n-1, sizeof(FLT));
 
-    c[0] = X(sqrt)(a[0]);
+    c[0] = Y(sqrt)(a[0]);
     for (int i = 0; i < n-1; i++) {
         d[i] = b[i]/c[i];
-        c[i+1] = X(sqrt)(a[i+1]-d[i]*d[i]);
+        c[i+1] = Y(sqrt)(a[i+1]-d[i]*d[i]);
     }
 
     X(bidiagonal) * B = (X(bidiagonal) *) malloc(sizeof(X(bidiagonal)));
@@ -118,10 +118,10 @@ void X(symmetric_tridiagonal_eig)(X(symmetric_tridiagonal) * A, FLT * V, FLT * l
 
     for (l = 0; l < n; l++) {
         j = 0;
-        h = X(fabs)(d[l]) + X(fabs)(e[l]);
+        h = Y(fabs)(d[l]) + Y(fabs)(e[l]);
         if (tst1 < h) tst1 = h;
         for (m = l; m < n; m++) {
-            tst2 = tst1 + X(fabs)(e[m]);
+            tst2 = tst1 + Y(fabs)(e[m]);
             if (tst2 == tst1) goto L120;
         }
         L120: if (m == l) goto L220;
@@ -131,9 +131,9 @@ void X(symmetric_tridiagonal_eig)(X(symmetric_tridiagonal) * A, FLT * V, FLT * l
         l2 = l1 + 1;
         g = d[l];
         p = (d[l1] - g)/ (TWO(FLT)*e[l]);
-        r = X(hypot)(p, ONE(FLT));
-        d[l] = e[l] / (p + X(copysign)(r, p));
-        d[l1] = e[l] * (p + X(copysign)(r, p));
+        r = Y(hypot)(p, ONE(FLT));
+        d[l] = e[l] / (p + Y(copysign)(r, p));
+        d[l1] = e[l] * (p + Y(copysign)(r, p));
         dl1 = d[l1];
         h = g - d[l];
         for (i = l2; i < n; i++)
@@ -152,7 +152,7 @@ void X(symmetric_tridiagonal_eig)(X(symmetric_tridiagonal) * A, FLT * V, FLT * l
             i = m - ii;
             g = c*e[i];
             h = c*p;
-            r = X(hypot)(p, e[i]);
+            r = Y(hypot)(p, e[i]);
             e[i+1] = s*r;
             s = e[i]/r;
             c = p/r;
@@ -167,7 +167,7 @@ void X(symmetric_tridiagonal_eig)(X(symmetric_tridiagonal) * A, FLT * V, FLT * l
         p = -s*s2*c3*el1*e[l]/dl1;
         e[l] = s*p;
         d[l] = c*p;
-        tst2 = tst1 + X(fabs)(e[l]);
+        tst2 = tst1 + Y(fabs)(e[l]);
         if (tst2 > tst1) goto L130;
         L220: d[l] = d[l] + f;
     }
@@ -195,7 +195,7 @@ void X(symmetric_tridiagonal_eig)(X(symmetric_tridiagonal) * A, FLT * V, FLT * l
     free(d);
     free(e);
     for (j = 0; j < n; j++)
-        if (X(signbit)(V(j,j)))
+        if (Y(signbit)(V(j,j)))
             for (i = 0; i < n; i++)
                 V(i,j) = -V(i,j);
 }
@@ -247,7 +247,7 @@ X(symmetric_tridiagonal) * X(symmetric_tridiagonal_congruence)(X(symmetric_tridi
         }
         for (int j = i; j > 1; j--) {
             // Apply Givens.
-            r = X(hypot)(b[j], w);
+            r = Y(hypot)(b[j], w);
             if (r != ZERO(FLT)) {
                 co = b[j]/r;
                 si = -w/r;
@@ -269,7 +269,7 @@ X(symmetric_tridiagonal) * X(symmetric_tridiagonal_congruence)(X(symmetric_tridi
             }
         }
         // Special rotation at the end. Bulge completely chased up; does not access b[-1].
-        r = X(hypot)(b[1], w);
+        r = Y(hypot)(b[1], w);
         if (r != ZERO(FLT)) {
             co = b[1]/r;
             si = -w/r;
@@ -325,7 +325,7 @@ X(symmetric_tridiagonal) * X(create_A_shtsdtev)(const int n, const int mu, const
     for (int l = 1+shft; l < 2*n-1+shft; l += 2) {
         ld = l;
         rat = (ld/(2*ld+2*md+1))*((ld+1)/(2*ld+2*md+3))*((ld+2*md+2)/(2*ld+2*md+3))*((ld+2*md+3)/(2*ld+2*md+5));
-        b[(l-1)/2] = -(ld+md+1)*(ld+md+2)*X(sqrt)(rat);
+        b[(l-1)/2] = -(ld+md+1)*(ld+md+2)*Y(sqrt)(rat);
     }
 
     A->n = n;
@@ -353,7 +353,7 @@ X(symmetric_tridiagonal) * X(create_B_shtsdtev)(const int n, const int m, char P
     for (int l = 1+shft; l < 2*n-1+shft; l += 2) {
         ld = l;
         rat = (ld/(2*ld+2*md+1))*((ld+1)/(2*ld+2*md+3))*((ld+2*md+2)/(2*ld+2*md+3))*((ld+2*md+3)/(2*ld+2*md+5));
-        b[(l-1)/2] = -X(sqrt)(rat);
+        b[(l-1)/2] = -Y(sqrt)(rat);
     }
 
     B->n = n;
@@ -375,12 +375,12 @@ X(bidiagonal) * X(create_R_shtsdtev)(const int n, const int m, char PARITY) {
     for (int l = 1+shft; l < 2*n+1+shft; l += 2) {
         ld = l;
         rat = ((ld+2*md)/(2*ld+2*md-1))*((ld+2*md+1)/(2*ld+2*md+1));
-        c[(l-1)/2] = X(sqrt)(rat);
+        c[(l-1)/2] = Y(sqrt)(rat);
     }
     for (int l = 1+shft; l < 2*n-1+shft; l += 2) {
         ld = l;
         rat = (ld/(2*ld+2*md+1))*((ld+1)/(2*ld+2*md+3));
-        d[(l-1)/2] = -X(sqrt)(rat);
+        d[(l-1)/2] = -Y(sqrt)(rat);
     }
 
     R->n = n;

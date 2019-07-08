@@ -39,7 +39,7 @@ X(triangular_banded) * X(eigenplan_B_jac2jac)(const int n, const FLT gamma, cons
 }
 
 
-void X(test_triangular_banded)(int * checksum) {
+void Y(test_triangular_banded)(int * checksum) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
 

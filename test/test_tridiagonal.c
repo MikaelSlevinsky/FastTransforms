@@ -6,8 +6,8 @@ void test_tridiagonal (int * checksum);
 void test_tridiagonall(int * checksum);
 void test_tridiagonalq(int * checksum);
 
-void symmetric_tridiagonal_printmat(char * MAT, char * FMT, symmetric_tridiagonal * A);
-void bidiagonal_printmat(char * MAT, char * FMT, bidiagonal * B);
+void symmetric_tridiagonal_printmat(char * MAT, char * FMT, ft_symmetric_tridiagonal * A);
+void bidiagonal_printmat(char * MAT, char * FMT, ft_bidiagonal * B);
 
 int main(void) {
     int checksum = 0;
@@ -25,31 +25,39 @@ int main(void) {
 }
 
 #define FLT float
-#define X(name) CONCAT(, name, f)
+#define X(name) FT_CONCAT(ft_, name, f)
+#define Y(name) FT_CONCAT(, name, f)
 #include "test_tridiagonal_source.c"
 #undef FLT
 #undef X
+#undef Y
 
 #define FLT double
-#define X(name) CONCAT(, name, )
+#define X(name) FT_CONCAT(ft_, name, )
+#define Y(name) FT_CONCAT(, name, )
 #include "test_tridiagonal_source.c"
 #undef FLT
 #undef X
+#undef Y
 
 #define FLT long double
-#define X(name) CONCAT(, name, l)
+#define X(name) FT_CONCAT(ft_, name, l)
+#define Y(name) FT_CONCAT(, name, l)
 #include "test_tridiagonal_source.c"
 #undef FLT
 #undef X
+#undef Y
 
 #define FLT quadruple
-#define X(name) CONCAT(, name, q)
+#define X(name) FT_CONCAT(ft_, name, q)
+#define Y(name) FT_CONCAT(, name, q)
 #include "test_tridiagonal_source.c"
 #undef FLT
 #undef X
+#undef Y
 
 
-void symmetric_tridiagonal_printmat(char * MAT, char * FMT, symmetric_tridiagonal * A) {
+void symmetric_tridiagonal_printmat(char * MAT, char * FMT, ft_symmetric_tridiagonal * A) {
     int n = A->n;
     double * a = A->a;
     double * b = A->b;
@@ -147,7 +155,7 @@ void symmetric_tridiagonal_printmat(char * MAT, char * FMT, symmetric_tridiagona
 }
 
 
-void bidiagonal_printmat(char * MAT, char * FMT, bidiagonal * B) {
+void bidiagonal_printmat(char * MAT, char * FMT, ft_bidiagonal * B) {
     int n = B->n;
     double * c = B->c;
     double * d = B->d;

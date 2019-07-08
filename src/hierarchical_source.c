@@ -3,13 +3,13 @@ FLT * X(chebyshev_points)(char KIND, int n) {
     FLT * x = (FLT *) malloc(n*sizeof(FLT));
     if (KIND == '1') {
         for (int k = 0; k <=nd2; k++)
-            x[k] = X(__sinpi)((n-2*k-ONE(FLT))/(2*n));
+            x[k] = Y(__sinpi)((n-2*k-ONE(FLT))/(2*n));
         for (int k = 0; k < nd2; k++)
             x[n-1-k] = -x[k];
     }
     else if (KIND == '2') {
         for (int k = 0; k <=nd2; k++)
-            x[k] = X(__sinpi)((n-2*k-ONE(FLT))/(2*n-2));
+            x[k] = Y(__sinpi)((n-2*k-ONE(FLT))/(2*n-2));
         for (int k = 0; k < nd2; k++)
             x[n-1-k] = -x[k];
     }
@@ -21,7 +21,7 @@ FLT * X(chebyshev_barycentric_weights)(char KIND, int n) {
     FLT * l = (FLT *) malloc(n*sizeof(FLT));
     if (KIND == '1') {
         for (int k = 0; k <=nd2; k++)
-            l[k] = X(__sinpi)((2*k+ONE(FLT))/(2*n));
+            l[k] = Y(__sinpi)((2*k+ONE(FLT))/(2*n));
         for (int k = 0; k < nd2; k++)
             l[n-1-k] = l[k];
         for (int k = 1; k < n; k += 2)
@@ -55,7 +55,7 @@ void * X(barycentricmatrix)(FLT * A, FLT * x, int m, FLT * y, FLT * l, int n) {
         k = -1;
         temp = 0;
         for (int j = 0; j < n; j++) {
-            if (X(isfinite)(A[i+m*j])) temp += A[i+m*j];
+            if (Y(isfinite)(A[i+m*j])) temp += A[i+m*j];
             else {k = j; break;}
         }
         if (k != -1) {
@@ -670,11 +670,11 @@ void X(indsplit)(FLT * x, unitrange ir, unitrange * i1, unitrange * i2, FLT a, F
 FLT X(cauchykernel)(FLT x, FLT y) {return 1/(x-y);}
 FLT X(coulombkernel)(FLT x, FLT y) {return 1/((x-y)*(x-y));}
 FLT X(coulombprimekernel)(FLT x, FLT y) {return 1/(((x-y)*(x-y))*(x-y));}
-FLT X(logkernel)(FLT x, FLT y) {return X(log)(X(fabs)(x-y));}
+FLT X(logkernel)(FLT x, FLT y) {return Y(log)(Y(fabs)(x-y));}
 
 static FLT X(minus)(FLT x, FLT y) {return x - y;}
 
 FLT X(cauchykernel2)(FLT x, FLT ylo, FLT yhi) {return 1/(X(minus)(x, yhi) - ylo);}
 FLT X(coulombkernel2)(FLT x, FLT ylo, FLT yhi) {return 1/((X(minus)(x, yhi) - ylo)*(X(minus)(x, yhi) - ylo));}
 FLT X(coulombprimekernel2)(FLT x, FLT ylo, FLT yhi) {return 1/(((X(minus)(x, yhi) - ylo)*(X(minus)(x, yhi) - ylo))*(X(minus)(x, yhi) - ylo));}
-FLT X(logkernel2)(FLT x, FLT ylo, FLT yhi) {return X(log)(X(fabs)(X(minus)(x, yhi) - ylo));}
+FLT X(logkernel2)(FLT x, FLT ylo, FLT yhi) {return Y(log)(Y(fabs)(X(minus)(x, yhi) - ylo));}
