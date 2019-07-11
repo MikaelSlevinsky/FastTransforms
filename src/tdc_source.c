@@ -165,9 +165,6 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
         X(destroy_symmetric_tridiagonal)(S2);
         X(destroy_symmetric_dpr1)(A);
         X(destroy_symmetric_idpr1)(B);
-        //free(y);
-        for (int i = 0; i < n; i++)
-            y[i] = 0;
         F->z = y;
     }
     return F;
@@ -287,9 +284,6 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
         X(destroy_symmetric_tridiagonal)(S2);
         X(destroy_symmetric_dpr1)(A);
         X(destroy_symmetric_idpr1)(B);
-        //free(y);
-        for (int i = 0; i < n; i++)
-            y[i] = 0;
         F->z = y;
     }
     return F;
@@ -301,7 +295,7 @@ void X(tdmv)(char TRANS, FLT alpha, X(tdc_eigen) * F, FLT * x, FLT beta, FLT * y
         X(gemv)(TRANS, n, n, alpha, F->V, x, beta, y);
     else {
         int s = F->F1->n;
-        FLT * z = F->z;//(FLT *) calloc(n, sizeof(FLT));
+        FLT * z = F->z;
         if (TRANS == 'N') {
             X(dvmv)(TRANS, 1, F->F0, x, 0, z);
             X(tdmv)(TRANS, alpha, F->F1, z, beta, y);
@@ -312,7 +306,6 @@ void X(tdmv)(char TRANS, FLT alpha, X(tdc_eigen) * F, FLT * x, FLT beta, FLT * y
             X(tdmv)(TRANS, 1, F->F2, x+s, 0, z+s);
             X(dvmv)(TRANS, alpha, F->F0, z, beta, y);
         }
-        //free(z);
     }
 }
 
@@ -322,7 +315,7 @@ void X(tfmv)(char TRANS, FLT alpha, X(tdc_eigen_FMM) * F, FLT * x, FLT beta, FLT
         X(gemv)(TRANS, n, n, alpha, F->V, x, beta, y);
     else {
         int s = F->F1->n;
-        FLT * z = F->z;//(FLT *) calloc(n, sizeof(FLT));
+        FLT * z = F->z;
         if (TRANS == 'N') {
             X(dfmv)(TRANS, 1, F->F0, x, 0, z);
             X(tfmv)(TRANS, alpha, F->F1, z, beta, y);
@@ -333,6 +326,5 @@ void X(tfmv)(char TRANS, FLT alpha, X(tdc_eigen_FMM) * F, FLT * x, FLT beta, FLT
             X(tfmv)(TRANS, 1, F->F2, x+s, 0, z+s);
             X(dfmv)(TRANS, alpha, F->F0, z, beta, y);
         }
-        //free(z);
     }
 }
