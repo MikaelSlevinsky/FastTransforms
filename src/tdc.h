@@ -16,21 +16,9 @@ typedef struct {
 #define densematrices(m,n) densematrices[(m)+(n)*M]
 #define lowrankmatrices(m,n) lowrankmatrices[(m)+(n)*M]
 
-#define FLT float
-#define X(name) FT_CONCAT(ft_, name, f)
-#define Y(name) FT_CONCAT(, name, f)
-#include "tridiagonal_source.h"
-#include "triangular_banded_source.h"
-#include "hierarchical_source.h"
-#include "dprk_source.h"
-#include "tdc_source.h"
-#undef FLT
-#undef X
-#undef Y
-
-#define FLT double
-#define X(name) FT_CONCAT(ft_, name, )
-#define Y(name) FT_CONCAT(, name, )
+#define FLT __float128
+#define X(name) FT_CONCAT(ft_, name, q)
+#define Y(name) FT_CONCAT(, name, q)
 #include "tridiagonal_source.h"
 #include "triangular_banded_source.h"
 #include "hierarchical_source.h"
@@ -52,16 +40,34 @@ typedef struct {
 #undef X
 #undef Y
 
-#define FLT __float128
-#define X(name) FT_CONCAT(ft_, name, q)
-#define Y(name) FT_CONCAT(, name, q)
+#define FLT double
+#define X(name) FT_CONCAT(ft_, name, )
+#define X2(name) FT_CONCAT(ft_, name, q)
+#define Y(name) FT_CONCAT(, name, )
 #include "tridiagonal_source.h"
 #include "triangular_banded_source.h"
 #include "hierarchical_source.h"
 #include "dprk_source.h"
 #include "tdc_source.h"
+#include "tdc_source2.h"
 #undef FLT
 #undef X
+#undef X2
+#undef Y
+
+#define FLT float
+#define X(name) FT_CONCAT(ft_, name, f)
+#define X2(name) FT_CONCAT(ft_, name, )
+#define Y(name) FT_CONCAT(, name, f)
+#include "tridiagonal_source.h"
+#include "triangular_banded_source.h"
+#include "hierarchical_source.h"
+#include "dprk_source.h"
+#include "tdc_source.h"
+#include "tdc_source2.h"
+#undef FLT
+#undef X
+#undef X2
 #undef Y
 
 #endif // TDC_H

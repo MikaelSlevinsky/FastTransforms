@@ -42,6 +42,19 @@ void printmat(char * MAT, char * FMT, double * A, int n, int m) {
     }
 }
 
+void print_summary_size(size_t i) {
+    if (i < 1024.0)
+        printf("%20zu B\n", i);
+    else if (i < 1048576.0)
+        printf("%18.3f KiB\n", i/1024.0);
+    else if (i < 1073741824.0)
+        printf("%18.3f MiB\n", i/1048576.0);
+    else if (i < 1099511627776.0)
+        printf("%18.3f GiB\n", i/1073741824.0);
+    else
+        printf("%18.16e B\n", (double) i);
+}
+
 double * copymat(double * A, int n, int m) {
     double * B = (double *) calloc(n*m, sizeof(double));
     for (int i = 0; i < n*m; i++)

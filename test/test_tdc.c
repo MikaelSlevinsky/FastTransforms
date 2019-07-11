@@ -6,6 +6,9 @@ void test_tdc (int * checksum);
 void test_tdcl(int * checksum);
 void test_tdcq(int * checksum);
 
+void test_tdc_drop_precisionf(int * checksum);
+void test_tdc_drop_precision (int * checksum);
+
 int main(void) {
     int checksum = 0;
     printf("\nTesting methods for symmetric-definite tridiagonal divide and conquer.\n");
@@ -18,20 +21,18 @@ int main(void) {
     printf("\n\tQuadruple precision.\n\n");
     test_tdcq(&checksum);
     printf("\n");
+    printf("\nTesting methods for dropping the precision.\n");
+    printf("\n\tDouble ↘  single precision.\n\n");
+    test_tdc_drop_precisionf(&checksum);
+    printf("\n\tQuadruple ↘  double precision.\n\n");
+    test_tdc_drop_precision(&checksum);
+    printf("\n");
     return checksum;
 }
 
-#define FLT float
-#define X(name) FT_CONCAT(ft_, name, f)
-#define Y(name) FT_CONCAT(, name, f)
-#include "test_tdc_source.c"
-#undef FLT
-#undef X
-#undef Y
-
-#define FLT double
-#define X(name) FT_CONCAT(ft_, name, )
-#define Y(name) FT_CONCAT(, name, )
+#define FLT quadruple
+#define X(name) FT_CONCAT(ft_, name, q)
+#define Y(name) FT_CONCAT(, name, q)
 #include "test_tdc_source.c"
 #undef FLT
 #undef X
@@ -45,10 +46,24 @@ int main(void) {
 #undef X
 #undef Y
 
-#define FLT quadruple
-#define X(name) FT_CONCAT(ft_, name, q)
-#define Y(name) FT_CONCAT(, name, q)
+#define FLT double
+#define X(name) FT_CONCAT(ft_, name, )
+#define X2(name) FT_CONCAT(ft_, name, q)
+#define Y(name) FT_CONCAT(, name, )
 #include "test_tdc_source.c"
+#include "test_tdc_source2.c"
 #undef FLT
 #undef X
+#undef X2
+#undef Y
+
+#define FLT float
+#define X(name) FT_CONCAT(ft_, name, f)
+#define X2(name) FT_CONCAT(ft_, name, )
+#define Y(name) FT_CONCAT(, name, f)
+#include "test_tdc_source.c"
+#include "test_tdc_source2.c"
+#undef FLT
+#undef X
+#undef X2
 #undef Y

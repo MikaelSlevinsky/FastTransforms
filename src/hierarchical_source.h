@@ -69,6 +69,12 @@ int X(size_lowrankmatrix)(X(lowrankmatrix) * L, int k);
 int X(size_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int k);
 int X(blocksize_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int m, int n, int k);
 
+size_t X(summary_size_densematrix)(X(densematrix) * A);
+size_t X(summary_size_lowrankmatrix)(X(lowrankmatrix) * L);
+size_t X(summary_size_hierarchicalmatrix)(X(hierarchicalmatrix) * H);
+
+int X(nlevels_hierarchicalmatrix)(X(hierarchicalmatrix) * H);
+
 FLT X(getindex_densematrix)(X(densematrix) * A, int i, int j);
 FLT X(getindex_lowrankmatrix)(X(lowrankmatrix) * L, int i, int j);
 FLT X(getindex_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int i, int j);

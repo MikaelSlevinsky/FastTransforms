@@ -434,6 +434,31 @@ int X(blocksize_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int m, int n, int
     }
 }
 
+size_t X(summary_size_densematrix)(X(densematrix) * A) {return sizeof(FLT)*A->m*A->n;};
+size_t X(summary_size_lowrankmatrix)(X(lowrankmatrix) * L) {return L->N == '2' ? sizeof(FLT)*(L->m+L->n+1)*L->r : L->N == '3' ? sizeof(FLT)*(L->m+L->n+L->r)*L->r : 0;};
+size_t X(summary_size_hierarchicalmatrix)(X(hierarchicalmatrix) * H) {
+    size_t M = H->M, N = H->N, S = 0;
+    for (int n = 0; n < N; n++)
+        for (int m = 0; m < M; m++) {
+            switch (H->hash(m, n)) {
+                case 0: {S += 0; break;}
+                case 1: {S += X(summary_size_hierarchicalmatrix)(H->hierarchicalmatrices(m, n)); break;}
+                case 2: {S += X(summary_size_densematrix)(H->densematrices(m, n)); break;}
+                case 3: {S += X(summary_size_lowrankmatrix)(H->lowrankmatrices(m, n)); break;}
+            }
+        }
+    return S;
+}
+
+int X(nlevels_hierarchicalmatrix)(X(hierarchicalmatrix) * H) {
+    int M = H->M, N = H->N, L = 0;
+    for (int n = 0; n < N; n++)
+        for (int m = 0; m < M; m++)
+            if (H->hash(m, n) == 1)
+                L = MAX(L, 1+X(nlevels_hierarchicalmatrix)(H->hierarchicalmatrices(m, n)));
+    return L;
+}
+
 void X(scale_rows_densematrix)(FLT alpha, FLT * x, X(densematrix) * AD) {
     int m = AD->m, n = AD->n;
     FLT * A = AD->A;

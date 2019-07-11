@@ -21,6 +21,10 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(f, x, y, ir, jr);
     printf("Time to sample hierarchically \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
 
+    printf("Number of levels in the hierarchy \t\t\t |%20i  \n", X(nlevels_hierarchicalmatrix)(H));
+    printf("Size of the hierarchical matrix \t\t\t |");
+    print_summary_size(X(summary_size_hierarchicalmatrix)(H));
+
     FLT * u = (FLT *) malloc(n*sizeof(FLT));
     for (int j = 0; j < n; j++)
         u[j] = 1/(j+ONE(FLT));
@@ -117,6 +121,21 @@ void Y(test_hierarchical)(int * checksum) {
         FLT * y = (FLT *) malloc(n*sizeof(FLT));
         for (int j = 0; j < n; j++)
             y[j] = (j+1)*(j+3/TWO(FLT));
+        X(inner_test_hierarchical)(checksum, m, n, X(cauchykernel), x, y);
+        free(x);
+        free(y);
+    }
+    printf("\t\t\t\t\t\t\t |\n");
+    printf("The Cauchy kernel and quartically spaced samples \t |\n");
+    printf("\t\t\t\t\t\t\t |\n");
+    for (int n = nmin; n < nmax; n *= 2) {
+        int m = n;
+        FLT * x = (FLT *) malloc(m*sizeof(FLT));
+        for (int i = 0; i < m; i++)
+            x[i] = ((FLT) i+1)*((FLT) i+1)*((FLT) i+2)*((FLT) i+2);
+        FLT * y = (FLT *) malloc(n*sizeof(FLT));
+        for (int j = 0; j < n; j++)
+            y[j] = ((FLT) j+1)*(j+3/TWO(FLT))*((FLT) j+1)*(j+3/TWO(FLT));
         X(inner_test_hierarchical)(checksum, m, n, X(cauchykernel), x, y);
         free(x);
         free(y);

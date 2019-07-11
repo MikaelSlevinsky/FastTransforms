@@ -20,6 +20,7 @@
 #define CYAN(string) "\x1b[36m" string "\x1b[0m"
 
 void printmat(char * MAT, char * FMT, double * A, int n, int m);
+void print_summary_size(size_t i);
 double * copymat(double * A, int n, int m);
 double * sphones(int n, int m);
 double * sphrand(int n, int m);

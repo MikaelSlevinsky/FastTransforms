@@ -31,6 +31,8 @@ typedef struct {
 } X(symmetric_dpr1_eigen);
 
 typedef struct {
+    X(symmetric_dpr1) * A;
+    X(symmetric_idpr1) * B;
     FLT * v;
     X(hierarchicalmatrix) * V;
     FLT * lambda;
@@ -48,6 +50,9 @@ void X(destroy_symmetric_dpr1)(X(symmetric_dpr1) * A);
 void X(destroy_symmetric_idpr1)(X(symmetric_idpr1) * A);
 void X(destroy_symmetric_dpr1_eigen)(X(symmetric_dpr1_eigen) * F);
 void X(destroy_symmetric_dpr1_eigen_FMM)(X(symmetric_dpr1_eigen_FMM) * F);
+
+size_t X(summary_size_symmetric_dpr1_eigen)(X(symmetric_dpr1_eigen) * F);
+size_t X(summary_size_symmetric_dpr1_eigen_FMM)(X(symmetric_dpr1_eigen_FMM) * F);
 
 X(symmetric_idpr1) * X(symmetric_idpr1_factorize)(X(symmetric_idpr1) * A);
 X(symmetric_idpr1) * X(symmetric_idpr1_inv)(X(symmetric_idpr1) * A);

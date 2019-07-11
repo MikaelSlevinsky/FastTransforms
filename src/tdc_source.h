@@ -6,6 +6,7 @@ struct X(tdcstruct) {
     X(tdc_eigen) * F2;
     FLT * V;
     FLT * lambda;
+    FLT * z;
     int n;
 };
 
@@ -17,11 +18,15 @@ struct X(tdcstruct_FMM) {
     X(tdc_eigen_FMM) * F2;
     FLT * V;
     FLT * lambda;
+    FLT * z;
     int n;
 };
 
 void X(destroy_tdc_eigen)(X(tdc_eigen) * F);
 void X(destroy_tdc_eigen_FMM)(X(tdc_eigen_FMM) * F);
+
+size_t X(summary_size_tdc_eigen)(X(tdc_eigen) * F);
+size_t X(summary_size_tdc_eigen_FMM)(X(tdc_eigen_FMM) * F);
 
 X(tdc_eigen) * X(tdc_eig)(X(symmetric_tridiagonal) * A);
 X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * A, X(symmetric_tridiagonal) * B);
