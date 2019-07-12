@@ -1,11 +1,7 @@
-void Y(test_tdc_drop_precision)(int * checksum) {
-    printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
-    printf("---------------------------------------------------------|----------------------\n");
-
-    int n = 1024;
+void X(inner_test_tdc_drop_precision)(int * checksum, int n) {
     struct timeval start, end;
 
-    printf("Size of a dense matrix \t\t (%5i×%5i) \t\t |", n, n);
+    printf("Size of a dense matrix \t\t\t (%5i×%5i) \t |", n, n);
     print_summary_size(sizeof(FLT)*n*n);
 
     int mu = n/2;
@@ -131,4 +127,14 @@ void Y(test_tdc_drop_precision)(int * checksum) {
     free(V);
     free(VtAV);
     free(VtBV);
+}
+
+void Y(test_tdc_drop_precision)(int * checksum) {
+    printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+
+    int nmin = 1024, nmax = 4096;
+
+    for (int n = nmin; n < nmax; n *= 2)
+        X(inner_test_tdc_drop_precision)(checksum, n);
 }
