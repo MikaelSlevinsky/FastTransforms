@@ -228,25 +228,6 @@ X(hierarchicalmatrix) * X(malloc_hierarchicalmatrix)(const int M, const int N) {
     return H;
 }
 
-X(hierarchicalmatrix) * X(create_hierarchicalmatrix)(const int M, const int N, FLT (*f)(FLT x, FLT y), const int m, const int n) {
-    X(hierarchicalmatrix) * H = X(malloc_hierarchicalmatrix)(M, N);
-    X(densematrix) ** HD = H->densematrices;
-    FLT * A;
-    for (int nn = 0; nn < N; nn++) {
-        for (int mm = 0; mm < M; mm++) {
-            H->hash(mm,nn) = 2;
-            HD[mm+M*nn] = X(calloc_densematrix)(m, n);
-            A = HD[mm+M*nn]->A;
-            for (int j = 0; j < n; j++) {
-                for (int i = 0; i < m; i++) {
-                    A[i+m*j] = f(i + mm*m, j+nn*n);
-                }
-            }
-        }
-    }
-    return H;
-}
-
 // Assumes x and y are increasing sequences
 static FLT X(dist)(FLT * x, FLT * y, unitrange i, unitrange j) {
     if (y[j.start] > x[i.stop-1])
@@ -325,6 +306,9 @@ X(hierarchicalmatrix) * X(sample_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT
         H->hash(1, 1) = 1;
     }
 
+    H->m = i.stop-i.start;
+    H->n = j.stop-j.start;
+
     return H;
 }
 
@@ -391,6 +375,9 @@ X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix)(FLT (*f)(FLT x, 
         H->hash(1, 1) = 1;
     }
 
+    H->m = i.stop-i.start;
+    H->n = j.stop-j.start;
+
     return H;
 }
 
@@ -408,19 +395,8 @@ int X(size_lowrankmatrix)(X(lowrankmatrix) * L, int k) {
 }
 
 int X(size_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int k) {
-    int M = H->M, N = H->N;
-    if (k == 1) {
-        int p = 0;
-        for (int m = 0; m < M; m++)
-            p += X(blocksize_hierarchicalmatrix)(H, m, N-1, 1);
-        return p;
-    }
-    else if (k == 2) {
-        int q = 0;
-        for (int n = 0; n < N; n++)
-            q += X(blocksize_hierarchicalmatrix)(H, 0, n, 2);
-        return q;
-    }
+    if (k == 1) return H->m;
+    else if (k == 2) return H->n;
     else return 1;
 }
 

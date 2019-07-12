@@ -39,6 +39,8 @@ struct X(hmat) {
     int * hash;
     int M;
     int N;
+    int m;
+    int n;
 };
 
 FLT * X(chebyshev_points)(char KIND, int n);
@@ -59,8 +61,6 @@ X(lowrankmatrix) * X(malloc_lowrankmatrix)(char N, int m, int n, int r);
 X(lowrankmatrix) * X(sample_lowrankmatrix)(FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j);
 
 X(hierarchicalmatrix) * X(malloc_hierarchicalmatrix)(const int M, const int N);
-X(hierarchicalmatrix) * X(create_hierarchicalmatrix)(const int M, const int N, FLT (*f)(FLT, FLT), const int m, const int n);
-
 X(hierarchicalmatrix) * X(sample_hierarchicalmatrix) (FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j);
 X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix) (FLT (*f)(FLT x, FLT y), FLT (*f2)(FLT x, FLT ylo, FLT yhi), FLT * x, FLT * y, FLT * ylo, FLT * yhi, unitrange i, unitrange j);
 
