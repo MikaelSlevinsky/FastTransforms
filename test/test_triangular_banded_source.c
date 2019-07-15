@@ -1,58 +1,8 @@
-X(triangular_banded) * X(eigenplan_A_jac2jac)(const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta) {
-    X(triangular_banded) * A = X(malloc_triangular_banded)(n, 2);
-    FLT v;
-    if (n > 0)
-        X(set_triangular_banded_index)(A, 0, 0, 0);
-    for (int i = 1; i < n; i++) {
-        v = i*(i+alpha+beta+1)*(i+gamma+delta+1)/(2*i+gamma+delta+1)*(i+gamma+delta+2)/(2*i+gamma+delta+2);
-        X(set_triangular_banded_index)(A, v, i, i);
-    }
-    for (int i = 1; i < n; i++) {
-        v = (gamma-delta)*(i+gamma+delta+1)/(2*i+gamma+delta)/(2*i+gamma+delta+2)*(i*(i+gamma+delta+1)+(gamma+delta+2)*(gamma+delta-alpha-beta)/2) - (i+gamma+delta+1)*(gamma-alpha+beta-delta)/2;
-        X(set_triangular_banded_index)(A, v, i-1, i);
-    }
-    for (int i = 2; i < n; i++) {
-        v = -(i+gamma+delta+1)*(i+gamma)/(2*i+gamma+delta)*(i+delta)/(2*i+gamma+delta+1)*(i+gamma-alpha+delta-beta);
-        X(set_triangular_banded_index)(A, v, i-2, i);
-    }
-    return A;
-}
-
-X(triangular_banded) * X(eigenplan_B_jac2jac)(const int n, const FLT gamma, const FLT delta) {
-    X(triangular_banded) * B = X(malloc_triangular_banded)(n, 2);
-    FLT v;
-    if (n > 0)
-        X(set_triangular_banded_index)(B, 1, 0, 0);
-    for (int i = 1; i < n; i++) {
-        v = (i+gamma+delta+1)/(2*i+gamma+delta+1)*(i+gamma+delta+2)/(2*i+gamma+delta+2);
-        X(set_triangular_banded_index)(B, v, i, i);
-    }
-    for (int i = 1; i < n; i++) {
-        v = (gamma-delta)*(i+gamma+delta+1)/(2*i+gamma+delta)/(2*i+gamma+delta+2);
-        X(set_triangular_banded_index)(B, v, i-1, i);
-    }
-    for (int i = 2; i < n; i++) {
-        v = -(i+gamma)/(2*i+gamma+delta)*(i+delta)/(2*i+gamma+delta+1);
-        X(set_triangular_banded_index)(B, v, i-2, i);
-    }
-    return B;
-}
-
-
 void Y(test_triangular_banded)(int * checksum) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
 
-    int n = 20;
-    int b = 2;
-    //FLT alpha = -0.25, beta = 0.25, gamma = 0.25, delta = 0.0;
-    //FLT alpha = -0.5, beta = 0.5, gamma = 0.0, delta = 0.0;
-    //FLT alpha = -0.5, beta = 0.5, gamma = 1.5, delta = 2.5;
-    FLT alpha = 0.0, beta = -0.5, gamma = -0.5, delta = -0.5;
-
-    X(triangular_banded) * A = X(eigenplan_A_jac2jac)(n, alpha, beta, gamma, delta);
-    X(triangular_banded) * B = X(eigenplan_B_jac2jac)(n, gamma, delta);
-    /*
+    int n = 256, b = 2;
     X(triangular_banded) * A = X(calloc_triangular_banded)(n, b);
     X(triangular_banded) * B = X(calloc_triangular_banded)(n, b);
     X(set_triangular_banded_index)(B, 2, 0, 0);
@@ -64,30 +14,78 @@ void Y(test_triangular_banded)(int * checksum) {
         X(set_triangular_banded_index)(A, -(i+1)*(i+2), i, i+2);
         X(set_triangular_banded_index)(B, -1, i, i+2);
     }
-    */
+
+    FLT * BinvA = (FLT *) calloc(n*n, sizeof(FLT));
+    FLT * BinvAtrue = (FLT *) calloc(n*n, sizeof(FLT));
+    for (int j = 0; j < n; j++) {
+        BinvA[j+j*n] = 1;
+        X(tbmv)('N', A, BinvA+j*n);
+        X(tbsv)('N', B, BinvA+j*n);
+        BinvAtrue[j+j*n] = j*(j+1);
+        for (int i = j-2; i > 0; i -= 2)
+            BinvAtrue[i+j*n] = 2*j;
+        if (j%2 == 0)
+            BinvAtrue[j*n] = j;
+
+    }
+    FLT err = X(norm_2arg)(BinvA, BinvAtrue, n*n)/X(norm_1arg)(BinvA, n*n);
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < n; i++) {
+            BinvA[i+j*n] = 0;
+            BinvAtrue[i+j*n] = 0;
+        }
+        BinvA[j+j*n] = 1;
+        X(tbmv)('T', A, BinvA+j*n);
+        X(tbsv)('T', B, BinvA+j*n);
+        BinvAtrue[j+j*n] = j*(j+1);
+        for (int i = j+2; i < n; i += 2)
+            BinvAtrue[i+j*n] = -(2*j+2);
+    }
+    err += X(norm_2arg)(BinvA, BinvAtrue, n*n)/X(norm_1arg)(BinvA, n*n);
+    printf("Forward and inverse matrix-vector products \t\t |%20.2e ", (double) err);
+    X(checktest)(err, n, checksum);
+
 
     FLT * V = (FLT *) calloc(n*n, sizeof(FLT));
-    //for (int i = 0; i < n; i++)
-    //    V[i+i*n] = 1.0;
-    V[0] = 1.0;
-    V[1+n] = (alpha+beta+2)/(gamma+delta+2);
-    for (int i = 2; i < n; i++) {
-        V[i+i*n] = (2*i+alpha+beta-1)/(i+alpha+beta)*(2*i+alpha+beta)/(2*i+gamma+delta-1)*(i+gamma+delta)/(2*i+gamma+delta)*V[i-1+(i-1)*n];
-    }
-    FLT * lambda = (FLT *) calloc(n, sizeof(FLT));
     for (int i = 0; i < n; i++)
-        lambda[i] = i*(i+alpha+beta+1);
+        V[i+i*n] = 1;
+    FLT * lambda = (FLT *) malloc(n*sizeof(FLT));
 
-    //X(triangular_banded_eigenvalues)(A, B, lambda);
-    printmat("Λ", "%3.3f", lambda, n, 1);
+    X(triangular_banded_eigenvalues)(A, B, lambda);
     X(triangular_banded_eigenvectors)(A, B, V);
-    printmat("V", "%1.3f", V, n, n);
 
-    printf("This is A[0,0]: %1.3f", X(get_triangular_banded_index)(A, 0, 0));
-    printf("This is B[0,0]: %1.3f", X(get_triangular_banded_index)(B, 0, 0));
+    FLT * AV = (FLT *) malloc(n*n*sizeof(FLT));
+    FLT * BVL = (FLT *) malloc(n*n*sizeof(FLT));
+
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < n; i++) {
+            AV[i+j*n] = V[i+j*n];
+            BVL[i+j*n] = V[i+j*n]*lambda[j];
+        }
+        X(tbmv)('N', A, AV+j*n);
+        X(tbmv)('N', B, BVL+j*n);
+    }
+
+    err = X(norm_2arg)(AV, BVL, n*n)/X(norm_1arg)(lambda, n);
+    printf("Numerical error of eigensolve ||AV - BVΛ|| / ||Λ|| \t |%20.2e ", (double) err);
+    X(checktest)(err, 4, checksum);
+
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < n; i++)
+            BVL[i+j*n] = V[i+j*n]*lambda[j];
+        X(tbsv)('N', B, AV+j*n);
+    }
+
+    err = X(norm_2arg)(AV, BVL, n*n)/X(norm_1arg)(lambda, n);
+    printf("Numerical error of eigensolve ||B⁻¹AV - VΛ|| / ||Λ|| \t |%20.2e ", (double) err);
+    X(checktest)(err, n, checksum);
 
     X(destroy_triangular_banded)(A);
     X(destroy_triangular_banded)(B);
+    free(BinvA);
+    free(BinvAtrue);
+    free(AV);
+    free(BVL);
     free(V);
     free(lambda);
 }
