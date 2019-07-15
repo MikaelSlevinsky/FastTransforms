@@ -103,3 +103,30 @@ void X(triangular_banded_eigenvectors)(X(triangular_banded) * A, X(triangular_ba
         }
     }
 }
+
+
+X(triangular_banded) * X(create_A_jac2jac)(const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta) {
+    X(triangular_banded) * A = X(malloc_triangular_banded)(n, 2);
+    if (n > 0)
+        X(set_triangular_banded_index)(A, 0, 0, 0);
+    for (int i = 1; i < n; i++)
+        X(set_triangular_banded_index)(A, i*(i+alpha+beta+1)*(i+gamma+delta+1)/(2*i+gamma+delta+1)*(i+gamma+delta+2)/(2*i+gamma+delta+2), i, i);
+    for (int i = 0; i < n-1; i++)
+        X(set_triangular_banded_index)(A, (gamma-delta)*(i+gamma+delta+2)/(2*i+gamma+delta+2)/(2*i+gamma+delta+4)*((i+1)*(i+gamma+delta+2)+(gamma+delta+2)*(gamma+delta-alpha-beta)/2) - (i+gamma+delta+2)*(gamma-alpha+beta-delta)/2, i, i+1);
+    for (int i = 0; i < n-2; i++)
+        X(set_triangular_banded_index)(A, -(i+gamma+delta+3)*(i+gamma+2)/(2*i+gamma+delta+4)*(i+delta+2)/(2*i+gamma+delta+5)*(i+gamma-alpha+delta-beta+2), i, i+2);
+    return A;
+}
+
+X(triangular_banded) * X(create_B_jac2jac)(const int n, const FLT gamma, const FLT delta) {
+    X(triangular_banded) * B = X(malloc_triangular_banded)(n, 2);
+    if (n > 0)
+        X(set_triangular_banded_index)(B, 1, 0, 0);
+    for (int i = 1; i < n; i++)
+        X(set_triangular_banded_index)(B, (i+gamma+delta+1)/(2*i+gamma+delta+1)*(i+gamma+delta+2)/(2*i+gamma+delta+2), i, i);
+    for (int i = 0; i < n-1; i++)
+        X(set_triangular_banded_index)(B, (gamma-delta)*(i+gamma+delta+2)/(2*i+gamma+delta+2)/(2*i+gamma+delta+4), i, i+1);
+    for (int i = 0; i < n-2; i++)
+        X(set_triangular_banded_index)(B, -(i+gamma+2)/(2*i+gamma+delta+4)*(i+delta+2)/(2*i+gamma+delta+5), i, i+2);
+    return B;
+}

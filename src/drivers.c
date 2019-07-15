@@ -3,18 +3,6 @@
 #include "fasttransforms.h"
 #include "ftinternal.h"
 
-static void alternate_sign(double * A, const int N, const int M) {
-    for (int j = 0; j < M; j++)
-        for (int i = 0; i < N; i += 2)
-            A[i+j*N] = -A[i+j*N];
-}
-
-static void alternate_sign_t(double * A, const int N, const int M) {
-    for (int i = 0; i < N; i += 2)
-        for (int j = 0; j < M; j++)
-            A[j+i*M] = -A[j+i*M];
-}
-
 static void chebyshev_normalization_2d(double * A, const int N, const int M) {
     for (int i = 0; i < N; i++)
         A[i] *= M_SQRT1_2;
@@ -836,30 +824,10 @@ ft_harmonic_plan * ft_plan_tri2cheb(const int n, const double alpha, const doubl
     ft_harmonic_plan * P = (ft_harmonic_plan *) malloc(sizeof(ft_harmonic_plan));
     P->RP = ft_plan_rottriangle(n, alpha, beta, gamma);
     P->B = (double *) VMALLOC(VALIGN(n) * n * sizeof(double));
-    P->P1 = plan_jac2jac(1, 1, n, beta + gamma + 1.0, alpha, -0.5);
-    double * P12 = plan_jac2jac(1, 1, n, alpha, -0.5, -0.5);
-    alternate_sign(P12, n, n);
-    alternate_sign_t(P12, n, n);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P12, n, P->P1, n);
-    free(P12);
-    P->P2 = plan_jac2jac(1, 1, n, gamma, beta, -0.5);
-    double * P22 = plan_jac2jac(1, 1, n, beta, -0.5, -0.5);
-    alternate_sign(P22, n, n);
-    alternate_sign_t(P22, n, n);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P22, n, P->P2, n);
-    free(P22);
-    P->P1inv = plan_jac2jac(1, 1, n, -0.5, -0.5, alpha);
-    double * P12inv = plan_jac2jac(1, 1, n, -0.5, alpha, beta + gamma + 1.0);
-    alternate_sign(P->P1inv, n, n);
-    alternate_sign_t(P->P1inv, n, n);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P12inv, n, P->P1inv, n);
-    free(P12inv);
-    P->P2inv = plan_jac2jac(1, 1, n, -0.5, -0.5, beta);
-    double * P22inv = plan_jac2jac(1, 1, n, -0.5, beta, gamma);
-    alternate_sign(P->P2inv, n, n);
-    alternate_sign_t(P->P2inv, n, n);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P22inv, n, P->P2inv, n);
-    free(P22inv);
+    P->P1 = eigenplan_jac2jac(1, 1, n, beta + gamma + 1.0, alpha, -0.5, -0.5);
+    P->P2 = eigenplan_jac2jac(1, 1, n, gamma, beta, -0.5, -0.5);
+    P->P1inv = eigenplan_jac2jac(1, 1, n, -0.5, -0.5, beta + gamma + 1.0, alpha);
+    P->P2inv = eigenplan_jac2jac(1, 1, n, -0.5, -0.5, gamma, beta);
     P->alpha = alpha;
     P->beta = beta;
     P->gamma = gamma;
@@ -889,19 +857,9 @@ ft_harmonic_plan * ft_plan_disk2cxf(const int n) {
     P->RP = ft_plan_rotdisk(n);
     P->B = (double *) VMALLOC(VALIGN(n) * (4*n-3) * sizeof(double));
     P->P1 = plan_leg2cheb(1, 0, n);
-    P->P2 = plan_jac2jac(1, 1, n, 1.0, 0.0, 0.5);
-    alternate_sign(P->P2, n, n);
-    alternate_sign_t(P->P2, n, n);
-    double * P22 = plan_jac2jac(1, 1, n, 0.0, 0.5, -0.5);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P22, n, P->P2, n);
-    free(P22);
+    P->P2 = eigenplan_jac2jac(1, 1, n, 0.0, 1.0, -0.5, 0.5);
     P->P1inv = plan_cheb2leg(0, 1, n);
-    double * P22inv = plan_jac2jac(1, 1, n, 0.5, 0.0, 1.0);
-    alternate_sign(P22inv, n, n);
-    alternate_sign_t(P22inv, n, n);
-    P->P2inv = plan_jac2jac(1, 1, n, -0.5, 0.5, 0.0);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P22inv, n, P->P2inv, n);
-    free(P22inv);
+    P->P2inv = eigenplan_jac2jac(1, 1, n, -0.5, 0.5, 0.0, 1.0);
     for (int j = 0; j < n; j++)
         for (int i = 0; i <= j; i++) {
             P->P1[i+j*n] *= 2.0;
@@ -948,42 +906,12 @@ ft_tetrahedral_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha,
     P->RP1 = ft_plan_rottriangle(n, alpha, beta, gamma + delta + 1.0);
     P->RP2 = ft_plan_rottriangle(n, beta, gamma, delta);
     P->B = (double *) VMALLOC(VALIGN(n) * n * n * sizeof(double));
-    P->P1 = plan_jac2jac(1, 1, n, beta + gamma + delta + 2.0, alpha, -0.5);
-    double * P12 = plan_jac2jac(1, 1, n, alpha, -0.5, -0.5);
-    alternate_sign(P12, n, n);
-    alternate_sign_t(P12, n, n);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P12, n, P->P1, n);
-    free(P12);
-    P->P2 = plan_jac2jac(1, 1, n, gamma + delta + 1.0, beta, -0.5);
-    double * P22 = plan_jac2jac(1, 1, n, beta, -0.5, -0.5);
-    alternate_sign(P22, n, n);
-    alternate_sign_t(P22, n, n);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P22, n, P->P2, n);
-    free(P22);
-    P->P3 = plan_jac2jac(1, 1, n, delta, gamma, -0.5);
-    double * P32 = plan_jac2jac(1, 1, n, gamma, -0.5, -0.5);
-    alternate_sign(P32, n, n);
-    alternate_sign_t(P32, n, n);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P32, n, P->P3, n);
-    free(P32);
-    P->P1inv = plan_jac2jac(1, 1, n, -0.5, -0.5, alpha);
-    double * P12inv = plan_jac2jac(1, 1, n, -0.5, alpha, beta + gamma + delta + 2.0);
-    alternate_sign(P->P1inv, n, n);
-    alternate_sign_t(P->P1inv, n, n);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P12inv, n, P->P1inv, n);
-    free(P12inv);
-    P->P2inv = plan_jac2jac(1, 1, n, -0.5, -0.5, beta);
-    double * P22inv = plan_jac2jac(1, 1, n, -0.5, beta, gamma + delta + 1.0);
-    alternate_sign(P->P2inv, n, n);
-    alternate_sign_t(P->P2inv, n, n);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P22inv, n, P->P2inv, n);
-    free(P22inv);
-    P->P3inv = plan_jac2jac(1, 1, n, -0.5, -0.5, gamma);
-    double * P32inv = plan_jac2jac(1, 1, n, -0.5, gamma, beta);
-    alternate_sign(P->P3inv, n, n);
-    alternate_sign_t(P->P3inv, n, n);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, P32inv, n, P->P3inv, n);
-    free(P32inv);
+    P->P1 = eigenplan_jac2jac(1, 1, n, beta + gamma + delta + 2.0, alpha, -0.5, -0.5);
+    P->P2 = eigenplan_jac2jac(1, 1, n, gamma + delta + 1.0, beta, -0.5, -0.5);
+    P->P3 = eigenplan_jac2jac(1, 1, n, delta, gamma, -0.5, -0.5);
+    P->P1inv = eigenplan_jac2jac(1, 1, n, -0.5, -0.5, beta + gamma + delta + 2.0, alpha);
+    P->P2inv = eigenplan_jac2jac(1, 1, n, -0.5, -0.5, gamma + delta + 1.0, beta);
+    P->P3inv = eigenplan_jac2jac(1, 1, n, -0.5, -0.5, delta, gamma);
     P->alpha = alpha;
     P->beta = beta;
     P->gamma = gamma;
