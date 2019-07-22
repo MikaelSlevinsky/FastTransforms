@@ -4,7 +4,7 @@
 #define FLT quadruple
 #define X(name) FT_CONCAT(ft_, name, q)
 #define Y(name) FT_CONCAT(, name, q)
-#define BLOCKRANK 2*((int) floor(-log(Y(eps)())/3.525494348078172))
+#define BLOCKRANK 2*((int) floor(-log(Y(eps)())/2.271667761226165))
 #define BLOCKSIZE 4*BLOCKRANK
 #include "tridiagonal_source.c"
 #include "hierarchical_source.c"
@@ -20,7 +20,7 @@
 #define FLT long double
 #define X(name) FT_CONCAT(ft_, name, l)
 #define Y(name) FT_CONCAT(, name, l)
-#define BLOCKRANK 2*((int) floor(-log(Y(eps)())/3.525494348078172))
+#define BLOCKRANK 2*((int) floor(-log(Y(eps)())/2.271667761226165))
 #define BLOCKSIZE 4*BLOCKRANK
 #include "tridiagonal_source.c"
 #include "hierarchical_source.c"
@@ -37,7 +37,7 @@
 #define X(name) FT_CONCAT(ft_, name, )
 #define X2(name) FT_CONCAT(ft_, name, q)
 #define Y(name) FT_CONCAT(, name, )
-#define BLOCKRANK 2*((int) floor(-log(Y(eps)())/3.525494348078172))
+#define BLOCKRANK 2*((int) floor(-log(Y(eps)())/2.271667761226165))
 #define BLOCKSIZE 4*BLOCKRANK
 #include "tridiagonal_source.c"
 #include "hierarchical_source.c"
@@ -56,7 +56,7 @@
 #define X(name) FT_CONCAT(ft_, name, f)
 #define X2(name) FT_CONCAT(ft_, name, )
 #define Y(name) FT_CONCAT(, name, f)
-#define BLOCKRANK 2*((int) floor(-log(Y(eps)())/3.525494348078172))
+#define BLOCKRANK 2*((int) floor(-log(Y(eps)())/2.271667761226165))
 #define BLOCKSIZE 4*BLOCKRANK
 #include "tridiagonal_source.c"
 #include "hierarchical_source.c"

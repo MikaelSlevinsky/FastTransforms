@@ -108,11 +108,11 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
 #define VMALLOC(s) _mm_malloc(s, ALIGN_SIZE*8)
 #define VFREE(s) _mm_free(s)
 
-double * plan_leg2cheb(const int normleg, const int normcheb, const int n);
-double * plan_cheb2leg(const int normcheb, const int normleg, const int n);
-double * plan_ultra2ultra(const int normultra1, const int normultra2, const int n, const double lambda1, const double lambda2);
-double * plan_jac2jac(const int normjac1, const int normjac2, const int n, const double alpha, const double beta, const double gamma);
-double * eigenplan_jac2jac(const int normjac1, const int normjac2, const int n, const double alpha, const double beta, const double gamma, const double delta);
+double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n);
+double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n);
+double * plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, const double lambda1, const double lambda2);
+double * plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const double alpha, const double beta, const double gamma);
+double * eigenplan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const double alpha, const double beta, const double gamma, const double delta);
 
 void permute(const double * A, double * B, const int N, const int M, const int L);
 void permute_t(double * A, const double * B, const int N, const int M, const int L);

@@ -63,7 +63,7 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     X(himv)('N', 1, H, ones, 0, b);
     for (int i = 0; i < m; i++)
         z[i] *= 2*a[i];
-    err = X(norm_2arg)(z, b, m)/X(norm_1arg)(z, m);
+    err += X(norm_2arg)(z, b, m)/X(norm_1arg)(z, m);
 
     printf("Check row/column scalings \t\t (%5i×%5i) \t |%20.2e ", m, n, (double) err);
     X(checktest)(err, MAX(m, n), checksum);

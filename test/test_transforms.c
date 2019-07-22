@@ -18,8 +18,8 @@ int main(void) {
             C[i+n*i] = 1.0;
         for (int normleg = 0; normleg <= 1; normleg++) {
             for (int normcheb = 0; normcheb <= 1; normcheb++) {
-                A = plan_leg2cheb(normleg, normcheb, n);
-                B = plan_cheb2leg(normcheb, normleg, n);
+                A = plan_legendre_to_chebyshev(normleg, normcheb, n);
+                B = plan_chebyshev_to_legendre(normcheb, normleg, n);
                 cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
                 err += ft_norm_2arg(B, C, n*n)/ft_norm_1arg(C, n*n);
                 free(A);
@@ -68,10 +68,10 @@ int main(void) {
                     break;
                 }
             }
-            for (int normultra1 = 0; normultra1 <= 1; normultra1++) {
-                for (int normultra2 = 0; normultra2 <= 1; normultra2++) {
-                    A = plan_ultra2ultra(normultra1, normultra2, n, lambda1, lambda2);
-                    B = plan_ultra2ultra(normultra2, normultra1, n, lambda2, lambda1);
+            for (int norm1 = 0; norm1 <= 1; norm1++) {
+                for (int norm2 = 0; norm2 <= 1; norm2++) {
+                    A = plan_ultraspherical_to_ultraspherical(norm1, norm2, n, lambda1, lambda2);
+                    B = plan_ultraspherical_to_ultraspherical(norm2, norm1, n, lambda2, lambda1);
                     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
                     err += ft_norm_2arg(B, C, n*n)/ft_norm_1arg(C, n*n);
                     free(A);
@@ -161,10 +161,10 @@ int main(void) {
                     break;
                 }
             }
-            for (int normjac1 = 0; normjac1 <= 1; normjac1++) {
-                for (int normjac2 = 0; normjac2 <= 1; normjac2++) {
-                    A = eigenplan_jac2jac(normjac1, normjac2, n, alpha, beta, gamma, delta);
-                    B = eigenplan_jac2jac(normjac2, normjac1, n, gamma, delta, alpha, beta);
+            for (int norm1 = 0; norm1 <= 1; norm1++) {
+                for (int norm2 = 0; norm2 <= 1; norm2++) {
+                    A = eigenplan_jacobi_to_jacobi(norm1, norm2, n, alpha, beta, gamma, delta);
+                    B = eigenplan_jacobi_to_jacobi(norm2, norm1, n, gamma, delta, alpha, beta);
                     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
                     err += ft_norm_2arg(B, C, n*n)/ft_norm_1arg(C, n*n);
                     free(A);

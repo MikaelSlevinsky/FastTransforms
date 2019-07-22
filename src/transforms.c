@@ -67,7 +67,7 @@ static inline double lambda2(const double x, const double l1, const double l2) {
 
 #define A(i,j) A[(i)+n*(j)]
 
-double * plan_leg2cheb(const int normleg, const int normcheb, const int n) {
+double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n) {
     double * A = (double *) calloc(n * n, sizeof(double));
     double * lam = (double *) calloc(n, sizeof(double));
     double * sclrow = (double *) calloc(n, sizeof(double));
@@ -88,7 +88,7 @@ double * plan_leg2cheb(const int normleg, const int normcheb, const int n) {
     return A;
 }
 
-double * plan_cheb2leg(const int normcheb, const int normleg, const int n) {
+double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n) {
     double * A = (double *) calloc(n * n, sizeof(double));
     double * lam = (double *) calloc(n, sizeof(double));
     double * lamh = (double *) calloc(n, sizeof(double));
@@ -116,7 +116,7 @@ double * plan_cheb2leg(const int normcheb, const int normleg, const int n) {
     return A;
 }
 
-double * plan_ultra2ultra(const int normultra1, const int normultra2, const int n, const double l1, const double l2) {
+double * plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, const double l1, const double l2) {
     double * A = (double *) calloc(n * n, sizeof(double));
     double * lam1 = (double *) calloc(n, sizeof(double));
     double * lam2 = (double *) calloc(n, sizeof(double));
@@ -126,8 +126,8 @@ double * plan_ultra2ultra(const int normultra1, const int normultra2, const int 
     for (int i = 0; i < n; i++) {
         lam1[i] = lambda2((double) i, l1 - l2, 1.0)/tgamma(l1-l2);
         lam2[i] = lambda2((double) i, l1, l2 + 1.0);
-        sclrow[i] = normultra2 ? sqrt(2.0*M_PI*lambda2((double) i, 2.0*l2, 1.0)/(i+l2))/(pow(2.0, l2)*tgamma(l2)) : 1.0;
-        sclcol[i] = normultra1 ? sqrt((i+l1)/(2.0*M_PI*lambda2((double) i, 2.0*l1, 1.0)))*(pow(2.0, l1)*tgamma(l1)) : 1.0;
+        sclrow[i] = norm2 ? sqrt(2.0*M_PI*lambda2((double) i, 2.0*l2, 1.0)/(i+l2))/(pow(2.0, l2)*tgamma(l2)) : 1.0;
+        sclcol[i] = norm1 ? sqrt((i+l1)/(2.0*M_PI*lambda2((double) i, 2.0*l1, 1.0)))*(pow(2.0, l1)*tgamma(l1)) : 1.0;
     }
     if (fabs((l1 - l2) - (int) (l1 - l2)) < M_EPS*(fabs(l1)+fabs(l2))) {
         lam1[0] = 1.0;
@@ -144,7 +144,7 @@ double * plan_ultra2ultra(const int normultra1, const int normultra2, const int 
     return A;
 }
 
-double * plan_jac2jac(const int normjac1, const int normjac2, const int n, const double alpha, const double beta, const double gamma) {
+double * plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const double alpha, const double beta, const double gamma) {
     double * A = (double *) calloc(n * n, sizeof(double));
     double * lam1 = (double *) calloc(n, sizeof(double));
     double * lam2 = (double *) calloc(2*n, sizeof(double));
@@ -169,8 +169,8 @@ double * plan_jac2jac(const int normjac1, const int normjac2, const int n, const
         sclcol[0] = 1.0;
     }
     for (int i = 0; i < n; i++) {
-        sclrow[i] *= normjac2 ? sqrt(Analphabeta(i, gamma, beta)) : 1.0;
-        sclcol[i] /= normjac1 ? sqrt(Analphabeta(i, alpha, beta)) : 1.0;
+        sclrow[i] *= norm2 ? sqrt(Analphabeta(i, gamma, beta)) : 1.0;
+        sclcol[i] /= norm1 ? sqrt(Analphabeta(i, alpha, beta)) : 1.0;
     }
     for (int j = 0; j < n; j++)
         for (int i = 0; i <= j; i++)
@@ -182,9 +182,9 @@ double * plan_jac2jac(const int normjac1, const int normjac2, const int n, const
     return A;
 }
 
-double * eigenplan_jac2jac(const int normjac1, const int normjac2, const int n, const double alpha, const double beta, const double gamma, const double delta) {
-    ft_triangular_bandedl * A = ft_create_A_jac2jacl(n, alpha, beta, gamma, delta);
-    ft_triangular_bandedl * B = ft_create_B_jac2jacl(n, gamma, delta);
+double * eigenplan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const double alpha, const double beta, const double gamma, const double delta) {
+    ft_triangular_bandedl * A = ft_create_A_jacobi_to_jacobil(n, alpha, beta, gamma, delta);
+    ft_triangular_bandedl * B = ft_create_B_jacobi_to_jacobil(n, gamma, delta);
     long double alphal = alpha, betal = beta, gammal = gamma, deltal = delta;
     long double * Vl = (long double *) calloc(n*n, sizeof(long double));
     if (n > 0)
@@ -198,8 +198,8 @@ double * eigenplan_jac2jac(const int normjac1, const int normjac2, const int n, 
     double * sclrow = (double *) calloc(n, sizeof(double));
     double * sclcol = (double *) calloc(n, sizeof(double));
     for (int i = 0; i < n; i++) {
-        sclrow[i] = normjac2 ? sqrt(Analphabeta(i, gamma, delta)) : 1.0;
-        sclcol[i] = normjac1 ? 1.0/sqrt(Analphabeta(i, alpha, beta)) : 1.0;
+        sclrow[i] = norm2 ? sqrt(Analphabeta(i, gamma, delta)) : 1.0;
+        sclcol[i] = norm1 ? 1.0/sqrt(Analphabeta(i, alpha, beta)) : 1.0;
     }
     for (int j = 0; j < n; j++)
         for (int i = 0; i <= j; i++)

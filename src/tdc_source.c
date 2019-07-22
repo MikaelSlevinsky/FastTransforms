@@ -294,7 +294,7 @@ void X(tdmv)(char TRANS, FLT alpha, X(tdc_eigen) * F, FLT * x, FLT beta, FLT * y
     if (n < 64)
         X(gemv)(TRANS, n, n, alpha, F->V, x, beta, y);
     else {
-        int s = F->F1->n;
+        int s = n/2;
         FLT * z = F->z;
         if (TRANS == 'N') {
             X(dvmv)(TRANS, 1, F->F0, x, 0, z);
@@ -314,7 +314,7 @@ void X(tfmv)(char TRANS, FLT alpha, X(tdc_eigen_FMM) * F, FLT * x, FLT beta, FLT
     if (n < 64)
         X(gemv)(TRANS, n, n, alpha, F->V, x, beta, y);
     else {
-        int s = F->F1->n;
+        int s = n/2;
         FLT * z = F->z;
         if (TRANS == 'N') {
             X(dfmv)(TRANS, 1, F->F0, x, 0, z);
