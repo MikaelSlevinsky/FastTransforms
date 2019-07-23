@@ -7,11 +7,11 @@ void X(inner_test_triangular_banded)(int * checksum, int n) {
     X(triangular_banded) * B = X(calloc_triangular_banded)(n, b);
     X(set_triangular_banded_index)(B, 2, 0, 0);
     for (int i = 1; i < n; i++) {
-        X(set_triangular_banded_index)(A, i*(i+1), i, i);
+        X(set_triangular_banded_index)(A, i*(i+ONE(FLT)), i, i);
         X(set_triangular_banded_index)(B, 1, i, i);
     }
     for (int i = 0; i < n-2; i++) {
-        X(set_triangular_banded_index)(A, -(i+1)*(i+2), i, i+2);
+        X(set_triangular_banded_index)(A, -(i+ONE(FLT))*(i+TWO(FLT)), i, i+2);
         X(set_triangular_banded_index)(B, -1, i, i+2);
     }
 
@@ -172,6 +172,57 @@ void X(inner_test_triangular_banded)(int * checksum, int n) {
     free(z);
 }
 
+void X(inner_timing_test_triangular_banded)(int * checksum, int n) {
+    int NLOOPS = 10;
+    struct timeval start, end;
+
+    int b = 2;
+    X(triangular_banded) * A = X(calloc_triangular_banded)(n, b);
+    X(triangular_banded) * B = X(calloc_triangular_banded)(n, b);
+    X(set_triangular_banded_index)(B, 2, 0, 0);
+    for (int i = 1; i < n; i++) {
+        X(set_triangular_banded_index)(A, i*(i+ONE(FLT)), i, i);
+        X(set_triangular_banded_index)(B, 1, i, i);
+    }
+    for (int i = 0; i < n-2; i++) {
+        X(set_triangular_banded_index)(A, -(i+ONE(FLT))*(i+TWO(FLT)), i, i+2);
+        X(set_triangular_banded_index)(B, -1, i, i+2);
+    }
+
+    printf("Size of a dense matrix \t\t (%7i×%7i) \t |", n, n);
+    print_summary_size(sizeof(FLT)*n*n);
+
+    gettimeofday(&start, NULL);
+    X(tb_eigen_FMM) * F = X(tb_eig_FMM)(A, B);
+    gettimeofday(&end, NULL);
+
+    printf("Size of the triangular banded eigendecomposition \t |");
+    print_summary_size(X(summary_size_tb_eigen_FMM)(F));
+
+    printf("Time for factorization \t\t (%7i×%7i) \t |%20.6f s\n", n, n, elapsed(&start, &end, 1));
+
+    FLT * x = (FLT *) malloc(n*sizeof(FLT));
+    FLT * y = (FLT *) malloc(n*sizeof(FLT));
+    for (int i = 0; i < n; i++)
+        y[i] = x[i] = ONE(FLT)/(i+1);
+    gettimeofday(&start, NULL);
+    for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+        X(bfmv)('N', F, x);
+        X(bfsv)('N', F, x);
+    }
+    gettimeofday(&end, NULL);
+    printf("Time for fwd-bckwd solves \t (%7i×%7i) \t |%20.6f s\n", n, n, elapsed(&start, &end, NLOOPS));
+
+    FLT err = X(norm_2arg)(x, y, n)/X(norm_1arg)(y, n);
+    printf("Error of fwd-bckwd solves \t (%7i×%7i) \t |%20.2e ", n, n, (double) err);
+    X(checktest)(err, n, checksum);
+
+    X(destroy_triangular_banded)(A);
+    X(destroy_triangular_banded)(B);
+    X(destroy_tb_eigen_FMM)(F);
+    free(x);
+    free(y);
+}
 
 void Y(test_triangular_banded)(int * checksum) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
@@ -181,4 +232,9 @@ void Y(test_triangular_banded)(int * checksum) {
 
     for (int n = nmin; n < nmax; n *= 2)
         X(inner_test_triangular_banded)(checksum, n);
+    if (sizeof(FLT) == sizeof(double)) {
+        printf("\n\n");
+        for (int n = 1024; n < 131072; n *= 2)
+            X(inner_timing_test_triangular_banded)(checksum, n);
+    }
 }

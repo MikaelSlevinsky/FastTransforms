@@ -51,8 +51,10 @@ void print_summary_size(size_t i) {
         printf("%18.3f MiB\n", i/1048576.0);
     else if (i < 1099511627776.0)
         printf("%18.3f GiB\n", i/1073741824.0);
+    else if (i < 1.125899906842624e15)
+        printf("%18.3f TiB\n", i/1099511627776.0);
     else
-        printf("%18.16e B\n", (double) i);
+        printf("%18.14e B\n", (double) i);
 }
 
 double * copymat(double * A, int n, int m) {
