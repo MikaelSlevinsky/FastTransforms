@@ -372,12 +372,15 @@ X(triangular_banded) * X(create_A_jacobi_to_jacobi)(const int n, const FLT alpha
     X(triangular_banded) * A = X(malloc_triangular_banded)(n, 2);
     if (n > 0)
         X(set_triangular_banded_index)(A, 0, 0, 0);
-    for (int i = 1; i < n; i++)
+    if (n > 1) {
+        X(set_triangular_banded_index)(A, (gamma-delta)*(gamma+delta+2)/(gamma+delta+4)*(1+(gamma-alpha+delta-beta)/2) - (gamma+delta+2)*(gamma-alpha+beta-delta)/2, 0, 1);
+        X(set_triangular_banded_index)(A, (alpha+beta+2)*(gamma+delta+2)/(gamma+delta+3)*(gamma+delta+3)/(gamma+delta+4), 1, 1);
+    }
+    for (int i = 2; i < n; i++) {
+        X(set_triangular_banded_index)(A, -(i+gamma+delta+1)*(i+gamma)/(2*i+gamma+delta)*(i+delta)/(2*i+gamma+delta+1)*(i+gamma-alpha+delta-beta), i-2, i);
+        X(set_triangular_banded_index)(A, (gamma-delta)*(i+gamma+delta+1)/(2*i+gamma+delta)/(2*i+gamma+delta+2)*(i*(i+gamma+delta+1)+(gamma+delta+2)*(gamma-alpha+delta-beta)/2) - (i+gamma+delta+1)*(gamma-alpha+beta-delta)/2, i-1, i);
         X(set_triangular_banded_index)(A, i*(i+alpha+beta+1)*(i+gamma+delta+1)/(2*i+gamma+delta+1)*(i+gamma+delta+2)/(2*i+gamma+delta+2), i, i);
-    for (int i = 0; i < n-1; i++)
-        X(set_triangular_banded_index)(A, (gamma-delta)*(i+gamma+delta+2)/(2*i+gamma+delta+2)/(2*i+gamma+delta+4)*((i+1)*(i+gamma+delta+2)+(gamma+delta+2)*(gamma-alpha+delta-beta)/2) - (i+gamma+delta+2)*(gamma-alpha+beta-delta)/2, i, i+1);
-    for (int i = 0; i < n-2; i++)
-        X(set_triangular_banded_index)(A, -(i+gamma+delta+3)*(i+gamma+2)/(2*i+gamma+delta+4)*(i+delta+2)/(2*i+gamma+delta+5)*(i+gamma-alpha+delta-beta+2), i, i+2);
+    }
     return A;
 }
 
@@ -385,11 +388,14 @@ X(triangular_banded) * X(create_B_jacobi_to_jacobi)(const int n, const FLT gamma
     X(triangular_banded) * B = X(malloc_triangular_banded)(n, 2);
     if (n > 0)
         X(set_triangular_banded_index)(B, 1, 0, 0);
-    for (int i = 1; i < n; i++)
+    if (n > 1) {
+        X(set_triangular_banded_index)(B, (gamma-delta)/(gamma+delta+4), 0, 1);
+        X(set_triangular_banded_index)(B, (gamma+delta+2)/(gamma+delta+4), 1, 1);
+    }
+    for (int i = 2; i < n; i++) {
+        X(set_triangular_banded_index)(B, -(i+gamma)/(2*i+gamma+delta)*(i+delta)/(2*i+gamma+delta+1), i-2, i);
+        X(set_triangular_banded_index)(B, (gamma-delta)*(i+gamma+delta+1)/(2*i+gamma+delta)/(2*i+gamma+delta+2), i-1, i);
         X(set_triangular_banded_index)(B, (i+gamma+delta+1)/(2*i+gamma+delta+1)*(i+gamma+delta+2)/(2*i+gamma+delta+2), i, i);
-    for (int i = 0; i < n-1; i++)
-        X(set_triangular_banded_index)(B, (gamma-delta)*(i+gamma+delta+2)/(2*i+gamma+delta+2)/(2*i+gamma+delta+4), i, i+1);
-    for (int i = 0; i < n-2; i++)
-        X(set_triangular_banded_index)(B, -(i+gamma+2)/(2*i+gamma+delta+4)*(i+delta+2)/(2*i+gamma+delta+5), i, i+2);
+    }
     return B;
 }

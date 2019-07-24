@@ -4,15 +4,20 @@ void X(inner_test_triangular_banded)(int * checksum, int n) {
 
     int b = 2;
     X(triangular_banded) * A = X(calloc_triangular_banded)(n, b);
-    X(triangular_banded) * B = X(calloc_triangular_banded)(n, b);
-    X(set_triangular_banded_index)(B, 2, 0, 0);
-    for (int i = 1; i < n; i++) {
+    if (n > 1)
+        X(set_triangular_banded_index)(A, 2, 1, 1);
+    for (int i = 2; i < n; i++) {
+        X(set_triangular_banded_index)(A, -i*(i-ONE(FLT)), i-2, i);
         X(set_triangular_banded_index)(A, i*(i+ONE(FLT)), i, i);
-        X(set_triangular_banded_index)(B, 1, i, i);
     }
-    for (int i = 0; i < n-2; i++) {
-        X(set_triangular_banded_index)(A, -(i+ONE(FLT))*(i+TWO(FLT)), i, i+2);
-        X(set_triangular_banded_index)(B, -1, i, i+2);
+    X(triangular_banded) * B = X(calloc_triangular_banded)(n, b);
+    if (n > 0)
+        X(set_triangular_banded_index)(B, 2, 0, 0);
+    if (n > 1)
+        X(set_triangular_banded_index)(B, 1, 1, 1);
+    for (int i = 2; i < n; i++) {
+        X(set_triangular_banded_index)(B, -1, i-2, i);
+        X(set_triangular_banded_index)(B, 1, i, i);
     }
 
     FLT * BinvA = (FLT *) calloc(n*n, sizeof(FLT));
@@ -178,15 +183,20 @@ void X(inner_timing_test_triangular_banded)(int * checksum, int n) {
 
     int b = 2;
     X(triangular_banded) * A = X(calloc_triangular_banded)(n, b);
-    X(triangular_banded) * B = X(calloc_triangular_banded)(n, b);
-    X(set_triangular_banded_index)(B, 2, 0, 0);
-    for (int i = 1; i < n; i++) {
+    if (n > 1)
+        X(set_triangular_banded_index)(A, 2, 1, 1);
+    for (int i = 2; i < n; i++) {
+        X(set_triangular_banded_index)(A, -i*(i-ONE(FLT)), i-2, i);
         X(set_triangular_banded_index)(A, i*(i+ONE(FLT)), i, i);
-        X(set_triangular_banded_index)(B, 1, i, i);
     }
-    for (int i = 0; i < n-2; i++) {
-        X(set_triangular_banded_index)(A, -(i+ONE(FLT))*(i+TWO(FLT)), i, i+2);
-        X(set_triangular_banded_index)(B, -1, i, i+2);
+    X(triangular_banded) * B = X(calloc_triangular_banded)(n, b);
+    if (n > 0)
+        X(set_triangular_banded_index)(B, 2, 0, 0);
+    if (n > 1)
+        X(set_triangular_banded_index)(B, 1, 1, 1);
+    for (int i = 2; i < n; i++) {
+        X(set_triangular_banded_index)(B, -1, i-2, i);
+        X(set_triangular_banded_index)(B, 1, i, i);
     }
 
     printf("Size of a dense matrix \t\t (%7i×%7i) \t |", n, n);
