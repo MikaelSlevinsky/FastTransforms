@@ -176,5 +176,30 @@ int main(void) {
         }
         free(C);
     }
+
+    printf("\nTesting the accuracy of Konoplev--Jacobi transforms.\n\n");
+    printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    A = eigenplan_konoplev_to_jacobi(16, 0.456, -0.25);
+    printmat("Vc", "%17.16e", A, 16, 16);
+    free(A);
+    /*
+    for (int n = 64; n < N; n *= 2) {
+        err = 0;
+        C = (double *) calloc(n * n, sizeof(double));
+        for (int i = 0; i < n; i++)
+            C[i+n*i] = 1.0;
+            A = eigenplan_konoplev_to_jacobi(n, 0.0, -0.5);
+            B = eigenplan_konoplev_to_jacobi(n, 0.0, -0.5);
+            B = plan_chebyshev_to_legendre(normcheb, normleg, n);
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
+            err += ft_norm_2arg(B, C, n*n)/ft_norm_1arg(C, n*n);
+            free(A);
+            free(B);
+        printf("(n×n) = (%4ix%4i): \t\t\t\t\t |%20.2e ", n, n, err);
+        ft_checktest(err, 2*sqrt(n), &checksum);
+        free(C);
+    }
+    */
     return checksum;
 }

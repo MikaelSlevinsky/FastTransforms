@@ -399,3 +399,35 @@ X(triangular_banded) * X(create_B_jacobi_to_jacobi)(const int n, const FLT gamma
     }
     return B;
 }
+
+#define delta(k) (((k)%2) ? 1 : 0)
+
+X(triangular_banded) * X(create_A_konoplev_to_jacobi)(const int n, const FLT alpha, const FLT beta) {
+    X(triangular_banded) * A = X(calloc_triangular_banded)(n, 2);
+    if (n > 0)
+        X(set_triangular_banded_index)(A, 0, 0, 0);
+    if (n > 1) {
+        X(set_triangular_banded_index)(A, 3*(2*alpha+2*beta+3)/(2*alpha+5), 1, 1);
+    }
+    for (int i = 2; i < n; i++) {
+        X(set_triangular_banded_index)(A, (i-2*beta-1)*(i+2*alpha+1)/(2*i+2*alpha-1)*(i+alpha-1)/(2*i+2*alpha+1)*(i+alpha), i-2, i);
+        X(set_triangular_banded_index)(A, i*(i+2*alpha+2*beta+2)*(i+1)/(i+2-delta(i))*(i+2)/(i+2*alpha+2-delta(i))*(i+2*alpha+1)/(2*i+2*alpha+1)*(i+2*alpha+2)/(2*i+2*alpha+3), i, i);
+    }
+    return A;
+}
+
+X(triangular_banded) * X(create_B_konoplev_to_jacobi)(const int n, const FLT alpha) {
+    X(triangular_banded) * B = X(calloc_triangular_banded)(n, 2);
+    if (n > 0)
+        X(set_triangular_banded_index)(B, 1/(2*alpha+3), 0, 0);
+    if (n > 1) {
+        X(set_triangular_banded_index)(B, 3/(2*alpha+5), 1, 1);
+    }
+    for (int i = 2; i < n; i++) {
+        X(set_triangular_banded_index)(B, (i+alpha-1)/(2*i+2*alpha-1)*(i+alpha)/(2*i+2*alpha+1), i-2, i);
+        X(set_triangular_banded_index)(B, (i+1+delta(i))/(2*i+2*alpha+1)*(i+2*alpha+1+delta(i))/(2*i+2*alpha+3), i, i);
+    }
+    return B;
+}
+
+#undef delta

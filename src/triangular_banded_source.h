@@ -50,3 +50,6 @@ void X(bfsv)(char TRANS, X(tb_eigen_FMM) * A, FLT * x);
 
 X(triangular_banded) * X(create_A_jacobi_to_jacobi)(const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta);
 X(triangular_banded) * X(create_B_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta);
+
+X(triangular_banded) * X(create_A_konoplev_to_jacobi)(const int n, const FLT alpha, const FLT beta);
+X(triangular_banded) * X(create_B_konoplev_to_jacobi)(const int n, const FLT alpha);

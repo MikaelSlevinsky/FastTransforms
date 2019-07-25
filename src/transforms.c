@@ -211,3 +211,40 @@ double * eigenplan_jacobi_to_jacobi(const int norm1, const int norm2, const int 
     free(sclcol);
     return V;
 }
+
+double * eigenplan_konoplev_to_jacobi(const int n, const double alpha, const double beta) {
+    ft_triangular_bandedl * A = ft_create_A_konoplev_to_jacobil(n, alpha, beta);
+    ft_triangular_bandedl * B = ft_create_B_konoplev_to_jacobil(n, alpha);
+    long double alphal = alpha, betal = beta;
+    long double * Vl = (long double *) calloc(n*n, sizeof(long double));
+    for (int i = 0; i < n; i++)
+        Vl[i+i*n] = 1;
+    //if (n > 0)
+    //    Vl[0] = 1;
+    //if (n > 1)
+    //    Vl[1+n] = (alphal+betal+2)/(gammal+deltal+2);
+    //for (int i = 2; i < n; i++)
+    //    Vl[i+i*n] = (2*i+alphal+betal-1)/(i+alphal+betal)*(2*i+alphal+betal)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*Vl[i-1+(i-1)*n];
+    ft_triangular_banded_eigenvectorsl(A, B, Vl);
+    double * V = (double *) calloc(n*n, sizeof(double));
+    for (int j = 0; j < n; j++)
+        for (int i = j; i >= 0; i -= 2)
+            V[i+j*n] = Vl[i+j*n];
+    /*
+    double * sclrow = (double *) calloc(n, sizeof(double));
+    double * sclcol = (double *) calloc(n, sizeof(double));
+    for (int i = 0; i < n; i++) {
+        sclrow[i] = norm2 ? sqrt(Analphabeta(i, gamma, delta)) : 1.0;
+        sclcol[i] = norm1 ? 1.0/sqrt(Analphabeta(i, alpha, beta)) : 1.0;
+    }
+    for (int j = 0; j < n; j++)
+        for (int i = 0; i <= j; i++)
+            V[i+j*n] = sclrow[i]*Vl[i+j*n]*sclcol[j];
+    */
+    ft_destroy_triangular_bandedl(A);
+    ft_destroy_triangular_bandedl(B);
+    free(Vl);
+    //free(sclrow);
+    //free(sclcol);
+    return V;
+}
