@@ -8,7 +8,7 @@
 #define BLOCKSIZE 4*BLOCKRANK
 #include "tridiagonal_source.c"
 #include "hierarchical_source.c"
-#include "triangular_banded_source.c"
+#include "banded_source.c"
 #include "dprk_source.c"
 #include "tdc_source.c"
 #undef FLT
@@ -24,7 +24,7 @@
 #define BLOCKSIZE 4*BLOCKRANK
 #include "tridiagonal_source.c"
 #include "hierarchical_source.c"
-#include "triangular_banded_source.c"
+#include "banded_source.c"
 #include "dprk_source.c"
 #include "tdc_source.c"
 #undef FLT
@@ -41,7 +41,7 @@
 #define BLOCKSIZE 4*BLOCKRANK
 #include "tridiagonal_source.c"
 #include "hierarchical_source.c"
-#include "triangular_banded_source.c"
+#include "banded_source.c"
 #include "dprk_source.c"
 #include "tdc_source.c"
 #include "tdc_source2.c"
@@ -60,7 +60,7 @@
 #define BLOCKSIZE 4*BLOCKRANK
 #include "tridiagonal_source.c"
 #include "hierarchical_source.c"
-#include "triangular_banded_source.c"
+#include "banded_source.c"
 #include "dprk_source.c"
 #include "tdc_source.c"
 #include "tdc_source2.c"

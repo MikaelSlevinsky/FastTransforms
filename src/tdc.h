@@ -21,7 +21,7 @@ typedef struct {
 #define Y(name) FT_CONCAT(, name, q)
 #include "tridiagonal_source.h"
 #include "hierarchical_source.h"
-#include "triangular_banded_source.h"
+#include "banded_source.h"
 #include "dprk_source.h"
 #include "tdc_source.h"
 #undef FLT
@@ -33,7 +33,7 @@ typedef struct {
 #define Y(name) FT_CONCAT(, name, l)
 #include "tridiagonal_source.h"
 #include "hierarchical_source.h"
-#include "triangular_banded_source.h"
+#include "banded_source.h"
 #include "dprk_source.h"
 #include "tdc_source.h"
 #undef FLT
@@ -46,7 +46,7 @@ typedef struct {
 #define Y(name) FT_CONCAT(, name, )
 #include "tridiagonal_source.h"
 #include "hierarchical_source.h"
-#include "triangular_banded_source.h"
+#include "banded_source.h"
 #include "dprk_source.h"
 #include "tdc_source.h"
 #include "tdc_source2.h"
@@ -61,7 +61,7 @@ typedef struct {
 #define Y(name) FT_CONCAT(, name, f)
 #include "tridiagonal_source.h"
 #include "hierarchical_source.h"
-#include "triangular_banded_source.h"
+#include "banded_source.h"
 #include "dprk_source.h"
 #include "tdc_source.h"
 #include "tdc_source2.h"
