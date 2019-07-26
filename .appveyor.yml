@@ -29,7 +29,7 @@ test_script:
   - test_rotations.exe
   - test_tridiagonal.exe
   - test_hierarchical.exe
-  - test_triangular_banded.exe
+  - test_banded.exe
   - test_dprk.exe
   - test_tdc.exe
   - test_drivers.exe 3 3 0

@@ -38,7 +38,7 @@ script:
   - ./test_rotations
   - ./test_tridiagonal
   - ./test_hierarchical
-  - ./test_triangular_banded
+  - ./test_banded
   - ./test_dprk
   - ./test_tdc
   - OMP_NUM_THREADS=4 ./test_drivers 3 3 0

@@ -212,6 +212,33 @@ double * eigenplan_jacobi_to_jacobi(const int norm1, const int norm2, const int 
     return V;
 }
 
+double * eigenplan_associated_jacobi_to_jacobi(const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta) {
+    ft_triangular_bandedl * A = ft_create_A_associated_jacobi_to_jacobil(n, c, alpha, beta, gamma, delta);
+    ft_triangular_bandedl * B = ft_create_B_associated_jacobi_to_jacobil(n, gamma, delta);
+    long double alphal = alpha, betal = beta, gammal = gamma, deltal = delta;
+    long double * Vl = (long double *) calloc(n*n, sizeof(long double));
+    if (n > 0)
+        Vl[0] = 1;
+    if (n > 1)
+        Vl[1+n] = (alphal+betal+2*c+1)/(alphal+betal+c+1)*(alphal+betal+2)/(gammal+deltal+2);
+    for (int i = 2; i < n; i++)
+        Vl[i+i*n] = (2*i+alphal+betal+2*c-1)/(i+alphal+betal+c)*(2*i+alphal+betal+2*c)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*Vl[i-1+(i-1)*n];
+    ft_triangular_banded_eigenvectorsl(A, B, Vl);
+    double * V = (double *) calloc(n*n, sizeof(double));
+    double * sclrow = (double *) calloc(n, sizeof(double));
+    for (int i = 0; i < n; i++) {
+        sclrow[i] = norm2 ? sqrt(Analphabeta(i, gamma, delta)) : 1.0;
+    }
+    for (int j = 0; j < n; j++)
+        for (int i = 0; i <= j; i++)
+            V[i+j*n] = sclrow[i]*Vl[i+j*n];
+    ft_destroy_triangular_bandedl(A);
+    ft_destroy_triangular_bandedl(B);
+    free(Vl);
+    free(sclrow);
+    return V;
+}
+
 double * eigenplan_konoplev_to_jacobi(const int n, const double alpha, const double beta) {
     ft_triangular_bandedl * A = ft_create_A_konoplev_to_jacobil(n, alpha, beta);
     ft_triangular_bandedl * B = ft_create_B_konoplev_to_jacobil(n, alpha);

@@ -1,4 +1,4 @@
-void X(inner_test_triangular_banded)(int * checksum, int n) {
+void X(inner_test_banded)(int * checksum, int n) {
     int NLOOPS = 10;
     struct timeval start, end;
 
@@ -177,7 +177,7 @@ void X(inner_test_triangular_banded)(int * checksum, int n) {
     free(z);
 }
 
-void X(inner_timing_test_triangular_banded)(int * checksum, int n) {
+void X(inner_timing_test_banded)(int * checksum, int n) {
     int NLOOPS = 10;
     struct timeval start, end;
 
@@ -234,17 +234,17 @@ void X(inner_timing_test_triangular_banded)(int * checksum, int n) {
     free(y);
 }
 
-void Y(test_triangular_banded)(int * checksum) {
+void Y(test_banded)(int * checksum) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
 
     int nmin = 256, nmax = 1024;
 
     for (int n = nmin; n < nmax; n *= 2)
-        X(inner_test_triangular_banded)(checksum, n);
+        X(inner_test_banded)(checksum, n);
     if (sizeof(FLT) == sizeof(double)) {
         printf("\n\n");
         for (int n = 1024; n < 131072; n *= 2)
-            X(inner_timing_test_triangular_banded)(checksum, n);
+            X(inner_timing_test_banded)(checksum, n);
     }
 }

@@ -177,11 +177,18 @@ int main(void) {
         free(C);
     }
 
+    printf("\nTesting the accuracy of Associated Jacobi--Jacobi transforms.\n\n");
+    printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    A = eigenplan_associated_jacobi_to_jacobi(0, 10, 1, 0.0, 0.0, 1.0, 1.0);
+    printmat("Vc", "%17.16e", A, 10, 10);
+    free(A);
+
     printf("\nTesting the accuracy of Konoplev--Jacobi transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
-    A = eigenplan_konoplev_to_jacobi(16, 0.456, -0.25);
-    printmat("Vc", "%17.16e", A, 16, 16);
+    A = eigenplan_konoplev_to_jacobi(10, 0.456, -0.25);
+    printmat("Vc", "%17.16e", A, 10, 10);
     free(A);
     /*
     for (int n = 64; n < N; n *= 2) {
