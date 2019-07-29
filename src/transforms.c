@@ -3,186 +3,99 @@
 #include "fasttransforms.h"
 #include "ftinternal.h"
 
-static inline double stirlingseries(const double z) {
-    double iz = 1.0/z;
-    if (z >= 3274.12075200175)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273))));
-    else if (z >= 590.1021805526798)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917)))));
-    else if (z >= 195.81733962412835)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917 + iz*(0.0007840392217200666))))));
-    else if (z >= 91.4692823071966)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917 + iz*(0.0007840392217200666 + iz*(6.972813758365857e-5)))))));
-    else if (z >= 52.70218954633605)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917 + iz*(0.0007840392217200666 + iz*(6.972813758365857e-5 + iz*(-0.0005921664373536939))))))));
-    else if (z >= 34.84031591198865)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917 + iz*(0.0007840392217200666 + iz*(6.972813758365857e-5 + iz*(-0.0005921664373536939 + iz*(-5.171790908260592e-5)))))))));
-    else if (z >= 25.3173982783047)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917 + iz*(0.0007840392217200666 + iz*(6.972813758365857e-5 + iz*(-0.0005921664373536939 + iz*(-5.171790908260592e-5 + iz*(0.0008394987206720873))))))))));
-    else if (z >= 19.685015283078513)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917 + iz*(0.0007840392217200666 + iz*(6.972813758365857e-5 + iz*(-0.0005921664373536939 + iz*(-5.171790908260592e-5 + iz*(0.0008394987206720873 + iz*(7.204895416020011e-5)))))))))));
-    else if (z >= 16.088669099569266)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917 + iz*(0.0007840392217200666 + iz*(6.972813758365857e-5 + iz*(-0.0005921664373536939 + iz*(-5.171790908260592e-5 + iz*(0.0008394987206720873 + iz*(7.204895416020011e-5 + iz*(-0.0019144384985654776))))))))))));
-    else if (z >= 13.655055978888104)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917 + iz*(0.0007840392217200666 + iz*(6.972813758365857e-5 + iz*(-0.0005921664373536939 + iz*(-5.171790908260592e-5 + iz*(0.0008394987206720873 + iz*(7.204895416020011e-5 + iz*(-0.0019144384985654776 + iz*(-0.00016251626278391583)))))))))))));
-    else if (z >= 11.93238782087875)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917 + iz*(0.0007840392217200666 + iz*(6.972813758365857e-5 + iz*(-0.0005921664373536939 + iz*(-5.171790908260592e-5 + iz*(0.0008394987206720873 + iz*(7.204895416020011e-5 + iz*(-0.0019144384985654776 + iz*(-0.00016251626278391583 + iz*(0.00640336283380807))))))))))))));
-    else if (z >= 10.668852439197263)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917 + iz*(0.0007840392217200666 + iz*(6.972813758365857e-5 + iz*(-0.0005921664373536939 + iz*(-5.171790908260592e-5 + iz*(0.0008394987206720873 + iz*(7.204895416020011e-5 + iz*(-0.0019144384985654776 + iz*(-0.00016251626278391583 + iz*(0.00640336283380807 + iz*(0.0005401647678926045)))))))))))))));
-    else if (z >= 9.715358216638403)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917 + iz*(0.0007840392217200666 + iz*(6.972813758365857e-5 + iz*(-0.0005921664373536939 + iz*(-5.171790908260592e-5 + iz*(0.0008394987206720873 + iz*(7.204895416020011e-5 + iz*(-0.0019144384985654776 + iz*(-0.00016251626278391583 + iz*(0.00640336283380807 + iz*(0.0005401647678926045 + iz*(-0.02952788094569912))))))))))))))));
-    else if (z >= 8.979120323411497)
-        return (1.0 + iz*(0.08333333333333333 + iz*(0.003472222222222222 + iz*(-0.0026813271604938273 + iz*(-0.00022947209362139917 + iz*(0.0007840392217200666 + iz*(6.972813758365857e-5 + iz*(-0.0005921664373536939 + iz*(-5.171790908260592e-5 + iz*(0.0008394987206720873 + iz*(7.204895416020011e-5 + iz*(-0.0019144384985654776 + iz*(-0.00016251626278391583 + iz*(0.00640336283380807 + iz*(0.0005401647678926045 + iz*(-0.02952788094569912 + iz*(-0.002481743600264998)))))))))))))))));
-    else
-        return 0.0;
-}
-
-static inline double Aratio(const int n, const double alpha, const double beta) {
-    return exp((0.5*n + alpha + 0.25)*log1p(-beta/(n + alpha + beta + 1.0)) + (0.5*n + beta + 0.25)*log1p(-alpha/(n + alpha + beta + 1.0)) + (0.5*n + 0.25)*log1p(alpha/(n + 1.0))+(0.5*n + 0.25)*log1p(beta/(n + 1.0)));
-}
-
-static inline double Analphabeta(const int n, const double alpha, const double beta) {
-    if (n == 0 && alpha + beta == -1.0)
-        return tgamma(alpha + 1.0)*tgamma(beta + 1.0);
-    double t = fmin(fmin(fmin(alpha, beta), alpha + beta), 0.0);
-    if (n + t >= 7.979120323411497)
-        return pow(2.0, alpha + beta + 1.0)/(2.0*n + alpha + beta + 1.0)*stirlingseries(n + alpha + 1.0)*Aratio(n, alpha, beta)/stirlingseries(n + alpha + beta + 1.0)*stirlingseries(n + beta + 1.0)/stirlingseries(n+1.0);
-    return (n + 1.0)*(n + alpha + beta + 1.0)/(n + alpha + 1.0)/(n + beta + 1.0)*Analphabeta(n+1, alpha, beta)*((2.0*n + alpha + beta + 3.0)/(2.0*n + alpha + beta + 1.0));
-}
-
-static inline double lambda(const double x) {
-    if (x > 9.84475) {
-        double xp = x + 0.25;
-        double invxp2 = 1.0/(xp*xp);
-        return (1.0 + invxp2*(-1.5625e-02 + invxp2*(2.5634765625e-03 + invxp2*(-1.2798309326171875e-03 + invxp2*(1.343511044979095458984375e-03 + invxp2*(-2.432896639220416545867919921875e-03 + invxp2*6.7542375336415716446936130523681640625e-03))))))/sqrt(xp);
-    }
-    return (x + 1.0)*lambda(x + 1.0)/(x + 0.5);
-}
-
-static inline double lambda2(const double x, const double l1, const double l2) {
-    if (fmin(x + l1, x + l2) >= 8.979120323411497)
-        return exp(l2 - l1 + (x - 0.5)*log1p((l1 - l2)/(x + l2)))*pow(x + l1, l1)/pow(x + l2, l2)*stirlingseries(x + l1)/stirlingseries(x + l2);
-    return (x + l2)/(x + l1)*lambda2(x + 1.0, l1, l2);
-}
-
-#define A(i,j) A[(i)+n*(j)]
-
 double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n) {
-    double * A = (double *) calloc(n * n, sizeof(double));
-    double * lam = (double *) calloc(n, sizeof(double));
-    double * sclrow = (double *) calloc(n, sizeof(double));
-    double * sclcol = (double *) calloc(n, sizeof(double));
+    ft_triangular_bandedl * A = ft_create_A_legendre_to_chebyshevl(n);
+    ft_triangular_bandedl * B = ft_create_B_legendre_to_chebyshevl(n);
+    long double * Vl = (long double *) calloc(n*n, sizeof(long double));
+    if (n > 0)
+        Vl[0] = 1;
+    if (n > 1)
+        Vl[1+n] = 1;
+    for (int i = 2; i < n; i++)
+        Vl[i+i*n] = (2*i-1)*Vl[i-1+(i-1)*n]/(2*i);
+    ft_triangular_banded_eigenvectorsl(A, B, Vl);
+    double * V = (double *) calloc(n*n, sizeof(double));
+    long double * sclrow = (long double *) calloc(n, sizeof(long double));
+    long double * sclcol = (long double *) calloc(n, sizeof(long double));
     for (int i = 0; i < n; i++) {
-        lam[i] = lambda((double) i);
-        sclrow[i] = normcheb ? i ? M_SQRT_PI/M_SQRT2 : M_SQRT_PI : 1.0;
-        sclcol[i] = normleg ? sqrt(i+0.5) : 1.0;
+        sclrow[i] = normcheb ? i ? sqrtl(M_PI_2l) : sqrtl(M_PIl) : 1.0L;
+        sclcol[i] = normleg ? sqrtl(i+0.5L) : 1.0L;
     }
-    for (int j = 0; j < n; j++) {
+    for (int j = 0; j < n; j++)
         for (int i = j; i >= 0; i -= 2)
-            A(i,j) = sclrow[i]*lam[(j-i)/2]*lam[(j+i)/2]*M_2_PI*sclcol[j];
-        A(0,j) *= 0.5;
-    }
-    free(lam);
+            V[i+j*n] = sclrow[i]*Vl[i+j*n]*sclcol[j];
+    ft_destroy_triangular_bandedl(A);
+    ft_destroy_triangular_bandedl(B);
+    free(Vl);
     free(sclrow);
     free(sclcol);
-    return A;
+    return V;
 }
 
 double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n) {
-    double * A = (double *) calloc(n * n, sizeof(double));
-    double * lam = (double *) calloc(n, sizeof(double));
-    double * lamh = (double *) calloc(n, sizeof(double));
-    double * sclrow = (double *) calloc(n, sizeof(double));
-    double * sclcol = (double *) calloc(n, sizeof(double));
-    for (int i = 0; i < n; i++) {
-        lam[i] = lambda((double) i);
-        lamh[i] = lambda(i - 0.5);
-        sclrow[i] = normleg ? 1.0/sqrt(i+0.5) : 1.0;
-        sclcol[i] = normcheb ? i ? M_SQRT2/M_SQRT_PI : M_1_SQRT_PI : 1.0;
-    }
+    ft_triangular_bandedl * A = ft_create_A_chebyshev_to_legendrel(n);
+    ft_triangular_bandedl * B = ft_create_B_chebyshev_to_legendrel(n);
+    long double * Vl = (long double *) calloc(n*n, sizeof(long double));
     if (n > 0)
-        A(0,0) = sclrow[0]*1.0*sclcol[0];
+        Vl[0] = 1;
     if (n > 1)
-        A(1,1) = sclrow[1]*1.0*sclcol[1];
-    for (int j = 2; j < n; j++)
-        A(j,j) = sclrow[j]*M_SQRT_PI_2/lam[j]*sclcol[j];
-    for (int j = 2; j < n; j++)
-        for (int i = j-2; i >= 0; i -= 2)
-            A(i,j) = -sclrow[i]*(i+0.5)*(lam[(j-i-2)/2]/(j-i))*(lamh[(j+i)/2]/(j+i+1))*j*sclcol[j];
-    free(lam);
-    free(lamh);
-    free(sclrow);
-    free(sclcol);
-    return A;
-}
-
-double * plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, const double l1, const double l2) {
-    double * A = (double *) calloc(n * n, sizeof(double));
-    double * lam1 = (double *) calloc(n, sizeof(double));
-    double * lam2 = (double *) calloc(n, sizeof(double));
-    double * sclrow = (double *) calloc(n, sizeof(double));
-    double * sclcol = (double *) calloc(n, sizeof(double));
-    double scl = tgamma(l2)/tgamma(l1);
+        Vl[1+n] = 1;
+    for (int i = 2; i < n; i++)
+        Vl[i+i*n] = (2*i)*Vl[i-1+(i-1)*n]/(2*i-1);
+    ft_triangular_banded_eigenvectorsl(A, B, Vl);
+    double * V = (double *) calloc(n*n, sizeof(double));
+    long double * sclrow = (long double *) calloc(n, sizeof(long double));
+    long double * sclcol = (long double *) calloc(n, sizeof(long double));
     for (int i = 0; i < n; i++) {
-        lam1[i] = lambda2((double) i, l1 - l2, 1.0)/tgamma(l1-l2);
-        lam2[i] = lambda2((double) i, l1, l2 + 1.0);
-        sclrow[i] = norm2 ? sqrt(2.0*M_PI*lambda2((double) i, 2.0*l2, 1.0)/(i+l2))/(pow(2.0, l2)*tgamma(l2)) : 1.0;
-        sclcol[i] = norm1 ? sqrt((i+l1)/(2.0*M_PI*lambda2((double) i, 2.0*l1, 1.0)))*(pow(2.0, l1)*tgamma(l1)) : 1.0;
-    }
-    if (fabs((l1 - l2) - (int) (l1 - l2)) < M_EPS*(fabs(l1)+fabs(l2))) {
-        lam1[0] = 1.0;
-        for (int i = 0; i < n-1; i++)
-            lam1[i+1] = (l1 - l2 + i)/(1.0 + i)*lam1[i];
+        sclrow[i] = normleg ? 1.0L/sqrtl(i+0.5L) : 1.0L;
+        sclcol[i] = normcheb ? i ? sqrtl(M_2_PIl) : sqrtl(M_1_PIl) : 1.0L;
     }
     for (int j = 0; j < n; j++)
         for (int i = j; i >= 0; i -= 2)
-            A(i,j) = sclrow[i]*scl*(i+l2)*lam1[(j-i)/2]*lam2[(j+i)/2]*sclcol[j];
-    free(lam1);
-    free(lam2);
+            V[i+j*n] = sclrow[i]*Vl[i+j*n]*sclcol[j];
+    ft_destroy_triangular_bandedl(A);
+    ft_destroy_triangular_bandedl(B);
+    free(Vl);
     free(sclrow);
     free(sclcol);
-    return A;
+    return V;
 }
 
-double * plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const double alpha, const double beta, const double gamma) {
-    double * A = (double *) calloc(n * n, sizeof(double));
-    double * lam1 = (double *) calloc(n, sizeof(double));
-    double * lam2 = (double *) calloc(2*n, sizeof(double));
-    double * sclrow = (double *) calloc(n, sizeof(double));
-    double * sclcol = (double *) calloc(n, sizeof(double));
-    for (int i = 0; i < n; i++) {
-        lam1[i] = lambda2((double) i, alpha - gamma, 1.0)/tgamma(alpha - gamma);
-        sclrow[i] = (2.0*i + gamma + beta + 1.0)*lambda2((double) i, gamma + beta + 1.0, beta + 1.0);
-        sclcol[i] = lambda2((double) i, beta + 1.0, alpha + beta + 1.0);
+double * plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, const double lambda, const double mu) {
+    ft_triangular_bandedl * A = ft_create_A_ultraspherical_to_ultrasphericall(n, lambda, mu);
+    ft_triangular_bandedl * B = ft_create_B_ultraspherical_to_ultrasphericall(n, mu);
+    long double * Vl = (long double *) calloc(n*n, sizeof(long double));
+    long double lambdal = lambda, mul = mu;
+    if (n > 0)
+        Vl[0] = 1;
+    if (n > 1)
+        Vl[1+n] = lambdal/mul;
+    for (int i = 2; i < n; i++)
+        Vl[i+i*n] = (i-1+lambdal)*Vl[i-1+(i-1)*n]/(i-1+mul);
+    ft_triangular_banded_eigenvectorsl(A, B, Vl);
+    double * V = (double *) calloc(n*n, sizeof(double));
+    long double * sclrow = (long double *) calloc(n, sizeof(long double));
+    long double * sclcol = (long double *) calloc(n, sizeof(long double));
+    if (n > 0) {
+        sclrow[0] = norm2 ? sqrtl(sqrtl(M_PIl)*tgammal(mul+0.5L)/tgammal(mul+1)) : 1.0L;
+        sclcol[0] = norm1 ? sqrtl(tgammal(lambdal+1)/(sqrtl(M_PIl)*tgammal(lambdal+0.5L))) : 1.0L;
     }
-    if (fabs((alpha - gamma) - (int) (alpha - gamma)) < M_EPS*(fabs(alpha)+fabs(gamma))) {
-        lam1[0] = 1.0;
-        for (int i = 0; i < n-1; i++)
-            lam1[i+1] = (alpha - gamma + i)/(1.0 + i)*lam1[i];
-    }
-    for (int i = 0; i < 2*n; i++)
-        lam2[i] = lambda2((double) i, alpha + beta + 1.0, gamma + beta + 2.0);
-    if (fabs(beta + gamma + 1.0) < M_EPS*(fabs(beta)+fabs(gamma)+1.0))
-        sclrow[0] = 1.0/tgamma(beta + 1.0);
-    if (fabs(alpha + beta + 1.0) < M_EPS*(fabs(alpha)+fabs(beta)+1.0)) {
-        lam2[0] = 1.0/(sclrow[0]*lam1[0]);
-        sclcol[0] = 1.0;
-    }
-    for (int i = 0; i < n; i++) {
-        sclrow[i] *= norm2 ? sqrt(Analphabeta(i, gamma, beta)) : 1.0;
-        sclcol[i] /= norm1 ? sqrt(Analphabeta(i, alpha, beta)) : 1.0;
+    for (int i = 1; i < n; i++) {
+        sclrow[i] = norm2 ? sqrtl((i-1+mul)/i*(i-1+2*mul)/(i+mul))*sclrow[i-1] : 1.0L;
+        sclcol[i] = norm1 ? sqrtl(i/(i-1+lambdal)*(i+lambdal)/(i-1+2*lambdal))*sclcol[i-1] : 1.0L;
     }
     for (int j = 0; j < n; j++)
-        for (int i = 0; i <= j; i++)
-            A(i,j) = sclrow[i]*lam1[j-i]*lam2[j+i]*sclcol[j];
-    free(lam1);
-    free(lam2);
+        for (int i = j; i >= 0; i -= 2)
+            V[i+j*n] = sclrow[i]*Vl[i+j*n]*sclcol[j];
+    ft_destroy_triangular_bandedl(A);
+    ft_destroy_triangular_bandedl(B);
+    free(Vl);
     free(sclrow);
     free(sclcol);
-    return A;
+    return V;
 }
 
-double * eigenplan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const double alpha, const double beta, const double gamma, const double delta) {
+double * plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const double alpha, const double beta, const double gamma, const double delta) {
     ft_triangular_bandedl * A = ft_create_A_jacobi_to_jacobil(n, alpha, beta, gamma, delta);
     ft_triangular_bandedl * B = ft_create_B_jacobi_to_jacobil(n, gamma, delta);
     long double alphal = alpha, betal = beta, gammal = gamma, deltal = delta;
@@ -195,11 +108,19 @@ double * eigenplan_jacobi_to_jacobi(const int norm1, const int norm2, const int 
         Vl[i+i*n] = (2*i+alphal+betal-1)/(i+alphal+betal)*(2*i+alphal+betal)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*Vl[i-1+(i-1)*n];
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
     double * V = (double *) calloc(n*n, sizeof(double));
-    double * sclrow = (double *) calloc(n, sizeof(double));
-    double * sclcol = (double *) calloc(n, sizeof(double));
-    for (int i = 0; i < n; i++) {
-        sclrow[i] = norm2 ? sqrt(Analphabeta(i, gamma, delta)) : 1.0;
-        sclcol[i] = norm1 ? 1.0/sqrt(Analphabeta(i, alpha, beta)) : 1.0;
+    long double * sclrow = (long double *) calloc(n, sizeof(long double));
+    long double * sclcol = (long double *) calloc(n, sizeof(long double));
+    if (n > 0) {
+        sclrow[0] = norm2 ? sqrtl(powl(2.0L, gammal+deltal+1)*tgammal(gammal+1)*tgammal(deltal+1)/tgammal(gammal+deltal+2)) : 1.0L;
+        sclcol[0] = norm1 ? sqrtl(tgammal(alphal+betal+2)/(powl(2.0L, alphal+betal+1)*tgammal(alphal+1)*tgammal(betal+1))) : 1.0L;
+    }
+    if (n > 1) {
+        sclrow[1] = norm2 ? sqrtl((gammal+1)*(deltal+1)/(gammal+deltal+3))*sclrow[0] : 1.0L;
+        sclcol[1] = norm1 ? sqrtl((alphal+betal+3)/(alphal+1)/(betal+1))*sclcol[0] : 1.0L;
+    }
+    for (int i = 2; i < n; i++) {
+        sclrow[i] = norm2 ? sqrtl((i+gammal)/i*(i+deltal)/(i+gammal+deltal)*(2*i+gammal+deltal-1)/(2*i+gammal+deltal+1))*sclrow[i-1] : 1.0L;
+        sclcol[i] = norm1 ? sqrtl(i/(i+alphal)*(i+alphal+betal)/(i+betal)*(2*i+alphal+betal+1)/(2*i+alphal+betal-1))*sclcol[i-1] : 1.0L;
     }
     for (int j = 0; j < n; j++)
         for (int i = 0; i <= j; i++)
@@ -212,7 +133,7 @@ double * eigenplan_jacobi_to_jacobi(const int norm1, const int norm2, const int 
     return V;
 }
 
-double * eigenplan_associated_jacobi_to_jacobi(const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta) {
+double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta) {
     ft_triangular_bandedl * A = ft_create_A_associated_jacobi_to_jacobil(n, c, alpha, beta, gamma, delta);
     ft_triangular_bandedl * B = ft_create_B_associated_jacobi_to_jacobil(n, gamma, delta);
     long double alphal = alpha, betal = beta, gammal = gamma, deltal = delta;
@@ -225,10 +146,13 @@ double * eigenplan_associated_jacobi_to_jacobi(const int norm2, const int n, con
         Vl[i+i*n] = (2*i+alphal+betal+2*c-1)/(i+alphal+betal+c)*(2*i+alphal+betal+2*c)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*Vl[i-1+(i-1)*n];
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
     double * V = (double *) calloc(n*n, sizeof(double));
-    double * sclrow = (double *) calloc(n, sizeof(double));
-    for (int i = 0; i < n; i++) {
-        sclrow[i] = norm2 ? sqrt(Analphabeta(i, gamma, delta)) : 1.0;
-    }
+    long double * sclrow = (long double *) calloc(n, sizeof(long double));
+    if (n > 0)
+        sclrow[0] = norm2 ? sqrtl(powl(2.0L, gammal+deltal+1)*tgammal(gammal+1)*tgammal(deltal+1)/tgammal(gammal+deltal+2)) : 1.0L;
+    if (n > 1)
+        sclrow[1] = norm2 ? sqrtl((gammal+1)*(deltal+1)/(gammal+deltal+3))*sclrow[0] : 1.0L;
+    for (int i = 2; i < n; i++)
+        sclrow[i] = norm2 ? sqrtl((i+gammal)/i*(i+deltal)/(i+gammal+deltal)*(2*i+gammal+deltal-1)/(2*i+gammal+deltal+1))*sclrow[i-1] : 1.0L;
     for (int j = 0; j < n; j++)
         for (int i = 0; i <= j; i++)
             V[i+j*n] = sclrow[i]*Vl[i+j*n];
@@ -239,7 +163,7 @@ double * eigenplan_associated_jacobi_to_jacobi(const int norm2, const int n, con
     return V;
 }
 
-double * eigenplan_konoplev_to_jacobi(const int n, const double alpha, const double beta) {
+double * plan_konoplev_to_jacobi(const int n, const double alpha, const double beta) {
     ft_triangular_bandedl * A = ft_create_A_konoplev_to_jacobil(n, alpha, beta);
     ft_triangular_bandedl * B = ft_create_B_konoplev_to_jacobil(n, alpha);
     long double alphal = alpha, betal = beta;

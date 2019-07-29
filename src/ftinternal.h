@@ -29,6 +29,18 @@
     #define M_PIl      0xc.90fdaa22168c235p-2l
 #endif
 
+#ifndef M_PI_2l
+    #define M_PI_2l     0xc.90fdaa22168c235p-3L
+#endif
+
+#ifndef M_1_PIl
+    #define M_1_PIl     0xa.2f9836e4e44152ap-5L
+#endif
+
+#ifndef M_2_PIl
+    #define M_2_PIl     0xa.2f9836e4e44152ap-4L
+#endif
+
 typedef __float128 quadruple;
 
 static inline float epsf(void) {return M_EPSf;}
@@ -110,11 +122,10 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
 
 double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n);
 double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n);
-double * plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, const double lambda1, const double lambda2);
-double * plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const double alpha, const double beta, const double gamma);
-double * eigenplan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const double alpha, const double beta, const double gamma, const double delta);
-double * eigenplan_associated_jacobi_to_jacobi(const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta);
-double * eigenplan_konoplev_to_jacobi(const int n, const double alpha, const double beta);
+double * plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, const double lambda, const double mu);
+double * plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const double alpha, const double beta, const double gamma, const double delta);
+double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta);
+double * plan_konoplev_to_jacobi(const int n, const double alpha, const double beta);
 
 void permute(const double * A, double * B, const int N, const int M, const int L);
 void permute_t(double * A, const double * B, const int N, const int M, const int L);

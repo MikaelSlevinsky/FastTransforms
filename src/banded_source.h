@@ -67,6 +67,15 @@ void X(trsv)(char TRANS, int n, FLT * A, FLT * x);
 void X(bfmv)(char TRANS, X(tb_eigen_FMM) * A, FLT * x);
 void X(bfsv)(char TRANS, X(tb_eigen_FMM) * A, FLT * x);
 
+X(triangular_banded) * X(create_A_legendre_to_chebyshev)(const int n);
+X(triangular_banded) * X(create_B_legendre_to_chebyshev)(const int n);
+
+X(triangular_banded) * X(create_A_chebyshev_to_legendre)(const int n);
+X(triangular_banded) * X(create_B_chebyshev_to_legendre)(const int n);
+
+X(triangular_banded) * X(create_A_ultraspherical_to_ultraspherical)(const int n, const FLT lambda, const FLT mu);
+X(triangular_banded) * X(create_B_ultraspherical_to_ultraspherical)(const int n, const FLT mu);
+
 X(triangular_banded) * X(create_A_jacobi_to_jacobi)(const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta);
 X(triangular_banded) * X(create_B_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta);
 

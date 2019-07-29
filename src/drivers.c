@@ -824,10 +824,10 @@ ft_harmonic_plan * ft_plan_tri2cheb(const int n, const double alpha, const doubl
     ft_harmonic_plan * P = (ft_harmonic_plan *) malloc(sizeof(ft_harmonic_plan));
     P->RP = ft_plan_rottriangle(n, alpha, beta, gamma);
     P->B = (double *) VMALLOC(VALIGN(n) * n * sizeof(double));
-    P->P1 = eigenplan_jacobi_to_jacobi(1, 1, n, beta + gamma + 1.0, alpha, -0.5, -0.5);
-    P->P2 = eigenplan_jacobi_to_jacobi(1, 1, n, gamma, beta, -0.5, -0.5);
-    P->P1inv = eigenplan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, beta + gamma + 1.0, alpha);
-    P->P2inv = eigenplan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, gamma, beta);
+    P->P1 = plan_jacobi_to_jacobi(1, 1, n, beta + gamma + 1.0, alpha, -0.5, -0.5);
+    P->P2 = plan_jacobi_to_jacobi(1, 1, n, gamma, beta, -0.5, -0.5);
+    P->P1inv = plan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, beta + gamma + 1.0, alpha);
+    P->P2inv = plan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, gamma, beta);
     P->alpha = alpha;
     P->beta = beta;
     P->gamma = gamma;
@@ -857,9 +857,9 @@ ft_harmonic_plan * ft_plan_disk2cxf(const int n) {
     P->RP = ft_plan_rotdisk(n);
     P->B = (double *) VMALLOC(VALIGN(n) * (4*n-3) * sizeof(double));
     P->P1 = plan_legendre_to_chebyshev(1, 0, n);
-    P->P2 = eigenplan_jacobi_to_jacobi(1, 1, n, 0.0, 1.0, -0.5, 0.5);
+    P->P2 = plan_jacobi_to_jacobi(1, 1, n, 0.0, 1.0, -0.5, 0.5);
     P->P1inv = plan_chebyshev_to_legendre(0, 1, n);
-    P->P2inv = eigenplan_jacobi_to_jacobi(1, 1, n, -0.5, 0.5, 0.0, 1.0);
+    P->P2inv = plan_jacobi_to_jacobi(1, 1, n, -0.5, 0.5, 0.0, 1.0);
     for (int j = 0; j < n; j++)
         for (int i = 0; i <= j; i++) {
             P->P1[i+j*n] *= 2.0;
@@ -906,12 +906,12 @@ ft_tetrahedral_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha,
     P->RP1 = ft_plan_rottriangle(n, alpha, beta, gamma + delta + 1.0);
     P->RP2 = ft_plan_rottriangle(n, beta, gamma, delta);
     P->B = (double *) VMALLOC(VALIGN(n) * n * n * sizeof(double));
-    P->P1 = eigenplan_jacobi_to_jacobi(1, 1, n, beta + gamma + delta + 2.0, alpha, -0.5, -0.5);
-    P->P2 = eigenplan_jacobi_to_jacobi(1, 1, n, gamma + delta + 1.0, beta, -0.5, -0.5);
-    P->P3 = eigenplan_jacobi_to_jacobi(1, 1, n, delta, gamma, -0.5, -0.5);
-    P->P1inv = eigenplan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, beta + gamma + delta + 2.0, alpha);
-    P->P2inv = eigenplan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, gamma + delta + 1.0, beta);
-    P->P3inv = eigenplan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, delta, gamma);
+    P->P1 = plan_jacobi_to_jacobi(1, 1, n, beta + gamma + delta + 2.0, alpha, -0.5, -0.5);
+    P->P2 = plan_jacobi_to_jacobi(1, 1, n, gamma + delta + 1.0, beta, -0.5, -0.5);
+    P->P3 = plan_jacobi_to_jacobi(1, 1, n, delta, gamma, -0.5, -0.5);
+    P->P1inv = plan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, beta + gamma + delta + 2.0, alpha);
+    P->P2inv = plan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, gamma + delta + 1.0, beta);
+    P->P3inv = plan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, delta, gamma);
     P->alpha = alpha;
     P->beta = beta;
     P->gamma = gamma;
