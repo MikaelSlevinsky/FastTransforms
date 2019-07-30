@@ -296,8 +296,8 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
         F->F0 = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda1, lambda2, (unitrange) {0, s}, (unitrange) {0, n-s});
         F->X = X;
         F->Y = Y;
-        F->t1 = (FLT *) calloc(s*b, sizeof(FLT));
-        F->t2 = (FLT *) calloc((n-s)*b, sizeof(FLT));
+        F->t1 = (FLT *) calloc(s*FT_GET_MAX_THREADS(), sizeof(FLT));
+        F->t2 = (FLT *) calloc((n-s)*FT_GET_MAX_THREADS(), sizeof(FLT));
         F->n = n;
         F->b = b;
         X(destroy_triangular_banded)(A1);
@@ -391,14 +391,15 @@ void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
         X(trmv)(TRANS, n, F->V, x);
     else {
         int s = n/2, b = F->b;
+        FLT * t1 = F->t1+s*FT_GET_THREAD_NUM(), * t2 = F->t2+(n-s)*FT_GET_THREAD_NUM();
         if (TRANS == 'N') {
             // C(Λ₁, Λ₂) ∘ (-XYᵀ)
             for (int k = 0; k < b; k++) {
                 for (int i = 0; i < n-s; i++)
-                    F->t2[i+k*(n-s)] = F->Y[i+k*(n-s)]*x[i+s];
-                X(himv)(TRANS, -1, F->F0, F->t2+k*(n-s), 0, F->t1+k*s);
+                    t2[i] = F->Y[i+k*(n-s)]*x[i+s];
+                X(himv)(TRANS, -1, F->F0, t2, 0, t1);
                 for (int i = 0; i < s; i++)
-                    x[i] += F->t1[i+k*s]*F->X[i+k*s];
+                    x[i] += t1[i]*F->X[i+k*s];
             }
             X(bfmv)(TRANS, F->F1, x);
             X(bfmv)(TRANS, F->F2, x+s);
@@ -409,10 +410,10 @@ void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
             // C(Λ₁, Λ₂) ∘ (-XYᵀ)
             for (int k = 0; k < b; k++) {
                 for (int i = 0; i < s; i++)
-                    F->t1[i+k*s] = F->X[i+k*s]*x[i];
-                X(himv)(TRANS, -1, F->F0, F->t1+k*s, 0, F->t2+k*(n-s));
+                    t1[i] = F->X[i+k*s]*x[i];
+                X(himv)(TRANS, -1, F->F0, t1, 0, t2);
                 for (int i = 0; i < n-s; i++)
-                    x[i+s] += F->t2[i+k*(n-s)]*F->Y[i+k*(n-s)];
+                    x[i+s] += t2[i]*F->Y[i+k*(n-s)];
             }
         }
     }
@@ -425,26 +426,27 @@ void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
         X(trsv)(TRANS, n, F->V, x);
     else {
         int s = n/2, b = F->b;
+        FLT * t1 = F->t1+s*FT_GET_THREAD_NUM(), * t2 = F->t2+(n-s)*FT_GET_THREAD_NUM();
         if (TRANS == 'N') {
             X(bfsv)(TRANS, F->F1, x);
             X(bfsv)(TRANS, F->F2, x+s);
             // C(Λ₁, Λ₂) ∘ (-XYᵀ)
             for (int k = 0; k < b; k++) {
                 for (int i = 0; i < n-s; i++)
-                    F->t2[i+k*(n-s)] = F->Y[i+k*(n-s)]*x[i+s];
-                X(himv)(TRANS, 1, F->F0, F->t2+k*(n-s), 0, F->t1+k*s);
+                    t2[i] = F->Y[i+k*(n-s)]*x[i+s];
+                X(himv)(TRANS, 1, F->F0, t2, 0, t1);
                 for (int i = 0; i < s; i++)
-                    x[i] += F->t1[i+k*s]*F->X[i+k*s];
+                    x[i] += t1[i]*F->X[i+k*s];
             }
         }
         else if (TRANS == 'T') {
             // C(Λ₁, Λ₂) ∘ (-XYᵀ)
             for (int k = 0; k < b; k++) {
                 for (int i = 0; i < s; i++)
-                    F->t1[i+k*s] = F->X[i+k*s]*x[i];
-                X(himv)(TRANS, 1, F->F0, F->t1+k*s, 0, F->t2+k*(n-s));
+                    t1[i] = F->X[i+k*s]*x[i];
+                X(himv)(TRANS, 1, F->F0, t1, 0, t2);
                 for (int i = 0; i < n-s; i++)
-                    x[i+s] += F->t2[i+k*(n-s)]*F->Y[i+k*(n-s)];
+                    x[i+s] += t2[i]*F->Y[i+k*(n-s)];
             }
             X(bfsv)(TRANS, F->F1, x);
             X(bfsv)(TRANS, F->F2, x+s);
