@@ -64,8 +64,14 @@ void X(scale_columns_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F);
 void X(trmv)(char TRANS, int n, FLT * A, FLT * x);
 void X(trsv)(char TRANS, int n, FLT * A, FLT * x);
 
+void X(trmm)(char TRANS, int n, FLT * A, FLT * X, int LDX, int N);
+void X(trsm)(char TRANS, int n, FLT * A, FLT * X, int LDX, int N);
+
 void X(bfmv)(char TRANS, X(tb_eigen_FMM) * A, FLT * x);
 void X(bfsv)(char TRANS, X(tb_eigen_FMM) * A, FLT * x);
+
+void X(bfmm)(char TRANS, X(tb_eigen_FMM) * F, FLT * X, int LDX, int N);
+void X(bfsm)(char TRANS, X(tb_eigen_FMM) * F, FLT * X, int LDX, int N);
 
 X(triangular_banded) * X(create_A_legendre_to_chebyshev)(const int n);
 X(triangular_banded) * X(create_B_legendre_to_chebyshev)(const int n);

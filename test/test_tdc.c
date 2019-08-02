@@ -24,7 +24,7 @@ int main(void) {
     printf("\nTesting methods for dropping the precision.\n");
     printf("\n\tDouble ↘  single precision.\n\n");
     test_tdc_drop_precisionf(&checksum);
-    printf("\n\tQuadruple ↘  double precision.\n\n");
+    printf("\n\tLong double ↘  double precision.\n\n");
     test_tdc_drop_precision(&checksum);
     printf("\n");
     return checksum;
@@ -48,7 +48,7 @@ int main(void) {
 
 #define FLT double
 #define X(name) FT_CONCAT(ft_, name, )
-#define X2(name) FT_CONCAT(ft_, name, q)
+#define X2(name) FT_CONCAT(ft_, name, l)
 #define Y(name) FT_CONCAT(, name, )
 #include "test_tdc_source.c"
 #include "test_tdc_source2.c"

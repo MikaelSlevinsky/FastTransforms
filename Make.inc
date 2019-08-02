@@ -24,7 +24,7 @@ OBJ = src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src
 
 #AVX512 = -mavx512f
 
-CFLAGS = -std=gnu99 -Ofast $(AVX512) -march=native -mtune=native -I./src
+CFLAGS = -std=gnu99 -Ofast $(AVX512) -march=native -mtune=native -mno-vzeroupper -I./src
 
 ifeq ($(CC),/usr/local/opt/llvm/bin/clang)
     CFLAGS += -I/usr/local/opt/llvm/include

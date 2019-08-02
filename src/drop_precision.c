@@ -128,3 +128,40 @@ X(symmetric_dpr1_eigen_FMM) * X(drop_precision_symmetric_dpr1_eigen_FMM)(X2(symm
     F->id = id;
     return F;
 }
+
+X(tb_eigen_FMM) * X(drop_precision_tb_eigen_FMM)(X2(tb_eigen_FMM) * F2) {
+    int n = F2->n;
+    X(tb_eigen_FMM) * F = (X(tb_eigen_FMM) *) malloc(sizeof(X(tb_eigen_FMM)));
+    if (n < 64) {
+        FLT * V = (FLT *) malloc(n*n*sizeof(FLT));
+        for (int i = 0; i < n*n; i++)
+            V[i] = F2->V[i];
+        FLT * lambda = (FLT *) malloc(n*sizeof(FLT));
+        for (int i = 0; i < n; i++)
+            lambda[i] = F2->lambda[i];
+        F->V = V;
+        F->lambda = lambda;
+        F->n = n;
+    }
+    else {
+        int s = n/2, b = F2->b;
+        FLT * lambda = (FLT *) malloc(n*sizeof(FLT));
+        for (int i = 0; i < n; i++)
+            lambda[i] = F2->lambda[i];
+        F->F0 = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda, lambda+s, (unitrange) {0, s}, (unitrange) {0, n-s});
+        F->F1 = X(drop_precision_tb_eigen_FMM)(F2->F1);
+        F->F2 = X(drop_precision_tb_eigen_FMM)(F2->F2);
+        F->X = (FLT *) malloc(s*b*sizeof(FLT));
+        for (int i = 0; i < s*b; i++)
+            F->X[i] = F2->X[i];
+        F->Y = (FLT *) malloc((n-s)*b*sizeof(FLT));
+        for (int i = 0; i < (n-s)*b; i++)
+            F->Y[i] = F2->Y[i];
+        F->t1 = (FLT *) calloc(s*b, sizeof(FLT));
+        F->t2 = (FLT *) calloc((n-s)*b, sizeof(FLT));
+        F->lambda = lambda;
+        F->n = n;
+        F->b = b;
+    }
+    return F;
+}

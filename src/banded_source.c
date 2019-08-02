@@ -366,7 +366,7 @@ void X(trmv)(char TRANS, int n, FLT * A, FLT * x) {
     }
 }
 
-// y ← A⁻¹*x, y ← A⁻ᵀ*x
+// x ← A⁻¹*x, x ← A⁻ᵀ*x
 void X(trsv)(char TRANS, int n, FLT * A, FLT * x) {
     if (TRANS == 'N') {
         for (int j = n-1; j >= 0; j--) {
@@ -384,7 +384,19 @@ void X(trsv)(char TRANS, int n, FLT * A, FLT * x) {
     }
 }
 
-// y ← A*x, y ← Aᵀ*x
+void X(trmm)(char TRANS, int n, FLT * A, FLT * X, int LDX, int N) {
+    #pragma omp parallel for
+    for (int j = 0; j < N; j++)
+        X(trmv)(TRANS, n, A, X+j*LDX);
+}
+
+void X(trsm)(char TRANS, int n, FLT * A, FLT * X, int LDX, int N) {
+    #pragma omp parallel for
+    for (int j = 0; j < N; j++)
+        X(trsv)(TRANS, n, A, X+j*LDX);
+}
+
+// x ← A*x, x ← Aᵀ*x
 void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
     int n = F->n;
     if (n < 64)
@@ -419,7 +431,7 @@ void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
     }
 }
 
-// y ← A⁻¹*x, y ← A⁻ᵀ*x
+// x ← A⁻¹*x, x ← A⁻ᵀ*x
 void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
     int n = F->n;
     if (n < 64)
@@ -452,6 +464,18 @@ void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
             X(bfsv)(TRANS, F->F2, x+s);
         }
     }
+}
+
+void X(bfmm)(char TRANS, X(tb_eigen_FMM) * F, FLT * X, int LDX, int N) {
+    #pragma omp parallel for
+    for (int j = 0; j < N; j++)
+        X(bfmv)(TRANS, F, X+j*LDX);
+}
+
+void X(bfsm)(char TRANS, X(tb_eigen_FMM) * F, FLT * X, int LDX, int N) {
+    #pragma omp parallel for
+    for (int j = 0; j < N; j++)
+        X(bfsv)(TRANS, F, X+j*LDX);
 }
 
 X(triangular_banded) * X(create_A_legendre_to_chebyshev)(const int n) {

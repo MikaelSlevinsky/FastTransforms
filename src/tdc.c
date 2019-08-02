@@ -35,7 +35,7 @@
 
 #define FLT double
 #define X(name) FT_CONCAT(ft_, name, )
-#define X2(name) FT_CONCAT(ft_, name, q)
+#define X2(name) FT_CONCAT(ft_, name, l)
 #define Y(name) FT_CONCAT(, name, )
 #define BLOCKRANK 2*((int) floor(-log(Y(eps)())/2.271667761226165))
 #define BLOCKSIZE 4*BLOCKRANK
@@ -44,7 +44,7 @@
 #include "banded_source.c"
 #include "dprk_source.c"
 #include "tdc_source.c"
-#include "tdc_source2.c"
+#include "drop_precision.c"
 #undef FLT
 #undef X
 #undef X2
@@ -63,7 +63,7 @@
 #include "banded_source.c"
 #include "dprk_source.c"
 #include "tdc_source.c"
-#include "tdc_source2.c"
+#include "drop_precision.c"
 #undef FLT
 #undef X
 #undef X2
