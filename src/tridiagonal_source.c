@@ -14,8 +14,8 @@ X(bidiagonal) * X(symmetric_tridiagonal_cholesky)(X(symmetric_tridiagonal) * A) 
     int n = A->n;
     FLT * a = A->a;
     FLT * b = A->b;
-    FLT * c = (FLT *) calloc(n, sizeof(FLT));
-    FLT * d = (FLT *) calloc(n-1, sizeof(FLT));
+    FLT * c = malloc(n*sizeof(FLT));
+    FLT * d = malloc((n-1)*sizeof(FLT));
 
     c[0] = Y(sqrt)(a[0]);
     for (int i = 0; i < n-1; i++) {
@@ -23,7 +23,7 @@ X(bidiagonal) * X(symmetric_tridiagonal_cholesky)(X(symmetric_tridiagonal) * A) 
         c[i+1] = Y(sqrt)(a[i+1]-d[i]*d[i]);
     }
 
-    X(bidiagonal) * B = (X(bidiagonal) *) malloc(sizeof(X(bidiagonal)));
+    X(bidiagonal) * B = malloc(sizeof(X(bidiagonal)));
     B->c = c;
     B->d = d;
     B->n = n;
@@ -100,8 +100,8 @@ http://www.netlib.org/cgi-bin/netlibfiles.pl?filename=/eispack/tql2.f
 
 void X(symmetric_tridiagonal_eig)(X(symmetric_tridiagonal) * A, FLT * V, FLT * lambda) {
     int n = A->n;
-    FLT * d = (FLT *) calloc(n, sizeof(FLT));
-    FLT * e = (FLT *) calloc(n, sizeof(FLT));
+    FLT * d = malloc(n*sizeof(FLT));
+    FLT * e = malloc(n*sizeof(FLT));
 
     int i,j,k,l,m,ii,l1,l2,mml;
     FLT c,c2,c3,dl1,el1,f,g,h,p,r,s,s2,tst1,tst2;
@@ -211,8 +211,8 @@ X(symmetric_tridiagonal) * X(symmetric_tridiagonal_congruence)(X(symmetric_tridi
     int n = A->n;
     FLT * c = R->c;
     FLT * d = R->d;
-    FLT * a = (FLT *) calloc(n, sizeof(FLT));
-    FLT * b = (FLT *) calloc(n-1, sizeof(FLT));
+    FLT * a = malloc(n*sizeof(FLT));
+    FLT * b = malloc((n-1)*sizeof(FLT));
     FLT co, si, r, t1, t2, t3, t4, w;
     for (int i = 0; i < n-1; i++) {
         a[i] = A->a[i];
@@ -296,7 +296,7 @@ X(symmetric_tridiagonal) * X(symmetric_tridiagonal_congruence)(X(symmetric_tridi
 
     X(destroy_bidiagonal)(R);
 
-    X(symmetric_tridiagonal) * A1 = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
+    X(symmetric_tridiagonal) * A1 = malloc(sizeof(X(symmetric_tridiagonal)));
     A1->a = a;
     A1->b = b;
     A1->n = n;
@@ -307,10 +307,10 @@ X(symmetric_tridiagonal) * X(symmetric_tridiagonal_congruence)(X(symmetric_tridi
 
 
 X(symmetric_tridiagonal) * X(create_A_shtsdtev)(const int n, const int mu, const int m, char PARITY) {
-    X(symmetric_tridiagonal) * A = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
+    X(symmetric_tridiagonal) * A = malloc(sizeof(X(symmetric_tridiagonal)));
     int shft;
-    FLT * a = (FLT *) calloc(n, sizeof(FLT));
-    FLT * b = (FLT *) calloc(n-1, sizeof(FLT));
+    FLT * a = calloc(n, sizeof(FLT));
+    FLT * b = calloc(n-1, sizeof(FLT));
     FLT rat, num, den, ld, md = (FLT) m;
 
     if (PARITY == 'E') shft = 0;
@@ -335,10 +335,10 @@ X(symmetric_tridiagonal) * X(create_A_shtsdtev)(const int n, const int mu, const
 }
 
 X(symmetric_tridiagonal) * X(create_B_shtsdtev)(const int n, const int m, char PARITY) {
-    X(symmetric_tridiagonal) * B = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
+    X(symmetric_tridiagonal) * B = malloc(sizeof(X(symmetric_tridiagonal)));
     int shft;
-    FLT * a = (FLT *) calloc(n, sizeof(FLT));
-    FLT * b = (FLT *) calloc(n-1, sizeof(FLT));
+    FLT * a = calloc(n, sizeof(FLT));
+    FLT * b = calloc(n-1, sizeof(FLT));
     FLT rat, num, den, ld, md = (FLT) m;
 
     if (PARITY == 'E') shft = 0;
@@ -363,10 +363,10 @@ X(symmetric_tridiagonal) * X(create_B_shtsdtev)(const int n, const int m, char P
 }
 
 X(bidiagonal) * X(create_R_shtsdtev)(const int n, const int m, char PARITY) {
-    X(bidiagonal) * R = (X(bidiagonal) *) malloc(sizeof(X(bidiagonal)));
+    X(bidiagonal) * R = malloc(sizeof(X(bidiagonal)));
     int shft;
-    FLT * c = (FLT *) calloc(n, sizeof(FLT));
-    FLT * d = (FLT *) calloc(n-1, sizeof(FLT));
+    FLT * c = calloc(n, sizeof(FLT));
+    FLT * d = calloc(n-1, sizeof(FLT));
     FLT rat, ld, md = (FLT) m;
 
     if (PARITY == 'E') shft = 0;

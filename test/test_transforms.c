@@ -13,7 +13,7 @@ int main(void) {
     printf("---------------------------------------------------------|----------------------\n");
     for (int n = 64; n < N; n *= 2) {
         err = 0;
-        C = (double *) calloc(n * n, sizeof(double));
+        C = calloc(n * n, sizeof(double));
         for (int i = 0; i < n; i++)
             C[i+n*i] = 1.0;
         for (int normleg = 0; normleg <= 1; normleg++) {
@@ -37,7 +37,7 @@ int main(void) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
     for (int n = 64; n < N; n *= 2) {
-        C = (double *) calloc(n * n, sizeof(double));
+        C = calloc(n * n, sizeof(double));
         for (int i = 0; i < n; i++)
             C[i+n*i] = 1.0;
         for (int cases = 0; cases < 4; cases++) {
@@ -90,7 +90,7 @@ int main(void) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
     for (int n = 64; n < N; n *= 2) {
-        C = (double *) calloc(n * n, sizeof(double));
+        C = calloc(n * n, sizeof(double));
         for (int i = 0; i < n; i++)
             C[i+n*i] = 1.0;
         for (int cases = 0; cases < 8; cases++) {
@@ -225,7 +225,7 @@ int main(void) {
     /*
     for (int n = 64; n < N; n *= 2) {
         err = 0;
-        C = (double *) calloc(n * n, sizeof(double));
+        C = calloc(n * n, sizeof(double));
         for (int i = 0; i < n; i++)
             C[i+n*i] = 1.0;
             A = plan_konoplev_to_jacobi(n, 0.0, -0.5);

@@ -5,8 +5,8 @@ void X(inner_test_banded)(int * checksum, int n) {
     X(triangular_banded) * A = X(create_A_legendre_to_chebyshev)(n);
     X(triangular_banded) * B = X(create_B_legendre_to_chebyshev)(n);
 
-    FLT * BinvA = (FLT *) calloc(n*n, sizeof(FLT));
-    FLT * BinvAtrue = (FLT *) calloc(n*n, sizeof(FLT));
+    FLT * BinvA = calloc(n*n, sizeof(FLT));
+    FLT * BinvAtrue = calloc(n*n, sizeof(FLT));
     for (int j = 0; j < n; j++) {
         BinvA[j+j*n] = 1;
         X(tbmv)('N', A, BinvA+j*n);
@@ -35,16 +35,16 @@ void X(inner_test_banded)(int * checksum, int n) {
     printf("Matrix-vector products & solves \t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
     X(checktest)(err, n, checksum);
 
-    FLT * V = (FLT *) calloc(n*n, sizeof(FLT));
+    FLT * V = calloc(n*n, sizeof(FLT));
     for (int i = 0; i < n; i++)
         V[i+i*n] = 1;
-    FLT * lambda = (FLT *) malloc(n*sizeof(FLT));
+    FLT * lambda = malloc(n*sizeof(FLT));
 
     X(triangular_banded_eigenvalues)(A, B, lambda);
     X(triangular_banded_eigenvectors)(A, B, V);
 
-    FLT * AV = (FLT *) malloc(n*n*sizeof(FLT));
-    FLT * BVL = (FLT *) malloc(n*n*sizeof(FLT));
+    FLT * AV = malloc(n*n*sizeof(FLT));
+    FLT * BVL = malloc(n*n*sizeof(FLT));
 
     for (int j = 0; j < n; j++) {
         for (int i = 0; i < n; i++) {
@@ -69,8 +69,8 @@ void X(inner_test_banded)(int * checksum, int n) {
     printf("Numerical error of tb ||B⁻¹AV - VΛ|| / ||Λ|| \t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
-    FLT * x = (FLT *) malloc(n*sizeof(FLT));
-    FLT * y = (FLT *) malloc(n*sizeof(FLT));
+    FLT * x = malloc(n*sizeof(FLT));
+    FLT * y = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++)
         y[i] = x[i] = ONE(FLT)/(i+1);
     X(trmv)('N', n, V, x);
@@ -128,7 +128,7 @@ void X(inner_test_banded)(int * checksum, int n) {
     printf("Error of fwd-bckwd solves \t\t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
     X(checktest)(err, n, checksum);
 
-    FLT * z  = (FLT *) malloc(n*sizeof(FLT));
+    FLT * z  = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++)
         z[i] = ONE(FLT)/(i+1);
     for (int i = 0; i < n; i++)
@@ -181,8 +181,8 @@ void X(inner_timing_test_banded)(int * checksum, int n) {
 
     printf("Time for factorization \t\t (%7i×%7i) \t |%20.6f s\n", n, n, elapsed(&start, &end, 1));
 
-    FLT * x = (FLT *) malloc(n*sizeof(FLT));
-    FLT * y = (FLT *) malloc(n*sizeof(FLT));
+    FLT * x = malloc(n*sizeof(FLT));
+    FLT * y = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++)
         y[i] = x[i] = ONE(FLT)/(i+1);
     gettimeofday(&start, NULL);

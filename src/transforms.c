@@ -6,7 +6,7 @@
 double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n) {
     ft_triangular_bandedl * A = ft_create_A_legendre_to_chebyshevl(n);
     ft_triangular_bandedl * B = ft_create_B_legendre_to_chebyshevl(n);
-    long double * Vl = (long double *) calloc(n*n, sizeof(long double));
+    long double * Vl = calloc(n*n, sizeof(long double));
     if (n > 0)
         Vl[0] = 1;
     if (n > 1)
@@ -14,9 +14,9 @@ double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const
     for (int i = 2; i < n; i++)
         Vl[i+i*n] = (2*i-1)*Vl[i-1+(i-1)*n]/(2*i);
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
-    double * V = (double *) calloc(n*n, sizeof(double));
-    long double * sclrow = (long double *) calloc(n, sizeof(long double));
-    long double * sclcol = (long double *) calloc(n, sizeof(long double));
+    double * V = calloc(n*n, sizeof(double));
+    long double * sclrow = calloc(n, sizeof(long double));
+    long double * sclcol = calloc(n, sizeof(long double));
     for (int i = 0; i < n; i++) {
         sclrow[i] = normcheb ? i ? sqrtl(M_PI_2l) : sqrtl(M_PIl) : 1.0L;
         sclcol[i] = normleg ? sqrtl(i+0.5L) : 1.0L;
@@ -35,7 +35,7 @@ double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const
 double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n) {
     ft_triangular_bandedl * A = ft_create_A_chebyshev_to_legendrel(n);
     ft_triangular_bandedl * B = ft_create_B_chebyshev_to_legendrel(n);
-    long double * Vl = (long double *) calloc(n*n, sizeof(long double));
+    long double * Vl = calloc(n*n, sizeof(long double));
     if (n > 0)
         Vl[0] = 1;
     if (n > 1)
@@ -43,9 +43,9 @@ double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const
     for (int i = 2; i < n; i++)
         Vl[i+i*n] = (2*i)*Vl[i-1+(i-1)*n]/(2*i-1);
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
-    double * V = (double *) calloc(n*n, sizeof(double));
-    long double * sclrow = (long double *) calloc(n, sizeof(long double));
-    long double * sclcol = (long double *) calloc(n, sizeof(long double));
+    double * V = calloc(n*n, sizeof(double));
+    long double * sclrow = calloc(n, sizeof(long double));
+    long double * sclcol = calloc(n, sizeof(long double));
     for (int i = 0; i < n; i++) {
         sclrow[i] = normleg ? 1.0L/sqrtl(i+0.5L) : 1.0L;
         sclcol[i] = normcheb ? i ? sqrtl(M_2_PIl) : sqrtl(M_1_PIl) : 1.0L;
@@ -64,7 +64,7 @@ double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const
 double * plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, const double lambda, const double mu) {
     ft_triangular_bandedl * A = ft_create_A_ultraspherical_to_ultrasphericall(n, lambda, mu);
     ft_triangular_bandedl * B = ft_create_B_ultraspherical_to_ultrasphericall(n, mu);
-    long double * Vl = (long double *) calloc(n*n, sizeof(long double));
+    long double * Vl = calloc(n*n, sizeof(long double));
     long double lambdal = lambda, mul = mu;
     if (n > 0)
         Vl[0] = 1;
@@ -73,9 +73,9 @@ double * plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2,
     for (int i = 2; i < n; i++)
         Vl[i+i*n] = (i-1+lambdal)*Vl[i-1+(i-1)*n]/(i-1+mul);
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
-    double * V = (double *) calloc(n*n, sizeof(double));
-    long double * sclrow = (long double *) calloc(n, sizeof(long double));
-    long double * sclcol = (long double *) calloc(n, sizeof(long double));
+    double * V = calloc(n*n, sizeof(double));
+    long double * sclrow = calloc(n, sizeof(long double));
+    long double * sclcol = calloc(n, sizeof(long double));
     if (n > 0) {
         sclrow[0] = norm2 ? sqrtl(sqrtl(M_PIl)*tgammal(mul+0.5L)/tgammal(mul+1)) : 1.0L;
         sclcol[0] = norm1 ? sqrtl(tgammal(lambdal+1)/(sqrtl(M_PIl)*tgammal(lambdal+0.5L))) : 1.0L;
@@ -99,7 +99,7 @@ double * plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, co
     ft_triangular_bandedl * A = ft_create_A_jacobi_to_jacobil(n, alpha, beta, gamma, delta);
     ft_triangular_bandedl * B = ft_create_B_jacobi_to_jacobil(n, gamma, delta);
     long double alphal = alpha, betal = beta, gammal = gamma, deltal = delta;
-    long double * Vl = (long double *) calloc(n*n, sizeof(long double));
+    long double * Vl = calloc(n*n, sizeof(long double));
     if (n > 0)
         Vl[0] = 1;
     if (n > 1)
@@ -107,9 +107,9 @@ double * plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, co
     for (int i = 2; i < n; i++)
         Vl[i+i*n] = (2*i+alphal+betal-1)/(i+alphal+betal)*(2*i+alphal+betal)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*Vl[i-1+(i-1)*n];
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
-    double * V = (double *) calloc(n*n, sizeof(double));
-    long double * sclrow = (long double *) calloc(n, sizeof(long double));
-    long double * sclcol = (long double *) calloc(n, sizeof(long double));
+    double * V = calloc(n*n, sizeof(double));
+    long double * sclrow = calloc(n, sizeof(long double));
+    long double * sclcol = calloc(n, sizeof(long double));
     if (n > 0) {
         sclrow[0] = norm2 ? sqrtl(powl(2.0L, gammal+deltal+1)*tgammal(gammal+1)*tgammal(deltal+1)/tgammal(gammal+deltal+2)) : 1.0L;
         sclcol[0] = norm1 ? sqrtl(tgammal(alphal+betal+2)/(powl(2.0L, alphal+betal+1)*tgammal(alphal+1)*tgammal(betal+1))) : 1.0L;
@@ -137,7 +137,7 @@ double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const in
     ft_triangular_bandedl * A = ft_create_A_associated_jacobi_to_jacobil(n, c, alpha, beta, gamma, delta);
     ft_triangular_bandedl * B = ft_create_B_associated_jacobi_to_jacobil(n, gamma, delta);
     long double alphal = alpha, betal = beta, gammal = gamma, deltal = delta;
-    long double * Vl = (long double *) calloc(n*n, sizeof(long double));
+    long double * Vl = calloc(n*n, sizeof(long double));
     if (n > 0)
         Vl[0] = 1;
     if (n > 1)
@@ -145,8 +145,8 @@ double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const in
     for (int i = 2; i < n; i++)
         Vl[i+i*n] = (2*i+alphal+betal+2*c-1)/(i+alphal+betal+c)*(2*i+alphal+betal+2*c)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*Vl[i-1+(i-1)*n];
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
-    double * V = (double *) calloc(n*n, sizeof(double));
-    long double * sclrow = (long double *) calloc(n, sizeof(long double));
+    double * V = calloc(n*n, sizeof(double));
+    long double * sclrow = calloc(n, sizeof(long double));
     if (n > 0)
         sclrow[0] = norm2 ? sqrtl(powl(2.0L, gammal+deltal+1)*tgammal(gammal+1)*tgammal(deltal+1)/tgammal(gammal+deltal+2)) : 1.0L;
     if (n > 1)
@@ -167,7 +167,7 @@ double * plan_konoplev_to_jacobi(const int n, const double alpha, const double b
     ft_triangular_bandedl * A = ft_create_A_konoplev_to_jacobil(n, alpha, beta);
     ft_triangular_bandedl * B = ft_create_B_konoplev_to_jacobil(n, alpha);
     long double alphal = alpha, betal = beta;
-    long double * Vl = (long double *) calloc(n*n, sizeof(long double));
+    long double * Vl = calloc(n*n, sizeof(long double));
     for (int i = 0; i < n; i++)
         Vl[i+i*n] = 1;
     //if (n > 0)
@@ -177,13 +177,13 @@ double * plan_konoplev_to_jacobi(const int n, const double alpha, const double b
     //for (int i = 2; i < n; i++)
     //    Vl[i+i*n] = (2*i+alphal+betal-1)/(i+alphal+betal)*(2*i+alphal+betal)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*Vl[i-1+(i-1)*n];
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
-    double * V = (double *) calloc(n*n, sizeof(double));
+    double * V = calloc(n*n, sizeof(double));
     for (int j = 0; j < n; j++)
         for (int i = j; i >= 0; i -= 2)
             V[i+j*n] = Vl[i+j*n];
     /*
-    double * sclrow = (double *) calloc(n, sizeof(double));
-    double * sclcol = (double *) calloc(n, sizeof(double));
+    double * sclrow = calloc(n, sizeof(double));
+    double * sclcol = calloc(n, sizeof(double));
     for (int i = 0; i < n; i++) {
         sclrow[i] = norm2 ? sqrt(Analphabeta(i, gamma, delta)) : 1.0;
         sclcol[i] = norm1 ? 1.0/sqrt(Analphabeta(i, alpha, beta)) : 1.0;

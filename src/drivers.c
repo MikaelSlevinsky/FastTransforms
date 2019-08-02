@@ -778,9 +778,9 @@ void ft_destroy_harmonic_plan(ft_harmonic_plan * P) {
 }
 
 ft_harmonic_plan * ft_plan_sph2fourier(const int n) {
-    ft_harmonic_plan * P = (ft_harmonic_plan *) malloc(sizeof(ft_harmonic_plan));
+    ft_harmonic_plan * P = malloc(sizeof(ft_harmonic_plan));
     P->RP = ft_plan_rotsphere(n);
-    P->B = (double *) VMALLOC(VALIGN(n) * (2*n-1) * sizeof(double));
+    P->B = VMALLOC(VALIGN(n) * (2*n-1) * sizeof(double));
     P->P1 = plan_legendre_to_chebyshev(1, 0, n);
     P->P2 = plan_ultraspherical_to_ultraspherical(1, 0, n, 1.5, 1.0);
     P->P1inv = plan_chebyshev_to_legendre(0, 1, n);
@@ -821,9 +821,9 @@ void ft_execute_fourier2sphv(const ft_harmonic_plan * P, double * A, const int N
 }
 
 ft_harmonic_plan * ft_plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma) {
-    ft_harmonic_plan * P = (ft_harmonic_plan *) malloc(sizeof(ft_harmonic_plan));
+    ft_harmonic_plan * P = malloc(sizeof(ft_harmonic_plan));
     P->RP = ft_plan_rottriangle(n, alpha, beta, gamma);
-    P->B = (double *) VMALLOC(VALIGN(n) * n * sizeof(double));
+    P->B = VMALLOC(VALIGN(n) * n * sizeof(double));
     P->P1 = plan_jacobi_to_jacobi(1, 1, n, beta + gamma + 1.0, alpha, -0.5, -0.5);
     P->P2 = plan_jacobi_to_jacobi(1, 1, n, gamma, beta, -0.5, -0.5);
     P->P1inv = plan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, beta + gamma + 1.0, alpha);
@@ -853,9 +853,9 @@ void ft_execute_cheb2tri(const ft_harmonic_plan * P, double * A, const int N, co
 }
 
 ft_harmonic_plan * ft_plan_disk2cxf(const int n) {
-    ft_harmonic_plan * P = (ft_harmonic_plan *) malloc(sizeof(ft_harmonic_plan));
+    ft_harmonic_plan * P = malloc(sizeof(ft_harmonic_plan));
     P->RP = ft_plan_rotdisk(n);
-    P->B = (double *) VMALLOC(VALIGN(n) * (4*n-3) * sizeof(double));
+    P->B = VMALLOC(VALIGN(n) * (4*n-3) * sizeof(double));
     P->P1 = plan_legendre_to_chebyshev(1, 0, n);
     P->P2 = plan_jacobi_to_jacobi(1, 1, n, 0.0, 1.0, -0.5, 0.5);
     P->P1inv = plan_chebyshev_to_legendre(0, 1, n);
@@ -902,10 +902,10 @@ void ft_destroy_tetrahedral_harmonic_plan(ft_tetrahedral_harmonic_plan * P) {
 }
 
 ft_tetrahedral_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha, const double beta, const double gamma, const double delta) {
-    ft_tetrahedral_harmonic_plan * P = (ft_tetrahedral_harmonic_plan *) malloc(sizeof(ft_tetrahedral_harmonic_plan));
+    ft_tetrahedral_harmonic_plan * P = malloc(sizeof(ft_tetrahedral_harmonic_plan));
     P->RP1 = ft_plan_rottriangle(n, alpha, beta, gamma + delta + 1.0);
     P->RP2 = ft_plan_rottriangle(n, beta, gamma, delta);
-    P->B = (double *) VMALLOC(VALIGN(n) * n * n * sizeof(double));
+    P->B = VMALLOC(VALIGN(n) * n * n * sizeof(double));
     P->P1 = plan_jacobi_to_jacobi(1, 1, n, beta + gamma + delta + 2.0, alpha, -0.5, -0.5);
     P->P2 = plan_jacobi_to_jacobi(1, 1, n, gamma + delta + 1.0, beta, -0.5, -0.5);
     P->P3 = plan_jacobi_to_jacobi(1, 1, n, delta, gamma, -0.5, -0.5);

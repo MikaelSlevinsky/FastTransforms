@@ -53,12 +53,12 @@ size_t X(summary_size_tdc_eigen_FMM)(X(tdc_eigen_FMM) * F) {
 
 X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagonal) * S) {
     int n = T->n;
-    X(tdc_eigen) * F = (X(tdc_eigen) *) malloc(sizeof(X(tdc_eigen)));
+    X(tdc_eigen) * F = malloc(sizeof(X(tdc_eigen)));
     if (n < 64) {
-        FLT * V = (FLT *) calloc(n*n, sizeof(FLT));
+        FLT * V = calloc(n*n, sizeof(FLT));
         for (int i = 0; i < n; i++)
             V[i+i*n] = 1;
-        FLT * lambda = (FLT *) calloc(n, sizeof(FLT));
+        FLT * lambda = calloc(n, sizeof(FLT));
         X(symmetric_definite_tridiagonal_eig)(T, S, V, lambda);
         F->V = V;
         F->lambda = lambda;
@@ -67,16 +67,16 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
     else {
         int s = n/2, sign = -1;
 
-        FLT * y = (FLT *) calloc(n, sizeof(FLT));
+        FLT * y = calloc(n, sizeof(FLT));
         y[s-1] = sign;
         y[s] = 1;
 
         FLT rho = -sign*Y(fabs)(T->b[s-1]);
         FLT sigma = -sign*Y(fabs)(S->b[s-1]);
 
-        X(symmetric_tridiagonal) * T1 = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
-        FLT * at1 = (FLT *) malloc(s*sizeof(FLT));
-        FLT * bt1 = (FLT *) malloc((s-1)*sizeof(FLT));
+        X(symmetric_tridiagonal) * T1 = malloc(sizeof(X(symmetric_tridiagonal)));
+        FLT * at1 = malloc(s*sizeof(FLT));
+        FLT * bt1 = malloc((s-1)*sizeof(FLT));
         for (int i = 0; i < s-1; i++) {
             at1[i] = T->a[i];
             bt1[i] = T->b[i];
@@ -86,9 +86,9 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
         T1->b = bt1;
         T1->n = s;
 
-        X(symmetric_tridiagonal) * S1 = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
-        FLT * as1 = (FLT *) malloc(s*sizeof(FLT));
-        FLT * bs1 = (FLT *) malloc((s-1)*sizeof(FLT));
+        X(symmetric_tridiagonal) * S1 = malloc(sizeof(X(symmetric_tridiagonal)));
+        FLT * as1 = malloc(s*sizeof(FLT));
+        FLT * bs1 = malloc((s-1)*sizeof(FLT));
         for (int i = 0; i < s-1; i++) {
             as1[i] = S->a[i];
             bs1[i] = S->b[i];
@@ -98,9 +98,9 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
         S1->b = bs1;
         S1->n = s;
 
-        X(symmetric_tridiagonal) * T2 = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
-        FLT * at2 = (FLT *) malloc((n-s)*sizeof(FLT));
-        FLT * bt2 = (FLT *) malloc((n-s-1)*sizeof(FLT));
+        X(symmetric_tridiagonal) * T2 = malloc(sizeof(X(symmetric_tridiagonal)));
+        FLT * at2 = malloc((n-s)*sizeof(FLT));
+        FLT * bt2 = malloc((n-s-1)*sizeof(FLT));
         for (int i = s; i < n-1; i++) {
             at2[i-s+1] = T->a[i+1];
             bt2[i-s] = T->b[i];
@@ -110,9 +110,9 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
         T2->b = bt2;
         T2->n = n-s;
 
-        X(symmetric_tridiagonal) * S2 = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
-        FLT * as2 = (FLT *) malloc((n-s)*sizeof(FLT));
-        FLT * bs2 = (FLT *) malloc((n-s-1)*sizeof(FLT));
+        X(symmetric_tridiagonal) * S2 = malloc(sizeof(X(symmetric_tridiagonal)));
+        FLT * as2 = malloc((n-s)*sizeof(FLT));
+        FLT * bs2 = malloc((n-s-1)*sizeof(FLT));
         for (int i = s; i < n-1; i++) {
             as2[i-s+1] = S->a[i+1];
             bs2[i-s] = S->b[i];
@@ -125,11 +125,11 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
         F->F1 = X(sdtdc_eig)(T1, S1);
         F->F2 = X(sdtdc_eig)(T2, S2);
 
-        FLT * z = (FLT *) calloc(n, sizeof(FLT));
+        FLT * z = calloc(n, sizeof(FLT));
         X(tdmv)('T', 1, F->F1, y, 0, z);
         X(tdmv)('T', 1, F->F2, y+s, 0, z+s);
 
-        FLT * d = (FLT *) malloc(n*sizeof(FLT));
+        FLT * d = malloc(n*sizeof(FLT));
         for (int i = 0; i < s; i++) {
             if (F->F1->n < 64)
                 d[i] = F->F1->lambda[i];
@@ -143,15 +143,15 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
                 d[i+s] = F->F2->F0->lambda[i];
         }
 
-        X(symmetric_dpr1) * A = (X(symmetric_dpr1) *) malloc(sizeof(X(symmetric_dpr1)));
+        X(symmetric_dpr1) * A = malloc(sizeof(X(symmetric_dpr1)));
         A->d = d;
         A->z = z;
         A->rho = rho;
         A->n = n;
-        FLT * zb = (FLT *) malloc(n*sizeof(FLT));
+        FLT * zb = malloc(n*sizeof(FLT));
         for (int i = 0; i < n; i++)
             zb[i] = z[i];
-        X(symmetric_idpr1) * B = (X(symmetric_idpr1) *) malloc(sizeof(X(symmetric_idpr1)));
+        X(symmetric_idpr1) * B = malloc(sizeof(X(symmetric_idpr1)));
         B->z = zb;
         B->sigma = sigma;
         B->n = n;
@@ -172,12 +172,12 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
 
 X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagonal) * S) {
     int n = T->n;
-    X(tdc_eigen_FMM) * F = (X(tdc_eigen_FMM) *) malloc(sizeof(X(tdc_eigen_FMM)));
+    X(tdc_eigen_FMM) * F = malloc(sizeof(X(tdc_eigen_FMM)));
     if (n < 64) {
-        FLT * V = (FLT *) calloc(n*n, sizeof(FLT));
+        FLT * V = calloc(n*n, sizeof(FLT));
         for (int i = 0; i < n; i++)
             V[i+i*n] = 1;
-        FLT * lambda = (FLT *) calloc(n, sizeof(FLT));
+        FLT * lambda = calloc(n, sizeof(FLT));
         X(symmetric_definite_tridiagonal_eig)(T, S, V, lambda);
         F->V = V;
         F->lambda = lambda;
@@ -186,16 +186,16 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
     else {
         int s = n/2, sign = -1;
 
-        FLT * y = (FLT *) calloc(n, sizeof(FLT));
+        FLT * y = calloc(n, sizeof(FLT));
         y[s-1] = sign;
         y[s] = 1;
 
         FLT rho = -sign*Y(fabs)(T->b[s-1]);
         FLT sigma = -sign*Y(fabs)(S->b[s-1]);
 
-        X(symmetric_tridiagonal) * T1 = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
-        FLT * at1 = (FLT *) malloc(s*sizeof(FLT));
-        FLT * bt1 = (FLT *) malloc((s-1)*sizeof(FLT));
+        X(symmetric_tridiagonal) * T1 = malloc(sizeof(X(symmetric_tridiagonal)));
+        FLT * at1 = malloc(s*sizeof(FLT));
+        FLT * bt1 = malloc((s-1)*sizeof(FLT));
         for (int i = 0; i < s-1; i++) {
             at1[i] = T->a[i];
             bt1[i] = T->b[i];
@@ -205,9 +205,9 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
         T1->b = bt1;
         T1->n = s;
 
-        X(symmetric_tridiagonal) * S1 = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
-        FLT * as1 = (FLT *) malloc(s*sizeof(FLT));
-        FLT * bs1 = (FLT *) malloc((s-1)*sizeof(FLT));
+        X(symmetric_tridiagonal) * S1 = malloc(sizeof(X(symmetric_tridiagonal)));
+        FLT * as1 = malloc(s*sizeof(FLT));
+        FLT * bs1 = malloc((s-1)*sizeof(FLT));
         for (int i = 0; i < s-1; i++) {
             as1[i] = S->a[i];
             bs1[i] = S->b[i];
@@ -217,9 +217,9 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
         S1->b = bs1;
         S1->n = s;
 
-        X(symmetric_tridiagonal) * T2 = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
-        FLT * at2 = (FLT *) malloc((n-s)*sizeof(FLT));
-        FLT * bt2 = (FLT *) malloc((n-s-1)*sizeof(FLT));
+        X(symmetric_tridiagonal) * T2 = malloc(sizeof(X(symmetric_tridiagonal)));
+        FLT * at2 = malloc((n-s)*sizeof(FLT));
+        FLT * bt2 = malloc((n-s-1)*sizeof(FLT));
         for (int i = s; i < n-1; i++) {
             at2[i-s+1] = T->a[i+1];
             bt2[i-s] = T->b[i];
@@ -229,9 +229,9 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
         T2->b = bt2;
         T2->n = n-s;
 
-        X(symmetric_tridiagonal) * S2 = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
-        FLT * as2 = (FLT *) malloc((n-s)*sizeof(FLT));
-        FLT * bs2 = (FLT *) malloc((n-s-1)*sizeof(FLT));
+        X(symmetric_tridiagonal) * S2 = malloc(sizeof(X(symmetric_tridiagonal)));
+        FLT * as2 = malloc((n-s)*sizeof(FLT));
+        FLT * bs2 = malloc((n-s-1)*sizeof(FLT));
         for (int i = s; i < n-1; i++) {
             as2[i-s+1] = S->a[i+1];
             bs2[i-s] = S->b[i];
@@ -244,11 +244,11 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
         F->F1 = X(sdtdc_eig_FMM)(T1, S1);
         F->F2 = X(sdtdc_eig_FMM)(T2, S2);
 
-        FLT * z = (FLT *) calloc(n, sizeof(FLT));
+        FLT * z = calloc(n, sizeof(FLT));
         X(tfmv)('T', 1, F->F1, y, 0, z);
         X(tfmv)('T', 1, F->F2, y+s, 0, z+s);
 
-        FLT * d = (FLT *) malloc(n*sizeof(FLT));
+        FLT * d = malloc(n*sizeof(FLT));
         for (int i = 0; i < s; i++) {
             if (F->F1->n < 64)
                 d[i] = F->F1->lambda[i];
@@ -262,15 +262,15 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
                 d[i+s] = F->F2->F0->lambda[i];
         }
 
-        X(symmetric_dpr1) * A = (X(symmetric_dpr1) *) malloc(sizeof(X(symmetric_dpr1)));
+        X(symmetric_dpr1) * A = malloc(sizeof(X(symmetric_dpr1)));
         A->d = d;
         A->z = z;
         A->rho = rho;
         A->n = n;
-        FLT * zb = (FLT *) malloc(n*sizeof(FLT));
+        FLT * zb = malloc(n*sizeof(FLT));
         for (int i = 0; i < n; i++)
             zb[i] = z[i];
-        X(symmetric_idpr1) * B = (X(symmetric_idpr1) *) malloc(sizeof(X(symmetric_idpr1)));
+        X(symmetric_idpr1) * B = malloc(sizeof(X(symmetric_idpr1)));
         B->z = zb;
         B->sigma = sigma;
         B->n = n;

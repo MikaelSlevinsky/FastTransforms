@@ -58,14 +58,14 @@ void print_summary_size(size_t i) {
 }
 
 double * copymat(double * A, int n, int m) {
-    double * B = (double *) calloc(n*m, sizeof(double));
+    double * B = calloc(n*m, sizeof(double));
     for (int i = 0; i < n*m; i++)
         B[i] = A[i];
     return B;
 }
 
 double * sphones(int n, int m) {
-    double * A  = (double *) calloc(n * m, sizeof(double));
+    double * A  = calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-2*i; j++)
             A(i,j) = 1.0;
@@ -73,7 +73,7 @@ double * sphones(int n, int m) {
 }
 
 double * sphrand(int n, int m) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-2*i; j++)
             A(i,j) = 2.0*(((double) rand())/RAND_MAX)-1.0;
@@ -81,7 +81,7 @@ double * sphrand(int n, int m) {
 }
 
 double * triones(int n, int m) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-i; j++)
             A(i,j) = 1.0;
@@ -89,7 +89,7 @@ double * triones(int n, int m) {
 }
 
 double * trirand(int n, int m) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-i; j++)
             A(i,j) = 2.0*(((double) rand())/RAND_MAX)-1.0;
@@ -97,7 +97,7 @@ double * trirand(int n, int m) {
 }
 
 double * diskones(int n, int m) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-4*i; j++)
             A(i,j) = 1.0;
@@ -105,7 +105,7 @@ double * diskones(int n, int m) {
 }
 
 double * diskrand(int n, int m) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-4*i; j++)
             A(i,j) = 2.0*(((double) rand())/RAND_MAX)-1.0;
@@ -113,7 +113,7 @@ double * diskrand(int n, int m) {
 }
 
 double * tetones(int n, int l, int m) {
-    double * A = (double *) calloc(n * l * m, sizeof(double));
+    double * A = calloc(n * l * m, sizeof(double));
     for (int k = 0; k < m; k++)
         for (int j = 0; j < l-k; j++)
             for (int i = 0; i < n-j-k; i++)
@@ -122,7 +122,7 @@ double * tetones(int n, int l, int m) {
 }
 
 double * tetrand(int n, int l, int m) {
-    double * A = (double *) calloc(n * l * m, sizeof(double));
+    double * A = calloc(n * l * m, sizeof(double));
     for (int k = 0; k < m; k++)
         for (int j = 0; j < l-k; j++)
             for (int i = 0; i < n-j-k; i++)
@@ -131,7 +131,7 @@ double * tetrand(int n, int l, int m) {
 }
 
 double * spinsphones(int n, int m, int s) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n-s; i++)
         for (int j = 0; j < m-2*i; j++)
             A(i,j) = 1.0;
@@ -139,7 +139,7 @@ double * spinsphones(int n, int m, int s) {
 }
 
 double * spinsphrand(int n, int m, int s) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n-s; i++)
         for (int j = 0; j < m-2*i; j++)
             A(i,j) = 2.0*(((double) rand())/RAND_MAX)-1.0;

@@ -1,6 +1,6 @@
 FLT * X(chebyshev_points)(char KIND, int n) {
     int nd2 = n/2;
-    FLT * x = (FLT *) malloc(n*sizeof(FLT));
+    FLT * x = malloc(n*sizeof(FLT));
     if (KIND == '1') {
         for (int k = 0; k <=nd2; k++)
             x[k] = Y(__sinpi)((n-2*k-ONE(FLT))/(2*n));
@@ -18,7 +18,7 @@ FLT * X(chebyshev_points)(char KIND, int n) {
 
 FLT * X(chebyshev_barycentric_weights)(char KIND, int n) {
     int nd2 = n/2;
-    FLT * l = (FLT *) malloc(n*sizeof(FLT));
+    FLT * l = malloc(n*sizeof(FLT));
     if (KIND == '1') {
         for (int k = 0; k <=nd2; k++)
             l[k] = Y(__sinpi)((2*k+ONE(FLT))/(2*n));
@@ -115,16 +115,16 @@ void X(destroy_hierarchicalmatrix)(X(hierarchicalmatrix) * H) {
 
 
 X(densematrix) * X(calloc_densematrix)(int m, int n) {
-    X(densematrix) * A = (X(densematrix) *) malloc(sizeof(X(densematrix)));
-    A->A = (FLT *) calloc(m*n, sizeof(FLT));
+    X(densematrix) * A = malloc(sizeof(X(densematrix)));
+    A->A = calloc(m*n, sizeof(FLT));
     A->m = m;
     A->n = n;
     return A;
 }
 
 X(densematrix) * X(malloc_densematrix)(int m, int n) {
-    X(densematrix) * A = (X(densematrix) *) malloc(sizeof(X(densematrix)));
-    A->A = (FLT *) malloc(m*n*sizeof(FLT));
+    X(densematrix) * A = malloc(sizeof(X(densematrix)));
+    A->A = malloc(m*n*sizeof(FLT));
     A->m = m;
     A->n = n;
     return A;
@@ -154,12 +154,12 @@ X(lowrankmatrix) * X(calloc_lowrankmatrix)(char N, int m, int n, int r) {
     int sz = 0;
     if (N == '2') sz = r;
     else if (N == '3') sz = r*r;
-    X(lowrankmatrix) * L = (X(lowrankmatrix) *) malloc(sizeof(X(lowrankmatrix)));
-    L->U = (FLT *) calloc(m*r, sizeof(FLT));
-    L->S = (FLT *) calloc(sz, sizeof(FLT));
-    L->V = (FLT *) calloc(n*r, sizeof(FLT));
-    L->t1 = (FLT *) calloc(r*FT_GET_MAX_THREADS(), sizeof(FLT));
-    L->t2 = (FLT *) calloc(r*FT_GET_MAX_THREADS(), sizeof(FLT));
+    X(lowrankmatrix) * L = malloc(sizeof(X(lowrankmatrix)));
+    L->U = calloc(m*r, sizeof(FLT));
+    L->S = calloc(sz, sizeof(FLT));
+    L->V = calloc(n*r, sizeof(FLT));
+    L->t1 = calloc(r*FT_GET_MAX_THREADS(), sizeof(FLT));
+    L->t2 = calloc(r*FT_GET_MAX_THREADS(), sizeof(FLT));
     L->m = m;
     L->n = n;
     L->r = r;
@@ -171,12 +171,12 @@ X(lowrankmatrix) * X(malloc_lowrankmatrix)(char N, int m, int n, int r) {
     int sz = 0;
     if (N == '2') sz = r;
     else if (N == '3') sz = r*r;
-    X(lowrankmatrix) * L = (X(lowrankmatrix) *) malloc(sizeof(X(lowrankmatrix)));
-    L->U = (FLT *) malloc(m*r*sizeof(FLT));
-    L->S = (FLT *) malloc(sz*sizeof(FLT));
-    L->V = (FLT *) malloc(n*r*sizeof(FLT));
-    L->t1 = (FLT *) calloc(r*FT_GET_MAX_THREADS(), sizeof(FLT));
-    L->t2 = (FLT *) calloc(r*FT_GET_MAX_THREADS(), sizeof(FLT));
+    X(lowrankmatrix) * L = malloc(sizeof(X(lowrankmatrix)));
+    L->U = malloc(m*r*sizeof(FLT));
+    L->S = malloc(sz*sizeof(FLT));
+    L->V = malloc(n*r*sizeof(FLT));
+    L->t1 = calloc(r*FT_GET_MAX_THREADS(), sizeof(FLT));
+    L->t2 = calloc(r*FT_GET_MAX_THREADS(), sizeof(FLT));
     L->m = m;
     L->n = n;
     L->r = r;
@@ -218,11 +218,11 @@ X(lowrankmatrix) * X(sample_lowrankmatrix)(FLT (*f)(FLT x, FLT y), FLT * x, FLT 
 
 
 X(hierarchicalmatrix) * X(malloc_hierarchicalmatrix)(const int M, const int N) {
-    X(hierarchicalmatrix) * H = (X(hierarchicalmatrix) *) malloc(sizeof(X(hierarchicalmatrix)));
-    H->hierarchicalmatrices = (X(hierarchicalmatrix) **) malloc(M*N*sizeof(X(hierarchicalmatrix)));
-    H->densematrices = (X(densematrix) **) malloc(M*N*sizeof(X(densematrix)));
-    H->lowrankmatrices = (X(lowrankmatrix) **) malloc(M*N*sizeof(X(lowrankmatrix)));
-    H->hash = (int *) calloc(M*N, sizeof(int));
+    X(hierarchicalmatrix) * H = malloc(sizeof(X(hierarchicalmatrix)));
+    H->hierarchicalmatrices = malloc(M*N*sizeof(X(hierarchicalmatrix) *));
+    H->densematrices = malloc(M*N*sizeof(X(densematrix) *));
+    H->lowrankmatrices = malloc(M*N*sizeof(X(lowrankmatrix) *));
+    H->hash = calloc(M*N, sizeof(int));
     H->M = M;
     H->N = N;
     return H;

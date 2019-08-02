@@ -40,8 +40,8 @@ size_t X(summary_size_tb_eigen_FMM)(X(tb_eigen_FMM) * F) {
 }
 
 X(banded) * X(malloc_banded)(const int m, const int n, const int l, const int u) {
-    FLT * data = (FLT *) malloc(n*(l+u+1)*sizeof(FLT));
-    X(banded) * A = (X(banded) *) malloc(sizeof(X(banded)));
+    FLT * data = malloc(n*(l+u+1)*sizeof(FLT));
+    X(banded) * A = malloc(sizeof(X(banded)));
     A->data = data;
     A->m = m;
     A->n = n;
@@ -50,8 +50,8 @@ X(banded) * X(malloc_banded)(const int m, const int n, const int l, const int u)
     return A;
 }
 X(banded) * X(calloc_banded)(const int m, const int n, const int l, const int u) {
-    FLT * data = (FLT *) calloc(n*(l+u+1), sizeof(FLT));
-    X(banded) * A = (X(banded) *) malloc(sizeof(X(banded)));
+    FLT * data = calloc(n*(l+u+1), sizeof(FLT));
+    X(banded) * A = malloc(sizeof(X(banded)));
     A->data = data;
     A->m = m;
     A->n = n;
@@ -61,8 +61,8 @@ X(banded) * X(calloc_banded)(const int m, const int n, const int l, const int u)
 }
 
 X(triangular_banded) * X(malloc_triangular_banded)(const int n, const int b) {
-    FLT * data = (FLT *) malloc(n*(b+1)*sizeof(FLT));
-    X(triangular_banded) * A = (X(triangular_banded) *) malloc(sizeof(X(triangular_banded)));
+    FLT * data = malloc(n*(b+1)*sizeof(FLT));
+    X(triangular_banded) * A = malloc(sizeof(X(triangular_banded)));
     A->data = data;
     A->n = n;
     A->b = b;
@@ -70,8 +70,8 @@ X(triangular_banded) * X(malloc_triangular_banded)(const int n, const int b) {
 }
 
 X(triangular_banded) * X(calloc_triangular_banded)(const int n, const int b) {
-    FLT * data = (FLT *) calloc(n*(b+1), sizeof(FLT));
-    X(triangular_banded) * A = (X(triangular_banded) *) malloc(sizeof(X(triangular_banded)));
+    FLT * data = calloc(n*(b+1), sizeof(FLT));
+    X(triangular_banded) * A = malloc(sizeof(X(triangular_banded)));
     A->data = data;
     A->n = n;
     A->b = b;
@@ -220,12 +220,12 @@ void X(triangular_banded_eigenvectors)(X(triangular_banded) * A, X(triangular_ba
 X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) * B) {
     int n = A->n, b1 = A->b, b2 = B->b;
     int b = MAX(b1, b2);
-    X(tb_eigen_FMM) * F = (X(tb_eigen_FMM) *) malloc(sizeof(X(tb_eigen_FMM)));
+    X(tb_eigen_FMM) * F = malloc(sizeof(X(tb_eigen_FMM)));
     if (n < 64) {
-        FLT * V = (FLT *) calloc(n*n, sizeof(FLT));
+        FLT * V = calloc(n*n, sizeof(FLT));
         for (int i = 0; i < n; i++)
             V[i+i*n] = 1;
-        F->lambda = (FLT *) malloc(n*sizeof(FLT));
+        F->lambda = malloc(n*sizeof(FLT));
         X(triangular_banded_eigenvalues)(A, B, F->lambda);
         X(triangular_banded_eigenvectors)(A, B, V);
         F->V = V;
@@ -233,7 +233,7 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
         F->b = b;
     }
     else {
-        F->lambda = (FLT *) malloc(n*sizeof(FLT));
+        F->lambda = malloc(n*sizeof(FLT));
         X(triangular_banded_eigenvalues)(A, B, F->lambda);
         int s = n/2;
         X(triangular_banded) * A1 = X(calloc_triangular_banded)(s, b1);
@@ -266,18 +266,18 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
         FLT * lambda1 = F->F1->lambda;
         FLT * lambda2 = F->F2->lambda;
 
-        FLT * X = (FLT *) calloc(s*b, sizeof(FLT));
+        FLT * X = calloc(s*b, sizeof(FLT));
         for (int j = 0; j < b; j++) {
             X[s-b+j+j*s] = 1;
             X(tbsv)('N', B1, X+j*s);
             X(bfsv)('N', F->F1, X+j*s);
         }
 
-        FLT * Y = (FLT *) calloc((n-s)*b, sizeof(FLT));
+        FLT * Y = calloc((n-s)*b, sizeof(FLT));
         for (int j = 0; j < b1; j++)
             for (int k = 0; k < b1-j; k++)
                 Y[j+(k+j)*(n-s)] = A2->data[k+j*(b1+1)];
-        FLT * Y2 = (FLT *) calloc((n-s)*b2, sizeof(FLT));
+        FLT * Y2 = calloc((n-s)*b2, sizeof(FLT));
         for (int j = 0; j < b2; j++)
             for (int k = 0; k < b2-j; k++)
                 Y2[j+(k+j)*(n-s)] = B2->data[k+j*(b2+1)];
@@ -296,8 +296,8 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
         F->F0 = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda1, lambda2, (unitrange) {0, s}, (unitrange) {0, n-s});
         F->X = X;
         F->Y = Y;
-        F->t1 = (FLT *) calloc(s*FT_GET_MAX_THREADS(), sizeof(FLT));
-        F->t2 = (FLT *) calloc((n-s)*FT_GET_MAX_THREADS(), sizeof(FLT));
+        F->t1 = calloc(s*FT_GET_MAX_THREADS(), sizeof(FLT));
+        F->t2 = calloc((n-s)*FT_GET_MAX_THREADS(), sizeof(FLT));
         F->n = n;
         F->b = b;
         X(destroy_triangular_banded)(A1);
@@ -712,7 +712,7 @@ X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, cons
     X(gbmm)(1, R1, A2a, 0, A2b);
     X(banded) * A2c = X(calloc_banded)(n, n, -1, 3);
     X(gbmm)(1, M2, D2, 0, A2c);
-    FLT * D2b = (FLT *) calloc(n, sizeof(FLT));
+    FLT * D2b = calloc(n, sizeof(FLT));
     for (int j = 0; j < n; j++) {
         D2b[j] = (j+alpha+beta+2*c-1)*(j+alpha+beta+2*c+1)+(j+1)*(j+ONE(FLT))-24;
         for (int k = 0; k < 5; k++)
@@ -730,7 +730,7 @@ X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, cons
     X(gbmm)(1, R1, A1a, 0, A1b);
     X(banded) * A1c = X(calloc_banded)(n, n, -1, 3);
     X(gbmm)(1, R1, D1, 0, A1c);
-    FLT * D1b = (FLT *) calloc(n, sizeof(FLT));
+    FLT * D1b = calloc(n, sizeof(FLT));
     for (int j = 0; j < n; j++) {
         D1b[j] = (j+alpha+beta+2*c-1)*(j+alpha+beta+2*c+1) + (j+3)*(j-ONE(FLT));
         for (int k = 0; k < 5; k++)
@@ -770,7 +770,7 @@ X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, cons
     free(D2b);
     free(D1b);
 
-    X(triangular_banded) * TA = (X(triangular_banded) *) malloc(sizeof(X(triangular_banded)));
+    X(triangular_banded) * TA = malloc(sizeof(X(triangular_banded)));
     TA->data = A->data;
     TA->n = n;
     TA->b = 4;
@@ -789,7 +789,7 @@ X(triangular_banded) * X(create_B_associated_jacobi_to_jacobi)(const int n, cons
     X(destroy_banded)(R0);
     X(destroy_banded)(R1);
 
-    X(triangular_banded) * TB = (X(triangular_banded) *) malloc(sizeof(X(triangular_banded)));
+    X(triangular_banded) * TB = malloc(sizeof(X(triangular_banded)));
     TB->data = B->data;
     TB->n = n;
     TB->b = 4;

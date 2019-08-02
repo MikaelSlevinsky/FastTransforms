@@ -14,8 +14,8 @@ int main(void) {
         N = 8*pow(2, i);
         M = 2*N-1;
 
-        A = (double *) calloc(N * M, sizeof(double));
-        B = (double *) calloc(N * M, sizeof(double));
+        A = calloc(N * M, sizeof(double));
+        B = calloc(N * M, sizeof(double));
         for (int i = 0; i < N * M; i++)
             A[i] = (double) i;
 
@@ -26,7 +26,7 @@ int main(void) {
 
         free(A);
 
-        A = (double *) calloc(N * M, sizeof(double));
+        A = calloc(N * M, sizeof(double));
 
         permute_t_sph(A, B, N, M, 2);
 
@@ -39,7 +39,7 @@ int main(void) {
 
         free(A);
 
-        A = (double *) calloc(N * M, sizeof(double));
+        A = calloc(N * M, sizeof(double));
 
         permute_t_sph(A, B, N, M, 4);
 
@@ -50,8 +50,8 @@ int main(void) {
 
         M = 2*N+1;
 
-        A = (double *) calloc(N * M, sizeof(double));
-        B = (double *) calloc(N * M, sizeof(double));
+        A = calloc(N * M, sizeof(double));
+        B = calloc(N * M, sizeof(double));
         for (int i = 0; i < N * M; i++)
             A[i] = (double) i;
 
@@ -62,7 +62,7 @@ int main(void) {
 
         free(A);
 
-        A = (double *) calloc(N * M, sizeof(double));
+        A = calloc(N * M, sizeof(double));
 
         permute_t_sph(A, B, N, M, 4);
 
@@ -78,8 +78,8 @@ int main(void) {
         M = 2*N-1;
         NLOOPS = 1 + pow(8192/N, 2);
 
-        A = (double *) calloc(N * M, sizeof(double));
-        B = (double *) calloc(N * M, sizeof(double));
+        A = calloc(N * M, sizeof(double));
+        B = calloc(N * M, sizeof(double));
         for (int i = 0; i < N * M; i++)
             A[i] = (double) i;
 
@@ -95,8 +95,8 @@ int main(void) {
         free(A);
         free(B);
 
-        A = (double *) calloc(N * M, sizeof(double));
-        B = (double *) calloc(N * M, sizeof(double));
+        A = calloc(N * M, sizeof(double));
+        B = calloc(N * M, sizeof(double));
         for (int i = 0; i < N * M; i++)
             A[i] = (double) i;
 
@@ -118,8 +118,8 @@ int main(void) {
         N = 8*pow(2, i);
         M = N;
 
-        A = (double *) calloc(N * M, sizeof(double));
-        B = (double *) calloc(N * M, sizeof(double));
+        A = calloc(N * M, sizeof(double));
+        B = calloc(N * M, sizeof(double));
         for (int i = 0; i < N * M; i++)
             A[i] = (double) i;
 
@@ -130,7 +130,7 @@ int main(void) {
 
         free(A);
 
-        A = (double *) calloc(N * M, sizeof(double));
+        A = calloc(N * M, sizeof(double));
 
         permute_t_tri_SSE(A, B, N, M);
 
@@ -146,8 +146,8 @@ int main(void) {
         M = N;
         NLOOPS = 1 + pow(8192/N, 2);
 
-        A = (double *) calloc(N * M, sizeof(double));
-        B = (double *) calloc(N * M, sizeof(double));
+        A = calloc(N * M, sizeof(double));
+        B = calloc(N * M, sizeof(double));
         for (int i = 0; i < N * M; i++)
             A[i] = (double) i;
 
@@ -163,8 +163,8 @@ int main(void) {
         free(A);
         free(B);
 
-        A = (double *) calloc(N * M, sizeof(double));
-        B = (double *) calloc(N * M, sizeof(double));
+        A = calloc(N * M, sizeof(double));
+        B = calloc(N * M, sizeof(double));
         for (int i = 0; i < N * M; i++)
             A[i] = (double) i;
 

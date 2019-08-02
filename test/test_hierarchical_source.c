@@ -24,10 +24,10 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     printf("Size of the hierarchical matrix \t\t\t |");
     print_summary_size(X(summary_size_hierarchicalmatrix)(H));
 
-    FLT * u = (FLT *) malloc(n*sizeof(FLT));
+    FLT * u = malloc(n*sizeof(FLT));
     for (int j = 0; j < n; j++)
         u[j] = 1/(j+ONE(FLT));
-    FLT * v = (FLT *) calloc(m, sizeof(FLT));
+    FLT * v = calloc(m, sizeof(FLT));
     gettimeofday(&start, NULL);
     for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
         X(demv)('N', 1, A, u, 0, v);
@@ -35,7 +35,7 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     gettimeofday(&end, NULL);
     printf("Time to multiply densely \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
 
-    FLT * w = (FLT *) calloc(m, sizeof(FLT));
+    FLT * w = calloc(m, sizeof(FLT));
     gettimeofday(&start, NULL);
     for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
         X(himv)('N', 1, H, u, 0, w);
@@ -48,18 +48,18 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     X(checktest)(err, MAX(m, n), checksum);
 
     X(scale_columns_hierarchicalmatrix)(1, u, H);
-    FLT * ones  = (FLT *) malloc(n*sizeof(FLT));
+    FLT * ones  = malloc(n*sizeof(FLT));
     for (int j = 0; j < n; j++)
         ones[j] = 1;
-    FLT * z = (FLT *) calloc(m, sizeof(FLT));
+    FLT * z = calloc(m, sizeof(FLT));
     X(himv)('N', 1, H, ones, 0, z);
     err = X(norm_2arg)(w, z, m)/X(norm_1arg)(w, m);
 
-    FLT * a = (FLT *) malloc(m*sizeof(FLT));
+    FLT * a = malloc(m*sizeof(FLT));
     for (int i = 0; i < m; i++)
         a[i] = i+1;
     X(scale_rows_hierarchicalmatrix)(2, a, H);
-    FLT * b = (FLT *) calloc(m, sizeof(FLT));
+    FLT * b = calloc(m, sizeof(FLT));
     X(himv)('N', 1, H, ones, 0, b);
     for (int i = 0; i < m; i++)
         z[i] *= 2*a[i];
@@ -114,10 +114,10 @@ void Y(test_hierarchical)(int * checksum) {
     printf("\t\t\t\t\t\t\t |\n");
     for (int n = nmin; n < nmax; n *= 2) {
         int m = n;
-        FLT * x = (FLT *) malloc(m*sizeof(FLT));
+        FLT * x = malloc(m*sizeof(FLT));
         for (size_t i = 0; i < m; i++)
             x[i] = (i+1)*(i+1);
-        FLT * y = (FLT *) malloc(n*sizeof(FLT));
+        FLT * y = malloc(n*sizeof(FLT));
         for (size_t j = 0; j < n; j++)
             y[j] = (j+1)*(j+3/TWO(FLT));
         X(inner_test_hierarchical)(checksum, m, n, X(cauchykernel), x, y);
@@ -129,10 +129,10 @@ void Y(test_hierarchical)(int * checksum) {
     printf("\t\t\t\t\t\t\t |\n");
     for (int n = nmin; n < nmax; n *= 2) {
         int m = n;
-        FLT * x = (FLT *) malloc(m*sizeof(FLT));
+        FLT * x = malloc(m*sizeof(FLT));
         for (size_t i = 0; i < m; i++)
             x[i] = (i+1)*(i+1)*(i+2)*(i+2);
-        FLT * y = (FLT *) malloc(n*sizeof(FLT));
+        FLT * y = malloc(n*sizeof(FLT));
         for (size_t j = 0; j < n; j++)
             y[j] = (j+1)*(j+3/TWO(FLT))*(j+1)*(j+3/TWO(FLT));
         X(inner_test_hierarchical)(checksum, m, n, X(cauchykernel), x, y);
@@ -144,10 +144,10 @@ void Y(test_hierarchical)(int * checksum) {
     printf("\t\t\t\t\t\t\t |\n");
     for (int n = nmin; n < nmax; n *= 2) {
         int m = n;
-        FLT * x = (FLT *) malloc(m*sizeof(FLT));
+        FLT * x = malloc(m*sizeof(FLT));
         for (int i = 0; i < m; i++)
             x[i] = i+1;
-        FLT * y = (FLT *) malloc(n*sizeof(FLT));
+        FLT * y = malloc(n*sizeof(FLT));
         for (int j = 0; j < n; j++)
             y[j] = j+1/TWO(FLT);
         X(inner_test_hierarchical)(checksum, m, n, X(coulombkernel), x, y);

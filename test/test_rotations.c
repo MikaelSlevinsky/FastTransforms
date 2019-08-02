@@ -22,8 +22,8 @@ int main(void) {
         ft_checktest(err, 1, &checksum);
 
         err = 0;
-        A = (double *) calloc(n, sizeof(double));
-        B = (double *) calloc(n, sizeof(double));
+        A = calloc(n, sizeof(double));
+        B = calloc(n, sizeof(double));
         for (int m = 2; m < n; m++) {
             for (int i = 0; i < n-m; i++)
                 A[i] = B[i] = 1.0;
@@ -40,9 +40,9 @@ int main(void) {
         free(B);
 
         err = 0;
-        A = (double *) calloc(2*n, sizeof(double));
-        Ac = (double *) VMALLOC(2*n*sizeof(double));
-        B = (double *) calloc(2*n, sizeof(double));
+        A = calloc(2*n, sizeof(double));
+        Ac = VMALLOC(2*n*sizeof(double));
+        B = calloc(2*n, sizeof(double));
         for (int m = 2; m < n; m++) {
             for (int i = 0; i < n-m; i++) {
                 A[i] = Ac[i] = B[i] = 1.0;
@@ -71,9 +71,9 @@ int main(void) {
         free(B);
 
         err = 0;
-        A = (double *) calloc(4*n, sizeof(double));
-        Ac = (double *) VMALLOC(4*n*sizeof(double));
-        B = (double *) calloc(4*n, sizeof(double));
+        A = calloc(4*n, sizeof(double));
+        Ac = VMALLOC(4*n*sizeof(double));
+        B = calloc(4*n, sizeof(double));
         for (int m = 2; m < n; m++) {
             for (int i = 0; i < n-m; i++) {
                 A[i] = Ac[i] = B[i] = 1.0;
@@ -119,8 +119,8 @@ int main(void) {
         ft_checktest(err, 1, &checksum);
 
         err = 0;
-        A = (double *) calloc(n, sizeof(double));
-        B = (double *) calloc(n, sizeof(double));
+        A = calloc(n, sizeof(double));
+        B = calloc(n, sizeof(double));
         for (int m = 1; m < n; m++) {
             for (int i = 0; i < n-m; i++)
                 A[i] = B[i] = 1.0;
@@ -137,9 +137,9 @@ int main(void) {
         free(B);
 
         err = 0;
-        A = (double *) calloc(2*n, sizeof(double));
-        Ac = (double *) VMALLOC(2*n*sizeof(double));
-        B = (double *) calloc(2*n, sizeof(double));
+        A = calloc(2*n, sizeof(double));
+        Ac = VMALLOC(2*n*sizeof(double));
+        B = calloc(2*n, sizeof(double));
         for (int m = 1; m < n; m++) {
             for (int i = 0; i < n-m; i++) {
                 A[i] = Ac[i] = B[i] = 1.0;
@@ -168,9 +168,9 @@ int main(void) {
         free(B);
 
         err = 0;
-        A = (double *) calloc(4*n, sizeof(double));
-        Ac = (double *) VMALLOC(4*n*sizeof(double));
-        B = (double *) calloc(4*n, sizeof(double));
+        A = calloc(4*n, sizeof(double));
+        Ac = VMALLOC(4*n*sizeof(double));
+        B = calloc(4*n, sizeof(double));
         for (int m = 1; m < n; m++) {
             for (int i = 0; i < n-m; i++) {
                 A[i] = Ac[i] = B[i] = 1.0;
@@ -213,8 +213,8 @@ int main(void) {
         RP = ft_plan_rotdisk(n);
 
         err = 0;
-        A = (double *) calloc(n, sizeof(double));
-        B = (double *) calloc(n, sizeof(double));
+        A = calloc(n, sizeof(double));
+        B = calloc(n, sizeof(double));
         for (int m = 2; m < 2*n-1; m++) {
             for (int i = 0; i < n-(m+1)/2; i++)
                 A[i] = B[i] = 1.0;
@@ -231,9 +231,9 @@ int main(void) {
         free(B);
 
         err = 0;
-        A = (double *) calloc(2*n, sizeof(double));
-        Ac = (double *) VMALLOC(2*n*sizeof(double));
-        B = (double *) calloc(2*n, sizeof(double));
+        A = calloc(2*n, sizeof(double));
+        Ac = VMALLOC(2*n*sizeof(double));
+        B = calloc(2*n, sizeof(double));
         for (int m = 2; m < 2*n-1; m++) {
             for (int i = 0; i < n-(m+1)/2; i++) {
                 A[i] = Ac[i] = B[i] = 1.0;
@@ -272,8 +272,8 @@ int main(void) {
             SRP = ft_plan_rotspinsphere(n, s);
 
             err = 0;
-            A = (double *) calloc(n, sizeof(double));
-            B = (double *) calloc(n, sizeof(double));
+            A = calloc(n, sizeof(double));
+            B = calloc(n, sizeof(double));
             err = 0;
             for (int m = 0; m < n; m++) {
                 for (int i = 0; i < n-MAX(m, s); i++)

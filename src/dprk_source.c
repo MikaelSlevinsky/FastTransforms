@@ -53,7 +53,7 @@ X(symmetric_idpr1) * X(symmetric_idpr1_factorize)(X(symmetric_idpr1) * A) {
     int n = A->n;
     FLT * z = A->z;
     FLT sigma = A->sigma;
-    FLT * y = (FLT *) calloc(n, sizeof(FLT));
+    FLT * y = malloc(n*sizeof(FLT));
     FLT tau = ZERO(FLT);
 
     for (int i = 0; i < n; i++) {
@@ -62,7 +62,7 @@ X(symmetric_idpr1) * X(symmetric_idpr1_factorize)(X(symmetric_idpr1) * A) {
     }
     tau = sigma/(1+Y(sqrt)(1+sigma*tau));
 
-    X(symmetric_idpr1) * B = (X(symmetric_idpr1) *) malloc(sizeof(X(symmetric_idpr1)));
+    X(symmetric_idpr1) * B = malloc(sizeof(X(symmetric_idpr1)));
     B->z = y;
     B->sigma = tau;
     B->n = n;
@@ -73,7 +73,7 @@ X(symmetric_idpr1) * X(symmetric_idpr1_inv)(X(symmetric_idpr1) * A) {
     int n = A->n;
     FLT * z = A->z;
     FLT sigma = A->sigma;
-    FLT * y = (FLT *) calloc(n, sizeof(FLT));
+    FLT * y = malloc(n*sizeof(FLT));
     FLT tau = ZERO(FLT);
 
     for (int i = 0; i < n; i++) {
@@ -82,7 +82,7 @@ X(symmetric_idpr1) * X(symmetric_idpr1_inv)(X(symmetric_idpr1) * A) {
     }
     tau = -sigma/(1+sigma*tau);
 
-    X(symmetric_idpr1) * B = (X(symmetric_idpr1) *) malloc(sizeof(X(symmetric_idpr1)));
+    X(symmetric_idpr1) * B = malloc(sizeof(X(symmetric_idpr1)));
     B->z = y;
     B->sigma = tau;
     B->n = n;
@@ -94,8 +94,8 @@ X(symmetric_dpr1) * X(symmetric_dpr1_inv)(X(symmetric_dpr1) * A) {
     FLT * d = A->d;
     FLT * z = A->z;
     FLT rho = A->rho;
-    FLT * e = (FLT *) calloc(n, sizeof(FLT));
-    FLT * y = (FLT *) calloc(n, sizeof(FLT));
+    FLT * e = malloc(n*sizeof(FLT));
+    FLT * y = malloc(n*sizeof(FLT));
     FLT sigma = ZERO(FLT);
 
     for (int i = 0; i < n; i++) {
@@ -105,7 +105,7 @@ X(symmetric_dpr1) * X(symmetric_dpr1_inv)(X(symmetric_dpr1) * A) {
     }
     sigma = -rho/(1+rho*sigma);
 
-    X(symmetric_dpr1) * B = (X(symmetric_dpr1) *) malloc(sizeof(X(symmetric_dpr1)));
+    X(symmetric_dpr1) * B = malloc(sizeof(X(symmetric_dpr1)));
     B->d = e;
     B->z = y;
     B->rho = sigma;
@@ -834,8 +834,8 @@ FLT * X(symmetric_dpr1_eigvals_FMM)(X(symmetric_dpr1) * A, int ib) {
     int n = A->n;
     FLT * a = A->a, * b = A->b, c = A->c;
 
-    FLT * lambda = (FLT *) calloc(n, sizeof(FLT));
-    FLT * b2 = (FLT *) malloc((n-1)*sizeof(FLT));
+    FLT * lambda = calloc(n, sizeof(FLT));
+    FLT * b2 = malloc((n-1)*sizeof(FLT));
 
     FLT nrmb2 = 0;
     for (int i = 0; i < n-1; i++) {
@@ -858,10 +858,10 @@ FLT * X(symmetric_dpr1_eigvals_FMM)(X(symmetric_dpr1) * A, int ib) {
     lambda[ib] = lambdak;
 
     FLT nrmd = 1, nrml = 1;
-    FLT * delta = (FLT *) malloc((n-1)*sizeof(FLT));
-    FLT * f = (FLT *) malloc(n*sizeof(FLT));
-    FLT * fp = (FLT *) malloc(n*sizeof(FLT));
-    FLT * fpp = (FLT *) malloc(n*sizeof(FLT));
+    FLT * delta = malloc((n-1)*sizeof(FLT));
+    FLT * f = malloc(n*sizeof(FLT));
+    FLT * fp = malloc(n*sizeof(FLT));
+    FLT * fpp = malloc(n*sizeof(FLT));
     for (int j = ib+1; j < n-1; j++)
         lambda[j] = (a[j]+a[j-1])/2;
     while (nrmd > MAX(n*Y(eps)()*nrml, Y(floatmin)())) {
@@ -901,7 +901,7 @@ FLT * X(symmetric_dpr1_eigvals_FMM)(X(symmetric_dpr1) * A, int ib) {
 FLT * X(symmetric_dpr1_eigvecs)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lambdahi, int m) {
     int n = A->n, k;
     FLT * d = A->d, * z = A->z;
-    FLT * Q = (FLT *) calloc(n*m, sizeof(FLT));
+    FLT * Q = calloc(n*m, sizeof(FLT));
     FLT nrm;
     for (int j = 0; j < m; j++) {
         for (int i = 0; i < n; i++)
@@ -940,7 +940,7 @@ X(hierarchicalmatrix) * X(symmetric_dpr1_eigvecs_FMM)(X(symmetric_dpr1) * A, FLT
     FLT * d = A->d, * z = A->z;
     X(hierarchicalmatrix) * Q = X(sample_accurately_hierarchicalmatrix)(X(cauchykernel), X(cauchykernel2), d, lambda, lambdalo, lambdahi, (unitrange) {0, n}, (unitrange) {0, m});
     X(hierarchicalmatrix) * N = X(sample_accurately_hierarchicalmatrix)(X(coulombkernel), X(coulombkernel2), d, lambda, lambdalo, lambdahi, (unitrange) {0, n}, (unitrange) {0, m});
-    FLT * q = (FLT *) calloc(m, sizeof(FLT));
+    FLT * q = calloc(m, sizeof(FLT));
     X(scale_rows_hierarchicalmatrix)(1, z, N);
     X(himv)('T', 1, N, z, 0, q);
     for (int j = 0; j < m; j++)
@@ -956,7 +956,7 @@ X(hierarchicalmatrix) * X(symmetric_dpr1_eigvecs_FMM)(X(symmetric_dpr1) * A, FLT
 FLT * X(symmetric_definite_dpr1_eigvecs)(X(symmetric_dpr1) * A, X(symmetric_idpr1) * B, FLT * lambdalo, FLT * lambdahi, int m) {
     int n = A->n, k;
     FLT * d = A->d, * z = A->z, sigma = B->sigma;
-    FLT * V = (FLT *) calloc(n*m, sizeof(FLT));
+    FLT * V = calloc(n*m, sizeof(FLT));
     FLT nrm, nrm1, nrm2;
     for (int j = 0; j < m; j++) {
         for (int i = 0; i < n; i++)
@@ -1000,7 +1000,7 @@ X(hierarchicalmatrix) * X(symmetric_definite_dpr1_eigvecs_FMM)(X(symmetric_dpr1)
     FLT * d = A->d, * z = A->z, sigma = B->sigma;
     X(hierarchicalmatrix) * V = X(sample_accurately_hierarchicalmatrix)(X(cauchykernel), X(cauchykernel2), d, lambda, lambdalo, lambdahi, (unitrange) {0, n}, (unitrange) {0, m});
     X(hierarchicalmatrix) * N = X(sample_accurately_hierarchicalmatrix)(X(coulombkernel), X(coulombkernel2), d, lambda, lambdalo, lambdahi, (unitrange) {0, n}, (unitrange) {0, m});
-    FLT * v = (FLT *) calloc(m, sizeof(FLT));
+    FLT * v = calloc(m, sizeof(FLT));
     X(scale_rows_hierarchicalmatrix)(1, z, V);
     X(scale_rows_hierarchicalmatrix)(1, z, N);
     X(himv)('T', 1, V, z, 0, v);
@@ -1018,11 +1018,11 @@ X(hierarchicalmatrix) * X(symmetric_definite_dpr1_eigvecs_FMM)(X(symmetric_dpr1)
 // Note: this modifies `A`.
 X(symmetric_dpr1_eigen) * X(symmetric_dpr1_eig)(X(symmetric_dpr1) * A) {
     int n = A->n;
-    FLT * lambdalo = (FLT *) calloc(n, sizeof(FLT));
-    FLT * lambdahi = (FLT *) malloc(n*sizeof(FLT));
+    FLT * lambdalo = calloc(n, sizeof(FLT));
+    FLT * lambdahi = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++)
         lambdahi[i] = A->d[i];
-    int * p1 = (int *) malloc(n*sizeof(int));
+    int * p1 = malloc(n*sizeof(int));
     for (int i = 0; i < n; i++)
         p1[i] = i;
     X(symmetric_dpr1_deflate)(A, p1);
@@ -1030,14 +1030,14 @@ X(symmetric_dpr1_eigen) * X(symmetric_dpr1_eig)(X(symmetric_dpr1) * A) {
     X(perm)('N', lambdahi, p1, n);
     int iz = n-A->n;
     X(symmetric_dpr1_eigvals)(A, lambdalo+iz, lambdahi+iz);
-    int * p2 = (int *) malloc((n-iz)*sizeof(int));
+    int * p2 = malloc((n-iz)*sizeof(int));
     for (int i = 0; i < n-iz; i++)
         p2[i] = i;
     int id = X(symmetric_dpr1_deflate2)(A, lambdalo+iz, lambdahi+iz, p2);
-    FLT * v = (FLT *) malloc(id*sizeof(FLT));
+    FLT * v = malloc(id*sizeof(FLT));
     for (int i = 0; i < id; i++)
         v[i] = 1;
-    int * p = (int *) malloc(n*sizeof(int));
+    int * p = malloc(n*sizeof(int));
     for (int i = 0; i < iz; i++)
         p[i] = p1[i];
     for (int i = iz; i < n; i++)
@@ -1045,8 +1045,8 @@ X(symmetric_dpr1_eigen) * X(symmetric_dpr1_eig)(X(symmetric_dpr1) * A) {
     free(p1);
     free(p2);
 
-    int * q = (int *) malloc(n*sizeof(int));
-    FLT * lambda = (FLT *) malloc(n*sizeof(FLT));
+    int * q = malloc(n*sizeof(int));
+    FLT * lambda = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++) {
         q[i] = i;
         lambda[i] = lambdahi[i]+lambdalo[i];
@@ -1054,7 +1054,7 @@ X(symmetric_dpr1_eigen) * X(symmetric_dpr1_eig)(X(symmetric_dpr1) * A) {
     FLT * Q = X(symmetric_dpr1_eigvecs)(A, lambdalo+iz, lambdahi+iz, n-iz-id);
     X(quicksort_3arg)(lambda, lambdalo, lambdahi, q, 0, n-1, X(lt));
 
-    X(symmetric_dpr1_eigen) * F = (X(symmetric_dpr1_eigen) *) malloc(sizeof(X(symmetric_dpr1_eigen)));
+    X(symmetric_dpr1_eigen) * F = malloc(sizeof(X(symmetric_dpr1_eigen)));
     F->v = v;
     F->V = Q;
     F->lambda = lambda;
@@ -1071,11 +1071,11 @@ X(symmetric_dpr1_eigen) * X(symmetric_dpr1_eig)(X(symmetric_dpr1) * A) {
 // Note: this modifies `A`.
 X(symmetric_dpr1_eigen_FMM) * X(symmetric_dpr1_eig_FMM)(X(symmetric_dpr1) * A) {
     int n = A->n;
-    FLT * lambdalo = (FLT *) calloc(n, sizeof(FLT));
-    FLT * lambdahi = (FLT *) malloc(n*sizeof(FLT));
+    FLT * lambdalo = calloc(n, sizeof(FLT));
+    FLT * lambdahi = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++)
         lambdahi[i] = A->d[i];
-    int * p1 = (int *) malloc(n*sizeof(int));
+    int * p1 = malloc(n*sizeof(int));
     for (int i = 0; i < n; i++)
         p1[i] = i;
     X(symmetric_dpr1_deflate)(A, p1);
@@ -1083,14 +1083,14 @@ X(symmetric_dpr1_eigen_FMM) * X(symmetric_dpr1_eig_FMM)(X(symmetric_dpr1) * A) {
     X(perm)('N', lambdahi, p1, n);
     int iz = n-A->n;
     X(symmetric_dpr1_eigvals)(A, lambdalo+iz, lambdahi+iz);
-    int * p2 = (int *) malloc((n-iz)*sizeof(int));
+    int * p2 = malloc((n-iz)*sizeof(int));
     for (int i = 0; i < n-iz; i++)
         p2[i] = i;
     int id = X(symmetric_dpr1_deflate2)(A, lambdalo+iz, lambdahi+iz, p2);
-    FLT * v = (FLT *) malloc(id*sizeof(FLT));
+    FLT * v = malloc(id*sizeof(FLT));
     for (int i = 0; i < id; i++)
         v[i] = 1;
-    int * p = (int *) malloc(n*sizeof(int));
+    int * p = malloc(n*sizeof(int));
     for (int i = 0; i < iz; i++)
         p[i] = p1[i];
     for (int i = iz; i < n; i++)
@@ -1098,8 +1098,8 @@ X(symmetric_dpr1_eigen_FMM) * X(symmetric_dpr1_eig_FMM)(X(symmetric_dpr1) * A) {
     free(p1);
     free(p2);
 
-    int * q = (int *) malloc(n*sizeof(int));
-    FLT * lambda = (FLT *) malloc(n*sizeof(FLT));
+    int * q = malloc(n*sizeof(int));
+    FLT * lambda = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++) {
         q[i] = i;
         lambda[i] = lambdahi[i]+lambdalo[i];
@@ -1107,12 +1107,12 @@ X(symmetric_dpr1_eigen_FMM) * X(symmetric_dpr1_eig_FMM)(X(symmetric_dpr1) * A) {
     X(hierarchicalmatrix) * Q = X(symmetric_dpr1_eigvecs_FMM)(A, lambda+iz, lambdalo+iz, lambdahi+iz, n-iz-id);
     X(quicksort_3arg)(lambda, lambdalo, lambdahi, q, 0, n-1, X(lt));
 
-    X(symmetric_dpr1) * FA = (X(symmetric_dpr1) *) malloc(sizeof(X(symmetric_dpr1)));
-    X(symmetric_idpr1) * FB = (X(symmetric_idpr1) *) malloc(sizeof(X(symmetric_idpr1)));
+    X(symmetric_dpr1) * FA = malloc(sizeof(X(symmetric_dpr1)));
+    X(symmetric_idpr1) * FB = malloc(sizeof(X(symmetric_idpr1)));
     FB->n = FA->n = A->n;
-    FA->d = (FLT *) malloc(FA->n*sizeof(FLT));
-    FA->z = (FLT *) malloc(FA->n*sizeof(FLT));
-    FB->z = (FLT *) malloc(FA->n*sizeof(FLT));
+    FA->d = malloc(FA->n*sizeof(FLT));
+    FA->z = malloc(FA->n*sizeof(FLT));
+    FB->z = malloc(FA->n*sizeof(FLT));
     for (int i = 0; i < FA->n; i++) {
         FA->d[i] = A->d[i];
         FB->z[i] = FA->z[i] = A->z[i];
@@ -1120,7 +1120,7 @@ X(symmetric_dpr1_eigen_FMM) * X(symmetric_dpr1_eig_FMM)(X(symmetric_dpr1) * A) {
     FA->rho = A->rho;
     FB->sigma = 0;
 
-    X(symmetric_dpr1_eigen_FMM) * F = (X(symmetric_dpr1_eigen_FMM) *) malloc(sizeof(X(symmetric_dpr1_eigen_FMM)));
+    X(symmetric_dpr1_eigen_FMM) * F = malloc(sizeof(X(symmetric_dpr1_eigen_FMM)));
     F->A = FA;
     F->B = FB;
     F->v = v;
@@ -1139,11 +1139,11 @@ X(symmetric_dpr1_eigen_FMM) * X(symmetric_dpr1_eig_FMM)(X(symmetric_dpr1) * A) {
 // Note: this modifies `A` and `B`.
 X(symmetric_dpr1_eigen) * X(symmetric_definite_dpr1_eig)(X(symmetric_dpr1) * A, X(symmetric_idpr1) * B) {
     int n = A->n;
-    FLT * lambdalo = (FLT *) calloc(n, sizeof(FLT));
-    FLT * lambdahi = (FLT *) malloc(n*sizeof(FLT));
+    FLT * lambdalo = calloc(n, sizeof(FLT));
+    FLT * lambdahi = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++)
         lambdahi[i] = A->d[i];
-    int * p1 = (int *) malloc(n*sizeof(int));
+    int * p1 = malloc(n*sizeof(int));
     for (int i = 0; i < n; i++)
         p1[i] = i;
     X(symmetric_definite_dpr1_deflate)(A, B, p1);
@@ -1151,14 +1151,14 @@ X(symmetric_dpr1_eigen) * X(symmetric_definite_dpr1_eig)(X(symmetric_dpr1) * A, 
     X(perm)('N', lambdahi, p1, n);
     int iz = n-A->n;
     X(symmetric_definite_dpr1_eigvals)(A, B, lambdalo+iz, lambdahi+iz);
-    int * p2 = (int *) malloc((n-iz)*sizeof(int));
+    int * p2 = malloc((n-iz)*sizeof(int));
     for (int i = 0; i < n-iz; i++)
         p2[i] = i;
     int id = X(symmetric_definite_dpr1_deflate2)(A, B, lambdalo+iz, lambdahi+iz, p2);
-    FLT * v = (FLT *) malloc(id*sizeof(FLT));
+    FLT * v = malloc(id*sizeof(FLT));
     for (int i = 0; i < id; i++)
         v[i] = Y(sqrt)(1/(1+B->sigma*B->z[i]*B->z[i]));
-    int * p = (int *) malloc(n*sizeof(int));
+    int * p = malloc(n*sizeof(int));
     for (int i = 0; i < iz; i++)
         p[i] = p1[i];
     for (int i = iz; i < n; i++)
@@ -1166,8 +1166,8 @@ X(symmetric_dpr1_eigen) * X(symmetric_definite_dpr1_eig)(X(symmetric_dpr1) * A, 
     free(p1);
     free(p2);
 
-    int * q = (int *) malloc(n*sizeof(int));
-    FLT * lambda = (FLT *) malloc(n*sizeof(FLT));
+    int * q = malloc(n*sizeof(int));
+    FLT * lambda = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++) {
         q[i] = i;
         lambda[i] = lambdahi[i]+lambdalo[i];
@@ -1175,7 +1175,7 @@ X(symmetric_dpr1_eigen) * X(symmetric_definite_dpr1_eig)(X(symmetric_dpr1) * A, 
     FLT * V = X(symmetric_definite_dpr1_eigvecs)(A, B, lambdalo+iz+id, lambdahi+iz+id, n-iz-id);
     X(quicksort_3arg)(lambda, lambdalo, lambdahi, q, 0, n-1, X(lt));
 
-    X(symmetric_dpr1_eigen) * F = (X(symmetric_dpr1_eigen) *) malloc(sizeof(X(symmetric_dpr1_eigen)));
+    X(symmetric_dpr1_eigen) * F = malloc(sizeof(X(symmetric_dpr1_eigen)));
     F->v = v;
     F->V = V;
     F->lambda = lambda;
@@ -1192,11 +1192,11 @@ X(symmetric_dpr1_eigen) * X(symmetric_definite_dpr1_eig)(X(symmetric_dpr1) * A, 
 // Note: this modifies `A` and `B`.
 X(symmetric_dpr1_eigen_FMM) * X(symmetric_definite_dpr1_eig_FMM)(X(symmetric_dpr1) * A, X(symmetric_idpr1) * B) {
     int n = A->n;
-    FLT * lambdalo = (FLT *) calloc(n, sizeof(FLT));
-    FLT * lambdahi = (FLT *) malloc(n*sizeof(FLT));
+    FLT * lambdalo = calloc(n, sizeof(FLT));
+    FLT * lambdahi = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++)
         lambdahi[i] = A->d[i];
-    int * p1 = (int *) malloc(n*sizeof(int));
+    int * p1 = malloc(n*sizeof(int));
     for (int i = 0; i < n; i++)
         p1[i] = i;
     X(symmetric_definite_dpr1_deflate)(A, B, p1);
@@ -1204,14 +1204,14 @@ X(symmetric_dpr1_eigen_FMM) * X(symmetric_definite_dpr1_eig_FMM)(X(symmetric_dpr
     X(perm)('N', lambdahi, p1, n);
     int iz = n-A->n;
     X(symmetric_definite_dpr1_eigvals)(A, B, lambdalo+iz, lambdahi+iz);
-    int * p2 = (int *) malloc((n-iz)*sizeof(int));
+    int * p2 = malloc((n-iz)*sizeof(int));
     for (int i = 0; i < n-iz; i++)
         p2[i] = i;
     int id = X(symmetric_definite_dpr1_deflate2)(A, B, lambdalo+iz, lambdahi+iz, p2);
-    FLT * v = (FLT *) malloc(id*sizeof(FLT));
+    FLT * v = malloc(id*sizeof(FLT));
     for (int i = 0; i < id; i++)
         v[i] = Y(sqrt)(1/(1+B->sigma*B->z[i]*B->z[i]));
-    int * p = (int *) malloc(n*sizeof(int));
+    int * p = malloc(n*sizeof(int));
     for (int i = 0; i < iz; i++)
         p[i] = p1[i];
     for (int i = iz; i < n; i++)
@@ -1219,8 +1219,8 @@ X(symmetric_dpr1_eigen_FMM) * X(symmetric_definite_dpr1_eig_FMM)(X(symmetric_dpr
     free(p1);
     free(p2);
 
-    int * q = (int *) malloc(n*sizeof(int));
-    FLT * lambda = (FLT *) malloc(n*sizeof(FLT));
+    int * q = malloc(n*sizeof(int));
+    FLT * lambda = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++) {
         q[i] = i;
         lambda[i] = lambdahi[i]+lambdalo[i];
@@ -1228,12 +1228,12 @@ X(symmetric_dpr1_eigen_FMM) * X(symmetric_definite_dpr1_eig_FMM)(X(symmetric_dpr
     X(hierarchicalmatrix) * V = X(symmetric_definite_dpr1_eigvecs_FMM)(A, B, lambda+iz+id, lambdalo+iz+id, lambdahi+iz+id, n-iz-id);
     X(quicksort_3arg)(lambda, lambdalo, lambdahi, q, 0, n-1, X(lt));
 
-    X(symmetric_dpr1) * FA = (X(symmetric_dpr1) *) malloc(sizeof(X(symmetric_dpr1)));
-    X(symmetric_idpr1) * FB = (X(symmetric_idpr1) *) malloc(sizeof(X(symmetric_idpr1)));
+    X(symmetric_dpr1) * FA = malloc(sizeof(X(symmetric_dpr1)));
+    X(symmetric_idpr1) * FB = malloc(sizeof(X(symmetric_idpr1)));
     FB->n = FA->n = A->n;
-    FA->d = (FLT *) malloc(FA->n*sizeof(FLT));
-    FA->z = (FLT *) malloc(FA->n*sizeof(FLT));
-    FB->z = (FLT *) malloc(FA->n*sizeof(FLT));
+    FA->d = malloc(FA->n*sizeof(FLT));
+    FA->z = malloc(FA->n*sizeof(FLT));
+    FB->z = malloc(FA->n*sizeof(FLT));
     for (int i = 0; i < FA->n; i++) {
         FA->d[i] = A->d[i];
         FB->z[i] = FA->z[i] = A->z[i];
@@ -1241,7 +1241,7 @@ X(symmetric_dpr1_eigen_FMM) * X(symmetric_definite_dpr1_eig_FMM)(X(symmetric_dpr
     FA->rho = A->rho;
     FB->sigma = B->sigma;
 
-    X(symmetric_dpr1_eigen_FMM) * F = (X(symmetric_dpr1_eigen_FMM) *) malloc(sizeof(X(symmetric_dpr1_eigen_FMM)));
+    X(symmetric_dpr1_eigen_FMM) * F = malloc(sizeof(X(symmetric_dpr1_eigen_FMM)));
     F->A = FA;
     F->B = FB;
     F->v = v;

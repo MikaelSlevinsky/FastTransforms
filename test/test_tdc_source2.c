@@ -16,13 +16,13 @@ void X(inner_test_tdc_drop_precision)(int * checksum, int n) {
     X2(symmetric_tridiagonal) * T2 = X2(create_A_shtsdtev)(n, mu, m, PARITY);
     X2(symmetric_tridiagonal) * S2 = X2(create_B_shtsdtev)(n, m, PARITY);
 
-    FLT * Id = (FLT *) calloc(n*n, sizeof(FLT));
+    FLT * Id = calloc(n*n, sizeof(FLT));
     for (int i = 0; i < n; i++)
         Id[i+i*n] = 1;
 
-    FLT * V = (FLT *) calloc(n*n, sizeof(FLT));
-    FLT * VtBV = (FLT *) calloc(n*n, sizeof(FLT));
-    FLT * VtAV = (FLT *) calloc(n*n, sizeof(FLT));
+    FLT * V = calloc(n*n, sizeof(FLT));
+    FLT * VtBV = calloc(n*n, sizeof(FLT));
+    FLT * VtAV = calloc(n*n, sizeof(FLT));
 
     gettimeofday(&start, NULL);
     X2(tdc_eigen) * F2 = X2(sdtdc_eig)(T2, S2);

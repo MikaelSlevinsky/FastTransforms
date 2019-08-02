@@ -36,9 +36,9 @@ void X(test_permute)(int * checksum) {
 }
 
 X(symmetric_dpr1) * X(test_symmetric_dpr1)(int n) {
-    X(symmetric_dpr1) * A = (X(symmetric_dpr1) *) malloc(sizeof(X(symmetric_dpr1)));
-    A->d = (FLT *) calloc(n, sizeof(FLT));
-    A->z = (FLT *) calloc(n, sizeof(FLT));
+    X(symmetric_dpr1) * A = malloc(sizeof(X(symmetric_dpr1)));
+    A->d = calloc(n, sizeof(FLT));
+    A->z = calloc(n, sizeof(FLT));
     for (int i = 0; i < n; i++) {
         A->d[i] = (i+1)*(i+2);
         A->z[i] = i+1;
@@ -49,8 +49,8 @@ X(symmetric_dpr1) * X(test_symmetric_dpr1)(int n) {
 }
 
 X(symmetric_idpr1) * X(test_symmetric_idpr1)(int n) {
-    X(symmetric_idpr1) * B = (X(symmetric_idpr1) *) malloc(sizeof(X(symmetric_idpr1)));
-    B->z = (FLT *) calloc(n, sizeof(FLT));
+    X(symmetric_idpr1) * B = malloc(sizeof(X(symmetric_idpr1)));
+    B->z = calloc(n, sizeof(FLT));
     for (int i = 0; i < n; i++)
         B->z[i] = i+1;
     B->sigma = 1.0;
@@ -80,11 +80,11 @@ void Y(test_dprk)(int * checksum) {
     B = X(test_symmetric_idpr1)(n);
     C = X(symmetric_dpr1_inv)(A);
 
-    Id = (FLT *) calloc(n*n, sizeof(FLT));
+    Id = calloc(n*n, sizeof(FLT));
     for (int j = 0; j < n; j++)
         Id[j+j*n] = 1;
 
-    AC = (FLT *) calloc(n*n, sizeof(FLT));
+    AC = calloc(n*n, sizeof(FLT));
     for (int j = 0; j < n; j++) {
         AC[j+j*n] = 1;
         X(drmv)('N', A, AC+j*n);
@@ -102,9 +102,9 @@ void Y(test_dprk)(int * checksum) {
     Ac = X(test_symmetric_dpr1)(n);
     F = X(symmetric_dpr1_eig)(A);
 
-    Q = (FLT *) calloc(n*n, sizeof(FLT));
-    QtQ = (FLT *) calloc(n*n, sizeof(FLT));
-    QtAQ = (FLT *) calloc(n*n, sizeof(FLT));
+    Q = calloc(n*n, sizeof(FLT));
+    QtQ = calloc(n*n, sizeof(FLT));
+    QtAQ = calloc(n*n, sizeof(FLT));
     for (int j = 0; j < n; j++)
         X(dvmv)('N', 1, F, Id+j*n, 0, Q+j*n);
     for (int j = 0; j < n; j++)
@@ -116,7 +116,7 @@ void Y(test_dprk)(int * checksum) {
     for (int j = 0; j < n; j++)
         QtAQ[j+j*n] -= F->lambda[j];
 
-    flam = (FLT *) calloc(n, sizeof(FLT));
+    flam = calloc(n, sizeof(FLT));
     for (int i = 0; i < n; i++)
         flam[i] = X(secular)(Ac, F->lambdalo[i], F->lambdahi[i])/X(secular_cond)(Ac, F->lambdalo[i], F->lambdahi[i]);
     err = X(norm_1arg)(flam, n);
@@ -176,9 +176,9 @@ void Y(test_dprk)(int * checksum) {
 
     F = X(symmetric_definite_dpr1_eig)(A, B);
 
-    V = (FLT *) calloc(n*n, sizeof(FLT));
-    VtBV = (FLT *) calloc(n*n, sizeof(FLT));
-    VtAV = (FLT *) calloc(n*n, sizeof(FLT));
+    V = calloc(n*n, sizeof(FLT));
+    VtBV = calloc(n*n, sizeof(FLT));
+    VtAV = calloc(n*n, sizeof(FLT));
     for (int j = 0; j < n; j++)
         X(dvmv)('N', 1, F, Id+j*n, 0, V+j*n);
     for (int j = 0; j < n; j++)

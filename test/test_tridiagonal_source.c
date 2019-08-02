@@ -4,9 +4,9 @@ void Y(test_tridiagonal)(int * checksum) {
 
     int n = 50;
 
-    X(symmetric_tridiagonal) * A = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
-    FLT * a = (FLT *) calloc(n, sizeof(FLT));
-    FLT * b = (FLT *) calloc(n-1, sizeof(FLT));
+    X(symmetric_tridiagonal) * A = malloc(sizeof(X(symmetric_tridiagonal)));
+    FLT * a = malloc(n*sizeof(FLT));
+    FLT * b = malloc((n-1)*sizeof(FLT));
     for (int i = 0; i < n; i++)
         a[i] = 2;
     for (int i = 0; i < n-1; i++)
@@ -17,9 +17,9 @@ void Y(test_tridiagonal)(int * checksum) {
 
     FLT alpha = 2;
     FLT beta = 0.5;
-    FLT * x = (FLT *) calloc(n, sizeof(FLT));
-    FLT * y = (FLT *) calloc(n, sizeof(FLT));
-    FLT * z = (FLT *) calloc(n, sizeof(FLT));
+    FLT * x = calloc(n, sizeof(FLT));
+    FLT * y = calloc(n, sizeof(FLT));
+    FLT * z = calloc(n, sizeof(FLT));
     for (int i = 0; i < n; i++)
         x[i] = y[i] = i;
     X(stmv)('N', alpha, A, x, beta, y);
@@ -50,10 +50,10 @@ void Y(test_tridiagonal)(int * checksum) {
     printf("Comparison of matrix-vector solves \t\t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
-    FLT * V = (FLT *) calloc(n*n, sizeof(FLT));
+    FLT * V = calloc(n*n, sizeof(FLT));
     for (int i = 0; i < n; i++)
         V[i+i*n] = 1;
-    FLT * lambda = (FLT *) calloc(n, sizeof(FLT));
+    FLT * lambda = calloc(n, sizeof(FLT));
     X(symmetric_tridiagonal_eig)(A, V, lambda);
     for (int i = 0; i < n; i++)
         x[i] = i;
@@ -69,16 +69,16 @@ void Y(test_tridiagonal)(int * checksum) {
     printf("Induced spectral decomposition matrix-vector product \t |%20.2e ", (double) err);
     X(checktest)(err, 4*n, checksum);
 
-    FLT * lambda_true = (FLT *) calloc(n, sizeof(FLT));
+    FLT * lambda_true = calloc(n, sizeof(FLT));
     for (int i = 0; i < n; i++)
         lambda_true[i] = Y(pow)(2*Y(__sinpi)((i+ONE(FLT))/(2*n+2)), 2);
     err = X(norm_2arg)(lambda, lambda_true, n)/X(norm_1arg)(lambda_true, n);
     printf("Symmetric tridiagonal eigenvalues \t\t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
-    X(symmetric_tridiagonal) * D = (X(symmetric_tridiagonal) *) malloc(sizeof(X(symmetric_tridiagonal)));
-    FLT * c = (FLT *) calloc(n, sizeof(FLT));
-    FLT * d = (FLT *) calloc(n-1, sizeof(FLT));
+    X(symmetric_tridiagonal) * D = malloc(sizeof(X(symmetric_tridiagonal)));
+    FLT * c = malloc(n*sizeof(FLT));
+    FLT * d = malloc((n-1)*sizeof(FLT));
     for (int i = 0; i < n; i++)
         c[i] = A->a[i];
     for (int i = 0; i < n-1; i++)
@@ -114,9 +114,9 @@ void Y(test_tridiagonal)(int * checksum) {
     printf("Symmetric-definite tridiagonal generalized eigenvalues \t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
-    FLT * BV = (FLT *) calloc(n*n, sizeof(FLT));
-    FLT * VtBV = (FLT *) calloc(n*n, sizeof(FLT));
-    FLT * Id = (FLT *) calloc(n*n, sizeof(FLT));
+    FLT * BV = calloc(n*n, sizeof(FLT));
+    FLT * VtBV = calloc(n*n, sizeof(FLT));
+    FLT * Id = calloc(n*n, sizeof(FLT));
     for (int i = 0; i < n; i++)
         Id[i+i*n] = 1;
     for (int j = 0; j < n; j++) {
@@ -130,7 +130,7 @@ void Y(test_tridiagonal)(int * checksum) {
     X(bidiagonal) * R = X(create_R_shtsdtev)(n, m, PARITY);
     for (int j = 0; j < n; j++)
         X(bdmv)('T', R, V+j*n);
-    FLT * QtQ = (FLT *) calloc(n*n, sizeof(FLT));
+    FLT * QtQ = calloc(n*n, sizeof(FLT));
     for (int j = 0; j < n; j++)
         X(gemv)('T', n, n, 1, V, V+j*n, 0, QtQ+j*n);
     err = X(norm_2arg)(QtQ, Id, n*(n-(mu-m)/2))/X(norm_1arg)(Id, n*(n-(mu-m)/2));

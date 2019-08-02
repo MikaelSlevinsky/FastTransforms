@@ -14,11 +14,11 @@ void Y(test_tdc)(int * checksum) {
     else shft = -1;
     X(symmetric_tridiagonal) * T = X(create_A_shtsdtev)(n, mu, m, PARITY);
     X(symmetric_tridiagonal) * S = X(create_B_shtsdtev)(n, m, PARITY);
-    FLT * V = (FLT *) calloc(n*n, sizeof(FLT));
+    FLT * V = calloc(n*n, sizeof(FLT));
     for (int i = 0; i < n; i++)
         V[i+i*n] = 1;
-    FLT * lambda = (FLT *) calloc(n, sizeof(FLT));
-    FLT * lambda_true = (FLT *) calloc(n, sizeof(FLT));
+    FLT * lambda = calloc(n, sizeof(FLT));
+    FLT * lambda_true = calloc(n, sizeof(FLT));
     X(symmetric_definite_tridiagonal_eig)(T, S, V, lambda);
     for (int l = shft; l < 2*n-(mu-m)+shft; l += 2)
         lambda_true[l/2] = (l+mu)*(l+mu+1);
@@ -26,11 +26,11 @@ void Y(test_tdc)(int * checksum) {
     printf("Symmetric-definite tridiagonal generalized eigenvalues \t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
-    FLT * Id = (FLT *) calloc(n*n, sizeof(FLT));
-    FLT * AV = (FLT *) calloc(n*n, sizeof(FLT));
-    FLT * BV = (FLT *) calloc(n*n, sizeof(FLT));
-    FLT * VtBV = (FLT *) calloc(n*n, sizeof(FLT));
-    FLT * VtAV = (FLT *) calloc(n*n, sizeof(FLT));
+    FLT * Id = calloc(n*n, sizeof(FLT));
+    FLT * AV = calloc(n*n, sizeof(FLT));
+    FLT * BV = calloc(n*n, sizeof(FLT));
+    FLT * VtBV = calloc(n*n, sizeof(FLT));
+    FLT * VtAV = calloc(n*n, sizeof(FLT));
     for (int i = 0; i < n; i++)
         Id[i+i*n] = 1;
     for (int j = 0; j < n; j++) {
