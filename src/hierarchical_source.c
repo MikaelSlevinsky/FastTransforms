@@ -382,25 +382,25 @@ X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix)(FLT (*f)(FLT x, 
 }
 
 
-int X(size_densematrix)(X(densematrix) * A, int k) {
+static inline int X(size_densematrix)(X(densematrix) * A, int k) {
     if (k == 1) return A->m;
     else if (k == 2) return A->n;
     else return 1;
 }
 
-int X(size_lowrankmatrix)(X(lowrankmatrix) * L, int k) {
+static inline int X(size_lowrankmatrix)(X(lowrankmatrix) * L, int k) {
     if (k == 1) return L->m;
     else if (k == 2) return L->n;
     else return 1;
 }
 
-int X(size_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int k) {
+static inline int X(size_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int k) {
     if (k == 1) return H->m;
     else if (k == 2) return H->n;
     else return 1;
 }
 
-int X(blocksize_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int m, int n, int k) {
+static inline int X(blocksize_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int m, int n, int k) {
     int M = H->M, N = H->N;
     switch (H->hash(m, n)) {
         case 0: return 1;

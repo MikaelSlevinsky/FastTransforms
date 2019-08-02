@@ -64,11 +64,6 @@ X(hierarchicalmatrix) * X(malloc_hierarchicalmatrix)(const int M, const int N);
 X(hierarchicalmatrix) * X(sample_hierarchicalmatrix) (FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j);
 X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix) (FLT (*f)(FLT x, FLT y), FLT (*f2)(FLT x, FLT ylo, FLT yhi), FLT * x, FLT * y, FLT * ylo, FLT * yhi, unitrange i, unitrange j);
 
-int X(size_densematrix)(X(densematrix) * A, int k);
-int X(size_lowrankmatrix)(X(lowrankmatrix) * L, int k);
-int X(size_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int k);
-int X(blocksize_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int m, int n, int k);
-
 size_t X(summary_size_densematrix)(X(densematrix) * A);
 size_t X(summary_size_lowrankmatrix)(X(lowrankmatrix) * L);
 size_t X(summary_size_hierarchicalmatrix)(X(hierarchicalmatrix) * H);
