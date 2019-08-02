@@ -1091,7 +1091,7 @@ int main(int argc, const char * argv[]) {
 #define A(i,j) A[(i)+n*(j)]
 
 double * aligned_copymat(double * A, int n, int m) {
-    double * B = (double *) VMALLOC(VALIGN(n)*m*sizeof(double));
+    double * B = VMALLOC(VALIGN(n)*m*sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m; j++)
             B[(i)+VALIGN(n)*(j)] = A(i,j);
