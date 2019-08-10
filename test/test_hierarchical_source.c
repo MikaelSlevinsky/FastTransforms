@@ -38,7 +38,7 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     FLT * w = calloc(m, sizeof(FLT));
     gettimeofday(&start, NULL);
     for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-        X(himv)('N', 1, H, u, 0, w);
+        X(ghmv)('N', 1, H, u, 0, w);
     }
     gettimeofday(&end, NULL);
     printf("Time to multiply hierarchically \t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
@@ -47,12 +47,37 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     printf("Comparison of matrix-vector products \t (%5i×%5i) \t |%20.2e ", m, n, (double) err);
     X(checktest)(err, MAX(m, n), checksum);
 
+    int p = MAX(m, n);
+    FLT * B = calloc(n*p, sizeof(FLT));
+    FLT * C = calloc(m*p, sizeof(FLT));
+    for (int i = 0; i < n*p; i++)
+        B[i] = i;
+    gettimeofday(&start, NULL);
+    for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+        #pragma omp parallel for
+        for (int q = 0; q < p; q++)
+            X(ghmv)('N', 1, H, B+q*n, 0, C+q*m);
+    }
+    gettimeofday(&end, NULL);
+    printf("Time for naïve ghmm \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
+
+    FLT * D = calloc(m*p, sizeof(FLT));
+    gettimeofday(&start, NULL);
+    for (int ntimes = 0; ntimes < NLOOPS; ntimes++)
+        X(ghmm)('N', p, 1, H, B, n, 0, D, m);
+    gettimeofday(&end, NULL);
+    printf("Time for blocked ghmm \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
+
+    err = X(norm_2arg)(C, D, m*p)/X(norm_1arg)(C, m*p);
+    printf("Comparison of matrix-matrix products \t (%5i×%5i) \t |%20.2e ", m, p, (double) err);
+    X(checktest)(err, p*p, checksum);
+
     X(scale_columns_hierarchicalmatrix)(1, u, H);
     FLT * ones  = malloc(n*sizeof(FLT));
     for (int j = 0; j < n; j++)
         ones[j] = 1;
     FLT * z = calloc(m, sizeof(FLT));
-    X(himv)('N', 1, H, ones, 0, z);
+    X(ghmv)('N', 1, H, ones, 0, z);
     err = X(norm_2arg)(w, z, m)/X(norm_1arg)(w, m);
 
     FLT * a = malloc(m*sizeof(FLT));
@@ -60,7 +85,7 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
         a[i] = i+1;
     X(scale_rows_hierarchicalmatrix)(2, a, H);
     FLT * b = calloc(m, sizeof(FLT));
-    X(himv)('N', 1, H, ones, 0, b);
+    X(ghmv)('N', 1, H, ones, 0, b);
     for (int i = 0; i < m; i++)
         z[i] *= 2*a[i];
     err += X(norm_2arg)(z, b, m)/X(norm_1arg)(z, m);
@@ -70,6 +95,9 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
 
     X(destroy_densematrix)(A);
     X(destroy_hierarchicalmatrix)(H);
+    free(B);
+    free(C);
+    free(D);
     free(a);
     free(b);
     free(ones);
@@ -98,7 +126,7 @@ void Y(test_hierarchical)(int * checksum) {
     printf("\t\t\t\t\t\t\t |   or Calculation Time\n");
     printf("---------------------------------------------------------|----------------------\n");
 
-    int nmin = 512, nmax = 2048;
+    int nmin = 512*8/sizeof(FLT), nmax = 2048*8/sizeof(FLT);
     FLT err = 0;
 
     err += X(test_barycentric)('1', 40, Y(exp), 0.125);

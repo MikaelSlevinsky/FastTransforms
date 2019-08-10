@@ -409,7 +409,7 @@ void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
             for (int k = 0; k < b; k++) {
                 for (int i = 0; i < n-s; i++)
                     t2[i] = F->Y[i+k*(n-s)]*x[i+s];
-                X(himv)(TRANS, -1, F->F0, t2, 0, t1);
+                X(ghmv)(TRANS, -1, F->F0, t2, 0, t1);
                 for (int i = 0; i < s; i++)
                     x[i] += t1[i]*F->X[i+k*s];
             }
@@ -423,7 +423,7 @@ void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
             for (int k = 0; k < b; k++) {
                 for (int i = 0; i < s; i++)
                     t1[i] = F->X[i+k*s]*x[i];
-                X(himv)(TRANS, -1, F->F0, t1, 0, t2);
+                X(ghmv)(TRANS, -1, F->F0, t1, 0, t2);
                 for (int i = 0; i < n-s; i++)
                     x[i+s] += t2[i]*F->Y[i+k*(n-s)];
             }
@@ -446,7 +446,7 @@ void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
             for (int k = 0; k < b; k++) {
                 for (int i = 0; i < n-s; i++)
                     t2[i] = F->Y[i+k*(n-s)]*x[i+s];
-                X(himv)(TRANS, 1, F->F0, t2, 0, t1);
+                X(ghmv)(TRANS, 1, F->F0, t2, 0, t1);
                 for (int i = 0; i < s; i++)
                     x[i] += t1[i]*F->X[i+k*s];
             }
@@ -456,7 +456,7 @@ void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
             for (int k = 0; k < b; k++) {
                 for (int i = 0; i < s; i++)
                     t1[i] = F->X[i+k*s]*x[i];
-                X(himv)(TRANS, 1, F->F0, t1, 0, t2);
+                X(ghmv)(TRANS, 1, F->F0, t1, 0, t2);
                 for (int i = 0; i < n-s; i++)
                     x[i+s] += t2[i]*F->Y[i+k*(n-s)];
             }

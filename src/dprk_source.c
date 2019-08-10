@@ -176,7 +176,7 @@ void X(dvmv)(char TRANS, FLT alpha, X(symmetric_dpr1_eigen) * F, FLT * x, FLT be
         X(perm)('N', y, p, n);
         for (int i = 0; i < iz; i++)
             y[i] = alpha*x[i] + beta*y[i];
-        X(gemv)('N', n-iz, n-iz-id, alpha, F->V, x+iz+id, beta, y+iz);
+        X(gemv)('N', n-iz, n-iz-id, alpha, F->V, n-iz, x+iz+id, beta, y+iz);
         for (int i = iz; i < iz+id; i++)
             y[i] += alpha*v[i-iz]*x[i];
         X(perm)('N', x, q, n);
@@ -189,7 +189,7 @@ void X(dvmv)(char TRANS, FLT alpha, X(symmetric_dpr1_eigen) * F, FLT * x, FLT be
             y[i] = alpha*x[i] + beta*y[i];
         for (int i = iz; i < iz+id; i++)
             y[i] = alpha*v[i-iz]*x[i] + beta*y[i];
-        X(gemv)('T', n-iz, n-iz-id, alpha, F->V, x+iz, beta, y+iz+id);
+        X(gemv)('T', n-iz, n-iz-id, alpha, F->V, n-iz, x+iz, beta, y+iz+id);
         X(perm)('T', x, p, n);
         X(perm)('N', y, q, n);
     }
@@ -204,7 +204,7 @@ void X(dfmv)(char TRANS, FLT alpha, X(symmetric_dpr1_eigen_FMM) * F, FLT * x, FL
         X(perm)('N', y, p, n);
         for (int i = 0; i < iz; i++)
             y[i] = alpha*x[i] + beta*y[i];
-        X(himv)('N', alpha, F->V, x+iz+id, beta, y+iz);
+        X(ghmv)('N', alpha, F->V, x+iz+id, beta, y+iz);
         for (int i = iz; i < iz+id; i++)
             y[i] += alpha*v[i-iz]*x[i];
         X(perm)('N', x, q, n);
@@ -217,7 +217,7 @@ void X(dfmv)(char TRANS, FLT alpha, X(symmetric_dpr1_eigen_FMM) * F, FLT * x, FL
             y[i] = alpha*x[i] + beta*y[i];
         for (int i = iz; i < iz+id; i++)
             y[i] = alpha*v[i-iz]*x[i] + beta*y[i];
-        X(himv)('T', alpha, F->V, x+iz, beta, y+iz+id);
+        X(ghmv)('T', alpha, F->V, x+iz, beta, y+iz+id);
         X(perm)('T', x, p, n);
         X(perm)('N', y, q, n);
     }
@@ -250,7 +250,7 @@ void X(secular_FMM)(X(symmetric_dpr1) * A, FLT * b2, FLT * lambda, FLT * ret, in
     for (int j = ib+1; j < n-1; j++)
         ret[j] = lambda[j] - A->c;
     X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda, a, (unitrange) {ib+1, n-1}, (unitrange) {ib, n-1});
-    X(himv)('N', -1, H, b2+ib, 1, ret+(ib+1));
+    X(ghmv)('N', -1, H, b2+ib, 1, ret+(ib+1));
     X(destroy_hierarchicalmatrix)(H);
 }
 */
@@ -283,7 +283,7 @@ void X(secular_derivative_FMM)(X(symmetric_dpr1) * A, FLT * b2, FLT * lambda, FL
     for (int j = ib+1; j < n-1; j++)
         ret[j] = ONE(FLT);
     X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(X(coulombkernel), lambda, a, (unitrange) {ib+1, n-1}, (unitrange) {ib, n-1});
-    X(himv)('N', 1, H, b2+ib, 1, ret+(ib+1));
+    X(ghmv)('N', 1, H, b2+ib, 1, ret+(ib+1));
     X(destroy_hierarchicalmatrix)(H);
 }
 */
@@ -318,7 +318,7 @@ void X(secular_second_derivative_FMM)(X(symmetric_dpr1) * A, FLT * b2, FLT * lam
     for (int j = ib+1; j < n-1; j++)
         ret[j] = ZERO(FLT);
     X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(X(coulombprimekernel), lambda, a, (unitrange) {ib+1, n-1}, (unitrange) {ib, n-1});
-    X(himv)('N', -2, H, b2+ib, 1, ret+(ib+1));
+    X(ghmv)('N', -2, H, b2+ib, 1, ret+(ib+1));
     X(destroy_hierarchicalmatrix)(H);
 }
 */
@@ -942,7 +942,7 @@ X(hierarchicalmatrix) * X(symmetric_dpr1_eigvecs_FMM)(X(symmetric_dpr1) * A, FLT
     X(hierarchicalmatrix) * N = X(sample_accurately_hierarchicalmatrix)(X(coulombkernel), X(coulombkernel2), d, lambda, lambdalo, lambdahi, (unitrange) {0, n}, (unitrange) {0, m});
     FLT * q = calloc(m, sizeof(FLT));
     X(scale_rows_hierarchicalmatrix)(1, z, N);
-    X(himv)('T', 1, N, z, 0, q);
+    X(ghmv)('T', 1, N, z, 0, q);
     for (int j = 0; j < m; j++)
         q[j] = Y(sqrt)(1/q[j]);
     X(scale_rows_hierarchicalmatrix)(1, z, Q);
@@ -1003,10 +1003,10 @@ X(hierarchicalmatrix) * X(symmetric_definite_dpr1_eigvecs_FMM)(X(symmetric_dpr1)
     FLT * v = calloc(m, sizeof(FLT));
     X(scale_rows_hierarchicalmatrix)(1, z, V);
     X(scale_rows_hierarchicalmatrix)(1, z, N);
-    X(himv)('T', 1, V, z, 0, v);
+    X(ghmv)('T', 1, V, z, 0, v);
     for (int j = 0; j < m; j++)
         v[j] *= v[j];
-    X(himv)('T', 1, N, z, sigma, v);
+    X(ghmv)('T', 1, N, z, sigma, v);
     for (int j = 0; j < m; j++)
         v[j] = Y(sqrt)(1/v[j]);
     X(scale_columns_hierarchicalmatrix)(1, v, V);

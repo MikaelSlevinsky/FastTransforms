@@ -44,29 +44,21 @@ int main(void) {
             err = 0;
             switch (cases) {
                 case 0:
-                {
                     lambda = -0.125;
                     mu = 0.125;
                     break;
-                }
                 case 1:
-                {
                     lambda = 1.5;
                     mu = 1.0;
                     break;
-                }
                 case 2:
-                {
                     lambda = 0.25;
                     mu = 1.25;
                     break;
-                }
                 case 3:
-                {
                     lambda = 0.5;
                     mu = 2.5;
                     break;
-                }
             }
             for (int norm1 = 0; norm1 <= 1; norm1++) {
                 for (int norm2 = 0; norm2 <= 1; norm2++) {
@@ -97,69 +89,53 @@ int main(void) {
             err = 0;
             switch (cases) {
                 case 0:
-                {
                     alpha = 0.0;
                     beta = -0.5;
                     gamma = -0.5;
                     delta = -0.5;
                     break;
-                }
                 case 1:
-                {
                     alpha = 0.1;
                     beta = 0.2;
                     gamma = 0.3;
                     delta = 0.4;
                     break;
-                }
                 case 2:
-                {
                     alpha = 1.0;
                     beta = 0.5;
                     gamma = 0.5;
                     delta = 0.25;
                     break;
-                }
                 case 3:
-                {
                     alpha = -0.25;
                     beta = -0.75;
                     gamma = 0.25;
                     delta = 0.75;
                     break;
-                }
                 case 4:
-                {
                     alpha = 0.0;
                     beta = 1.0;
                     gamma = -0.5;
                     delta = 0.5;
                     break;
-                }
                 case 5:
-                {
                     alpha = 0.0;
                     beta = -0.5;
                     gamma = -0.5;
                     delta = -0.25;
                     break;
-                }
                 case 6:
-                {
                     alpha = -0.5;
                     beta = 0.5;
                     gamma = -0.5;
                     delta = 0.0;
                     break;
-                }
                 case 7:
-                {
                     alpha = 0.5;
                     beta = -0.5;
                     gamma = -0.5;
                     delta = 0.0;
                     break;
-                }
             }
             for (int norm1 = 0; norm1 <= 1; norm1++) {
                 for (int norm2 = 0; norm2 <= 1; norm2++) {

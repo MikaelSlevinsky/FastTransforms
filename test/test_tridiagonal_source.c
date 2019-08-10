@@ -57,10 +57,10 @@ void Y(test_tridiagonal)(int * checksum) {
     X(symmetric_tridiagonal_eig)(A, V, lambda);
     for (int i = 0; i < n; i++)
         x[i] = i;
-    X(gemv)('T', n, n, 1, V, x, 0, z);
+    X(gemv)('T', n, n, 1, V, n, x, 0, z);
     for (int i = 0; i < n; i++)
         z[i] *= lambda[i];
-    X(gemv)('N', n, n, 1, V, z, 0, x);
+    X(gemv)('N', n, n, 1, V, n, z, 0, x);
     for (int i = 0; i < n; i++)
         z[i] = i;
     for (int i = 0; i < n; i++)
@@ -121,7 +121,7 @@ void Y(test_tridiagonal)(int * checksum) {
         Id[i+i*n] = 1;
     for (int j = 0; j < n; j++) {
         X(stmv)('N', 1, S, V+j*n, 0, BV+j*n);
-        X(gemv)('T', n, n, 1, V, BV+j*n, 0, VtBV+j*n);
+        X(gemv)('T', n, n, 1, V, n, BV+j*n, 0, VtBV+j*n);
     }
     err = X(norm_2arg)(VtBV, Id, n*n)/X(norm_1arg)(Id, n*n);
     printf("Numerical B-orthogonality of generalized eigenvectors \t |%20.2e ", (double) err);
@@ -132,7 +132,7 @@ void Y(test_tridiagonal)(int * checksum) {
         X(bdmv)('T', R, V+j*n);
     FLT * QtQ = calloc(n*n, sizeof(FLT));
     for (int j = 0; j < n; j++)
-        X(gemv)('T', n, n, 1, V, V+j*n, 0, QtQ+j*n);
+        X(gemv)('T', n, n, 1, V, n, V+j*n, 0, QtQ+j*n);
     err = X(norm_2arg)(QtQ, Id, n*(n-(mu-m)/2))/X(norm_1arg)(Id, n*(n-(mu-m)/2));
     printf("Numerical RRᵀ-orthogonality of gen. eigenvectors \t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
