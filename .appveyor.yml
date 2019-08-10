@@ -17,7 +17,8 @@ install:
   - mklink c:\projects\fasttransforms\fftw3.dll c:\tools\vcpkg\installed\x64-windows\bin\fftw3.dll
   - set PATH=c:\tools\vcpkg\installed\x64-windows\bin;%PATH%
 
-allow_failures:
+matrix:
+  allow_failures:
     - image: Visual Studio 2015
 
 build_script:
