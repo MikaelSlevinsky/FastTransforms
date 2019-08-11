@@ -46,7 +46,7 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     err = X(norm_2arg)(v, w, m)/X(norm_1arg)(v, m);
     printf("Comparison of matrix-vector products \t (%5i×%5i) \t |%20.2e ", m, n, (double) err);
     X(checktest)(err, MAX(m, n), checksum);
-
+    /*
     int p = MAX(m, n);
     FLT * B = calloc(n*p, sizeof(FLT));
     FLT * C = calloc(m*p, sizeof(FLT));
@@ -71,7 +71,7 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     err = X(norm_2arg)(C, D, m*p)/X(norm_1arg)(C, m*p);
     printf("Comparison of matrix-matrix products \t (%5i×%5i) \t |%20.2e ", m, p, (double) err);
     X(checktest)(err, p*p, checksum);
-
+    */
     X(scale_columns_hierarchicalmatrix)(1, u, H);
     FLT * ones  = malloc(n*sizeof(FLT));
     for (int j = 0; j < n; j++)
@@ -95,9 +95,11 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
 
     X(destroy_densematrix)(A);
     X(destroy_hierarchicalmatrix)(H);
+    /*
     free(B);
     free(C);
     free(D);
+    */
     free(a);
     free(b);
     free(ones);
