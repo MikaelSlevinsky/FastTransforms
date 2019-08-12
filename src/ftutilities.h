@@ -12,13 +12,6 @@
 
 #define FT_CONCAT(prefix, name, suffix) prefix ## name ## suffix
 
-#define RED(string) "\x1b[31m" string "\x1b[0m"
-#define GREEN(string) "\x1b[32m" string "\x1b[0m"
-#define YELLOW(string) "\x1b[33m" string "\x1b[0m"
-#define BLUE(string) "\x1b[34m" string "\x1b[0m"
-#define MAGENTA(string) "\x1b[35m" string "\x1b[0m"
-#define CYAN(string) "\x1b[36m" string "\x1b[0m"
-
 void printmat(char * MAT, char * FMT, double * A, int n, int m);
 void print_summary_size(size_t i);
 double * copymat(double * A, int n, int m);

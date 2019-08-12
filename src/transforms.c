@@ -133,6 +133,36 @@ double * plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, co
     return V;
 }
 
+double * plan_laguerre_to_laguerre(const int norm1, const int norm2, const int n, const double alpha, const double beta) {
+    ft_triangular_bandedl * A = ft_create_A_laguerre_to_laguerrel(n, alpha, beta);
+    ft_triangular_bandedl * B = ft_create_B_laguerre_to_laguerrel(n);
+    long double * Vl = calloc(n*n, sizeof(long double));
+    long double alphal = alpha, betal = beta;
+    for (int i = 0; i < n; i++)
+        Vl[i+i*n] = 1;
+    ft_triangular_banded_eigenvectorsl(A, B, Vl);
+    double * V = calloc(n*n, sizeof(double));
+    long double * sclrow = calloc(n, sizeof(long double));
+    long double * sclcol = calloc(n, sizeof(long double));
+    if (n > 0) {
+        sclrow[0] = norm2 ? sqrtl(tgammal(betal+1)) : 1.0L;
+        sclcol[0] = norm1 ? 1.0L/sqrtl(tgammal(alphal+1)) : 1.0L;
+    }
+    for (int i = 1; i < n; i++) {
+        sclrow[i] = norm2 ? sqrtl((i+betal)/i)*sclrow[i-1] : 1.0L;
+        sclcol[i] = norm1 ? sqrtl(i/(i+alphal))*sclcol[i-1] : 1.0L;
+    }
+    for (int j = 0; j < n; j++)
+        for (int i = 0; i <= j; i++)
+            V[i+j*n] = sclrow[i]*Vl[i+j*n]*sclcol[j];
+    ft_destroy_triangular_bandedl(A);
+    ft_destroy_triangular_bandedl(B);
+    free(Vl);
+    free(sclrow);
+    free(sclcol);
+    return V;
+}
+
 double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta) {
     ft_triangular_bandedl * A = ft_create_A_associated_jacobi_to_jacobil(n, c, alpha, beta, gamma, delta);
     ft_triangular_bandedl * B = ft_create_B_associated_jacobi_to_jacobil(n, gamma, delta);
@@ -141,9 +171,9 @@ double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const in
     if (n > 0)
         Vl[0] = 1;
     if (n > 1)
-        Vl[1+n] = (alphal+betal+2*c+1)/(alphal+betal+c+1)*(alphal+betal+2)/(gammal+deltal+2);
+        Vl[1+n] = (2*c+alphal+betal+1)/(c+alphal+betal+1)*(2*c+alphal+betal+2)/(1+c)/(gammal+deltal+2);
     for (int i = 2; i < n; i++)
-        Vl[i+i*n] = (2*i+alphal+betal+2*c-1)/(i+alphal+betal+c)*(2*i+alphal+betal+2*c)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*Vl[i-1+(i-1)*n];
+        Vl[i+i*n] = (2*(i+c)+alphal+betal-1)/(i+c+alphal+betal)*(2*(i+c)+alphal+betal)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*i/(i+c)*Vl[i-1+(i-1)*n];
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
     double * V = calloc(n*n, sizeof(double));
     long double * sclrow = calloc(n, sizeof(long double));

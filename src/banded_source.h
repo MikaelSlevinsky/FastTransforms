@@ -85,6 +85,9 @@ X(triangular_banded) * X(create_B_ultraspherical_to_ultraspherical)(const int n,
 X(triangular_banded) * X(create_A_jacobi_to_jacobi)(const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta);
 X(triangular_banded) * X(create_B_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta);
 
+X(triangular_banded) * X(create_A_laguerre_to_laguerre)(const int n, const FLT alpha, const FLT beta);
+X(triangular_banded) * X(create_B_laguerre_to_laguerre)(const int n);
+
 X(triangular_banded) * X(create_A_konoplev_to_jacobi)(const int n, const FLT alpha, const FLT beta);
 X(triangular_banded) * X(create_B_konoplev_to_jacobi)(const int n, const FLT alpha);
 

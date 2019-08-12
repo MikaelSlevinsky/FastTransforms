@@ -185,6 +185,49 @@ int main(void) {
         free(C);
     }
 
+    printf("\nTesting the accuracy of Laguerre--Laguerre transforms.\n\n");
+    printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int n = 64; n < N; n *= 2) {
+        C = calloc(n * n, sizeof(double));
+        for (int i = 0; i < n; i++)
+            C[i+n*i] = 1.0;
+        for (int cases = 0; cases < 4; cases++) {
+            err = 0;
+            switch (cases) {
+                case 0:
+                    alpha = -0.125;
+                    beta = 0.125;
+                    break;
+                case 1:
+                    alpha = 1.5;
+                    beta = 1.0;
+                    break;
+                case 2:
+                    alpha = 0.25;
+                    beta = 1.25;
+                    break;
+                case 3:
+                    alpha = 0.5;
+                    beta = 2.5;
+                    break;
+            }
+            for (int norm1 = 0; norm1 <= 1; norm1++) {
+                for (int norm2 = 0; norm2 <= 1; norm2++) {
+                    A = plan_laguerre_to_laguerre(norm1, norm2, n, alpha, beta);
+                    B = plan_laguerre_to_laguerre(norm2, norm1, n, beta, alpha);
+                    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, n, 1.0, A, n, B, n);
+                    err += ft_norm_2arg(B, C, n*n)/ft_norm_1arg(C, n*n);
+                    free(A);
+                    free(B);
+                }
+            }
+            printf("(n×n) = (%4ix%4i), (%+1.2f) → (%+1.2f): \t\t |%20.2e ", n, n, alpha, beta, err);
+            ft_checktest(err, 4*pow(n, fabs(alpha-beta)), &checksum);
+        }
+        free(C);
+    }
+
     printf("\nTesting the accuracy of Associated Jacobi--Jacobi transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");

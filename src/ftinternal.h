@@ -6,6 +6,13 @@
 #include <quadmath.h>
 #include <immintrin.h>
 
+#define RED(string) "\x1b[31m" string "\x1b[0m"
+#define GREEN(string) "\x1b[32m" string "\x1b[0m"
+#define YELLOW(string) "\x1b[33m" string "\x1b[0m"
+#define BLUE(string) "\x1b[34m" string "\x1b[0m"
+#define MAGENTA(string) "\x1b[35m" string "\x1b[0m"
+#define CYAN(string) "\x1b[36m" string "\x1b[0m"
+
 #define M_SQRT_PI      1.772453850905516027   /* sqrt(pi)           */
 #define M_1_SQRT_PI    0.564189583547756287   /* 1/sqrt(pi)         */
 #define M_SQRT_PI_2    0.886226925452758014   /* sqrt(pi)/2         */
@@ -124,6 +131,7 @@ double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const
 double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n);
 double * plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, const double lambda, const double mu);
 double * plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const double alpha, const double beta, const double gamma, const double delta);
+double * plan_laguerre_to_laguerre(const int norm1, const int norm2, const int n, const double alpha, const double beta);
 double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta);
 double * plan_konoplev_to_jacobi(const int n, const double alpha, const double beta);
 
