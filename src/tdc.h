@@ -30,14 +30,17 @@ typedef struct {
 
 #define FLT long double
 #define X(name) FT_CONCAT(ft_, name, l)
+#define X2(name) FT_CONCAT(ft_, name, q)
 #define Y(name) FT_CONCAT(, name, l)
 #include "tridiagonal_source.h"
 #include "hierarchical_source.h"
 #include "banded_source.h"
 #include "dprk_source.h"
 #include "tdc_source.h"
+#include "drop_precision.h"
 #undef FLT
 #undef X
+#undef X2
 #undef Y
 
 #define FLT double

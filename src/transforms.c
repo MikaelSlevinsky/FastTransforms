@@ -3,6 +3,42 @@
 #include "fasttransforms.h"
 #include "ftinternal.h"
 
+#define FLT long double
+#define FLT2 quadruple
+#define X(name) FT_CONCAT(ft_, name, l)
+#define X2(name) FT_CONCAT(ft_, name, q)
+#define Y2(name) FT_CONCAT(, name, q)
+#include "transforms_source.c"
+#undef FLT
+#undef FLT2
+#undef X
+#undef X2
+#undef Y2
+
+#define FLT double
+#define FLT2 long double
+#define X(name) FT_CONCAT(ft_, name, )
+#define X2(name) FT_CONCAT(ft_, name, l)
+#define Y2(name) FT_CONCAT(, name, l)
+#include "transforms_source.c"
+#undef FLT
+#undef FLT2
+#undef X
+#undef X2
+#undef Y2
+
+#define FLT float
+#define FLT2 double
+#define X(name) FT_CONCAT(ft_, name, f)
+#define X2(name) FT_CONCAT(ft_, name, )
+#define Y2(name) FT_CONCAT(, name, )
+#include "transforms_source.c"
+#undef FLT
+#undef FLT2
+#undef X
+#undef X2
+#undef Y2
+
 double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n) {
     ft_triangular_bandedl * A = ft_create_A_legendre_to_chebyshevl(n);
     ft_triangular_bandedl * B = ft_create_B_legendre_to_chebyshevl(n);
@@ -15,8 +51,8 @@ double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const
         Vl[i+i*n] = (2*i-1)*Vl[i-1+(i-1)*n]/(2*i);
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
     double * V = calloc(n*n, sizeof(double));
-    long double * sclrow = calloc(n, sizeof(long double));
-    long double * sclcol = calloc(n, sizeof(long double));
+    long double * sclrow = malloc(n*sizeof(long double));
+    long double * sclcol = malloc(n*sizeof(long double));
     for (int i = 0; i < n; i++) {
         sclrow[i] = normcheb ? i ? sqrtl(M_PI_2l) : sqrtl(M_PIl) : 1.0L;
         sclcol[i] = normleg ? sqrtl(i+0.5L) : 1.0L;
@@ -44,8 +80,8 @@ double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const
         Vl[i+i*n] = (2*i)*Vl[i-1+(i-1)*n]/(2*i-1);
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
     double * V = calloc(n*n, sizeof(double));
-    long double * sclrow = calloc(n, sizeof(long double));
-    long double * sclcol = calloc(n, sizeof(long double));
+    long double * sclrow = malloc(n*sizeof(long double));
+    long double * sclcol = malloc(n*sizeof(long double));
     for (int i = 0; i < n; i++) {
         sclrow[i] = normleg ? 1.0L/sqrtl(i+0.5L) : 1.0L;
         sclcol[i] = normcheb ? i ? sqrtl(M_2_PIl) : sqrtl(M_1_PIl) : 1.0L;
@@ -68,9 +104,7 @@ double * plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2,
     long double lambdal = lambda, mul = mu;
     if (n > 0)
         Vl[0] = 1;
-    if (n > 1)
-        Vl[1+n] = lambdal/mul;
-    for (int i = 2; i < n; i++)
+    for (int i = 1; i < n; i++)
         Vl[i+i*n] = (i-1+lambdal)*Vl[i-1+(i-1)*n]/(i-1+mul);
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
     double * V = calloc(n*n, sizeof(double));

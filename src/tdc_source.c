@@ -1,5 +1,5 @@
 void X(destroy_tdc_eigen)(X(tdc_eigen) * F) {
-    if (F->n < 64) {
+    if (F->n < TDC_EIGEN_BLOCKSIZE) {
         free(F->V);
         free(F->lambda);
     }
@@ -13,7 +13,7 @@ void X(destroy_tdc_eigen)(X(tdc_eigen) * F) {
 }
 
 void X(destroy_tdc_eigen_FMM)(X(tdc_eigen_FMM) * F) {
-    if (F->n < 64) {
+    if (F->n < TDC_EIGEN_BLOCKSIZE) {
         free(F->V);
         free(F->lambda);
     }
@@ -28,7 +28,7 @@ void X(destroy_tdc_eigen_FMM)(X(tdc_eigen_FMM) * F) {
 
 size_t X(summary_size_tdc_eigen)(X(tdc_eigen) * F) {
     size_t S = 0;
-    if (F->n < 64)
+    if (F->n < TDC_EIGEN_BLOCKSIZE)
         S += sizeof(FLT)*F->n*(F->n+1);
     else {
         S += X(summary_size_symmetric_dpr1_eigen)(F->F0);
@@ -40,7 +40,7 @@ size_t X(summary_size_tdc_eigen)(X(tdc_eigen) * F) {
 
 size_t X(summary_size_tdc_eigen_FMM)(X(tdc_eigen_FMM) * F) {
     size_t S = 0;
-    if (F->n < 64)
+    if (F->n < TDC_EIGEN_BLOCKSIZE)
         S += sizeof(FLT)*F->n*(F->n+1);
     else {
         S += X(summary_size_symmetric_dpr1_eigen_FMM)(F->F0);
@@ -54,7 +54,7 @@ size_t X(summary_size_tdc_eigen_FMM)(X(tdc_eigen_FMM) * F) {
 X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagonal) * S) {
     int n = T->n;
     X(tdc_eigen) * F = malloc(sizeof(X(tdc_eigen)));
-    if (n < 64) {
+    if (n < TDC_EIGEN_BLOCKSIZE) {
         FLT * V = calloc(n*n, sizeof(FLT));
         for (int i = 0; i < n; i++)
             V[i+i*n] = 1;
@@ -131,13 +131,13 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
 
         FLT * d = malloc(n*sizeof(FLT));
         for (int i = 0; i < s; i++) {
-            if (F->F1->n < 64)
+            if (F->F1->n < TDC_EIGEN_BLOCKSIZE)
                 d[i] = F->F1->lambda[i];
             else
                 d[i] = F->F1->F0->lambda[i];
         }
         for (int i = 0; i < n-s; i++) {
-            if (F->F2->n < 64)
+            if (F->F2->n < TDC_EIGEN_BLOCKSIZE)
                 d[i+s] = F->F2->lambda[i];
             else
                 d[i+s] = F->F2->F0->lambda[i];
@@ -173,7 +173,7 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
 X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagonal) * S) {
     int n = T->n;
     X(tdc_eigen_FMM) * F = malloc(sizeof(X(tdc_eigen_FMM)));
-    if (n < 64) {
+    if (n < TDC_EIGEN_BLOCKSIZE) {
         FLT * V = calloc(n*n, sizeof(FLT));
         for (int i = 0; i < n; i++)
             V[i+i*n] = 1;
@@ -250,13 +250,13 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
 
         FLT * d = malloc(n*sizeof(FLT));
         for (int i = 0; i < s; i++) {
-            if (F->F1->n < 64)
+            if (F->F1->n < TDC_EIGEN_BLOCKSIZE)
                 d[i] = F->F1->lambda[i];
             else
                 d[i] = F->F1->F0->lambda[i];
         }
         for (int i = 0; i < n-s; i++) {
-            if (F->F2->n < 64)
+            if (F->F2->n < TDC_EIGEN_BLOCKSIZE)
                 d[i+s] = F->F2->lambda[i];
             else
                 d[i+s] = F->F2->F0->lambda[i];
@@ -291,7 +291,7 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
 
 void X(tdmv)(char TRANS, FLT alpha, X(tdc_eigen) * F, FLT * x, FLT beta, FLT * y) {
     int n = F->n;
-    if (n < 64)
+    if (n < TDC_EIGEN_BLOCKSIZE)
         X(gemv)(TRANS, n, n, alpha, F->V, n, x, beta, y);
     else {
         int s = n/2;
@@ -311,7 +311,7 @@ void X(tdmv)(char TRANS, FLT alpha, X(tdc_eigen) * F, FLT * x, FLT beta, FLT * y
 
 void X(tfmv)(char TRANS, FLT alpha, X(tdc_eigen_FMM) * F, FLT * x, FLT beta, FLT * y) {
     int n = F->n;
-    if (n < 64)
+    if (n < TDC_EIGEN_BLOCKSIZE)
         X(gemv)(TRANS, n, n, alpha, F->V, n, x, beta, y);
     else {
         int s = n/2;

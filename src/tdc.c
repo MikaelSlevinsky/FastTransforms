@@ -1,6 +1,9 @@
 #include "fasttransforms.h"
 #include "ftinternal.h"
 
+#define TB_EIGEN_BLOCKSIZE 128
+#define TDC_EIGEN_BLOCKSIZE 128
+
 #define FLT quadruple
 #define X(name) FT_CONCAT(ft_, name, q)
 #define Y(name) FT_CONCAT(, name, q)
@@ -19,6 +22,7 @@
 
 #define FLT long double
 #define X(name) FT_CONCAT(ft_, name, l)
+#define X2(name) FT_CONCAT(ft_, name, q)
 #define Y(name) FT_CONCAT(, name, l)
 #define BLOCKRANK 2*((int) floor(-log(Y(eps)())/2.271667761226165))
 #define BLOCKSIZE 4*BLOCKRANK
@@ -27,8 +31,10 @@
 #include "banded_source.c"
 #include "dprk_source.c"
 #include "tdc_source.c"
+#include "drop_precision.c"
 #undef FLT
 #undef X
+#undef X2
 #undef Y
 #undef BLOCKRANK
 #undef BLOCKSIZE
@@ -74,3 +80,6 @@
 #undef BLOCKRANK
 #undef BLOCKSIZE
 #undef USE_CBLAS_S
+
+#undef TB_EIGEN_BLOCKSIZE
+#undef TDC_EIGEN_BLOCKSIZE

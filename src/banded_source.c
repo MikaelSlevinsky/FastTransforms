@@ -9,7 +9,7 @@ void X(destroy_triangular_banded)(X(triangular_banded) * A) {
 }
 
 void X(destroy_tb_eigen_FMM)(X(tb_eigen_FMM) * F) {
-    if (F->n < 64) {
+    if (F->n < TB_EIGEN_BLOCKSIZE) {
         free(F->V);
         free(F->lambda);
     }
@@ -28,7 +28,7 @@ void X(destroy_tb_eigen_FMM)(X(tb_eigen_FMM) * F) {
 
 size_t X(summary_size_tb_eigen_FMM)(X(tb_eigen_FMM) * F) {
     size_t S = 0;
-    if (F->n < 64)
+    if (F->n < TB_EIGEN_BLOCKSIZE)
         S += sizeof(FLT)*F->n*(F->n+1);
     else {
         S += X(summary_size_hierarchicalmatrix)(F->F0);
@@ -229,7 +229,7 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
     int n = A->n, b1 = A->b, b2 = B->b;
     int b = MAX(b1, b2);
     X(tb_eigen_FMM) * F = malloc(sizeof(X(tb_eigen_FMM)));
-    if (n < 64) {
+    if (n < TB_EIGEN_BLOCKSIZE) {
         FLT * V = calloc(n*n, sizeof(FLT));
         for (int i = 0; i < n; i++)
             V[i+i*n] = 1;
@@ -319,7 +319,7 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
 
 void X(scale_rows_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F) {
     int n = F->n;
-    if (n < 64) {
+    if (n < TB_EIGEN_BLOCKSIZE) {
         FLT * V = F->V;
         for (int j = 0; j < n; j++)
             for (int i = 0; i <= j; i++)
@@ -334,7 +334,7 @@ void X(scale_rows_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F) {
 
 void X(scale_columns_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F) {
     int n = F->n;
-    if (n < 64) {
+    if (n < TB_EIGEN_BLOCKSIZE) {
         FLT scl, * V = F->V;
         for (int j = 0; j < n; j++) {
             scl = alpha*x[j];
@@ -407,7 +407,7 @@ void X(trsm)(char TRANS, int n, FLT * A, FLT * X, int LDX, int N) {
 // x ← A*x, x ← Aᵀ*x
 void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
     int n = F->n;
-    if (n < 64)
+    if (n < TB_EIGEN_BLOCKSIZE)
         X(trmv)(TRANS, n, F->V, x);
     else {
         int s = n/2, b = F->b;
@@ -442,7 +442,7 @@ void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
 // x ← A⁻¹*x, x ← A⁻ᵀ*x
 void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
     int n = F->n;
-    if (n < 64)
+    if (n < TB_EIGEN_BLOCKSIZE)
         X(trsv)(TRANS, n, F->V, x);
     else {
         int s = n/2, b = F->b;
@@ -486,127 +486,6 @@ void X(bfsm)(char TRANS, X(tb_eigen_FMM) * F, FLT * X, int LDX, int N) {
         X(bfsv)(TRANS, F, X+j*LDX);
 }
 
-X(triangular_banded) * X(create_A_legendre_to_chebyshev)(const int n) {
-    X(triangular_banded) * A = X(calloc_triangular_banded)(n, 2);
-    if (n > 1)
-        X(set_triangular_banded_index)(A, 2, 1, 1);
-    for (int i = 2; i < n; i++) {
-        X(set_triangular_banded_index)(A, -i*(i-ONE(FLT)), i-2, i);
-        X(set_triangular_banded_index)(A, i*(i+ONE(FLT)), i, i);
-    }
-    return A;
-}
-
-X(triangular_banded) * X(create_B_legendre_to_chebyshev)(const int n) {
-    X(triangular_banded) * B = X(calloc_triangular_banded)(n, 2);
-    if (n > 0)
-        X(set_triangular_banded_index)(B, 2, 0, 0);
-    if (n > 1)
-        X(set_triangular_banded_index)(B, 1, 1, 1);
-    for (int i = 2; i < n; i++) {
-        X(set_triangular_banded_index)(B, -1, i-2, i);
-        X(set_triangular_banded_index)(B, 1, i, i);
-    }
-    return B;
-}
-
-X(triangular_banded) * X(create_A_chebyshev_to_legendre)(const int n) {
-    X(triangular_banded) * A = X(calloc_triangular_banded)(n, 2);
-    if (n > 1)
-        X(set_triangular_banded_index)(A, ONE(FLT)/3, 1, 1);
-    for (int i = 2; i < n; i++) {
-        X(set_triangular_banded_index)(A, -(i+1)/(2*i+ONE(FLT))*(i+1), i-2, i);
-        X(set_triangular_banded_index)(A, i/(2*i+ONE(FLT))*i, i, i);
-    }
-    return A;
-}
-
-X(triangular_banded) * X(create_B_chebyshev_to_legendre)(const int n) {
-    X(triangular_banded) * B = X(calloc_triangular_banded)(n, 2);
-    if (n > 0)
-        X(set_triangular_banded_index)(B, 1, 0, 0);
-    if (n > 1)
-        X(set_triangular_banded_index)(B, ONE(FLT)/3, 1, 1);
-    for (int i = 2; i < n; i++) {
-        X(set_triangular_banded_index)(B, -1/(2*i+ONE(FLT)), i-2, i);
-        X(set_triangular_banded_index)(B, 1/(2*i+ONE(FLT)), i, i);
-    }
-    return B;
-}
-
-X(triangular_banded) * X(create_A_ultraspherical_to_ultraspherical)(const int n, const FLT lambda, const FLT mu) {
-    X(triangular_banded) * A = X(calloc_triangular_banded)(n, 2);
-    if (n > 1)
-        X(set_triangular_banded_index)(A, (1+2*lambda)*mu/(1+mu), 1, 1);
-    for (int i = 2; i < n; i++) {
-        X(set_triangular_banded_index)(A, -(i+2*mu)*(i+2*(mu-lambda))*mu/(i+mu), i-2, i);
-        X(set_triangular_banded_index)(A, i*(i+2*lambda)*mu/(i+mu), i, i);
-    }
-    return A;
-}
-
-X(triangular_banded) * X(create_B_ultraspherical_to_ultraspherical)(const int n, const FLT mu) {
-    X(triangular_banded) * B = X(calloc_triangular_banded)(n, 2);
-    if (n > 0)
-        X(set_triangular_banded_index)(B, 1, 0, 0);
-    if (n > 1)
-        X(set_triangular_banded_index)(B, mu/(1+mu), 1, 1);
-    for (int i = 2; i < n; i++) {
-        X(set_triangular_banded_index)(B, -mu/(i+mu), i-2, i);
-        X(set_triangular_banded_index)(B, mu/(i+mu), i, i);
-    }
-    return B;
-}
-
-X(triangular_banded) * X(create_A_jacobi_to_jacobi)(const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta) {
-    X(triangular_banded) * A = X(malloc_triangular_banded)(n, 2);
-    if (n > 0)
-        X(set_triangular_banded_index)(A, 0, 0, 0);
-    if (n > 1) {
-        X(set_triangular_banded_index)(A, (gamma-delta)*(gamma+delta+2)/(gamma+delta+4)*(1+(gamma-alpha+delta-beta)/2) - (gamma+delta+2)*(gamma-alpha+beta-delta)/2, 0, 1);
-        X(set_triangular_banded_index)(A, (alpha+beta+2)*(gamma+delta+2)/(gamma+delta+3)*(gamma+delta+3)/(gamma+delta+4), 1, 1);
-    }
-    for (int i = 2; i < n; i++) {
-        X(set_triangular_banded_index)(A, -(i+gamma+delta+1)*(i+gamma)/(2*i+gamma+delta)*(i+delta)/(2*i+gamma+delta+1)*(i+gamma-alpha+delta-beta), i-2, i);
-        X(set_triangular_banded_index)(A, (gamma-delta)*(i+gamma+delta+1)/(2*i+gamma+delta)/(2*i+gamma+delta+2)*(i*(i+gamma+delta+1)+(gamma+delta+2)*(gamma-alpha+delta-beta)/2) - (i+gamma+delta+1)*(gamma-alpha+beta-delta)/2, i-1, i);
-        X(set_triangular_banded_index)(A, i*(i+alpha+beta+1)*(i+gamma+delta+1)/(2*i+gamma+delta+1)*(i+gamma+delta+2)/(2*i+gamma+delta+2), i, i);
-    }
-    return A;
-}
-
-X(triangular_banded) * X(create_B_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta) {
-    X(triangular_banded) * B = X(malloc_triangular_banded)(n, 2);
-    if (n > 0)
-        X(set_triangular_banded_index)(B, 1, 0, 0);
-    if (n > 1) {
-        X(set_triangular_banded_index)(B, (gamma-delta)/(gamma+delta+4), 0, 1);
-        X(set_triangular_banded_index)(B, (gamma+delta+2)/(gamma+delta+4), 1, 1);
-    }
-    for (int i = 2; i < n; i++) {
-        X(set_triangular_banded_index)(B, -(i+gamma)/(2*i+gamma+delta)*(i+delta)/(2*i+gamma+delta+1), i-2, i);
-        X(set_triangular_banded_index)(B, (gamma-delta)*(i+gamma+delta+1)/(2*i+gamma+delta)/(2*i+gamma+delta+2), i-1, i);
-        X(set_triangular_banded_index)(B, (i+gamma+delta+1)/(2*i+gamma+delta+1)*(i+gamma+delta+2)/(2*i+gamma+delta+2), i, i);
-    }
-    return B;
-}
-
-X(triangular_banded) * X(create_A_laguerre_to_laguerre)(const int n, const FLT alpha, const FLT beta) {
-    X(triangular_banded) * A = X(malloc_triangular_banded)(n, 1);
-    for (int i = 0; i < n; i++) {
-        X(set_triangular_banded_index)(A, alpha-beta-i, i-1, i);
-        X(set_triangular_banded_index)(A, i, i, i);
-    }
-    return A;
-}
-
-X(triangular_banded) * X(create_B_laguerre_to_laguerre)(const int n) {
-    X(triangular_banded) * B = X(malloc_triangular_banded)(n, 1);
-    for (int i = 0; i < n; i++) {
-        X(set_triangular_banded_index)(B, -1, i-1, i);
-        X(set_triangular_banded_index)(B, 1, i, i);
-    }
-    return B;
-}
 
 #define delta(k) (((k)%2) ? 1 : 0)
 

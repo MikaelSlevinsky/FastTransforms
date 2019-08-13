@@ -1,7 +1,7 @@
 X(tdc_eigen) * X(drop_precision_tdc_eigen)(X2(tdc_eigen) * F2) {
     int n = F2->n;
     X(tdc_eigen) * F = malloc(sizeof(X(tdc_eigen)));
-    if (n < 64) {
+    if (n < TDC_EIGEN_BLOCKSIZE) {
         FLT * V = malloc(n*n*sizeof(FLT));
         for (int i = 0; i < n*n; i++)
             V[i] = F2->V[i];
@@ -25,7 +25,7 @@ X(tdc_eigen) * X(drop_precision_tdc_eigen)(X2(tdc_eigen) * F2) {
 X(tdc_eigen_FMM) * X(drop_precision_tdc_eigen_FMM)(X2(tdc_eigen_FMM) * F2) {
     int n = F2->n;
     X(tdc_eigen_FMM) * F = malloc(sizeof(X(tdc_eigen_FMM)));
-    if (n < 64) {
+    if (n < TDC_EIGEN_BLOCKSIZE) {
         FLT * V = malloc(n*n*sizeof(FLT));
         for (int i = 0; i < n*n; i++)
             V[i] = F2->V[i];
@@ -132,7 +132,7 @@ X(symmetric_dpr1_eigen_FMM) * X(drop_precision_symmetric_dpr1_eigen_FMM)(X2(symm
 X(tb_eigen_FMM) * X(drop_precision_tb_eigen_FMM)(X2(tb_eigen_FMM) * F2) {
     int n = F2->n;
     X(tb_eigen_FMM) * F = malloc(sizeof(X(tb_eigen_FMM)));
-    if (n < 64) {
+    if (n < TB_EIGEN_BLOCKSIZE) {
         FLT * V = malloc(n*n*sizeof(FLT));
         for (int i = 0; i < n*n; i++)
             V[i] = F2->V[i];
@@ -157,8 +157,8 @@ X(tb_eigen_FMM) * X(drop_precision_tb_eigen_FMM)(X2(tb_eigen_FMM) * F2) {
         F->Y = malloc((n-s)*b*sizeof(FLT));
         for (int i = 0; i < (n-s)*b; i++)
             F->Y[i] = F2->Y[i];
-        F->t1 = calloc(s*b, sizeof(FLT));
-        F->t2 = calloc((n-s)*b, sizeof(FLT));
+        F->t1 = calloc(s*FT_GET_MAX_THREADS(), sizeof(FLT));
+        F->t2 = calloc((n-s)*FT_GET_MAX_THREADS(), sizeof(FLT));
         F->lambda = lambda;
         F->n = n;
         F->b = b;
