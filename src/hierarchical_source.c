@@ -154,6 +154,7 @@ X(lowrankmatrix) * X(calloc_lowrankmatrix)(char N, int m, int n, int r) {
     L->m = m;
     L->n = n;
     L->r = r;
+    L->p = FT_GET_MAX_THREADS();
     L->N = N;
     return L;
 }
@@ -171,6 +172,7 @@ X(lowrankmatrix) * X(malloc_lowrankmatrix)(char N, int m, int n, int r) {
     L->m = m;
     L->n = n;
     L->r = r;
+    L->p = FT_GET_MAX_THREADS();
     L->N = N;
     return L;
 }
@@ -644,10 +646,19 @@ void X(lrmv)(char TRANS, FLT alpha, X(lowrankmatrix) * L, FLT * x, FLT beta, FLT
     }
 }
 
+static inline void X(check_temps_lowrankmatrix)(X(lowrankmatrix) * L, int p) {
+    if (L->p < p) {
+        L->t1 = realloc(L->t1, L->r*p*sizeof(FLT));
+        L->t2 = realloc(L->t2, L->r*p*sizeof(FLT));
+        L->p = p;
+    }
+}
+
 // C ← α*(USVᵀ)*B + β*C, C ← α*(VSᵀUᵀ)*B + β*C
 void X(lrmm)(char TRANS, int p, FLT alpha, X(lowrankmatrix) * L, FLT * B, int LDB, FLT beta, FLT * C, int LDC) {
+    X(check_temps_lowrankmatrix)(L, p);
     int m = L->m, n = L->n, r = L->r;
-    FLT * t1 = calloc(r*p, sizeof(FLT)), * t2 = calloc(r*p, sizeof(FLT));
+    FLT * t1 = L->t1, * t2 = L->t2;
     if (TRANS == 'N') {
         if (L->N == '2') {
             X(gemm)('T', n, r, p, 1, L->V, n, B, LDB, 0, t1, r);
@@ -670,8 +681,6 @@ void X(lrmm)(char TRANS, int p, FLT alpha, X(lowrankmatrix) * L, FLT * B, int LD
             X(gemm)('N', n, r, p, alpha, L->V, n, t2, r, beta, C, LDC);
         }
     }
-    free(t1);
-    free(t2);
 }
 
 // y ← α*H*x + β*y, y ← α*Hᵀ*x + β*y
@@ -750,8 +759,8 @@ void X(ghmm)(char TRANS, int p, FLT alpha, X(hierarchicalmatrix) * H, FLT * B, i
             }
         }
         if (p >= X(size_hierarchicalmatrix)(H, 2)) {
-            #pragma omp parallel for collapse(2)
             for (int p = 0; p < P; p++) {
+                #pragma omp parallel for
                 for (int m = 0; m < M; m++) {
                     for (int n = 0; n < N; n++) {
                         switch (H->hash(m, n)) {
@@ -792,8 +801,8 @@ void X(ghmm)(char TRANS, int p, FLT alpha, X(hierarchicalmatrix) * H, FLT * B, i
             }
         }
         if (p >= X(size_hierarchicalmatrix)(H, 1)) {
-            #pragma omp parallel for collapse(2)
             for (int p = 0; p < P; p++) {
+                #pragma omp parallel for
                 for (int n = 0; n < N; n++) {
                     for (int m = 0; m < M; m++) {
                         switch (H->hash(m, n)) {
@@ -807,8 +816,8 @@ void X(ghmm)(char TRANS, int p, FLT alpha, X(hierarchicalmatrix) * H, FLT * B, i
         }
         else {
             #pragma omp parallel for
-                for (int n = 0; n < N; n++) {
-                    for (int m = 0; m < M; m++) {
+            for (int n = 0; n < N; n++) {
+                for (int m = 0; m < M; m++) {
                     switch (H->hash(m, n)) {
                         case 1: X(ghmm)(TRANS, p, alpha, H->hierarchicalmatrices(m, n), B+mrows[m], LDB, 1, C+ncols[n], LDC); break;
                         case 2: X(demm)(TRANS, p, alpha, H->densematrices(m, n),        B+mrows[m], LDB, 1, C+ncols[n], LDC); break;

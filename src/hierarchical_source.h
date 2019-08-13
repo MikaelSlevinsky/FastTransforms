@@ -27,6 +27,7 @@ typedef struct {
     int m;
     int n;
     int r;
+    int p;
     char N;
 } X(lowrankmatrix);
 
