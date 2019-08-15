@@ -16,6 +16,10 @@ install:
   - mklink c:\projects\fasttransforms\src\fftw3.h c:\tools\vcpkg\installed\x64-windows\include\fftw3.h
   - mklink c:\projects\fasttransforms\fftw3.dll c:\tools\vcpkg\installed\x64-windows\bin\fftw3.dll
   - mklink c:\projects\fasttransforms\src\mpfr.h c:\tools\vcpkg\installed\x64-windows\include\mpfr.h
+  - cd c:\tools\vcpkg\installed\x64-windows\include\
+  - ls
+  - mklink c:\projects\fasttransforms\src\gmp.h c:\tools\vcpkg\installed\x64-windows\include\gmp.h
+  - cd c:\projects\fasttransforms\
   - mklink c:\projects\fasttransforms\mpfr.dll c:\tools\vcpkg\installed\x64-windows\bin\mpfr.dll
   - set PATH=c:\tools\vcpkg\installed\x64-windows\bin;%PATH%
 
