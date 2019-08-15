@@ -6,19 +6,19 @@ matrix:
     - os: osx
       osx_image: xcode10
       compiler: gcc-4.9
-      env: MATRIX_EVAL="brew update && brew install gcc@4.9 fftw doxygen && export CC=gcc-4.9 && export BLAS=APPLEBLAS"
+      env: MATRIX_EVAL="brew update && brew install gcc@4.9 fftw mpfr doxygen && export CC=gcc-4.9 && export BLAS=APPLEBLAS"
     # Recommended system requirements
     - os: osx
       osx_image: xcode10
       compiler: gcc-7
-      env: MATRIX_EVAL="brew update && brew install gcc@7 fftw doxygen && export CC=gcc-7 && export BLAS=APPLEBLAS"
+      env: MATRIX_EVAL="brew update && brew install gcc@7 fftw mpfr doxygen && export CC=gcc-7 && export BLAS=APPLEBLAS"
     # Minimum system requirements
     - os: linux
       compiler: gcc-4.9
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
-          packages: ['gcc-4.9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'doxygen']
+          packages: ['gcc-4.9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev', 'doxygen']
       env: MATRIX_EVAL="export CC=gcc-4.9 && export BLAS=OPENBLAS && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     # Recommended system requirements
     - os: linux
@@ -26,7 +26,7 @@ matrix:
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
-          packages: ['gcc-7', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'doxygen']
+          packages: ['gcc-7', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev', 'doxygen']
       env: MATRIX_EVAL="export CC=gcc-7 && export BLAS=OPENBLAS && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
 
 before_install: eval "${MATRIX_EVAL}"
