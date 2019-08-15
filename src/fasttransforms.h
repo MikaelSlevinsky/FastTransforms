@@ -43,6 +43,20 @@ ft_tb_eigen_FMMl * ft_plan_ultraspherical_to_ultrasphericall(const int norm1, co
 ft_tb_eigen_FMMl * ft_plan_jacobi_to_jacobil(const int norm1, const int norm2, const int n, const long double alpha, const long double beta, const long double gamma, const long double delta);
 ft_tb_eigen_FMMl * ft_plan_laguerre_to_laguerrel(const int norm1, const int norm2, const int n, const long double alpha, const long double beta);
 
+#include <mpfr.h>
+
+typedef struct {
+    mpfr_t * data;
+    int n;
+    int b;
+} ft_mpfr_triangular_banded;
+
+void ft_mpfr_destroy_plan(mpfr_t * A, int n);
+mpfr_t * ft_mpfr_plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n, mpfr_prec_t prec, mpfr_rnd_t rnd);
+mpfr_t * ft_mpfr_plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n, mpfr_prec_t prec, mpfr_rnd_t rnd);
+mpfr_t * ft_mpfr_plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, mpfr_srcptr lambda, mpfr_srcptr mu, mpfr_prec_t prec, mpfr_rnd_t rnd);
+mpfr_t * ft_mpfr_plan_laguerre_to_laguerre(const int norm1, const int norm2, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_prec_t prec, mpfr_rnd_t rnd);
+
 /// Set the number of OpenMP threads.
 void ft_set_num_threads(const int n);
 

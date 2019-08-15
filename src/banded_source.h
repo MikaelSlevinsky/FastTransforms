@@ -61,11 +61,11 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
 void X(scale_rows_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F);
 void X(scale_columns_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F);
 
-void X(trmv)(char TRANS, int n, FLT * A, FLT * x);
-void X(trsv)(char TRANS, int n, FLT * A, FLT * x);
+void X(trmv)(char TRANS, int n, FLT * A, int LDA, FLT * x);
+void X(trsv)(char TRANS, int n, FLT * A, int LDA, FLT * x);
 
-void X(trmm)(char TRANS, int n, FLT * A, FLT * X, int LDX, int N);
-void X(trsm)(char TRANS, int n, FLT * A, FLT * X, int LDX, int N);
+void X(trmm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N);
+void X(trsm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N);
 
 void X(bfmv)(char TRANS, X(tb_eigen_FMM) * A, FLT * x);
 void X(bfsv)(char TRANS, X(tb_eigen_FMM) * A, FLT * x);

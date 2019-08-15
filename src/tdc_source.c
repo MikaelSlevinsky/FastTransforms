@@ -65,7 +65,7 @@ X(tdc_eigen) * X(sdtdc_eig)(X(symmetric_tridiagonal) * T, X(symmetric_tridiagona
         F->n = n;
     }
     else {
-        int s = n/2, sign = -1;
+        int s = n>>1, sign = -1;
 
         FLT * y = calloc(n, sizeof(FLT));
         y[s-1] = sign;
@@ -184,7 +184,7 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
         F->n = n;
     }
     else {
-        int s = n/2, sign = -1;
+        int s = n>>1, sign = -1;
 
         FLT * y = calloc(n, sizeof(FLT));
         y[s-1] = sign;
@@ -294,7 +294,7 @@ void X(tdmv)(char TRANS, FLT alpha, X(tdc_eigen) * F, FLT * x, FLT beta, FLT * y
     if (n < TDC_EIGEN_BLOCKSIZE)
         X(gemv)(TRANS, n, n, alpha, F->V, n, x, beta, y);
     else {
-        int s = n/2;
+        int s = n>>1;
         FLT * z = F->z;
         if (TRANS == 'N') {
             X(dvmv)(TRANS, 1, F->F0, x, 0, z);
@@ -314,7 +314,7 @@ void X(tfmv)(char TRANS, FLT alpha, X(tdc_eigen_FMM) * F, FLT * x, FLT beta, FLT
     if (n < TDC_EIGEN_BLOCKSIZE)
         X(gemv)(TRANS, n, n, alpha, F->V, n, x, beta, y);
     else {
-        int s = n/2;
+        int s = n>>1;
         FLT * z = F->z;
         if (TRANS == 'N') {
             X(dfmv)(TRANS, 1, F->F0, x, 0, z);

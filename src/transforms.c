@@ -263,3 +263,5 @@ double * plan_konoplev_to_jacobi(const int n, const double alpha, const double b
     //free(sclcol);
     return V;
 }
+
+#include "transforms_mpfr.c"

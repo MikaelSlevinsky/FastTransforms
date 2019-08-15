@@ -49,6 +49,7 @@ X(banded) * X(malloc_banded)(const int m, const int n, const int l, const int u)
     A->u = u;
     return A;
 }
+
 X(banded) * X(calloc_banded)(const int m, const int n, const int l, const int u) {
     FLT * data = calloc(n*(l+u+1), sizeof(FLT));
     X(banded) * A = malloc(sizeof(X(banded)));
@@ -243,7 +244,7 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
     else {
         F->lambda = malloc(n*sizeof(FLT));
         X(triangular_banded_eigenvalues)(A, B, F->lambda);
-        int s = n/2;
+        int s = n>>1;
         X(triangular_banded) * A1 = X(calloc_triangular_banded)(s, b1);
         X(triangular_banded) * B1 = X(calloc_triangular_banded)(s, b2);
         for (int j = 0; j < s; j++)
@@ -326,7 +327,7 @@ void X(scale_rows_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F) {
                 V[i+j*n] *= alpha*x[i];
     }
     else {
-        int s = n/2;
+        int s = n>>1;
         X(scale_rows_tb_eigen_FMM)(alpha, x, F->F1);
         X(scale_rows_tb_eigen_FMM)(alpha, x+s, F->F2);
     }
@@ -343,7 +344,7 @@ void X(scale_columns_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F) {
         }
     }
     else {
-        int s = n/2, b = F->b;
+        int s = n>>1, b = F->b;
         for (int k = 0; k < b; k++) {
             for (int i = 0; i < s; i++)
                 F->X[i+k*s] /= x[i];
@@ -355,62 +356,95 @@ void X(scale_columns_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F) {
     }
 }
 
-
 // y ← A*x, y ← Aᵀ*x
-void X(trmv)(char TRANS, int n, FLT * A, FLT * x) {
+void X(trmv)(char TRANS, int n, FLT * A, int LDA, FLT * x) {
     if (TRANS == 'N') {
         for (int j = 0; j < n; j++) {
             for (int i = 0; i < j; i++)
-                x[i] += A[i+j*n]*x[j];
-            x[j] *= A[j+j*n];
+                x[i] += A[i+j*LDA]*x[j];
+            x[j] *= A[j+j*LDA];
         }
     }
     else if (TRANS == 'T') {
         for (int i = n-1; i >= 0; i--) {
-            x[i] *= A[i+i*n];
+            x[i] *= A[i+i*LDA];
             for (int j = i-1; j >= 0; j--)
-                x[i] += A[j+i*n]*x[j];
+                x[i] += A[j+i*LDA]*x[j];
         }
     }
 }
 
 // x ← A⁻¹*x, x ← A⁻ᵀ*x
-void X(trsv)(char TRANS, int n, FLT * A, FLT * x) {
+void X(trsv)(char TRANS, int n, FLT * A, int LDA, FLT * x) {
     if (TRANS == 'N') {
         for (int j = n-1; j >= 0; j--) {
-            x[j] /= A[j+j*n];
+            x[j] /= A[j+j*LDA];
             for (int i = 0; i < j; i++)
-                x[i] -= A[i+j*n]*x[j];
+                x[i] -= A[i+j*LDA]*x[j];
         }
     }
     else if (TRANS == 'T') {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < i; j++)
-                x[i] -= A[j+i*n]*x[j];
-            x[i] /= A[i+i*n];
+                x[i] -= A[j+i*LDA]*x[j];
+            x[i] /= A[i+i*LDA];
         }
     }
 }
 
-void X(trmm)(char TRANS, int n, FLT * A, FLT * X, int LDX, int N) {
-    #pragma omp parallel for
-    for (int j = 0; j < N; j++)
-        X(trmv)(TRANS, n, A, X+j*LDX);
-}
+// B ← A*B, B ← Aᵀ*B
+#if defined(USE_CBLAS_S)
+    void X(trmm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N) {
+        if (TRANS == 'N')
+            cblas_strmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);
+        else if (TRANS == 'T')
+            cblas_strmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);
+    }
+#elif defined(USE_CBLAS_D)
+    void X(trmm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N) {
+        if (TRANS == 'N')
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);
+        else if (TRANS == 'T')
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);
+    }
+#else
+    void X(trmm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N) {
+        #pragma omp parallel for
+        for (int j = 0; j < N; j++)
+            X(trmv)(TRANS, n, A, LDA, B+j*LDB);
+    }
+#endif
 
-void X(trsm)(char TRANS, int n, FLT * A, FLT * X, int LDX, int N) {
-    #pragma omp parallel for
-    for (int j = 0; j < N; j++)
-        X(trsv)(TRANS, n, A, X+j*LDX);
-}
+// B ← A*B, B ← Aᵀ*B
+#if defined(USE_CBLAS_S)
+    void X(trsm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N) {
+        if (TRANS == 'N')
+            cblas_strsm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);
+        else if (TRANS == 'T')
+            cblas_strsm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);
+    }
+#elif defined(USE_CBLAS_D)
+    void X(trsm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N) {
+        if (TRANS == 'N')
+            cblas_dtrsm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);
+        else if (TRANS == 'T')
+            cblas_dtrsm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);
+    }
+#else
+    void X(trsm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N) {
+        #pragma omp parallel for
+        for (int j = 0; j < N; j++)
+            X(trsv)(TRANS, n, A, LDA, B+j*LDB);
+    }
+#endif
 
 // x ← A*x, x ← Aᵀ*x
 void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
     int n = F->n;
     if (n < TB_EIGEN_BLOCKSIZE)
-        X(trmv)(TRANS, n, F->V, x);
+        X(trmv)(TRANS, n, F->V, n, x);
     else {
-        int s = n/2, b = F->b;
+        int s = n>>1, b = F->b;
         FLT * t1 = F->t1+s*FT_GET_THREAD_NUM(), * t2 = F->t2+(n-s)*FT_GET_THREAD_NUM();
         if (TRANS == 'N') {
             // C(Λ₁, Λ₂) ∘ (-XYᵀ)
@@ -443,9 +477,9 @@ void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
 void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
     int n = F->n;
     if (n < TB_EIGEN_BLOCKSIZE)
-        X(trsv)(TRANS, n, F->V, x);
+        X(trsv)(TRANS, n, F->V, n, x);
     else {
-        int s = n/2, b = F->b;
+        int s = n>>1, b = F->b;
         FLT * t1 = F->t1+s*FT_GET_THREAD_NUM(), * t2 = F->t2+(n-s)*FT_GET_THREAD_NUM();
         if (TRANS == 'N') {
             X(bfsv)(TRANS, F->F1, x);
@@ -474,16 +508,16 @@ void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
     }
 }
 
-void X(bfmm)(char TRANS, X(tb_eigen_FMM) * F, FLT * X, int LDX, int N) {
+void X(bfmm)(char TRANS, X(tb_eigen_FMM) * F, FLT * B, int LDB, int N) {
     #pragma omp parallel for
     for (int j = 0; j < N; j++)
-        X(bfmv)(TRANS, F, X+j*LDX);
+        X(bfmv)(TRANS, F, B+j*LDB);
 }
 
-void X(bfsm)(char TRANS, X(tb_eigen_FMM) * F, FLT * X, int LDX, int N) {
+void X(bfsm)(char TRANS, X(tb_eigen_FMM) * F, FLT * B, int LDB, int N) {
     #pragma omp parallel for
     for (int j = 0; j < N; j++)
-        X(bfsv)(TRANS, F, X+j*LDX);
+        X(bfsv)(TRANS, F, B+j*LDB);
 }
 
 

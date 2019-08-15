@@ -166,7 +166,7 @@ static inline X2(triangular_banded) * X2(create_A_jacobi_to_jacobi)(const int n,
         X2(set_triangular_banded_index)(A, 0, 0, 0);
     if (n > 1) {
         X2(set_triangular_banded_index)(A, (gamma-delta)*(gamma+delta+2)/(gamma+delta+4)*(1+(gamma-alpha+delta-beta)/2) - (gamma+delta+2)*(gamma-alpha+beta-delta)/2, 0, 1);
-        X2(set_triangular_banded_index)(A, (alpha+beta+2)*(gamma+delta+2)/(gamma+delta+3)*(gamma+delta+3)/(gamma+delta+4), 1, 1);
+        X2(set_triangular_banded_index)(A, (alpha+beta+2)*(gamma+delta+2)/(gamma+delta+4), 1, 1);
     }
     for (int i = 2; i < n; i++) {
         X2(set_triangular_banded_index)(A, -(i+gamma+delta+1)*(i+gamma)/(2*i+gamma+delta)*(i+delta)/(2*i+gamma+delta+1)*(i+gamma-alpha+delta-beta), i-2, i);

@@ -97,11 +97,11 @@ void X(inner_test_banded)(int * checksum, int n) {
     FLT * y = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++)
         y[i] = x[i] = ONE(FLT)/(i+1);
-    X(trmv)('N', n, V, x);
-    X(trsv)('N', n, V, x);
+    X(trmv)('N', n, V, n, x);
+    X(trsv)('N', n, V, n, x);
     err = X(norm_2arg)(x, y, n)/X(norm_1arg)(y, n);
-    X(trmv)('T', n, V, x);
-    X(trsv)('T', n, V, x);
+    X(trmv)('T', n, V, n, x);
+    X(trsv)('T', n, V, n, x);
     err += X(norm_2arg)(x, y, n)/X(norm_1arg)(y, n);
     printf("Numerical error of triangular linear algebra \t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);

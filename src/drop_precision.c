@@ -144,7 +144,7 @@ X(tb_eigen_FMM) * X(drop_precision_tb_eigen_FMM)(X2(tb_eigen_FMM) * F2) {
         F->n = n;
     }
     else {
-        int s = n/2, b = F2->b;
+        int s = n>>1, b = F2->b;
         FLT * lambda = malloc(n*sizeof(FLT));
         for (int i = 0; i < n; i++)
             lambda[i] = F2->lambda[i];

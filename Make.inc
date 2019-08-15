@@ -49,7 +49,7 @@ ifeq ($(UNAME), Windows)
     LDFLAGS += -L.
 endif
 
-LDLIBS += -lm -lquadmath -fopenmp -lblas -lfftw3
+LDLIBS += -lm -lquadmath -lmpfr -lgmp -fopenmp -lblas -lfftw3
 ifeq ($(UNAME), Linux)
     LDLIBS += -lfftw3_threads
 else ifeq ($(UNAME), Darwin)
