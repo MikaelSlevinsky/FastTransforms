@@ -504,6 +504,7 @@ void X(scale_columns_hierarchicalmatrix)(FLT alpha, FLT * x, X(hierarchicalmatri
 void X(gemv)(char TRANS, int m, int n, FLT alpha, FLT * A, int LDA, FLT * x, FLT beta, FLT * y) {
     FLT t;
     if (TRANS == 'N') {
+        /*
         if (beta != 1) {
             if (beta == 0)
                 for (int i = 0; i < m; i++)
@@ -512,6 +513,9 @@ void X(gemv)(char TRANS, int m, int n, FLT alpha, FLT * A, int LDA, FLT * x, FLT
                 for (int i = 0; i < m; i++)
                     y[i] = beta*y[i];
         }
+        */
+        for (int i = 0; i < m; i++)
+            y[i] = beta*y[i];
         for (int j = 0; j < n; j++) {
             t = alpha*x[j];
             for (int i = 0; i < m; i++)
@@ -519,6 +523,7 @@ void X(gemv)(char TRANS, int m, int n, FLT alpha, FLT * A, int LDA, FLT * x, FLT
         }
     }
     else if (TRANS == 'T') {
+        /*
         if (beta != 1) {
             if (beta == 0)
                 for (int i = 0; i < n; i++)
@@ -527,6 +532,9 @@ void X(gemv)(char TRANS, int m, int n, FLT alpha, FLT * A, int LDA, FLT * x, FLT
                 for (int i = 0; i < n; i++)
                     y[i] = beta*y[i];
         }
+        */
+        for (int i = 0; i < n; i++)
+            y[i] = beta*y[i];
         for (int i = 0; i < n; i++) {
             t = 0;
             for (int j = 0; j < m; j++)
