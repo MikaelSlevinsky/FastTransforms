@@ -1,5 +1,5 @@
 FLT * X(chebyshev_points)(char KIND, int n) {
-    int nd2 = n/2;
+    int nd2 = n>>1;
     FLT * x = malloc(n*sizeof(FLT));
     if (KIND == '1') {
         for (int k = 0; k <=nd2; k++)
@@ -17,7 +17,7 @@ FLT * X(chebyshev_points)(char KIND, int n) {
 }
 
 FLT * X(chebyshev_barycentric_weights)(char KIND, int n) {
-    int nd2 = n/2;
+    int nd2 = n>>1;
     FLT * l = malloc(n*sizeof(FLT));
     if (KIND == '1') {
         for (int k = 0; k <=nd2; k++)
@@ -501,56 +501,40 @@ void X(scale_columns_hierarchicalmatrix)(FLT alpha, FLT * x, X(hierarchicalmatri
 
 
 // y ← α*A*x + β*y, y ← α*Aᵀ*x + β*y
-#if defined(USE_CBLAS_S)
-    void X(gemv)(char TRANS, int m, int n, FLT alpha, FLT * A, int LDA, FLT * x, FLT beta, FLT * y) {
-        if (TRANS == 'N')
-            cblas_sgemv(CblasColMajor, CblasNoTrans, m, n, alpha, A, LDA, x, 1, beta, y, 1);
-        else if (TRANS == 'T')
-            cblas_sgemv(CblasColMajor, CblasTrans, m, n, alpha, A, LDA, x, 1, beta, y, 1);
-    }
-#elif defined(USE_CBLAS_D)
-    void X(gemv)(char TRANS, int m, int n, FLT alpha, FLT * A, int LDA, FLT * x, FLT beta, FLT * y) {
-        if (TRANS == 'N')
-            cblas_dgemv(CblasColMajor, CblasNoTrans, m, n, alpha, A, LDA, x, 1, beta, y, 1);
-        else if (TRANS == 'T')
-            cblas_dgemv(CblasColMajor, CblasTrans, m, n, alpha, A, LDA, x, 1, beta, y, 1);
-    }
-#else
-    void X(gemv)(char TRANS, int m, int n, FLT alpha, FLT * A, int LDA, FLT * x, FLT beta, FLT * y) {
-        FLT t;
-        if (TRANS == 'N') {
-            if (beta != 1) {
-                if (beta == 0)
-                    for (int i = 0; i < m; i++)
-                        y[i] = 0;
-                else
-                    for (int i = 0; i < m; i++)
-                        y[i] = beta*y[i];
-            }
-            for (int j = 0; j < n; j++) {
-                t = alpha*x[j];
+void X(gemv)(char TRANS, int m, int n, FLT alpha, FLT * A, int LDA, FLT * x, FLT beta, FLT * y) {
+    FLT t;
+    if (TRANS == 'N') {
+        if (beta != 1) {
+            if (beta == 0)
                 for (int i = 0; i < m; i++)
-                    y[i] += A[i+j*LDA]*t;
-            }
+                    y[i] = 0;
+            else
+                for (int i = 0; i < m; i++)
+                    y[i] = beta*y[i];
         }
-        else if (TRANS == 'T') {
-            if (beta != 1) {
-                if (beta == 0)
-                    for (int i = 0; i < n; i++)
-                        y[i] = 0;
-                else
-                    for (int i = 0; i < n; i++)
-                        y[i] = beta*y[i];
-            }
-            for (int i = 0; i < n; i++) {
-                t = 0;
-                for (int j = 0; j < m; j++)
-                    t += A[j+i*LDA]*x[j];
-                y[i] += alpha*t;
-            }
+        for (int j = 0; j < n; j++) {
+            t = alpha*x[j];
+            for (int i = 0; i < m; i++)
+                y[i] += A[i+j*LDA]*t;
         }
     }
-#endif
+    else if (TRANS == 'T') {
+        if (beta != 1) {
+            if (beta == 0)
+                for (int i = 0; i < n; i++)
+                    y[i] = 0;
+            else
+                for (int i = 0; i < n; i++)
+                    y[i] = beta*y[i];
+        }
+        for (int i = 0; i < n; i++) {
+            t = 0;
+            for (int j = 0; j < m; j++)
+                t += A[j+i*LDA]*x[j];
+            y[i] += alpha*t;
+        }
+    }
+}
 
 // C ← α*A*B + β*C, C ← α*Aᵀ*B + β*C
 #if defined(USE_CBLAS_S)
@@ -607,7 +591,6 @@ void X(scale_columns_hierarchicalmatrix)(FLT alpha, FLT * x, X(hierarchicalmatri
         }
     }
 #endif
-
 
 
 void X(demv)(char TRANS, FLT alpha, X(densematrix) * A, FLT * x, FLT beta, FLT * y) {
