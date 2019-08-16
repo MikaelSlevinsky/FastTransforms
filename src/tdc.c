@@ -2,7 +2,7 @@
 #include "ftinternal.h"
 
 #define TB_EIGEN_BLOCKSIZE 128
-#define TDC_EIGEN_BLOCKSIZE 64
+#define TDC_EIGEN_BLOCKSIZE 128
 
 #define FLT quadruple
 #define X(name) FT_CONCAT(ft_, name, q)
