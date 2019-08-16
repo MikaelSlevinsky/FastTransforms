@@ -36,8 +36,8 @@ void Y(test_tdc)(int * checksum) {
     for (int j = 0; j < n; j++) {
         X(stmv)('N', 1, T, V+j*n, 0, AV+j*n);
         X(stmv)('N', 1, S, V+j*n, 0, BV+j*n);
-        X(gemv_alt)('T', n, n, 1, V, n, AV+j*n, 0, VtAV+j*n);
-        X(gemv_alt)('T', n, n, 1, V, n, BV+j*n, 0, VtBV+j*n);
+        X(gemv)('T', n, n, 1, V, n, AV+j*n, 0, VtAV+j*n);
+        X(gemv)('T', n, n, 1, V, n, BV+j*n, 0, VtBV+j*n);
         VtAV[j+j*n] -= lambda[j];
         VtBV[j+j*n] -= 1;
     }
