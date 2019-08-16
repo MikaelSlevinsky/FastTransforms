@@ -576,26 +576,9 @@ mpfr_t * ft_mpfr_plan_ultraspherical_to_ultraspherical(const int norm1, const in
     return V;
 }
 
-/*
-static inline X2(triangular_banded) * X2(create_A_jacobi_to_jacobi)(const int n, const FLT2 alpha, const FLT2 beta, const FLT2 gamma, const FLT2 delta) {
-    X2(triangular_banded) * A = X2(malloc_triangular_banded)(n, 2);
-    if (n > 0)
-        X2(set_triangular_banded_index)(A, 0, 0, 0);
-    if (n > 1) {
-        X2(set_triangular_banded_index)(A, (gamma-delta)*(gamma+delta+2)/(gamma+delta+4)*(1+(gamma-alpha+delta-beta)/2) - (gamma+delta+2)*(gamma-alpha+beta-delta)/2, 0, 1);
-        X2(set_triangular_banded_index)(A, (alpha+beta+2)*(gamma+delta+2)/(gamma+delta+3)*(gamma+delta+3)/(gamma+delta+4), 1, 1);
-    }
-    for (int i = 2; i < n; i++) {
-        X2(set_triangular_banded_index)(A, -(i+gamma+delta+1)*(i+gamma)/(2*i+gamma+delta)*(i+delta)/(2*i+gamma+delta+1)*(i+gamma-alpha+delta-beta), i-2, i);
-        X2(set_triangular_banded_index)(A, (gamma-delta)*(i+gamma+delta+1)/(2*i+gamma+delta)/(2*i+gamma+delta+2)*(i*(i+gamma+delta+1)+(gamma+delta+2)*(gamma-alpha+delta-beta)/2) - (i+gamma+delta+1)*(gamma-alpha+beta-delta)/2, i-1, i);
-        X2(set_triangular_banded_index)(A, i*(i+alpha+beta+1)*(i+gamma+delta+1)/(2*i+gamma+delta+1)*(i+gamma+delta+2)/(2*i+gamma+delta+2), i, i);
-    }
-    return A;
-}
-
 static inline ft_mpfr_triangular_banded * ft_mpfr_create_A_jacobi_to_jacobi(const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_srcptr gamma, mpfr_srcptr delta, mpfr_prec_t prec, mpfr_rnd_t rnd) {
     ft_mpfr_triangular_banded * A = ft_mpfr_calloc_triangular_banded(n, 2, prec);
-    mpfr_t v;
+    mpfr_t v, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15;
     mpfr_init2(v, prec);
     mpfr_init2(t1, prec);
     mpfr_init2(t2, prec);
@@ -606,44 +589,82 @@ static inline ft_mpfr_triangular_banded * ft_mpfr_create_A_jacobi_to_jacobi(cons
     mpfr_init2(t7, prec);
     mpfr_init2(t8, prec);
     mpfr_init2(t9, prec);
+    mpfr_init2(t10, prec);
+    mpfr_init2(t11, prec);
+    mpfr_init2(t12, prec);
+    mpfr_init2(t13, prec);
+    mpfr_init2(t14, prec);
+    mpfr_init2(t15, prec);
     if (n > 1) {
-        // v = (gamma-delta)*(gamma+delta+2)/(gamma+delta+4)*(1+(gamma-alpha+delta-beta)/2) - (gamma+delta+2)*(gamma-alpha+beta-delta)/2;
-        mpfr_sub(t1, gamma, delta, rnd);
-        mpfr_add(t2, gamma, delta, rnd);  // t2 == γ+δ
-        mpfr_add_d(t3, t2, 2, rnd);
-        mpfr_add(t4, alpha, beta, rnd); // α+β
-        mpfr_sub(t5, alpha, beta, rnd);
-
-        mpfr_sub(t6, t2, t4, rnd);
-        mpfr_div_d(t6, t6, 2, rnd); // (γ-α+δ-β)/2
-
-        mpfr_sub(t7, t1, t5, rnd);
-        mpfr_div_d(t7, t7, 2, rnd); // (γ-α+β-δ)/2
-
-        mpfr_mul(t9, t3, t7, rnd); // (γ+δ+2)*(γ-α+β-δ)/2
-
-        mpfr_add_d(t8, t6, 1, rnd);
-        mpfr_mul(t8, t1, t8, rnd);
-        mpfr_mul(t8, t3, t8, rnd);
+        mpfr_add(t1, alpha, beta, rnd);
+        mpfr_sub(t2, alpha, beta, rnd);
+        mpfr_add(t3, gamma, delta, rnd);
+        mpfr_sub(t4, gamma, delta, rnd);
+        mpfr_sub(t1, t3, t1, rnd);
+        mpfr_div_d(t1, t1, 2, rnd);
+        mpfr_sub(t2, t4, t2, rnd);
+        mpfr_div_d(t2, t2, 2, rnd);
         mpfr_add_d(t3, t3, 2, rnd);
-        mpfr_mul(t8, t3, t8, rnd);
-
-        mpfr_sub(v, t8, t9, rnd);
-
+        mpfr_add_d(t5, t3, 2, rnd);
+        // v = (gamma-delta)*(gamma+delta+2)/(gamma+delta+4)*(1+(gamma-alpha+delta-beta)/2) - (gamma+delta+2)*(gamma-alpha+beta-delta)/2;
+        mpfr_add_d(v, t1, 1, rnd);
+        mpfr_mul(v, v, t3, rnd);
+        mpfr_div(v, v, t5, rnd);
+        mpfr_mul(v, v, t4, rnd);
+        mpfr_mul(t2, t2, t3, rnd);
+        mpfr_sub(v, v, t2, rnd);
         ft_mpfr_set_triangular_banded_index(A, v, 0, 1, rnd);
         // v = (alpha+beta+2)*(gamma+delta+2)/(gamma+delta+4);
-        mpfr_add_d(t4, t4, 2, rnd);
-        mpfr_add_d(t2, t2, 2, rnd);
-        mpfr_div(v, t2, t3, rnd);
-        mpfr_mul(v, t4, v, rnd);
+        mpfr_add(v, alpha, beta, rnd);
+        mpfr_add_d(v, v, 2, rnd);
+        mpfr_mul(v, v, t3, rnd);
+        mpfr_div(v, v, t5, rnd);
         ft_mpfr_set_triangular_banded_index(A, v, 1, 1, rnd);
     }
     for (int i = 2; i < n; i++) {
+        mpfr_add_d(t1, gamma, i, rnd);
+        mpfr_add_d(t2, delta, i, rnd);
+        mpfr_add(t3, t1, t2, rnd);
+        mpfr_add_d(t4, t3, 1, rnd);
+        mpfr_add_d(t5, t4, 1, rnd);
+        mpfr_add(t6, alpha, beta, rnd);
+        mpfr_sub(t7, alpha, beta, rnd);
+        mpfr_add(t8, gamma, delta, rnd);
+        mpfr_sub(t9, gamma, delta, rnd);
+        mpfr_add_d(t10, t8, i+1, rnd);
+        mpfr_add_d(t11, t10, 1, rnd);
+        mpfr_add_d(t12, t6, i+1, rnd);
+        mpfr_sub(t13, t8, t6, rnd);
+        mpfr_add_d(t14, t13, i, rnd);
+        mpfr_div_d(t13, t13, 2, rnd);
+        mpfr_add_d(t8, t8, 2, rnd);
+        mpfr_mul(t8, t8, t13, rnd);
+        mpfr_sub(t15, t9, t7, rnd);
+        mpfr_div_d(t15, t15, 2, rnd);
+        mpfr_mul(t15, t10, t15, rnd);
         // v = -(i+gamma+delta+1)*(i+gamma)/(2*i+gamma+delta)*(i+delta)/(2*i+gamma+delta+1)*(i+gamma-alpha+delta-beta)
+        mpfr_mul(v, t10, t1, rnd);
+        mpfr_div(v, v, t3, rnd);
+        mpfr_mul(v, v, t2, rnd);
+        mpfr_div(v, v, t4, rnd);
+        mpfr_mul(v, v, t14, rnd);
+        mpfr_neg(v, v, rnd);
         ft_mpfr_set_triangular_banded_index(A, v, i-2, i, rnd);
         // v = (gamma-delta)*(i+gamma+delta+1)/(2*i+gamma+delta)/(2*i+gamma+delta+2)*(i*(i+gamma+delta+1)+(gamma+delta+2)*(gamma-alpha+delta-beta)/2) - (i+gamma+delta+1)*(gamma-alpha+beta-delta)/2;
+        mpfr_mul_d(v, t10, i, rnd);
+        mpfr_add(v, v, t8, rnd);
+        mpfr_mul(v, v, t9, rnd);
+        mpfr_div(v, v, t3, rnd);
+        mpfr_mul(v, v, t10, rnd);
+        mpfr_div(v, v, t5, rnd);
+        mpfr_sub(v, v, t15, rnd);
         ft_mpfr_set_triangular_banded_index(A, v, i-1, i, rnd);
         // v = i*(i+alpha+beta+1)*(i+gamma+delta+1)/(2*i+gamma+delta+1)*(i+gamma+delta+2)/(2*i+gamma+delta+2);
+        mpfr_mul_d(v, t12, i, rnd);
+        mpfr_mul(v, v, t10, rnd);
+        mpfr_div(v, v, t4, rnd);
+        mpfr_mul(v, v, t11, rnd);
+        mpfr_div(v, v, t5, rnd);
         ft_mpfr_set_triangular_banded_index(A, v, i, i, rnd);
     }
     mpfr_clear(v);
@@ -656,12 +677,18 @@ static inline ft_mpfr_triangular_banded * ft_mpfr_create_A_jacobi_to_jacobi(cons
     mpfr_clear(t7);
     mpfr_clear(t8);
     mpfr_clear(t9);
+    mpfr_clear(t10);
+    mpfr_clear(t11);
+    mpfr_clear(t12);
+    mpfr_clear(t13);
+    mpfr_clear(t14);
+    mpfr_clear(t15);
     return A;
 }
 
 static inline ft_mpfr_triangular_banded * ft_mpfr_create_B_jacobi_to_jacobi(const int n, mpfr_srcptr gamma, mpfr_srcptr delta, mpfr_prec_t prec, mpfr_rnd_t rnd) {
     ft_mpfr_triangular_banded * B = ft_mpfr_calloc_triangular_banded(n, 2, prec);
-    mpfr_t v, t1, t2;
+    mpfr_t v, t1, t2, t3, t4, t5, t6;
     mpfr_init2(v, prec);
     mpfr_init2(t1, prec);
     mpfr_init2(t2, prec);
@@ -669,7 +696,6 @@ static inline ft_mpfr_triangular_banded * ft_mpfr_create_B_jacobi_to_jacobi(cons
     mpfr_init2(t4, prec);
     mpfr_init2(t5, prec);
     mpfr_init2(t6, prec);
-    mpfr_init2(t7, prec);
     if (n > 0) {
         // v = 1;
         mpfr_set_d(v, 1.0, rnd);
@@ -696,8 +722,8 @@ static inline ft_mpfr_triangular_banded * ft_mpfr_create_B_jacobi_to_jacobi(cons
         mpfr_add_d(t4, t3, 1, rnd);
         mpfr_div(t5, t1, t3, rnd);
         mpfr_div(t6, t2, t4, rnd);
-        mpfr_mul(t7, t5, t6, rnd);
-        mpfr_neg(v, t7, rnd);
+        mpfr_mul(v, t5, t6, rnd);
+        mpfr_neg(v, v, rnd);
         ft_mpfr_set_triangular_banded_index(B, v, i-2, i, rnd);
         // v = (gamma-delta)*(i+gamma+delta+1)/(2*i+gamma+delta)/(2*i+gamma+delta+2);
         mpfr_sub(t1, gamma, delta, rnd);
@@ -723,11 +749,157 @@ static inline ft_mpfr_triangular_banded * ft_mpfr_create_B_jacobi_to_jacobi(cons
     mpfr_clear(t4);
     mpfr_clear(t5);
     mpfr_clear(t6);
-    mpfr_clear(t7);
     return B;
 }
-*/
 
+mpfr_t * ft_mpfr_plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_srcptr gamma, mpfr_srcptr delta, mpfr_prec_t prec, mpfr_rnd_t rnd) {
+    ft_mpfr_triangular_banded * A = ft_mpfr_create_A_jacobi_to_jacobi(n, alpha, beta, gamma, delta, prec, rnd);
+    ft_mpfr_triangular_banded * B = ft_mpfr_create_B_jacobi_to_jacobi(n, gamma, delta, prec, rnd);
+    mpfr_t * V = malloc(n*n*sizeof(mpfr_t));
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < n; i++) {
+            mpfr_init2(V[i+j*n], prec);
+            mpfr_set_zero(V[i+j*n], 1);
+        }
+        mpfr_set_d(V[j+j*n], 1.0, rnd);
+    }
+    ft_mpfr_triangular_banded_eigenvectors(A, B, V, prec, rnd);
+
+    mpfr_t * sclrow = malloc(n*sizeof(mpfr_t));
+    mpfr_t * sclcol = malloc(n*sizeof(mpfr_t));
+    mpfr_t t1, t2, t3, t4;
+    mpfr_init2(t1, prec);
+    mpfr_init2(t2, prec);
+    mpfr_init2(t3, prec);
+    mpfr_init2(t4, prec);
+
+    if (n > 0) {
+        //sclrow[0] = norm2 ? Y2(sqrt)(Y2(pow)(2, gamma2+delta2+1)*Y2(tgamma)(gamma2+1)*Y2(tgamma)(delta2+1)/Y2(tgamma)(gamma2+delta2+2)) : 1;
+        mpfr_add_d(t1, gamma, 1, rnd);
+        mpfr_add_d(t2, delta, 1, rnd);
+        mpfr_add(t3, t1, t2, rnd);
+        mpfr_sub_d(t4, t3, 1, rnd);
+        mpfr_gamma(t1, t1, rnd);
+        mpfr_gamma(t2, t2, rnd);
+        mpfr_gamma(t3, t3, rnd);
+        mpfr_ui_pow(t4, 2, t4, rnd);
+        mpfr_div(t3, t3, t1, rnd);
+        mpfr_div(t3, t3, t2, rnd);
+        mpfr_div(t3, t3, t4, rnd);
+        mpfr_rec_sqrt(t3, t3, rnd);
+        mpfr_init2(sclrow[0], prec);
+        norm2 ? mpfr_set(sclrow[0], t3, rnd) : mpfr_set_d(sclrow[0], 1.0, rnd);
+        //sclcol[0] = norm1 ? Y2(sqrt)(Y2(tgamma)(alpha2+beta2+2)/(Y2(pow)(2, alpha2+beta2+1)*Y2(tgamma)(alpha2+1)*Y2(tgamma)(beta2+1))) : 1;
+        mpfr_add_d(t1, alpha, 1, rnd);
+        mpfr_add_d(t2, beta, 1, rnd);
+        mpfr_add(t3, t1, t2, rnd);
+        mpfr_sub_d(t4, t3, 1, rnd);
+        mpfr_gamma(t1, t1, rnd);
+        mpfr_gamma(t2, t2, rnd);
+        mpfr_gamma(t3, t3, rnd);
+        mpfr_ui_pow(t4, 2, t4, rnd);
+        mpfr_div(t3, t3, t1, rnd);
+        mpfr_div(t3, t3, t2, rnd);
+        mpfr_div(t3, t3, t4, rnd);
+        mpfr_sqrt(t3, t3, rnd);
+        mpfr_init2(sclcol[0], prec);
+        norm1 ? mpfr_set(sclcol[0], t3, rnd) : mpfr_set_d(sclcol[0], 1.0, rnd);
+    }
+    if (n > 1) {
+        //sclrow[1] = norm2 ? Y2(sqrt)((gamma2+1)*(delta2+1)/(gamma2+delta2+3))*sclrow[0] : 1;
+        mpfr_add_d(t1, gamma, 1, rnd);
+        mpfr_add_d(t2, delta, 1, rnd);
+        mpfr_add(t3, t1, t2, rnd);
+        mpfr_add_d(t3, t3, 1, rnd);
+        mpfr_mul(t1, t1, t2, rnd);
+        mpfr_div(t3, t1, t3, rnd);
+        mpfr_sqrt(t3, t3, rnd);
+        mpfr_init2(sclrow[1], prec);
+        norm2 ? mpfr_mul(sclrow[1], t3, sclrow[0], rnd) : mpfr_set_d(sclrow[1], 1.0, rnd);
+        //sclcol[1] = norm1 ? Y2(sqrt)((alpha2+beta2+3)/(alpha2+1)/(beta2+1))*(alpha2+beta2+2)/(gamma2+delta2+2)*sclcol[0] : (alpha2+beta2+2)/(gamma2+delta2+2);
+        mpfr_add_d(t1, alpha, 1, rnd);
+        mpfr_add_d(t2, beta, 1, rnd);
+        mpfr_add(t3, t1, t2, rnd);
+        mpfr_add_d(t3, t3, 1, rnd);
+        mpfr_mul(t1, t1, t2, rnd);
+        mpfr_div(t3, t3, t1, rnd);
+        mpfr_sqrt(t3, t3, rnd);
+        mpfr_add(t1, alpha, beta, rnd);
+        mpfr_add_d(t1, t1, 2, rnd);
+        mpfr_add(t2, gamma, delta, rnd);
+        mpfr_add_d(t2, t2, 2, rnd);
+        mpfr_div(t4, t1, t2, rnd);
+        mpfr_mul(t4, t4, sclcol[0], rnd);
+        mpfr_init2(sclcol[1], prec);
+        norm1 ? mpfr_mul(sclcol[1], t3, t4, rnd) : mpfr_set(sclcol[1], t4, rnd);
+    }
+    for (int i = 2; i < n; i++) {
+        //sclrow[i] = norm2 ? Y2(sqrt)((i+gamma2)/i*(i+delta2)/(i+gamma2+delta2)*(2*i+gamma2+delta2-1)/(2*i+gamma2+delta2+1))*sclrow[i-1] : 1;
+        mpfr_add_d(t1, gamma, i, rnd);
+        mpfr_add_d(t2, delta, i, rnd);
+        mpfr_add(t3, t1, t2, rnd);
+        mpfr_sub_d(t3, t3, 1, rnd);
+        mpfr_add_d(t4, t3, 2, rnd);
+        mpfr_div_d(t1, t1, i, rnd);
+        mpfr_mul(t1, t1, t2, rnd);
+        mpfr_add(t2, t2, gamma, rnd);
+        mpfr_div(t1, t1, t2, rnd);
+        mpfr_div(t3, t3, t4, rnd);
+        mpfr_mul(t3, t1, t3, rnd);
+        mpfr_sqrt(t3, t3, rnd);
+        mpfr_init2(sclrow[i], prec);
+        norm2 ? mpfr_mul(sclrow[i], t3, sclrow[i-1], rnd) : mpfr_set_d(sclrow[i], 1.0, rnd);
+        //sclcol[i] = norm1 ? Y2(sqrt)(i/(i+alpha2)*(i+alpha2+beta2)/(i+beta2)*(2*i+alpha2+beta2+1)/(2*i+alpha2+beta2-1))*(2*i+alpha2+beta2-1)/(i+alpha2+beta2)*(2*i+alpha2+beta2)/(2*i+gamma2+delta2-1)*(i+gamma2+delta2)/(2*i+gamma2+delta2)*sclcol[i-1] : (2*i+alpha2+beta2-1)/(i+alpha2+beta2)*(2*i+alpha2+beta2)/(2*i+gamma2+delta2-1)*(i+gamma2+delta2)/(2*i+gamma2+delta2)*sclcol[i-1];
+        mpfr_add_d(t1, alpha, i, rnd);
+        mpfr_add_d(t2, beta, i, rnd);
+        mpfr_add(t3, t1, t2, rnd);
+        mpfr_sub_d(t3, t3, 1, rnd);
+        mpfr_add_d(t4, t3, 2, rnd);
+        mpfr_div_d(t1, t1, i, rnd);
+        mpfr_mul(t1, t1, t2, rnd);
+        mpfr_add(t2, t2, alpha, rnd);
+        mpfr_div(t1, t1, t2, rnd);
+        mpfr_div(t3, t3, t4, rnd);
+        mpfr_mul(t3, t1, t3, rnd);
+        mpfr_rec_sqrt(t3, t3, rnd);
+        mpfr_add(t2, alpha, beta, rnd);
+        mpfr_add_d(t2, t2, i, rnd);
+        mpfr_add_d(t1, t2, i, rnd);
+        mpfr_div(t4, t1, t2, rnd);
+        mpfr_sub_d(t1, t1, 1, rnd);
+        mpfr_mul(t4, t1, t4, rnd);
+        mpfr_add(t1, gamma, delta, rnd);
+        mpfr_add_d(t1, t1, i, rnd);
+        mpfr_add_d(t2, t1, i, rnd);
+        mpfr_mul(t4, t1, t4, rnd);
+        mpfr_div(t4, t4, t2, rnd);
+        mpfr_sub_d(t2, t2, 1, rnd);
+        mpfr_div(t4, t4, t2, rnd);
+        mpfr_mul(t4, t4, sclcol[i-1], rnd);
+        mpfr_init2(sclcol[i], prec);
+        norm1 ? mpfr_mul(sclcol[i], t3, t4, rnd) : mpfr_set(sclcol[i], t4, rnd);
+    }
+
+    for (int j = 0; j < n; j++)
+        for (int i = 0; i <= j; i++) {
+            //V[i+j*n] = sclrow[i]*Vl[i+j*n]*sclcol[j];
+            mpfr_mul(V[i+j*n], sclrow[i], V[i+j*n], rnd);
+            mpfr_mul(V[i+j*n], V[i+j*n], sclcol[j], rnd);
+        }
+    ft_mpfr_destroy_triangular_banded(A);
+    ft_mpfr_destroy_triangular_banded(B);
+    for (int i = 0; i < n; i++) {
+        mpfr_clear(sclrow[i]);
+        mpfr_clear(sclcol[i]);
+    }
+    free(sclrow);
+    free(sclcol);
+    mpfr_clear(t1);
+    mpfr_clear(t2);
+    mpfr_clear(t3);
+    mpfr_clear(t4);
+    return V;
+}
 
 static inline ft_mpfr_triangular_banded * ft_mpfr_create_A_laguerre_to_laguerre(const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_prec_t prec, mpfr_rnd_t rnd) {
     ft_mpfr_triangular_banded * A = ft_mpfr_calloc_triangular_banded(n, 1, prec);
