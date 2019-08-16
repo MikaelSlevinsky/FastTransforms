@@ -292,7 +292,7 @@ X(tdc_eigen_FMM) * X(sdtdc_eig_FMM)(X(symmetric_tridiagonal) * T, X(symmetric_tr
 void X(tdmv)(char TRANS, FLT alpha, X(tdc_eigen) * F, FLT * x, FLT beta, FLT * y) {
     int n = F->n;
     if (n < TDC_EIGEN_BLOCKSIZE)
-        X(gemv_alt)(TRANS, n, n, alpha, F->V, x, beta, y);
+        X(gemv)(TRANS, n, n, alpha, F->V, n, x, beta, y);
     else {
         int s = n>>1;
         FLT * z = F->z;
@@ -312,7 +312,7 @@ void X(tdmv)(char TRANS, FLT alpha, X(tdc_eigen) * F, FLT * x, FLT beta, FLT * y
 void X(tfmv)(char TRANS, FLT alpha, X(tdc_eigen_FMM) * F, FLT * x, FLT beta, FLT * y) {
     int n = F->n;
     if (n < TDC_EIGEN_BLOCKSIZE)
-        X(gemv_alt)(TRANS, n, n, alpha, F->V, x, beta, y);
+        X(gemv)(TRANS, n, n, alpha, F->V, n, x, beta, y);
     else {
         int s = n>>1;
         FLT * z = F->z;

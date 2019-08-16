@@ -176,7 +176,7 @@ void X(dvmv)(char TRANS, FLT alpha, X(symmetric_dpr1_eigen) * F, FLT * x, FLT be
         X(perm)('N', y, p, n);
         for (int i = 0; i < iz; i++)
             y[i] = alpha*x[i] + beta*y[i];
-        X(gemv_alt)('N', n-iz, n-iz-id, alpha, F->V, x+iz+id, beta, y+iz);
+        X(gemv)('N', n-iz, n-iz-id, alpha, F->V, n-iz, x+iz+id, beta, y+iz);
         for (int i = iz; i < iz+id; i++)
             y[i] += alpha*v[i-iz]*x[i];
         X(perm)('N', x, q, n);
@@ -189,7 +189,7 @@ void X(dvmv)(char TRANS, FLT alpha, X(symmetric_dpr1_eigen) * F, FLT * x, FLT be
             y[i] = alpha*x[i] + beta*y[i];
         for (int i = iz; i < iz+id; i++)
             y[i] = alpha*v[i-iz]*x[i] + beta*y[i];
-        X(gemv_alt)('T', n-iz, n-iz-id, alpha, F->V, x+iz, beta, y+iz+id);
+        X(gemv)('T', n-iz, n-iz-id, alpha, F->V, n-iz, x+iz, beta, y+iz+id);
         X(perm)('T', x, p, n);
         X(perm)('N', y, q, n);
     }

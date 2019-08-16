@@ -544,31 +544,6 @@ void X(gemv)(char TRANS, int m, int n, FLT alpha, FLT * A, int LDA, FLT * x, FLT
     }
 }
 
-void X(gemv_alt)(char TRANS, int m, int n, FLT alpha, FLT * A, FLT * x, FLT beta, FLT * y) {
-    FLT t;
-    if (TRANS == 'N') {
-        for (int i = 0; i < m; i++)
-            y[i] = beta*y[i];
-        for (int j = 0; j < n; j++) {
-            t = alpha*x[j];
-            for (int i = 0; i < m; i++)
-                y[i] += A[i]*t;
-            A += m;
-        }
-    }
-    else if (TRANS == 'T') {
-        for (int i = 0; i < n; i++)
-            y[i] = beta*y[i];
-        for (int i = 0; i < n; i++) {
-            t = 0;
-            for (int j = 0; j < m; j++)
-                t += A[j]*x[j];
-            y[i] += alpha*t;
-            A += m;
-        }
-    }
-}
-
 // C ← α*A*B + β*C, C ← α*Aᵀ*B + β*C
 #if defined(USE_CBLAS_S)
     void X(gemm)(char TRANS, int m, int n, int p, FLT alpha, FLT * A, int LDA, FLT * B, int LDB, FLT beta, FLT * C, int LDC) {

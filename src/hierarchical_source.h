@@ -84,7 +84,6 @@ void X(scale_rows_hierarchicalmatrix)(FLT alpha, FLT * x, X(hierarchicalmatrix) 
 void X(scale_columns_hierarchicalmatrix)(FLT alpha, FLT * x, X(hierarchicalmatrix) * H);
 
 void X(gemv)(char TRANS, int m, int n, FLT alpha, FLT * A, int LDA, FLT * x, FLT beta, FLT * y);
-void X(gemv_alt)(char TRANS, int m, int n, FLT alpha, FLT * A, FLT * x, FLT beta, FLT * y);
 void X(gemm)(char TRANS, int m, int n, int p, FLT alpha, FLT * A, int LDA, FLT * B, int LDB, FLT beta, FLT * C, int LDC);
 void X(demv)(char TRANS, FLT alpha, X(densematrix) * A, FLT * x, FLT beta, FLT * y);
 void X(demm)(char TRANS, int p, FLT alpha, X(densematrix) * A, FLT * B, int LDB, FLT beta, FLT * C, int LDC);
