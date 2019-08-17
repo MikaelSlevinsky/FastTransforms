@@ -264,4 +264,92 @@ double * plan_konoplev_to_jacobi(const int n, const double alpha, const double b
     return V;
 }
 
+double * plan_jacobi_to_ultraspherical(const int normjac, const int normultra, const int n, const double alpha, const double beta, const double lambda) {
+    double * V = plan_jacobi_to_jacobi(normjac, normultra, n, alpha, beta, lambda-0.5, lambda-0.5);
+    if (normultra == 0) {
+        double * sclrow = malloc(n*sizeof(double));
+        if (n > 0)
+            sclrow[0] = 1;
+        for (int i = 1; i < n; i++)
+            sclrow[i] = (lambda+i-0.5)/(2*lambda+i-1)*sclrow[i-1];
+        for (int j = 0; j < n; j++)
+            for (int i = 0; i <= j; i++)
+                V[i+j*n] *= sclrow[i];
+        free(sclrow);
+    }
+    return V;
+}
+
+double * plan_ultraspherical_to_jacobi(const int normultra, const int normjac, const int n, const double lambda, const double alpha, const double beta) {
+    double * V = plan_jacobi_to_jacobi(normultra, normjac, n, lambda-0.5, lambda-0.5, alpha, beta);
+    if (normultra == 0) {
+        double * sclcol = malloc(n*sizeof(double));
+        if (n > 0)
+            sclcol[0] = 1;
+        for (int i = 1; i < n; i++)
+            sclcol[i] = (2*lambda+i-1)/(lambda+i-0.5)*sclcol[i-1];
+        for (int j = 0; j < n; j++)
+            for (int i = 0; i <= j; i++)
+                V[i+j*n] *= sclcol[j];
+        free(sclcol);
+    }
+    return V;
+}
+
+double * plan_jacobi_to_chebyshev(const int normjac, const int normcheb, const int n, const double alpha, const double beta) {
+    double * V = plan_jacobi_to_jacobi(normjac, 1, n, alpha, beta, -0.5, -0.5);
+    if (normcheb == 0) {
+        double * sclrow = malloc(n*sizeof(double));
+        for (int i = 0; i < n; i++)
+            sclrow[i] = i ? sqrtl(M_2_PIl) : sqrtl(M_1_PIl);
+        for (int j = 0; j < n; j++)
+            for (int i = 0; i <= j; i++)
+                V[i+j*n] *= sclrow[i];
+        free(sclrow);
+    }
+    return V;
+}
+
+double * plan_chebyshev_to_jacobi(const int normcheb, const int normjac, const int n, const double alpha, const double beta) {
+    double * V = plan_jacobi_to_jacobi(1, normjac, n, -0.5, -0.5, alpha, beta);
+    if (normcheb == 0) {
+        double * sclcol = malloc(n*sizeof(double));
+        for (int i = 0; i < n; i++)
+            sclcol[i] = i ? sqrtl(M_PI_2l) : sqrtl(M_PIl);
+        for (int j = 0; j < n; j++)
+            for (int i = 0; i <= j; i++)
+                V[i+j*n] *= sclcol[j];
+        free(sclcol);
+    }
+    return V;
+}
+
+double * plan_ultraspherical_to_chebyshev(const int normultra, const int normcheb, const int n, const double lambda) {
+    double * V = plan_ultraspherical_to_jacobi(normultra, 1, n, lambda, -0.5, -0.5);
+    if (normcheb == 0) {
+        double * sclrow = malloc(n*sizeof(double));
+        for (int i = 0; i < n; i++)
+            sclrow[i] = i ? sqrtl(M_2_PIl) : sqrtl(M_1_PIl);
+        for (int j = 0; j < n; j++)
+            for (int i = j; i >= 0; i -= 2)
+                V[i+j*n] *= sclrow[i];
+        free(sclrow);
+    }
+    return V;
+}
+
+double * plan_chebyshev_to_ultraspherical(const int normcheb, const int normultra, const int n, const double lambda) {
+    double * V = plan_jacobi_to_ultraspherical(1, normultra, n, -0.5, -0.5, lambda);
+    if (normcheb == 0) {
+        double * sclcol = malloc(n*sizeof(double));
+        for (int i = 0; i < n; i++)
+            sclcol[i] = i ? sqrtl(M_PI_2l) : sqrtl(M_PIl);
+        for (int j = 0; j < n; j++)
+            for (int i = j; i >= 0; i -= 2)
+                V[i+j*n] *= sclcol[j];
+        free(sclcol);
+    }
+    return V;
+}
+
 #include "transforms_mpfr.c"

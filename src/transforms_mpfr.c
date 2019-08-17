@@ -714,7 +714,7 @@ static inline ft_mpfr_triangular_banded * ft_mpfr_create_B_jacobi_to_jacobi(cons
         mpfr_div(v, t1, t2, rnd);
         ft_mpfr_set_triangular_banded_index(B, v, 1, 1, rnd);
     }
-    for (int i = 0; i < n; i++) {
+    for (int i = 2; i < n; i++) {
         // v = -(i+gamma)/(2*i+gamma+delta)*(i+delta)/(2*i+gamma+delta+1);
         mpfr_add_d(t1, gamma, i, rnd);
         mpfr_add_d(t2, delta, i, rnd);
@@ -996,5 +996,203 @@ mpfr_t * ft_mpfr_plan_laguerre_to_laguerre(const int norm1, const int norm2, con
     mpfr_clear(t1);
     mpfr_clear(t2);
     mpfr_clear(t3);
+    return V;
+}
+
+mpfr_t * ft_mpfr_plan_jacobi_to_ultraspherical(const int normjac, const int normultra, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_srcptr lambda, mpfr_prec_t prec, mpfr_rnd_t rnd) {
+    mpfr_t t1;
+    mpfr_init2(t1, prec);
+    mpfr_sub_d(t1, lambda, 0.5, rnd);
+    mpfr_t * V = ft_mpfr_plan_jacobi_to_jacobi(normjac, normultra, n, alpha, beta, t1, t1, prec, rnd);
+    if (normultra == 0) {
+        mpfr_t * sclrow = malloc(n*sizeof(mpfr_t));
+        if (n > 0) {
+            mpfr_init2(sclrow[0], prec);
+            mpfr_set_d(sclrow[0], 1.0, rnd);
+        }
+        mpfr_t t2;
+        mpfr_init2(t2, prec);
+        mpfr_mul_d(t2, lambda, 2, rnd);
+        mpfr_sub_d(t2, t2, 1, rnd);
+        for (int i = 1; i < n; i++) {
+            //sclrow[i] = (lambda+i-0.5)/(2*lambda+i-1)*sclrow[i-1];
+            mpfr_add_d(t1, t1, 1, rnd);
+            mpfr_add_d(t2, t2, 1, rnd);
+            mpfr_init2(sclrow[i], prec);
+            mpfr_div(sclrow[i], t1, t2, rnd);
+            mpfr_mul(sclrow[i], sclrow[i], sclrow[i-1], rnd);
+        }
+        for (int j = 0; j < n; j++)
+            for (int i = 0; i <= j; i++)
+                //V[i+j*n] *= sclrow[i];
+                mpfr_mul(V[i+j*n], V[i+j*n], sclrow[i], rnd);
+        for (int i = 0; i < n; i++)
+            mpfr_clear(sclrow[i]);
+        free(sclrow);
+        mpfr_clear(t2);
+    }
+    mpfr_clear(t1);
+    return V;
+}
+
+mpfr_t * ft_mpfr_plan_ultraspherical_to_jacobi(const int normultra, const int normjac, const int n, mpfr_srcptr lambda, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_prec_t prec, mpfr_rnd_t rnd) {
+    mpfr_t t1;
+    mpfr_init2(t1, prec);
+    mpfr_sub_d(t1, lambda, 0.5, rnd);
+    mpfr_t * V = ft_mpfr_plan_jacobi_to_jacobi(normultra, normjac, n, t1, t1, alpha, beta, prec, rnd);
+    if (normultra == 0) {
+        mpfr_t * sclcol = malloc(n*sizeof(mpfr_t));
+        if (n > 0) {
+            mpfr_init2(sclcol[0], prec);
+            mpfr_set_d(sclcol[0], 1.0, rnd);
+        }
+        mpfr_t t2;
+        mpfr_init2(t2, prec);
+        mpfr_mul_d(t2, lambda, 2, rnd);
+        mpfr_sub_d(t2, t2, 1, rnd);
+        for (int i = 1; i < n; i++) {
+            //sclcol[i] = (2*lambda+i-1)/(lambda+i-0.5)*sclcol[i-1];
+            mpfr_add_d(t1, t1, 1, rnd);
+            mpfr_add_d(t2, t2, 1, rnd);
+            mpfr_init2(sclcol[i], prec);
+            mpfr_div(sclcol[i], t2, t1, rnd);
+            mpfr_mul(sclcol[i], sclcol[i], sclcol[i-1], rnd);
+        }
+        for (int j = 0; j < n; j++)
+            for (int i = 0; i <= j; i++)
+                //V[i+j*n] *= sclcol[j];
+                mpfr_mul(V[i+j*n], V[i+j*n], sclcol[j], rnd);
+        for (int i = 0; i < n; i++)
+            mpfr_clear(sclcol[i]);
+        free(sclcol);
+        mpfr_clear(t2);
+    }
+    mpfr_clear(t1);
+    return V;
+}
+
+mpfr_t * ft_mpfr_plan_jacobi_to_chebyshev(const int normjac, const int normcheb, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_prec_t prec, mpfr_rnd_t rnd) {
+    mpfr_t t1;
+    mpfr_init2(t1, prec);
+    mpfr_set_d(t1, -0.5, rnd);
+    mpfr_t * V = ft_mpfr_plan_jacobi_to_jacobi(normjac, 1, n, alpha, beta, t1, t1, prec, rnd);
+    if (normcheb == 0) {
+        mpfr_t sqrt_1_pi, sqrt_2_pi;
+        mpfr_neg(t1, t1, rnd);
+        mpfr_init2(sqrt_1_pi, prec);
+        mpfr_gamma(sqrt_1_pi, t1, rnd);
+        mpfr_d_div(sqrt_1_pi, 1.0, sqrt_1_pi, rnd);
+        mpfr_init2(sqrt_2_pi, prec);
+        mpfr_sqrt(sqrt_2_pi, t1, rnd);
+        mpfr_div(sqrt_2_pi, sqrt_1_pi, sqrt_2_pi, rnd);
+        mpfr_t * sclrow = malloc(n*sizeof(mpfr_t));
+        for (int i = 0; i < n; i++) {
+            mpfr_init2(sclrow[i], prec);
+            i ? mpfr_set(sclrow[i], sqrt_2_pi, rnd) : mpfr_set(sclrow[i], sqrt_1_pi, rnd);
+        }
+        for (int j = 0; j < n; j++)
+            for (int i = 0; i <= j; i++)
+                mpfr_mul(V[i+j*n], V[i+j*n], sclrow[i], rnd);
+        for (int i = 0; i < n; i++)
+            mpfr_clear(sclrow[i]);
+        free(sclrow);
+        mpfr_clear(sqrt_1_pi);
+        mpfr_clear(sqrt_2_pi);
+    }
+    mpfr_clear(t1);
+    return V;
+}
+
+mpfr_t * ft_mpfr_plan_chebyshev_to_jacobi(const int normcheb, const int normjac, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_prec_t prec, mpfr_rnd_t rnd) {
+    mpfr_t t1;
+    mpfr_init2(t1, prec);
+    mpfr_set_d(t1, -0.5, rnd);
+    mpfr_t * V = ft_mpfr_plan_jacobi_to_jacobi(1, normjac, n, t1, t1, alpha, beta, prec, rnd);
+    if (normcheb == 0) {
+        mpfr_t sqrtpi, sqrtpi2;
+        mpfr_neg(t1, t1, rnd);
+        mpfr_init2(sqrtpi, prec);
+        mpfr_gamma(sqrtpi, t1, rnd);
+        mpfr_init2(sqrtpi2, prec);
+        mpfr_sqrt(sqrtpi2, t1, rnd);
+        mpfr_mul(sqrtpi2, sqrtpi, sqrtpi2, rnd);
+        mpfr_t * sclcol = malloc(n*sizeof(mpfr_t));
+        for (int i = 0; i < n; i++) {
+            mpfr_init2(sclcol[i], prec);
+            i ? mpfr_set(sclcol[i], sqrtpi2, rnd) : mpfr_set(sclcol[i], sqrtpi, rnd);
+        }
+        for (int j = 0; j < n; j++)
+            for (int i = 0; i <= j; i++)
+                mpfr_mul(V[i+j*n], V[i+j*n], sclcol[j], rnd);
+        for (int i = 0; i < n; i++)
+            mpfr_clear(sclcol[i]);
+        free(sclcol);
+        mpfr_clear(sqrtpi);
+        mpfr_clear(sqrtpi2);
+    }
+    mpfr_clear(t1);
+    return V;
+}
+
+mpfr_t * ft_mpfr_plan_ultraspherical_to_chebyshev(const int normultra, const int normcheb, const int n, mpfr_srcptr lambda, mpfr_prec_t prec, mpfr_rnd_t rnd) {
+    mpfr_t t1;
+    mpfr_init2(t1, prec);
+    mpfr_set_d(t1, -0.5, rnd);
+    mpfr_t * V = ft_mpfr_plan_ultraspherical_to_jacobi(normultra, 1, n, lambda, t1, t1, prec, rnd);
+    if (normcheb == 0) {
+        mpfr_t sqrt_1_pi, sqrt_2_pi;
+        mpfr_neg(t1, t1, rnd);
+        mpfr_init2(sqrt_1_pi, prec);
+        mpfr_gamma(sqrt_1_pi, t1, rnd);
+        mpfr_d_div(sqrt_1_pi, 1.0, sqrt_1_pi, rnd);
+        mpfr_init2(sqrt_2_pi, prec);
+        mpfr_sqrt(sqrt_2_pi, t1, rnd);
+        mpfr_div(sqrt_2_pi, sqrt_1_pi, sqrt_2_pi, rnd);
+        mpfr_t * sclrow = malloc(n*sizeof(mpfr_t));
+        for (int i = 0; i < n; i++) {
+            mpfr_init2(sclrow[i], prec);
+            i ? mpfr_set(sclrow[i], sqrt_2_pi, rnd) : mpfr_set(sclrow[i], sqrt_1_pi, rnd);
+        }
+        for (int j = 0; j < n; j++)
+            for (int i = j; i >= 0; i -= 2)
+                mpfr_mul(V[i+j*n], V[i+j*n], sclrow[i], rnd);
+        for (int i = 0; i < n; i++)
+            mpfr_clear(sclrow[i]);
+        free(sclrow);
+        mpfr_clear(sqrt_1_pi);
+        mpfr_clear(sqrt_2_pi);
+    }
+    mpfr_clear(t1);
+    return V;
+}
+
+mpfr_t * ft_mpfr_plan_chebyshev_to_ultraspherical(const int normcheb, const int normultra, const int n, mpfr_srcptr lambda, mpfr_prec_t prec, mpfr_rnd_t rnd) {
+    mpfr_t t1;
+    mpfr_init2(t1, prec);
+    mpfr_set_d(t1, -0.5, rnd);
+    mpfr_t * V = ft_mpfr_plan_jacobi_to_ultraspherical(1, normultra, n, t1, t1, lambda, prec, rnd);
+    if (normcheb == 0) {
+        mpfr_t sqrtpi, sqrtpi2;
+        mpfr_neg(t1, t1, rnd);
+        mpfr_init2(sqrtpi, prec);
+        mpfr_gamma(sqrtpi, t1, rnd);
+        mpfr_init2(sqrtpi2, prec);
+        mpfr_sqrt(sqrtpi2, t1, rnd);
+        mpfr_mul(sqrtpi2, sqrtpi, sqrtpi2, rnd);
+        mpfr_t * sclcol = malloc(n*sizeof(mpfr_t));
+        for (int i = 0; i < n; i++) {
+            mpfr_init2(sclcol[i], prec);
+            i ? mpfr_set(sclcol[i], sqrtpi2, rnd) : mpfr_set(sclcol[i], sqrtpi, rnd);
+        }
+        for (int j = 0; j < n; j++)
+            for (int i = j; i >= 0; i -= 2)
+                mpfr_mul(V[i+j*n], V[i+j*n], sclcol[j], rnd);
+        for (int i = 0; i < n; i++)
+            mpfr_clear(sclcol[i]);
+        free(sclcol);
+        mpfr_clear(sqrtpi);
+        mpfr_clear(sqrtpi2);
+    }
+    mpfr_clear(t1);
     return V;
 }

@@ -265,3 +265,95 @@ X(tb_eigen_FMM) * X(plan_laguerre_to_laguerre)(const int norm1, const int norm2,
     free(sclcol);
     return F;
 }
+
+X(tb_eigen_FMM) * X(plan_jacobi_to_ultraspherical)(const int normjac, const int normultra, const int n, const FLT alpha, const FLT beta, const FLT lambda) {
+    X(tb_eigen_FMM) * F = X(plan_jacobi_to_jacobi)(normjac, normultra, n, alpha, beta, lambda-0.5, lambda-0.5);
+    if (normultra == 0) {
+        FLT * sclrow = malloc(n*sizeof(FLT));
+        if (n > 0)
+            sclrow[0] = 1;
+        for (int i = 1; i < n; i++)
+            sclrow[i] = (lambda+i-0.5)/(2*lambda+i-1)*sclrow[i-1];
+        X(scale_rows_tb_eigen_FMM)(1, sclrow, F);
+        free(sclrow);
+    }
+    return F;
+}
+
+X(tb_eigen_FMM) * X(plan_ultraspherical_to_jacobi)(const int normultra, const int normjac, const int n, const FLT lambda, const FLT alpha, const FLT beta) {
+    X(tb_eigen_FMM) * F = X(plan_jacobi_to_jacobi)(normultra, normjac, n, lambda-0.5, lambda-0.5, alpha, beta);
+    if (normultra == 0) {
+        FLT * sclcol = malloc(n*sizeof(FLT));
+        if (n > 0)
+            sclcol[0] = 1;
+        for (int i = 1; i < n; i++)
+            sclcol[i] = (2*lambda+i-1)/(lambda+i-0.5)*sclcol[i-1];
+        X(scale_columns_tb_eigen_FMM)(1, sclcol, F);
+        free(sclcol);
+    }
+    return F;
+}
+
+X(tb_eigen_FMM) * X(plan_jacobi_to_chebyshev)(const int normjac, const int normcheb, const int n, const FLT alpha, const FLT beta) {
+    X(tb_eigen_FMM) * F = X(plan_jacobi_to_jacobi)(normjac, 1, n, alpha, beta, -0.5, -0.5);
+    if (normcheb == 0) {
+        FLT * sclrow = malloc(n*sizeof(FLT));
+        FLT sqrt_1_pi = 1/Y2(tgamma)(0.5);
+        FLT sqrt_2_pi = Y2(sqrt)(2)*sqrt_1_pi;
+        if (n > 0)
+            sclrow[0] = sqrt_1_pi;
+        for (int i = 1; i < n; i++)
+            sclrow[i] = sqrt_2_pi;
+        X(scale_rows_tb_eigen_FMM)(1, sclrow, F);
+        free(sclrow);
+    }
+    return F;
+}
+
+X(tb_eigen_FMM) * X(plan_chebyshev_to_jacobi)(const int normcheb, const int normjac, const int n, const FLT alpha, const FLT beta) {
+    X(tb_eigen_FMM) * F = X(plan_jacobi_to_jacobi)(1, normjac, n, -0.5, -0.5, alpha, beta);
+    if (normcheb == 0) {
+        FLT * sclcol = malloc(n*sizeof(FLT));
+        FLT2 sqrtpi = Y2(tgamma)(0.5);
+        FLT2 sqrtpi2 = sqrtpi/Y2(sqrt)(2);
+        if (n > 0)
+            sclcol[0] = sqrtpi;
+        for (int i = 1; i < n; i++)
+            sclcol[i] = sqrtpi2;
+        X(scale_columns_tb_eigen_FMM)(1, sclcol, F);
+        free(sclcol);
+    }
+    return F;
+}
+
+X(tb_eigen_FMM) * X(plan_ultraspherical_to_chebyshev)(const int normultra, const int normcheb, const int n, const FLT lambda) {
+    X(tb_eigen_FMM) * F = X(plan_ultraspherical_to_jacobi)(normultra, 1, n, lambda, -0.5, -0.5);
+    if (normcheb == 0) {
+        FLT * sclrow = malloc(n*sizeof(FLT));
+        FLT sqrt_1_pi = 1/Y2(tgamma)(0.5);
+        FLT sqrt_2_pi = Y2(sqrt)(2)*sqrt_1_pi;
+        if (n > 0)
+            sclrow[0] = sqrt_1_pi;
+        for (int i = 1; i < n; i++)
+            sclrow[i] = sqrt_2_pi;
+        X(scale_rows_tb_eigen_FMM)(1, sclrow, F);
+        free(sclrow);
+    }
+    return F;
+}
+
+X(tb_eigen_FMM) * X(plan_chebyshev_to_ultraspherical)(const int normcheb, const int normultra, const int n, const FLT lambda) {
+    X(tb_eigen_FMM) * F = X(plan_jacobi_to_ultraspherical)(1, normultra, n, -0.5, -0.5, lambda);
+    if (normcheb == 0) {
+        FLT * sclcol = malloc(n*sizeof(FLT));
+        FLT2 sqrtpi = Y2(tgamma)(0.5);
+        FLT2 sqrtpi2 = sqrtpi/Y2(sqrt)(2);
+        if (n > 0)
+            sclcol[0] = sqrtpi;
+        for (int i = 1; i < n; i++)
+            sclcol[i] = sqrtpi2;
+        X(scale_columns_tb_eigen_FMM)(1, sclcol, F);
+        free(sclcol);
+    }
+    return F;
+}
