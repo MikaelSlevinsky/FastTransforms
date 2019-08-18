@@ -10,7 +10,7 @@ void test_tdc_drop_precisionf(int * checksum);
 void test_tdc_drop_precision (int * checksum);
 
 int main(void) {
-    int checksum = 0;
+    int checksum = 0, checksum2 = 0;
     printf("\nTesting methods for symmetric-definite tridiagonal divide and conquer.\n");
     printf("\n\tSingle precision.\n\n");
     test_tdcf(&checksum);
@@ -23,9 +23,9 @@ int main(void) {
     printf("\n");
     printf("\nTesting methods for dropping the precision.\n");
     printf("\n\tDouble ↘  single precision.\n\n");
-    test_tdc_drop_precisionf(&checksum);
+    test_tdc_drop_precisionf(&checksum2);
     printf("\n\tLong double ↘  double precision.\n\n");
-    test_tdc_drop_precision(&checksum);
+    test_tdc_drop_precision(&checksum2);
     printf("\n");
     return checksum;
 }

@@ -25,18 +25,14 @@
 
 #include "tdc.h"
 
-ft_tb_eigen_FMMf * ft_plan_legendre_to_chebyshevf(const int normleg, const int normcheb, const int n);
-ft_tb_eigen_FMMf * ft_plan_chebyshev_to_legendref(const int normcheb, const int normleg, const int n);
-ft_tb_eigen_FMMf * ft_plan_ultraspherical_to_ultrasphericalf(const int norm1, const int norm2, const int n, const float lambda, const float mu);
-ft_tb_eigen_FMMf * ft_plan_jacobi_to_jacobif(const int norm1, const int norm2, const int n, const float alpha, const float beta, const float gamma, const float delta);
-ft_tb_eigen_FMMf * ft_plan_laguerre_to_laguerref(const int norm1, const int norm2, const int n, const float alpha, const float beta);
-ft_tb_eigen_FMMf * ft_plan_jacobi_to_ultrasphericalf(const int normjac, const int normultra, const int n, const float alpha, const float beta, const float lambda);
-ft_tb_eigen_FMMf * ft_plan_ultraspherical_to_jacobif(const int normultra, const int normjac, const int n, const float lambda, const float alpha, const float beta);
-ft_tb_eigen_FMMf * ft_plan_jacobi_to_chebyshevf(const int normjac, const int normcheb, const int n, const float alpha, const float beta);
-ft_tb_eigen_FMMf * ft_plan_chebyshev_to_jacobif(const int normcheb, const int normjac, const int n, const float alpha, const float beta);
-ft_tb_eigen_FMMf * ft_plan_ultraspherical_to_chebyshevf(const int normultra, const int normcheb, const int n, const float lambda);
-ft_tb_eigen_FMMf * ft_plan_chebyshev_to_ultrasphericalf(const int normcheb, const int normultra, const int n, const float lambda);
-
+/*!
+  \brief \ref ft_plan_legendre_to_chebyshev pre-computes a factorization of the connection coefficients between Legendre and Chebyshev polynomials in double precision so that ft_bfmv converts between coefficients in:
+  \f[
+  \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Legendre}} P_\ell(x) = \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Chebyshev}} T_\ell(x).
+  \f]
+  Normleg and normcheb govern the normalizations, either standard ( == 0) or orthonormalized ( == 1).
+  See also \ref ft_plan_legendre_to_chebyshevf, \ref ft_plan_legendre_to_chebyshevl, and \ref ft_mpfr_plan_legendre_to_chebyshev.
+*/
 ft_tb_eigen_FMM * ft_plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n);
 ft_tb_eigen_FMM * ft_plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n);
 ft_tb_eigen_FMM * ft_plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, const double lambda, const double mu);
@@ -49,6 +45,20 @@ ft_tb_eigen_FMM * ft_plan_chebyshev_to_jacobi(const int normcheb, const int norm
 ft_tb_eigen_FMM * ft_plan_ultraspherical_to_chebyshev(const int normultra, const int normcheb, const int n, const double lambda);
 ft_tb_eigen_FMM * ft_plan_chebyshev_to_ultraspherical(const int normcheb, const int normultra, const int n, const double lambda);
 
+/// A single precision version of \ref ft_plan_legendre_to_chebyshev.
+ft_tb_eigen_FMMf * ft_plan_legendre_to_chebyshevf(const int normleg, const int normcheb, const int n);
+ft_tb_eigen_FMMf * ft_plan_chebyshev_to_legendref(const int normcheb, const int normleg, const int n);
+ft_tb_eigen_FMMf * ft_plan_ultraspherical_to_ultrasphericalf(const int norm1, const int norm2, const int n, const float lambda, const float mu);
+ft_tb_eigen_FMMf * ft_plan_jacobi_to_jacobif(const int norm1, const int norm2, const int n, const float alpha, const float beta, const float gamma, const float delta);
+ft_tb_eigen_FMMf * ft_plan_laguerre_to_laguerref(const int norm1, const int norm2, const int n, const float alpha, const float beta);
+ft_tb_eigen_FMMf * ft_plan_jacobi_to_ultrasphericalf(const int normjac, const int normultra, const int n, const float alpha, const float beta, const float lambda);
+ft_tb_eigen_FMMf * ft_plan_ultraspherical_to_jacobif(const int normultra, const int normjac, const int n, const float lambda, const float alpha, const float beta);
+ft_tb_eigen_FMMf * ft_plan_jacobi_to_chebyshevf(const int normjac, const int normcheb, const int n, const float alpha, const float beta);
+ft_tb_eigen_FMMf * ft_plan_chebyshev_to_jacobif(const int normcheb, const int normjac, const int n, const float alpha, const float beta);
+ft_tb_eigen_FMMf * ft_plan_ultraspherical_to_chebyshevf(const int normultra, const int normcheb, const int n, const float lambda);
+ft_tb_eigen_FMMf * ft_plan_chebyshev_to_ultrasphericalf(const int normcheb, const int normultra, const int n, const float lambda);
+
+/// A long double precision version of \ref ft_plan_legendre_to_chebyshev.
 ft_tb_eigen_FMMl * ft_plan_legendre_to_chebyshevl(const int normleg, const int normcheb, const int n);
 ft_tb_eigen_FMMl * ft_plan_chebyshev_to_legendrel(const int normcheb, const int normleg, const int n);
 ft_tb_eigen_FMMl * ft_plan_ultraspherical_to_ultrasphericall(const int norm1, const int norm2, const int n, const long double lambda, const long double mu);
@@ -70,6 +80,7 @@ typedef struct {
 } ft_mpfr_triangular_banded;
 
 void ft_mpfr_destroy_plan(mpfr_t * A, int n);
+/// A multi-precision version of \ref ft_plan_legendre_to_chebyshev that returns a dense array of connection coefficients.
 mpfr_t * ft_mpfr_plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n, mpfr_prec_t prec, mpfr_rnd_t rnd);
 mpfr_t * ft_mpfr_plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n, mpfr_prec_t prec, mpfr_rnd_t rnd);
 mpfr_t * ft_mpfr_plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, mpfr_srcptr lambda, mpfr_srcptr mu, mpfr_prec_t prec, mpfr_rnd_t rnd);
