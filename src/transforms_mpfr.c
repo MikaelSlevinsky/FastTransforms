@@ -13,6 +13,31 @@ void ft_mpfr_destroy_triangular_banded(ft_mpfr_triangular_banded * A) {
     free(A);
 }
 
+// y ← A*x, y ← Aᵀ*x
+void ft_mpfr_trmv(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t * x, mpfr_rnd_t rnd) {
+    if (TRANS == 'N') {
+        for (int j = 0; j < n; j++) {
+            for (int i = 0; i < j; i++)
+                mpfr_fma(x[i], A[i+j*LDA], x[j], x[i], rnd);
+            mpfr_mul(x[j], A[j+j*LDA], x[j], rnd);
+        }
+    }
+    else if (TRANS == 'T') {
+        for (int i = n-1; i >= 0; i--) {
+            mpfr_mul(x[i], A[i+i*LDA], x[i], rnd);
+            for (int j = i-1; j >= 0; j--)
+                mpfr_fma(x[i], A[j+i*LDA], x[j], x[i], rnd);
+        }
+    }
+}
+
+// B ← A*B, B ← Aᵀ*B
+void ft_mpfr_trmm(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t * B, int LDB, int N, mpfr_rnd_t rnd) {
+    #pragma omp parallel for
+    for (int j = 0; j < N; j++)
+        ft_mpfr_trmv(TRANS, n, A, LDA, B+j*LDB, rnd);
+}
+
 ft_mpfr_triangular_banded * ft_mpfr_calloc_triangular_banded(const int n, const int b, mpfr_prec_t prec) {
     mpfr_t * data = malloc(n*(b+1)*sizeof(mpfr_t));
     for (int j = 0; j < n; j++)

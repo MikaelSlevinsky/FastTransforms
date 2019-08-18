@@ -4,6 +4,7 @@
 void test_transformsf(int * checksum, int n);
 void test_transforms (int * checksum, int n);
 void test_transformsl(int * checksum, int n);
+void test_transforms_mpfr(int * checksum, int n, mpfr_prec_t prec, mpfr_rnd_t rnd);
 
 int main(void) {
     int checksum = 0, n = 2048;
@@ -12,8 +13,8 @@ int main(void) {
     test_transformsf(&checksum, n);
     printf("\n\tDouble precision.\n\n");
     test_transforms(&checksum, n);
-    printf("\n\tLong double precision.\n\n");
-    test_transformsl(&checksum, n>>1);
+    printf("\n\tMulti-precision.\n\n");
+    test_transforms_mpfr(&checksum, 256, 256, MPFR_RNDN);
     printf("\n");
     return checksum;
 }
@@ -41,3 +42,5 @@ int main(void) {
 #undef FLT
 #undef X
 #undef Y
+
+#include "test_transforms_mpfr.c"
