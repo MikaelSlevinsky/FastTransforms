@@ -16,7 +16,7 @@ Generically, the library makes use of OpenBLAS and FFTW3, which are easily insta
 
 Apple's version of GCC does not support OpenMP. Sample installation:
 ```
-brew install gcc openblas fftw
+brew install gcc openblas fftw mpfr
 export CC=gcc-8 && export BLAS=OPENBLAS && make
 ```
 On macOS, the OpenBLAS dependency is optional in light of the vecLib framework (see the `BLAS` variable in `Make.inc`). In case the library is compiled with vecLib, then the environment variable `VECLIB_MAXIMUM_THREADS` partially controls the multithreading.
@@ -29,7 +29,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
 ```
 Sample installation:
 ```
-apt-get install gcc-8 libblas-dev libopenblas-base libfftw3-dev
+apt-get install gcc-8 libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
 export CC=gcc-8 && export BLAS=OPENBLAS && make
 ```
 
@@ -37,7 +37,7 @@ export CC=gcc-8 && export BLAS=OPENBLAS && make
 
 We use GCC 7.2.0 distributed through MinGW-w64 on Visual Studio 2015 and 2017. Sample installation:
 ```
-vcpkg install openblas:x64-windows fftw3:x64-windows
+vcpkg install openblas:x64-windows fftw3:x64-windows mpir:x64-windows mpfr:x64-windows
 set CC=gcc && set BLAS=OPENBLAS && mingw32-make win
 ```
 See the [AppVeyor build](https://github.com/MikaelSlevinsky/FastTransforms/blob/master/.appveyor.yml) for further details.
