@@ -114,8 +114,8 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
 #define c(l,m) c[l+(m)*(2*n+1-(m))/2]
 
 ft_rotation_plan * ft_plan_rotsphere(const int n) {
-    double * s = (double *) malloc(n*(n+1)/2 * sizeof(double));
-    double * c = (double *) malloc(n*(n+1)/2 * sizeof(double));
+    double * s = malloc(n*(n+1)/2 * sizeof(double));
+    double * c = malloc(n*(n+1)/2 * sizeof(double));
     double nums, numc, den;
     for (int m = 0; m < n; m++)
         for (int l = 0; l < n-m; l++) {
@@ -125,7 +125,7 @@ ft_rotation_plan * ft_plan_rotsphere(const int n) {
             s(l, m) = sqrt(nums/den);
             c(l, m) = sqrt(numc/den);
         }
-    ft_rotation_plan * RP = (ft_rotation_plan *) malloc(sizeof(ft_rotation_plan));
+    ft_rotation_plan * RP = malloc(sizeof(ft_rotation_plan));
     RP->s = s;
     RP->c = c;
     RP->n = n;
@@ -207,8 +207,8 @@ void ft_kernel_sph_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double
 }
 
 ft_rotation_plan * ft_plan_rottriangle(const int n, const double alpha, const double beta, const double gamma) {
-    double * s = (double *) malloc(n*(n+1)/2 * sizeof(double));
-    double * c = (double *) malloc(n*(n+1)/2 * sizeof(double));
+    double * s = malloc(n*(n+1)/2 * sizeof(double));
+    double * c = malloc(n*(n+1)/2 * sizeof(double));
     double nums, numc, den;
     for (int m = 0; m < n; m++)
         for (int l = 0; l < n-m; l++) {
@@ -218,7 +218,7 @@ ft_rotation_plan * ft_plan_rottriangle(const int n, const double alpha, const do
             s(l, m) = sqrt(nums/den);
             c(l, m) = sqrt(numc/den);
         }
-    ft_rotation_plan * RP = (ft_rotation_plan *) malloc(sizeof(ft_rotation_plan));
+    ft_rotation_plan * RP = malloc(sizeof(ft_rotation_plan));
     RP->s = s;
     RP->c = c;
     RP->n = n;
@@ -340,8 +340,8 @@ void ft_kernel_tri_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double
 #define c(l,m) c[l+(m)*n-(m)/2*((m)+1)/2]
 
 ft_rotation_plan * ft_plan_rotdisk(const int n) {
-    double * s = (double *) malloc(n*n * sizeof(double));
-    double * c = (double *) malloc(n*n * sizeof(double));
+    double * s = malloc(n*n * sizeof(double));
+    double * c = malloc(n*n * sizeof(double));
     double numc, den;
     for (int m = 0; m < 2*n-1; m++)
         for (int l = 0; l < n-(m+1)/2; l++) {
@@ -350,7 +350,7 @@ ft_rotation_plan * ft_plan_rotdisk(const int n) {
             s(l, m) = -((double) (l+1))/((double) (l+m+2));
             c(l, m) = sqrt(numc/den);
         }
-    ft_rotation_plan * RP = (ft_rotation_plan *) malloc(sizeof(ft_rotation_plan));
+    ft_rotation_plan * RP = malloc(sizeof(ft_rotation_plan));
     RP->s = s;
     RP->c = c;
     RP->n = n;
@@ -465,7 +465,7 @@ void ft_kernel_tet_lo2hi(const ft_rotation_plan * RP, const int L, const int m, 
 
 void ft_kernel_tet_hi2lo_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
-    int nb = ALIGNB(n);
+    int nb = VALIGN(n);
     double s, c;
     for (int j = m-1; j >= 0; j--) {
         for (int l = L-2-j; l >= 0; l--) {
@@ -481,7 +481,7 @@ void ft_kernel_tet_hi2lo_SSE(const ft_rotation_plan * RP, const int L, const int
 
 void ft_kernel_tet_lo2hi_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
-    int nb = ALIGNB(n);
+    int nb = VALIGN(n);
     double s, c;
     for (int j = 0; j < m; j++) {
         for (int l = 0; l <= L-2-j; l++) {
@@ -497,7 +497,7 @@ void ft_kernel_tet_lo2hi_SSE(const ft_rotation_plan * RP, const int L, const int
 
 void ft_kernel_tet_hi2lo_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
-    int nb = ALIGNB(n);
+    int nb = VALIGN(n);
     double s, c;
     for (int j = m-1; j >= 0; j--) {
         for (int l = L-2-j; l >= 0; l--) {
@@ -515,7 +515,7 @@ void ft_kernel_tet_hi2lo_AVX(const ft_rotation_plan * RP, const int L, const int
 
 void ft_kernel_tet_lo2hi_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
-    int nb = ALIGNB(n);
+    int nb = VALIGN(n);
     double s, c;
     for (int j = 0; j < m; j++) {
         for (int l = 0; l <= L-2-j; l++) {
@@ -533,7 +533,7 @@ void ft_kernel_tet_lo2hi_AVX(const ft_rotation_plan * RP, const int L, const int
 
 void ft_kernel_tet_hi2lo_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
-    int nb = ALIGNB(n);
+    int nb = VALIGN(n);
     double s, c;
     for (int j = m-1; j >= 0; j--) {
         for (int l = L-2-j; l >= 0; l--) {
@@ -553,7 +553,7 @@ void ft_kernel_tet_hi2lo_AVX512(const ft_rotation_plan * RP, const int L, const 
 
 void ft_kernel_tet_lo2hi_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
-    int nb = ALIGNB(n);
+    int nb = VALIGN(n);
     double s, c;
     for (int j = 0; j < m; j++) {
         for (int l = 0; l <= L-2-j; l++) {
@@ -599,8 +599,8 @@ ft_spin_rotation_plan * ft_plan_rotspinsphere(const int n, const int s) {
     double nums, numc, den;
 
     // The tail
-    double * s1 = (double *) calloc(2*n*n, sizeof(double));
-    double * c1 = (double *) calloc(2*n*n, sizeof(double));
+    double * s1 = calloc(2*n*n, sizeof(double));
+    double * c1 = calloc(2*n*n, sizeof(double));
 
     for (int m = as; m < n+as; m++)
         for (int l = 0; l < n; l++) {
@@ -619,8 +619,8 @@ ft_spin_rotation_plan * ft_plan_rotspinsphere(const int n, const int s) {
         }
 
     // The O(s^2) triangle
-    double * s2 = (double *) calloc(n*(as+1)*(as+2)/2, sizeof(double));
-    double * c2 = (double *) calloc(n*(as+1)*(as+2)/2, sizeof(double));
+    double * s2 = calloc(n*(as+1)*(as+2)/2, sizeof(double));
+    double * c2 = calloc(n*(as+1)*(as+2)/2, sizeof(double));
 
     for (int m = 0; m < as+1; m++)
         for (int k = m; k < 2*as+2-m; k += 2)
@@ -633,8 +633,8 @@ ft_spin_rotation_plan * ft_plan_rotspinsphere(const int n, const int s) {
             }
 
     // The main diagonal
-    double * s3 = (double *) calloc(n*as, sizeof(double));
-    double * c3 = (double *) calloc(n*as, sizeof(double));
+    double * s3 = calloc(n*as, sizeof(double));
+    double * c3 = calloc(n*as, sizeof(double));
 
     for (int m = 0; m < as; m++)
         for (int l = 0; l < n-m; l++) {
@@ -645,7 +645,7 @@ ft_spin_rotation_plan * ft_plan_rotspinsphere(const int n, const int s) {
             c3(l, m) = sqrt(numc/den);
         }
 
-    ft_spin_rotation_plan * SRP = (ft_spin_rotation_plan *) malloc(sizeof(ft_spin_rotation_plan));
+    ft_spin_rotation_plan * SRP = malloc(sizeof(ft_spin_rotation_plan));
     SRP->s1 = s1;
     SRP->c1 = c1;
     SRP->s2 = s2;

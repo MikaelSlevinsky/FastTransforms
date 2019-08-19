@@ -1,5 +1,4 @@
 #include "fasttransforms.h"
-#include "ftinternal.h"
 #include "ftutilities.h"
 
 double * aligned_copymat(double * A, int n, int m);
@@ -48,44 +47,44 @@ int main(int argc, const char * argv[]) {
         ft_execute_sph_hi2lo(RP, A, M);
         ft_execute_sph_lo2hi(RP, A, M);
 
-        printf("%d  %1.2e  ", N, norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%d  %1.2e  ", N, ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_sph_hi2lo_SSE(RP, A, Ac, M);
         ft_execute_sph_lo2hi(RP, A, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_sph_hi2lo(RP, A, M);
         ft_execute_sph_lo2hi_SSE(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_sph_hi2lo_AVX(RP, A, Ac, M);
         ft_execute_sph_lo2hi_SSE(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_sph_hi2lo_SSE(RP, A, Ac, M);
         ft_execute_sph_lo2hi_AVX(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_sph_hi2lo_AVX512(RP, A, Ac, M);
         ft_execute_sph_lo2hi_AVX(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_sph_hi2lo_AVX(RP, A, Ac, M);
         ft_execute_sph_lo2hi_AVX512(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e\n", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         free(A);
         VFREE(Ac);
@@ -187,8 +186,8 @@ int main(int argc, const char * argv[]) {
         ft_execute_sph2fourier(P, A, N, M);
         ft_execute_fourier2sph(P, A, N, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e\n", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         free(A);
         free(B);
@@ -241,44 +240,44 @@ int main(int argc, const char * argv[]) {
         ft_execute_sphv_hi2lo(RP, A, M);
         ft_execute_sphv_lo2hi(RP, A, M);
 
-        printf("%d  %1.2e  ", N, norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%d  %1.2e  ", N, ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_sphv_hi2lo_SSE(RP, A, Ac, M);
         ft_execute_sphv_lo2hi(RP, A, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_sphv_hi2lo(RP, A, M);
         ft_execute_sphv_lo2hi_SSE(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_sphv_hi2lo_AVX(RP, A, Ac, M);
         ft_execute_sphv_lo2hi_SSE(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_sphv_hi2lo_SSE(RP, A, Ac, M);
         ft_execute_sphv_lo2hi_AVX(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_sphv_hi2lo_AVX512(RP, A, Ac, M);
         ft_execute_sphv_lo2hi_AVX(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_sphv_hi2lo_AVX(RP, A, Ac, M);
         ft_execute_sphv_lo2hi_AVX512(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e\n", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         free(A);
         VFREE(Ac);
@@ -380,8 +379,8 @@ int main(int argc, const char * argv[]) {
         ft_execute_sphv2fourier(P, A, N, M);
         ft_execute_fourier2sphv(P, A, N, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e\n", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         free(A);
         free(B);
@@ -434,44 +433,44 @@ int main(int argc, const char * argv[]) {
         ft_execute_tri_hi2lo(RP, A, M);
         ft_execute_tri_lo2hi(RP, A, M);
 
-        printf("%d  %1.2e  ", N, norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%d  %1.2e  ", N, ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_tri_hi2lo_SSE(RP, A, Ac, M);
         ft_execute_tri_lo2hi(RP, A, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_tri_hi2lo(RP, A, M);
         ft_execute_tri_lo2hi_SSE(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_tri_hi2lo_AVX(RP, A, Ac, M);
         ft_execute_tri_lo2hi_SSE(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_tri_hi2lo_SSE(RP, A, Ac, M);
         ft_execute_tri_lo2hi_AVX(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_tri_hi2lo_AVX(RP, A, Ac, M);
         ft_execute_tri_lo2hi_AVX512(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_tri_hi2lo_AVX512(RP, A, Ac, M);
         ft_execute_tri_lo2hi_AVX(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e\n", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         free(A);
         VFREE(Ac);
@@ -574,8 +573,8 @@ int main(int argc, const char * argv[]) {
         ft_execute_tri2cheb(P, A, N, M);
         ft_execute_cheb2tri(P, A, N, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e\n", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         free(A);
         free(B);
@@ -628,44 +627,44 @@ int main(int argc, const char * argv[]) {
         ft_execute_disk_hi2lo(RP, A, M);
         ft_execute_disk_lo2hi(RP, A, M);
 
-        printf("%d  %1.2e  ", N, norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%d  %1.2e  ", N, ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_disk_hi2lo_SSE(RP, A, Ac, M);
         ft_execute_disk_lo2hi(RP, A, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_disk_hi2lo(RP, A, M);
         ft_execute_disk_lo2hi_SSE(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_disk_hi2lo_AVX(RP, A, Ac, M);
         ft_execute_disk_lo2hi_SSE(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_disk_hi2lo_SSE(RP, A, Ac, M);
         ft_execute_disk_lo2hi_AVX(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_disk_hi2lo_AVX512(RP, A, Ac, M);
         ft_execute_disk_lo2hi_AVX(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         ft_execute_disk_hi2lo_AVX(RP, A, Ac, M);
         ft_execute_disk_lo2hi_AVX512(RP, A, Ac, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e\n", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         free(A);
         VFREE(Ac);
@@ -768,8 +767,8 @@ int main(int argc, const char * argv[]) {
         ft_execute_disk2cxf(P, A, N, M);
         ft_execute_cxf2disk(P, A, N, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-        printf("%1.2e\n", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         free(A);
         free(B);
@@ -824,44 +823,44 @@ int main(int argc, const char * argv[]) {
         ft_execute_tet_hi2lo(RP1, RP2, A, L, M);
         ft_execute_tet_lo2hi(RP1, RP2, A, L, M);
 
-        printf("%d  %1.2e  ", N, norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+        printf("%d  %1.2e  ", N, ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
 
         ft_execute_tet_hi2lo_SSE(RP1, RP2, A, Ac, L, M);
         ft_execute_tet_lo2hi(RP1, RP2, A, L, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
 
         ft_execute_tet_hi2lo(RP1, RP2, A, L, M);
         ft_execute_tet_lo2hi_SSE(RP1, RP2, A, Ac, L, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
 
         ft_execute_tet_hi2lo_AVX(RP1, RP2, A, Ac, L, M);
         ft_execute_tet_lo2hi_SSE(RP1, RP2, A, Ac, L, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
 
         ft_execute_tet_hi2lo_SSE(RP1, RP2, A, Ac, L, M);
         ft_execute_tet_lo2hi_AVX(RP1, RP2, A, Ac, L, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
 
         ft_execute_tet_hi2lo_AVX512(RP1, RP2, A, Ac, L, M);
         ft_execute_tet_lo2hi_AVX(RP1, RP2, A, Ac, L, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
-        printf("%1.2e  ", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
 
         ft_execute_tet_hi2lo_AVX(RP1, RP2, A, Ac, L, M);
         ft_execute_tet_lo2hi_AVX512(RP1, RP2, A, Ac, L, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
-        printf("%1.2e\n", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
+        printf("%1.2e\n", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
 
         free(A);
         VFREE(Ac);
@@ -968,8 +967,8 @@ int main(int argc, const char * argv[]) {
         ft_execute_tet2cheb(TP, A, N, L, M);
         ft_execute_cheb2tet(TP, A, N, L, M);
 
-        printf("%1.2e  ", norm_2arg(A, B, N*L*M)/norm_1arg(B, N*L*M));
-        printf("%1.2e\n", normInf_2arg(A, B, N*L*M)/normInf_1arg(B, N*L*M));
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
+        printf("%1.2e\n", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
 
         free(A);
         free(B);
@@ -1024,20 +1023,20 @@ int main(int argc, const char * argv[]) {
             ft_execute_spinsph_hi2lo(SRP, A, M);
             ft_execute_spinsph_lo2hi(SRP, A, M);
 
-            printf("  %1.2e", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-            printf("  %1.2e", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+            printf("  %1.2e", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+            printf("  %1.2e", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
             ft_execute_spinsph_hi2lo_SSE(SRP, A, Ac, M);
             ft_execute_spinsph_lo2hi_SSE(SRP, A, Ac, M);
 
-            printf("  %1.2e", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-            printf("  %1.2e", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+            printf("  %1.2e", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+            printf("  %1.2e", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
             ft_execute_spinsph_hi2lo(SRP, A, M);
             ft_execute_spinsph_lo2hi_SSE(SRP, A, Ac, M);
 
-            printf("  %1.2e", norm_2arg(A, B, N*M)/norm_1arg(B, N*M));
-            printf("  %1.2e", normInf_2arg(A, B, N*M)/normInf_1arg(B, N*M));
+            printf("  %1.2e", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+            printf("  %1.2e", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
             free(A);
             VFREE(Ac);
@@ -1092,12 +1091,12 @@ int main(int argc, const char * argv[]) {
 #define A(i,j) A[(i)+n*(j)]
 
 double * aligned_copymat(double * A, int n, int m) {
-    double * B = (double *) VMALLOC(ALIGNB(n)*m*sizeof(double));
+    double * B = VMALLOC(VALIGN(n)*m*sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m; j++)
-            B[(i)+ALIGNB(n)*(j)] = A(i,j);
-    for (int i = n; i < ALIGNB(n); i++)
+            B[(i)+VALIGN(n)*(j)] = A(i,j);
+    for (int i = n; i < VALIGN(n); i++)
         for (int j = 0; j < m; j++)
-            B[(i)+ALIGNB(n)*(j)] = 0.0;
+            B[(i)+VALIGN(n)*(j)] = 0.0;
     return B;
 }

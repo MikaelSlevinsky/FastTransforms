@@ -70,3 +70,28 @@ void apply_givens(const double S, const double C, double * X, double * Y) {
         vstore8(Y, C*y - S*x);
     }
 #endif
+
+void gemv(char TRANS, int m, int n, double alpha, double * A, double * x, double beta, double * y) {
+    double xj, t;
+    if (TRANS == 'N') {
+        for (int i = 0; i < m; i++)
+            y[i] = beta*y[i];
+        for (int j = 0; j < n; j++) {
+            xj = alpha*x[j];
+            for (int i = 0; i < m; i++)
+                y[i] += A[i]*xj;
+            A += m;
+        }
+    }
+    else if (TRANS == 'T') {
+        for (int i = 0; i < n; i++)
+            y[i] = beta*y[i];
+        for (int i = 0; i < n; i++) {
+            t = 0.0;
+            for (int j = 0; j < m; j++)
+                t += A[j]*x[j];
+            y[i] += alpha*t;
+            A += m;
+        }
+    }
+}

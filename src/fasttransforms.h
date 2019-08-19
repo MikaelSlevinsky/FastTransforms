@@ -21,6 +21,190 @@
     #define FT_SET_NUM_THREADS(x)
 #endif
 
+#define FT_CONCAT(prefix, name, suffix) prefix ## name ## suffix
+
+#include <tdc.h>
+
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between Legendre and Chebyshev polynomials in double precision so that ft_bfmv converts between expansions:
+  \f[
+  \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Legendre}} P_\ell(x) = \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Chebyshev}} T_\ell(x).
+  \f]
+  `normleg` and `normcheb` govern the normalizations, either standard ( == 0) or orthonormalized ( == 1).\n
+  See also \ref ft_plan_legendre_to_chebyshevf, \ref ft_plan_legendre_to_chebyshevl, and \ref ft_mpfr_plan_legendre_to_chebyshev.
+*/
+ft_tb_eigen_FMM * ft_plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n);
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between Chebyshev and Legendre polynomials in double precision so that ft_bfmv converts between expansions:
+  \f[
+  \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Chebyshev}} T_\ell(x) = \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Legendre}} P_\ell(x).
+  \f]
+  `normcheb` and `normleg` govern the normalizations, either standard ( == 0) or orthonormalized ( == 1).\n
+  See also \ref ft_plan_chebyshev_to_legendref, \ref ft_plan_chebyshev_to_legendrel, and \ref ft_mpfr_plan_chebyshev_to_legendre.
+*/
+ft_tb_eigen_FMM * ft_plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n);
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between ultraspherical polynomials in double precision so that ft_bfmv converts between expansions:
+  \f[
+  \sum_{\ell=0}^{n-1} c_\ell^{(1)} C_\ell^{(\lambda)}(x) = \sum_{\ell=0}^{n-1} c_\ell^{(2)} C_\ell^{(\mu)}(x).
+  \f]
+  `norm1` and `norm2` govern the normalizations, either standard ( == 0) or orthonormalized ( == 1).\n
+  See also \ref ft_plan_ultraspherical_to_ultrasphericalf, \ref ft_plan_ultraspherical_to_ultrasphericall, and \ref ft_mpfr_plan_ultraspherical_to_ultraspherical.
+*/
+ft_tb_eigen_FMM * ft_plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, const double lambda, const double mu);
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between Jacobi polynomials in double precision so that ft_bfmv converts between expansions:
+  \f[
+  \sum_{\ell=0}^{n-1} c_\ell^{(1)} P_\ell^{(\alpha,\beta)}(x) = \sum_{\ell=0}^{n-1} c_\ell^{(2)} P_\ell^{(\gamma,\delta)}(x).
+  \f]
+  `norm1` and `norm2` govern the normalizations, either standard ( == 0) or orthonormalized ( == 1).\n
+  See also \ref ft_plan_jacobi_to_jacobif, \ref ft_plan_jacobi_to_jacobil, and \ref ft_mpfr_plan_jacobi_to_jacobi.
+*/
+ft_tb_eigen_FMM * ft_plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const double alpha, const double beta, const double gamma, const double delta);
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between Laguerre polynomials in double precision so that ft_bfmv converts between expansions:
+  \f[
+  \sum_{\ell=0}^{n-1} c_\ell^{(1)} L_\ell^{(\alpha)}(x) = \sum_{\ell=0}^{n-1} c_\ell^{(2)} L_\ell^{(\beta)}(x).
+  \f]
+  `norm1` and `norm2` govern the normalizations, either standard ( == 0) or orthonormalized ( == 1).\n
+  See also \ref ft_plan_laguerre_to_laguerref, \ref ft_plan_laguerre_to_laguerrel, and \ref ft_mpfr_plan_laguerre_to_laguerre.
+*/
+ft_tb_eigen_FMM * ft_plan_laguerre_to_laguerre(const int norm1, const int norm2, const int n, const double alpha, const double beta);
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between Jacobi and ultraspherical polynomials in double precision so that ft_bfmv converts between expansions:
+  \f[
+  \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Jacobi}} P_\ell^{(\alpha,\beta)}(x) = \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{ultraspherical}} C_\ell^{(\lambda)}(x).
+  \f]
+  `normjac` and `normultra` govern the normalizations, either standard ( == 0) or orthonormalized ( == 1).\n
+  See also \ref ft_plan_jacobi_to_ultrasphericalf, \ref ft_plan_jacobi_to_ultrasphericall, and \ref ft_mpfr_plan_jacobi_to_ultraspherical.
+*/
+ft_tb_eigen_FMM * ft_plan_jacobi_to_ultraspherical(const int normjac, const int normultra, const int n, const double alpha, const double beta, const double lambda);
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between ultraspherical and Jacobi polynomials in double precision so that ft_bfmv converts between expansions:
+  \f[
+  \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{ultraspherical}} C_\ell^{(\lambda)}(x) = \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Jacobi}} P_\ell^{(\alpha,\beta)}(x).
+  \f]
+  `normultra` and `normjac` govern the normalizations, either standard ( == 0) or orthonormalized ( == 1).\n
+  See also \ref ft_plan_ultraspherical_to_jacobif, \ref ft_plan_ultraspherical_to_jacobil, and \ref ft_mpfr_plan_ultraspherical_to_jacobi.
+*/
+ft_tb_eigen_FMM * ft_plan_ultraspherical_to_jacobi(const int normultra, const int normjac, const int n, const double lambda, const double alpha, const double beta);
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between Jacobi and Chebyshev polynomials in double precision so that ft_bfmv converts between expansions:
+  \f[
+  \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Jacobi}} P_\ell^{(\alpha,\beta)}(x) = \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Chebyshev}} T_\ell(x).
+  \f]
+  `normjac` and `normcheb` govern the normalizations, either standard ( == 0) or orthonormalized ( == 1).\n
+  See also \ref ft_plan_jacobi_to_chebyshevf, \ref ft_plan_jacobi_to_chebyshevl, and \ref ft_mpfr_plan_jacobi_to_chebyshev.
+*/
+ft_tb_eigen_FMM * ft_plan_jacobi_to_chebyshev(const int normjac, const int normcheb, const int n, const double alpha, const double beta);
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between Chebyshev and Jacobi polynomials in double precision so that ft_bfmv converts between expansions:
+  \f[
+  \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Chebyshev}} T_\ell(x) = \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Jacobi}} P_\ell^{(\alpha,\beta)}(x).
+  \f]
+  `normcheb` and `normjac` govern the normalizations, either standard ( == 0) or orthonormalized ( == 1).\n
+  See also \ref ft_plan_chebyshev_to_jacobif, \ref ft_plan_chebyshev_to_jacobil, and \ref ft_mpfr_plan_chebyshev_to_jacobi.
+*/
+ft_tb_eigen_FMM * ft_plan_chebyshev_to_jacobi(const int normcheb, const int normjac, const int n, const double alpha, const double beta);
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between ultraspherical and Chebyshev polynomials in double precision so that ft_bfmv converts between expansions:
+  \f[
+  \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{ultraspherical}} C_\ell^{(\lambda)}(x) = \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Chebyshev}} T_\ell(x).
+  \f]
+  `normultra` and `normcheb` govern the normalizations, either standard ( == 0) or orthonormalized ( == 1).\n
+  See also \ref ft_plan_ultraspherical_to_chebyshevf, \ref ft_plan_ultraspherical_to_chebyshevl, and \ref ft_mpfr_plan_ultraspherical_to_chebyshev.
+*/
+ft_tb_eigen_FMM * ft_plan_ultraspherical_to_chebyshev(const int normultra, const int normcheb, const int n, const double lambda);
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between Chebyshev and ultraspherical polynomials in double precision so that ft_bfmv converts between expansions:
+  \f[
+  \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{Chebyshev}} T_\ell(x) = \sum_{\ell=0}^{n-1} c_\ell^{\mathrm{ultraspherical}} C_\ell^{(\lambda)}(x).
+  \f]
+  `normcheb` and `normultra` govern the normalizations, either standard ( == 0) or orthonormalized ( == 1).\n
+  See also \ref ft_plan_chebyshev_to_ultrasphericalf, \ref ft_plan_chebyshev_to_ultrasphericall, and \ref ft_mpfr_plan_chebyshev_to_ultraspherical.
+*/
+ft_tb_eigen_FMM * ft_plan_chebyshev_to_ultraspherical(const int normcheb, const int normultra, const int n, const double lambda);
+
+/// A single precision version of \ref ft_plan_legendre_to_chebyshev.
+ft_tb_eigen_FMMf * ft_plan_legendre_to_chebyshevf(const int normleg, const int normcheb, const int n);
+/// A single precision version of \ref ft_plan_chebyshev_to_legendre.
+ft_tb_eigen_FMMf * ft_plan_chebyshev_to_legendref(const int normcheb, const int normleg, const int n);
+/// A single precision version of \ref ft_plan_ultraspherical_to_ultraspherical.
+ft_tb_eigen_FMMf * ft_plan_ultraspherical_to_ultrasphericalf(const int norm1, const int norm2, const int n, const float lambda, const float mu);
+/// A single precision version of \ref ft_plan_jacobi_to_jacobi.
+ft_tb_eigen_FMMf * ft_plan_jacobi_to_jacobif(const int norm1, const int norm2, const int n, const float alpha, const float beta, const float gamma, const float delta);
+/// A single precision version of \ref ft_plan_laguerre_to_laguerre.
+ft_tb_eigen_FMMf * ft_plan_laguerre_to_laguerref(const int norm1, const int norm2, const int n, const float alpha, const float beta);
+/// A single precision version of \ref ft_plan_jacobi_to_ultraspherical.
+ft_tb_eigen_FMMf * ft_plan_jacobi_to_ultrasphericalf(const int normjac, const int normultra, const int n, const float alpha, const float beta, const float lambda);
+/// A single precision version of \ref ft_plan_ultraspherical_to_jacobi.
+ft_tb_eigen_FMMf * ft_plan_ultraspherical_to_jacobif(const int normultra, const int normjac, const int n, const float lambda, const float alpha, const float beta);
+/// A single precision version of \ref ft_plan_jacobi_to_chebyshev.
+ft_tb_eigen_FMMf * ft_plan_jacobi_to_chebyshevf(const int normjac, const int normcheb, const int n, const float alpha, const float beta);
+/// A single precision version of \ref ft_plan_chebyshev_to_jacobi.
+ft_tb_eigen_FMMf * ft_plan_chebyshev_to_jacobif(const int normcheb, const int normjac, const int n, const float alpha, const float beta);
+/// A single precision version of \ref ft_plan_ultraspherical_to_chebyshev.
+ft_tb_eigen_FMMf * ft_plan_ultraspherical_to_chebyshevf(const int normultra, const int normcheb, const int n, const float lambda);
+/// A single precision version of \ref ft_plan_chebyshev_to_ultraspherical.
+ft_tb_eigen_FMMf * ft_plan_chebyshev_to_ultrasphericalf(const int normcheb, const int normultra, const int n, const float lambda);
+
+/// A long double precision version of \ref ft_plan_legendre_to_chebyshev.
+ft_tb_eigen_FMMl * ft_plan_legendre_to_chebyshevl(const int normleg, const int normcheb, const int n);
+/// A long double precision version of \ref ft_plan_chebyshev_to_legendre.
+ft_tb_eigen_FMMl * ft_plan_chebyshev_to_legendrel(const int normcheb, const int normleg, const int n);
+/// A long double precision version of \ref ft_plan_ultraspherical_to_ultraspherical.
+ft_tb_eigen_FMMl * ft_plan_ultraspherical_to_ultrasphericall(const int norm1, const int norm2, const int n, const long double lambda, const long double mu);
+/// A long double precision version of \ref ft_plan_jacobi_to_jacobi.
+ft_tb_eigen_FMMl * ft_plan_jacobi_to_jacobil(const int norm1, const int norm2, const int n, const long double alpha, const long double beta, const long double gamma, const long double delta);
+/// A long double precision version of \ref ft_plan_laguerre_to_laguerre.
+ft_tb_eigen_FMMl * ft_plan_laguerre_to_laguerrel(const int norm1, const int norm2, const int n, const long double alpha, const long double beta);
+/// A long double precision version of \ref ft_plan_jacobi_to_ultraspherical.
+ft_tb_eigen_FMMl * ft_plan_jacobi_to_ultrasphericall(const int normjac, const int normultra, const int n, const long double alpha, const long double beta, const long double lambda);
+/// A long double precision version of \ref ft_plan_ultraspherical_to_jacobi.
+ft_tb_eigen_FMMl * ft_plan_ultraspherical_to_jacobil(const int normultra, const int normjac, const int n, const long double lambda, const long double alpha, const long double beta);
+/// A long double precision version of \ref ft_plan_jacobi_to_chebyshev.
+ft_tb_eigen_FMMl * ft_plan_jacobi_to_chebyshevl(const int normjac, const int normcheb, const int n, const long double alpha, const long double beta);
+/// A long double precision version of \ref ft_plan_chebyshev_to_jacobi.
+ft_tb_eigen_FMMl * ft_plan_chebyshev_to_jacobil(const int normcheb, const int normjac, const int n, const long double alpha, const long double beta);
+/// A long double precision version of \ref ft_plan_ultraspherical_to_chebyshev.
+ft_tb_eigen_FMMl * ft_plan_ultraspherical_to_chebyshevl(const int normultra, const int normcheb, const int n, const long double lambda);
+/// A long double precision version of \ref ft_plan_chebyshev_to_ultraspherical.
+ft_tb_eigen_FMMl * ft_plan_chebyshev_to_ultrasphericall(const int normcheb, const int normultra, const int n, const long double lambda);
+
+#include <mpfr.h>
+
+typedef struct {
+    mpfr_t * data;
+    int n;
+    int b;
+} ft_mpfr_triangular_banded;
+
+void ft_mpfr_destroy_plan(mpfr_t * A, int n);
+void ft_mpfr_trmv(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t * x, mpfr_rnd_t rnd);
+void ft_mpfr_trmm(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t * B, int LDB, int N, mpfr_rnd_t rnd);
+/// A multi-precision version of \ref ft_plan_legendre_to_chebyshev that returns a dense array of connection coefficients.
+mpfr_t * ft_mpfr_plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n, mpfr_prec_t prec, mpfr_rnd_t rnd);
+/// A multi-precision version of \ref ft_plan_chebyshev_to_legendre that returns a dense array of connection coefficients.
+mpfr_t * ft_mpfr_plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n, mpfr_prec_t prec, mpfr_rnd_t rnd);
+/// A multi-precision version of \ref ft_plan_ultraspherical_to_ultraspherical that returns a dense array of connection coefficients.
+mpfr_t * ft_mpfr_plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, mpfr_srcptr lambda, mpfr_srcptr mu, mpfr_prec_t prec, mpfr_rnd_t rnd);
+/// A multi-precision version of \ref ft_plan_jacobi_to_jacobi that returns a dense array of connection coefficients.
+mpfr_t * ft_mpfr_plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_srcptr gamma, mpfr_srcptr delta, mpfr_prec_t prec, mpfr_rnd_t rnd);
+/// A multi-precision version of \ref ft_plan_laguerre_to_laguerre that returns a dense array of connection coefficients.
+mpfr_t * ft_mpfr_plan_laguerre_to_laguerre(const int norm1, const int norm2, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_prec_t prec, mpfr_rnd_t rnd);
+/// A multi-precision version of \ref ft_plan_jacobi_to_ultraspherical that returns a dense array of connection coefficients.
+mpfr_t * ft_mpfr_plan_jacobi_to_ultraspherical(const int normjac, const int normultra, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_srcptr lambda, mpfr_prec_t prec, mpfr_rnd_t rnd);
+/// A multi-precision version of \ref ft_plan_ultraspherical_to_jacobi that returns a dense array of connection coefficients.
+mpfr_t * ft_mpfr_plan_ultraspherical_to_jacobi(const int normultra, const int normjac, const int n, mpfr_srcptr lambda, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_prec_t prec, mpfr_rnd_t rnd);
+/// A multi-precision version of \ref ft_plan_jacobi_to_chebyshev that returns a dense array of connection coefficients.
+mpfr_t * ft_mpfr_plan_jacobi_to_chebyshev(const int normjac, const int normcheb, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_prec_t prec, mpfr_rnd_t rnd);
+/// A multi-precision version of \ref ft_plan_chebyshev_to_jacobi that returns a dense array of connection coefficients.
+mpfr_t * ft_mpfr_plan_chebyshev_to_jacobi(const int normcheb, const int normjac, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_prec_t prec, mpfr_rnd_t rnd);
+/// A multi-precision version of \ref ft_plan_ultraspherical_to_chebyshev that returns a dense array of connection coefficients.
+mpfr_t * ft_mpfr_plan_ultraspherical_to_chebyshev(const int normultra, const int normcheb, const int n, mpfr_srcptr lambda, mpfr_prec_t prec, mpfr_rnd_t rnd);
+/// A multi-precision version of \ref ft_plan_chebyshev_to_ultraspherical that returns a dense array of connection coefficients.
+mpfr_t * ft_mpfr_plan_chebyshev_to_ultraspherical(const int normcheb, const int normultra, const int n, mpfr_srcptr lambda, mpfr_prec_t prec, mpfr_rnd_t rnd);
+
 /// Set the number of OpenMP threads.
 void ft_set_num_threads(const int n);
 

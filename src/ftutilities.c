@@ -42,52 +42,30 @@ void printmat(char * MAT, char * FMT, double * A, int n, int m) {
     }
 }
 
+void print_summary_size(size_t i) {
+    if (i < 1024.0)
+        printf("%20zu B\n", i);
+    else if (i < 1048576.0)
+        printf("%18.3f KiB\n", i/1024.0);
+    else if (i < 1073741824.0)
+        printf("%18.3f MiB\n", i/1048576.0);
+    else if (i < 1099511627776.0)
+        printf("%18.3f GiB\n", i/1073741824.0);
+    else if (i < 1.125899906842624e15)
+        printf("%18.3f TiB\n", i/1099511627776.0);
+    else
+        printf("%18.14e B\n", (double) i);
+}
+
 double * copymat(double * A, int n, int m) {
-    double * B = (double *) calloc(n*m, sizeof(double));
+    double * B = calloc(n*m, sizeof(double));
     for (int i = 0; i < n*m; i++)
         B[i] = A[i];
     return B;
 }
 
-void checktest(double err, int n, int * checksum) {
-    if (fabs(err) < n*0x1p-52) printf(GREEN("✓")"\n");
-    else {printf(RED("×")"\n"); (*checksum)++;}
-}
-
-double norm_1arg(double * A, int n) {
-    double ret = 0.0;
-    for (int i = 0; i < n; i++)
-        ret += pow(A[i], 2);
-    return sqrt(ret);
-}
-
-double norm_2arg(double * A, double * B, int n) {
-    double ret = 0.0;
-    for (int i = 0; i < n; i++)
-        ret += pow(A[i]-B[i], 2);
-    return sqrt(ret);
-}
-
-double normInf_1arg(double * A, int n) {
-    double ret = 0.0, temp;
-    for (int i = 0; i < n; i++) {
-        temp = fabs(A[i]);
-        if (temp > ret) ret = temp;
-    }
-    return ret;
-}
-
-double normInf_2arg(double * A, double * B, int n) {
-    double ret = 0.0, temp;
-    for (int i = 0; i < n; i++) {
-        temp = fabs(A[i]-B[i]);
-        if (temp > ret) ret = temp;
-    }
-    return ret;
-}
-
 double * sphones(int n, int m) {
-    double * A  = (double *) calloc(n * m, sizeof(double));
+    double * A  = calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-2*i; j++)
             A(i,j) = 1.0;
@@ -95,7 +73,7 @@ double * sphones(int n, int m) {
 }
 
 double * sphrand(int n, int m) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-2*i; j++)
             A(i,j) = 2.0*(((double) rand())/RAND_MAX)-1.0;
@@ -103,7 +81,7 @@ double * sphrand(int n, int m) {
 }
 
 double * triones(int n, int m) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-i; j++)
             A(i,j) = 1.0;
@@ -111,7 +89,7 @@ double * triones(int n, int m) {
 }
 
 double * trirand(int n, int m) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-i; j++)
             A(i,j) = 2.0*(((double) rand())/RAND_MAX)-1.0;
@@ -119,7 +97,7 @@ double * trirand(int n, int m) {
 }
 
 double * diskones(int n, int m) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-4*i; j++)
             A(i,j) = 1.0;
@@ -127,7 +105,7 @@ double * diskones(int n, int m) {
 }
 
 double * diskrand(int n, int m) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m-4*i; j++)
             A(i,j) = 2.0*(((double) rand())/RAND_MAX)-1.0;
@@ -135,7 +113,7 @@ double * diskrand(int n, int m) {
 }
 
 double * tetones(int n, int l, int m) {
-    double * A = (double *) calloc(n * l * m, sizeof(double));
+    double * A = calloc(n * l * m, sizeof(double));
     for (int k = 0; k < m; k++)
         for (int j = 0; j < l-k; j++)
             for (int i = 0; i < n-j-k; i++)
@@ -144,7 +122,7 @@ double * tetones(int n, int l, int m) {
 }
 
 double * tetrand(int n, int l, int m) {
-    double * A = (double *) calloc(n * l * m, sizeof(double));
+    double * A = calloc(n * l * m, sizeof(double));
     for (int k = 0; k < m; k++)
         for (int j = 0; j < l-k; j++)
             for (int i = 0; i < n-j-k; i++)
@@ -153,7 +131,7 @@ double * tetrand(int n, int l, int m) {
 }
 
 double * spinsphones(int n, int m, int s) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n-s; i++)
         for (int j = 0; j < m-2*i; j++)
             A(i,j) = 1.0;
@@ -161,7 +139,7 @@ double * spinsphones(int n, int m, int s) {
 }
 
 double * spinsphrand(int n, int m, int s) {
-    double * A = (double *) calloc(n * m, sizeof(double));
+    double * A = calloc(n * m, sizeof(double));
     for (int i = 0; i < n-s; i++)
         for (int j = 0; j < m-2*i; j++)
             A(i,j) = 2.0*(((double) rand())/RAND_MAX)-1.0;
@@ -171,3 +149,35 @@ double * spinsphrand(int n, int m, int s) {
 double elapsed(struct timeval * start, struct timeval * end, int N) {
     return ((end->tv_sec  - start->tv_sec) * 1000000u + end->tv_usec - start->tv_usec) / (1.e6 * N);
 }
+
+#define FLT float
+#define X(name) FT_CONCAT(ft_, name, f)
+#define Y(name) FT_CONCAT(, name, f)
+#include "ftutilities_source.c"
+#undef FLT
+#undef X
+#undef Y
+
+#define FLT double
+#define X(name) FT_CONCAT(ft_, name, )
+#define Y(name) FT_CONCAT(, name, )
+#include "ftutilities_source.c"
+#undef FLT
+#undef X
+#undef Y
+
+#define FLT long double
+#define X(name) FT_CONCAT(ft_, name, l)
+#define Y(name) FT_CONCAT(, name, l)
+#include "ftutilities_source.c"
+#undef FLT
+#undef X
+#undef Y
+
+#define FLT quadruple
+#define X(name) FT_CONCAT(ft_, name, q)
+#define Y(name) FT_CONCAT(, name, q)
+#include "ftutilities_source.c"
+#undef FLT
+#undef X
+#undef Y

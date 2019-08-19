@@ -3,7 +3,7 @@
 #include "ftinternal.h"
 
 void permute(const double * A, double * B, const int N, const int M, const int L) {
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     #pragma omp parallel for if (N < 2*M)
     for (int j = 0; j < M; j += L)
         for (int i = 0; i < L*N; i++)
@@ -11,7 +11,7 @@ void permute(const double * A, double * B, const int N, const int M, const int L
 }
 
 void permute_t(double * A, const double * B, const int N, const int M, const int L) {
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     #pragma omp parallel for if (N < 2*M)
     for (int j = 0; j < M; j += L)
         for (int i = 0; i < L*N; i++)
@@ -20,7 +20,7 @@ void permute_t(double * A, const double * B, const int N, const int M, const int
 
 
 void permute_sph(const double * A, double * B, const int N, const int M, const int L) {
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     if (L == 2) {
         for (int i = 0; i < N; i++)
             B[i] = A[i];
@@ -33,7 +33,7 @@ void permute_sph(const double * A, double * B, const int N, const int M, const i
 }
 
 void permute_t_sph(double * A, const double * B, const int N, const int M, const int L) {
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     if (L == 2) {
         for (int i = 0; i < N; i++)
             A[i] = B[i];
@@ -46,7 +46,7 @@ void permute_t_sph(double * A, const double * B, const int N, const int M, const
 }
 
 void permute_tri(const double * A, double * B, const int N, const int M, const int L) {
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     if (L == 2) {
         if (M%2) {
             for (int i = 0; i < N; i++)
@@ -63,7 +63,7 @@ void permute_tri(const double * A, double * B, const int N, const int M, const i
 }
 
 void permute_t_tri(double * A, const double * B, const int N, const int M, const int L) {
-    int NB = ALIGNB(N);
+    int NB = VALIGN(N);
     if (L == 2) {
         if (M%2) {
             for (int i = 0; i < N; i++)
@@ -80,7 +80,7 @@ void permute_t_tri(double * A, const double * B, const int N, const int M, const
 }
 
 
-void swap(double * A, double * B, const int N) {
+void swap_warp(double * A, double * B, const int N) {
     double tmp;
     for (int i = 0; i < N; i++) {
         tmp = A[i];
@@ -92,11 +92,11 @@ void swap(double * A, double * B, const int N) {
 void warp(double * A, const int N, const int M, const int L) {
     for (int j = 2; j <= L; j <<= 1)
         for (int i = M%(4*L); i < M; i += 4*j)
-            swap(A+(i+j)*N, A+(i+j*2)*N, j*N);
+            swap_warp(A+(i+j)*N, A+(i+j*2)*N, j*N);
 }
 
 void warp_t(double * A, const int N, const int M, const int L) {
     for (int j = L; j >= 2; j >>= 1)
         for (int i = M%(4*L); i < M; i += 4*j)
-            swap(A+(i+j)*N, A+(i+j*2)*N, j*N);
+            swap_warp(A+(i+j)*N, A+(i+j*2)*N, j*N);
 }

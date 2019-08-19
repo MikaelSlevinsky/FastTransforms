@@ -155,7 +155,7 @@ int main(void) {
     printf("\n");
 
     printf("The 2-norm relative error in differentiating the Proriol series\n");
-    printf("for "MAGENTA("f(x,y)")" term-by-term and its sampled gradient is %4.2e.\n", sqrt(pow(norm_2arg(Fx, Gx, N*M), 2) + pow(norm_2arg(Fy, Gy, N*M), 2))/sqrt(pow(norm_1arg(Fx, N*M), 2) + pow(norm_1arg(Fy, N*M), 2)));
+    printf("for "MAGENTA("f(x,y)")" term-by-term and its sampled gradient is %4.2e.\n", sqrt(pow(ft_norm_2arg(Fx, Gx, N*M), 2) + pow(ft_norm_2arg(Fy, Gy, N*M), 2))/sqrt(pow(ft_norm_1arg(Fx, N*M), 2) + pow(ft_norm_1arg(Fy, N*M), 2)));
     printf("This error can be improved upon by increasing "MAGENTA("N")" and "MAGENTA("M")".\n");
 
     ft_destroy_harmonic_plan(P);

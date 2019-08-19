@@ -1,6 +1,6 @@
 LIB = fasttransforms
 LIBDIR = .
-LIBFLAGS = -shared -lm -fPIC -fopenmp
+LIBFLAGS = -shared -lm -fPIC
 
 ifeq ($(OS), Windows_NT)
     UNAME := Windows
@@ -14,7 +14,7 @@ else
 	endif
 endif
 
-OBJ = src/transforms.c src/rotations.c src/permute.c src/drivers.c src/fftw.c
+OBJ = src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
 
 #CC = gcc-8
 #CC = /usr/local/opt/llvm/bin/clang
@@ -24,7 +24,7 @@ OBJ = src/transforms.c src/rotations.c src/permute.c src/drivers.c src/fftw.c
 
 #AVX512 = -mavx512f
 
-CFLAGS = -std=gnu99 -Ofast $(AVX512) -march=native -mtune=native -I./src
+CFLAGS = -std=gnu99 -Ofast $(AVX512) -march=native -mtune=native -mno-vzeroupper -I./src
 
 ifeq ($(CC),/usr/local/opt/llvm/bin/clang)
     CFLAGS += -I/usr/local/opt/llvm/include
@@ -49,9 +49,11 @@ ifeq ($(UNAME), Windows)
     LDFLAGS += -L.
 endif
 
-LDLIBS += -lm -lblas -lfftw3
+LDLIBS += -lm -lquadmath -lmpfr -fopenmp -lblas -lfftw3
 ifeq ($(UNAME), Linux)
-    LDLIBS += -lfftw3_threads
+    LDLIBS += -lfftw3_threads -lgmp
 else ifeq ($(UNAME), Darwin)
-    LDLIBS += -lfftw3_threads
+    LDLIBS += -lfftw3_threads -lgmp
+else ifeq ($(OS), Windows_NT)
+    LDLIBS += -lmpir
 endif
