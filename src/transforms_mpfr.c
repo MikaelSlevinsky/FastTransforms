@@ -13,7 +13,7 @@ void ft_mpfr_destroy_triangular_banded(ft_mpfr_triangular_banded * A) {
     free(A);
 }
 
-// y ← A*x, y ← Aᵀ*x
+// x ← A*x, x ← Aᵀ*x
 void ft_mpfr_trmv(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t * x, mpfr_rnd_t rnd) {
     if (TRANS == 'N') {
         for (int j = 0; j < n; j++) {
@@ -69,15 +69,15 @@ void ft_mpfr_set_triangular_banded_index(const ft_mpfr_triangular_banded * A, co
 
 void ft_mpfr_triangular_banded_eigenvalues(ft_mpfr_triangular_banded * A, ft_mpfr_triangular_banded * B, mpfr_t * lambda, mpfr_prec_t prec, mpfr_rnd_t rnd) {
     mpfr_t t1, t2;
+    mpfr_init2(t1, prec);
+    mpfr_init2(t2, prec);
     for (int j = 0; j < A->n; j++) {
-        mpfr_init2(t1, prec);
-        mpfr_init2(t2, prec);
         ft_mpfr_get_triangular_banded_index(A, &t1, j, j, prec, rnd);
         ft_mpfr_get_triangular_banded_index(B, &t2, j, j, prec, rnd);
         mpfr_div(lambda[j], t1, t2, rnd);
-        mpfr_clear(t1);
-        mpfr_clear(t2);
     }
+    mpfr_clear(t1);
+    mpfr_clear(t2);
 }
 
 // Assumes eigenvectors are initialized by V[i,j] = 0 for i > j and V[j,j] ≠ 0.
@@ -85,52 +85,40 @@ void ft_mpfr_triangular_banded_eigenvectors(ft_mpfr_triangular_banded * A, ft_mp
     int n = A->n, b1 = A->b, b2 = B->b;
     int b = MAX(b1, b2);
     mpfr_t t, t1, t2, t3, t4, lam;
+    mpfr_init2(t, prec);
+    mpfr_init2(t1, prec);
+    mpfr_init2(t2, prec);
+    mpfr_init2(t3, prec);
+    mpfr_init2(t4, prec);
+    mpfr_init2(lam, prec);
     for (int j = 1; j < n; j++) {
         //lam = X(get_triangular_banded_index)(A, j, j)/X(get_triangular_banded_index)(B, j, j);
-        mpfr_init2(t1, prec);
-        mpfr_init2(t2, prec);
         ft_mpfr_get_triangular_banded_index(A, &t1, j, j, prec, rnd);
         ft_mpfr_get_triangular_banded_index(B, &t2, j, j, prec, rnd);
-        mpfr_init2(lam, prec);
         mpfr_div(lam, t1, t2, rnd);
-        mpfr_clear(t1);
-        mpfr_clear(t2);
         for (int i = j-1; i >= 0; i--) {
             //t = 0;
-            mpfr_init2(t, prec);
             mpfr_set_zero(t, 1);
             for (int k = i+1; k < MIN(i+b+1, n); k++) {
                 //t += (lam*X(get_triangular_banded_index)(B, i, k) - X(get_triangular_banded_index)(A, i, k))*V[k+j*n];
-                mpfr_init2(t3, prec);
                 mpfr_set(t3, V[k+j*n], rnd);
-                mpfr_init2(t4, prec);
-                mpfr_init2(t1, prec);
-                mpfr_init2(t2, prec);
                 ft_mpfr_get_triangular_banded_index(A, &t1, i, k, prec, rnd);
                 ft_mpfr_get_triangular_banded_index(B, &t2, i, k, prec, rnd);
                 mpfr_fms(t4, lam, t2, t1, rnd);
                 mpfr_fma(t, t4, t3, t, rnd);
-                mpfr_clear(t1);
-                mpfr_clear(t2);
-                mpfr_clear(t3);
-                mpfr_clear(t4);
             }
             //V[i+j*n] = -t/(lam*X(get_triangular_banded_index)(B, i, i) - X(get_triangular_banded_index)(A, i, i));
-            mpfr_init2(t1, prec);
-            mpfr_init2(t2, prec);
             ft_mpfr_get_triangular_banded_index(A, &t1, i, i, prec, rnd);
             ft_mpfr_get_triangular_banded_index(B, &t2, i, i, prec, rnd);
-            mpfr_init2(t3, prec);
             mpfr_fms(t3, lam, t2, t1, rnd);
-            mpfr_init2(t4, prec);
             mpfr_div(t4, t, t3, rnd);
             mpfr_neg(V[i+j*n], t4, rnd);
-            mpfr_clear(t1);
-            mpfr_clear(t2);
-            mpfr_clear(t3);
-            mpfr_clear(t4);
         }
     }
+    mpfr_clear(t1);
+    mpfr_clear(t2);
+    mpfr_clear(t3);
+    mpfr_clear(t4);
 }
 
 static inline ft_mpfr_triangular_banded * ft_mpfr_create_A_legendre_to_chebyshev(const int n, mpfr_prec_t prec, mpfr_rnd_t rnd) {
@@ -169,6 +157,7 @@ static inline ft_mpfr_triangular_banded * ft_mpfr_create_B_legendre_to_chebyshev
         mpfr_set_d(v, 1.0, rnd);
         ft_mpfr_set_triangular_banded_index(B, v, i, i, rnd);
     }
+    mpfr_clear(v);
     return B;
 }
 

@@ -356,7 +356,7 @@ void X(scale_columns_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F) {
     }
 }
 
-// y ← A*x, y ← Aᵀ*x
+// x ← A*x, x ← Aᵀ*x
 void X(trmv)(char TRANS, int n, FLT * A, int LDA, FLT * x) {
     if (TRANS == 'N') {
         for (int j = 0; j < n; j++) {
