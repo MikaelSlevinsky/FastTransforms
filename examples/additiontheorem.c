@@ -27,7 +27,7 @@ double3 z(double theta, double phi) {return (double3) {sin(theta)*cos(phi), sin(
   is actually a degree-\f$3\f$ polynomial on \f$\mathbb{S}^2\f$, where \f$P_4\f$ is the degree-\f$4\f$ Legendre polynomial, and \f$x,y,z \in \mathbb{S}^2\f$.
 */
 int main(void) {
-    printf("\nThis example confirms numerically that\n");
+    printf("This example confirms numerically that\n");
     printf("\n");
     printf("\t"MAGENTA("[P₄(z⋅y) - P₄(x⋅y)]/(z⋅y - x⋅y)")",\n");
     printf("\n");
