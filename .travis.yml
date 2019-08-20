@@ -47,6 +47,7 @@ script:
   - ./additiontheorem
   - ./calculus
   - ./holomorphic
+  - ./nonlocaldiffusion
 
 after_success:
   - doxygen Doxyfile

@@ -45,3 +45,4 @@ test_script:
   - additiontheorem.exe
   - calculus.exe
   - holomorphic.exe
+  - nonlocaldiffusion.exe
