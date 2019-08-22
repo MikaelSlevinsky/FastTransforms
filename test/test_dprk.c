@@ -1,26 +1,6 @@
 #include "fasttransforms.h"
 #include "ftutilities.h"
 
-void test_dprkf(int * checksum);
-void test_dprk (int * checksum);
-void test_dprkl(int * checksum);
-void test_dprkq(int * checksum);
-
-int main(void) {
-    int checksum = 0;
-    printf("\nTesting methods for symmetric diagonal-plus-rank-k matrices.\n");
-    printf("\n\tSingle precision.\n\n");
-    test_dprkf(&checksum);
-    printf("\n\tDouble precision.\n\n");
-    test_dprk(&checksum);
-    printf("\n\tLong double precision.\n\n");
-    test_dprkl(&checksum);
-    printf("\n\tQuadruple precision.\n\n");
-    test_dprkq(&checksum);
-    printf("\n");
-    return checksum;
-}
-
 #define FLT float
 #define X(name) FT_CONCAT(ft_, name, f)
 #define Y(name) FT_CONCAT(, name, f)
@@ -52,3 +32,18 @@ int main(void) {
 #undef FLT
 #undef X
 #undef Y
+
+int main(void) {
+    int checksum = 0;
+    printf("\nTesting methods for symmetric diagonal-plus-rank-k matrices.\n");
+    printf("\n\tSingle precision.\n\n");
+    test_dprkf(&checksum);
+    printf("\n\tDouble precision.\n\n");
+    test_dprk(&checksum);
+    printf("\n\tLong double precision.\n\n");
+    test_dprkl(&checksum);
+    printf("\n\tQuadruple precision.\n\n");
+    test_dprkq(&checksum);
+    printf("\n");
+    return checksum;
+}

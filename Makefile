@@ -52,6 +52,7 @@ clean:
 	rm -f additiontheorem
 	rm -f calculus
 	rm -f holomorphic
+	rm -f nonlocaldiffusion
 	rm -f test_*
 
 .PHONY: all lib assembly examples tests clean

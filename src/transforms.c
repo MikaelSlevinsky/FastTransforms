@@ -285,4 +285,6 @@ double * plan_chebyshev_to_ultraspherical(const int normcheb, const int normultr
     return V;
 }
 
-#include "transforms_mpfr.c"
+#ifdef FT_USE_MPFR
+    #include "transforms_mpfr.c"
+#endif

@@ -31,11 +31,40 @@ void ft_mpfr_trmv(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t * x, mpfr_rnd_t
     }
 }
 
+// x ← A⁻¹*x, x ← A⁻ᵀ*x
+void ft_mpfr_trsv(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t * x, mpfr_rnd_t rnd) {
+    if (TRANS == 'N') {
+        for (int j = n-1; j >= 0; j--) {
+            mpfr_div(x[j], x[j], A[j+j*LDA], rnd);
+            for (int i = 0; i < j; i++) {
+                mpfr_fms(x[i], A[i+j*LDA], x[j], x[i], rnd);
+                mpfr_neg(x[i], x[i], rnd);
+            }
+        }
+    }
+    else if (TRANS == 'T') {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                mpfr_fms(x[i], A[j+i*LDA], x[j], x[i], rnd);
+                mpfr_neg(x[i], x[i], rnd);
+            }
+            mpfr_div(x[i], x[i], A[i+i*LDA], rnd);
+        }
+    }
+}
+
 // B ← A*B, B ← Aᵀ*B
 void ft_mpfr_trmm(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t * B, int LDB, int N, mpfr_rnd_t rnd) {
     #pragma omp parallel for
     for (int j = 0; j < N; j++)
         ft_mpfr_trmv(TRANS, n, A, LDA, B+j*LDB, rnd);
+}
+
+// B ← A⁻¹*B, B ← A⁻ᵀ*B
+void ft_mpfr_trsm(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t * B, int LDB, int N, mpfr_rnd_t rnd) {
+    #pragma omp parallel for
+    for (int j = 0; j < N; j++)
+        ft_mpfr_trsv(TRANS, n, A, LDA, B+j*LDB, rnd);
 }
 
 ft_mpfr_triangular_banded * ft_mpfr_calloc_triangular_banded(const int n, const int b, mpfr_prec_t prec) {

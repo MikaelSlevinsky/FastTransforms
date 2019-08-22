@@ -1,29 +1,6 @@
 #include "fasttransforms.h"
 #include "ftutilities.h"
 
-void test_tridiagonalf(int * checksum);
-void test_tridiagonal (int * checksum);
-void test_tridiagonall(int * checksum);
-void test_tridiagonalq(int * checksum);
-
-void symmetric_tridiagonal_printmat(char * MAT, char * FMT, ft_symmetric_tridiagonal * A);
-void bidiagonal_printmat(char * MAT, char * FMT, ft_bidiagonal * B);
-
-int main(void) {
-    int checksum = 0;
-    printf("\nTesting methods for bidiagonal and symmetric tridiagonal matrices.\n");
-    printf("\n\tSingle precision.\n\n");
-    test_tridiagonalf(&checksum);
-    printf("\n\tDouble precision.\n\n");
-    test_tridiagonal(&checksum);
-    printf("\n\tLong double precision.\n\n");
-    test_tridiagonall(&checksum);
-    printf("\n\tQuadruple precision.\n\n");
-    test_tridiagonalq(&checksum);
-    printf("\n");
-    return checksum;
-}
-
 #define FLT float
 #define X(name) FT_CONCAT(ft_, name, f)
 #define Y(name) FT_CONCAT(, name, f)
@@ -56,6 +33,23 @@ int main(void) {
 #undef X
 #undef Y
 
+void symmetric_tridiagonal_printmat(char * MAT, char * FMT, ft_symmetric_tridiagonal * A);
+void bidiagonal_printmat(char * MAT, char * FMT, ft_bidiagonal * B);
+
+int main(void) {
+    int checksum = 0;
+    printf("\nTesting methods for bidiagonal and symmetric tridiagonal matrices.\n");
+    printf("\n\tSingle precision.\n\n");
+    test_tridiagonalf(&checksum);
+    printf("\n\tDouble precision.\n\n");
+    test_tridiagonal(&checksum);
+    printf("\n\tLong double precision.\n\n");
+    test_tridiagonall(&checksum);
+    printf("\n\tQuadruple precision.\n\n");
+    test_tridiagonalq(&checksum);
+    printf("\n");
+    return checksum;
+}
 
 void symmetric_tridiagonal_printmat(char * MAT, char * FMT, ft_symmetric_tridiagonal * A) {
     int n = A->n;
