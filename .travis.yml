@@ -32,7 +32,9 @@ matrix:
 before_install: eval "${MATRIX_EVAL}"
 
 script:
+  - cd ${TRAVIS_BUILD_DIR}
   - make lib
+  - ls
   - make tests
   - ./test_transforms
   - ./test_rotations
@@ -61,7 +63,9 @@ deploy:
       branch: master
   - provider: releases
     api_key: $FT_BINARIES
-    file: libfasttransforms.*
+    file:
+      - "${TRAVIS_BUILD_DIR}/libfasttransforms.dylib"
+      - "${TRAVIS_BUILD_DIR}/libfasttransforms.so"
     skip_cleanup: true
     on:
       tags: true
