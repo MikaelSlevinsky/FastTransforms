@@ -138,6 +138,7 @@ double * plan_jacobi_to_chebyshev(const int normjac, const int normcheb, const i
 double * plan_chebyshev_to_jacobi(const int normcheb, const int normjac, const int n, const double alpha, const double beta);
 double * plan_ultraspherical_to_chebyshev(const int normultra, const int normcheb, const int n, const double lambda);
 double * plan_chebyshev_to_ultraspherical(const int normcheb, const int normultra, const int n, const double lambda);
+double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta);
 
 void permute(const double * A, double * B, const int N, const int M, const int L);
 void permute_t(double * A, const double * B, const int N, const int M, const int L);

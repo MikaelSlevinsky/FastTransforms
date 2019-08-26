@@ -205,6 +205,8 @@ void X(tbsv)(char TRANS, X(triangular_banded) * A, FLT * x) {
     }
 }
 
+// AV = BVΛ
+
 void X(triangular_banded_eigenvalues)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * lambda) {
     for (int j = 0; j < A->n; j++)
         lambda[j] = X(get_triangular_banded_index)(A, j, j)/X(get_triangular_banded_index)(B, j, j);
@@ -222,6 +224,30 @@ void X(triangular_banded_eigenvectors)(X(triangular_banded) * A, X(triangular_ba
             for (int k = i+1; k < MIN(i+b+1, n); k++)
                 t += (X(get_triangular_banded_index)(A, i, k) - lam*X(get_triangular_banded_index)(B, i, k))*V[k+j*n];
             V[i+j*n] = t/(lam*X(get_triangular_banded_index)(B, i, i) - X(get_triangular_banded_index)(A, i, i));
+        }
+    }
+}
+
+// AV + BVΛ = CVΩ
+
+void X(triangular_banded_eigenvalues_3arg)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * lambda, X(triangular_banded) * C, FLT * omega) {
+    for (int j = 0; j < A->n; j++)
+        omega[j] = (X(get_triangular_banded_index)(A, j, j) + X(get_triangular_banded_index)(B, j, j)*lambda[j])/X(get_triangular_banded_index)(C, j, j);
+}
+
+// Assumes eigenvectors are initialized by V[i,j] = 0 for i > j and V[j,j] ≠ 0.
+void X(triangular_banded_eigenvectors_3arg)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * lambda, X(triangular_banded) * C, FLT * V) {
+    int n = A->n, b1 = A->b, b2 = B->b, b3 = C->b;
+    int b = MAX(MAX(b1, b2), b3);
+    FLT t, lam, omeg;
+    for (int j = 1; j < n; j++) {
+        lam = lambda[j];
+        omeg = (X(get_triangular_banded_index)(A, j, j) + X(get_triangular_banded_index)(B, j, j)*lambda[j])/X(get_triangular_banded_index)(C, j, j);
+        for (int i = j-1; i >= 0; i--) {
+            t = 0;
+            for (int k = i+1; k < MIN(i+b+1, n); k++)
+                t += (X(get_triangular_banded_index)(A, i, k) + lam*X(get_triangular_banded_index)(B, i, k) - omeg*X(get_triangular_banded_index)(C, i, k))*V[k+j*n];
+            V[i+j*n] = t/(omeg*X(get_triangular_banded_index)(C, i, i) - lam*X(get_triangular_banded_index)(B, i, i) - X(get_triangular_banded_index)(A, i, i));
         }
     }
 }
@@ -620,7 +646,7 @@ X(banded) * X(create_jacobi_lowering)(const int m, const int n, const FLT alpha,
     return A;
 }
 
-X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, const int c, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta) {
+X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta) {
     X(banded) * A = X(calloc_banded)(n, n, 0, 4);
 
     X(banded) * D1 = X(create_jacobi_derivative)(n, n, 1, gamma, delta);
@@ -647,8 +673,8 @@ X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, cons
     X(banded) * A3 = X(calloc_banded)(n, n, 0, 4);
     X(gbmm)(-10, M2, A3a, 0, A3);
 
-    // A2 = [ (μ+(n+1)²-24)(1-x²)-2ν(1+x)-4β²+16 ] D²
-    //    = [ (μ+(n+1)²-24)(1-x²)-2νx -2ν-4β²+16 ] D²
+    // A2 = [ -20(1-x²)-2ν(1+x)-4β²+16 ] D²
+    //    = [ -20(1-x²)-2νx -2ν-4β²+16 ] D²
 
     X(banded) * A2a = X(calloc_banded)(n, n, 0, 2);
     X(gbmm)(1, L1, D2, 0, A2a);
@@ -656,30 +682,14 @@ X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, cons
     X(gbmm)(1, R1, A2a, 0, A2b);
     X(banded) * A2c = X(calloc_banded)(n, n, -1, 3);
     X(gbmm)(1, M2, D2, 0, A2c);
-    FLT D2b;
-    for (int j = 0; j < n; j++) {
-        D2b = (j+alpha+beta+2*c-1)*(j+alpha+beta+2*c+1)+(j+1)*(j+ONE(FLT))-24;
-        for (int k = 0; k < 5; k++)
-            A2b->data[k+j*5] *= D2b;
-    }
     X(banded) * A2 = X(calloc_banded)(n, n, 0, 4);
-    X(banded_add)(1, A2b, -2*(alpha-beta)*(alpha+beta), A2c, A2);
+    X(banded_add)(-20, A2b, -2*(alpha-beta)*(alpha+beta), A2c, A2);
     X(banded_add)(1, A2, -2*(alpha-beta)*(alpha+beta)-4*beta*beta+16, D2, A2);
 
-    // A1 = [ -3*(μ+(n+3)(n-1))x - 3ν ] D
+    // A1 = -3ν D
 
-    X(banded) * A1a = X(calloc_banded)(n, n, -1, 3);
-    X(gbmm)(1, R1, D1, 0, A1a);
-    X(banded) * A1b = X(calloc_banded)(n, n, 0, 4);
-    X(gbmm)(1, M2, A1a, 0, A1b);
-    FLT D1b;
-    for (int j = 0; j < n; j++) {
-        D1b = (j+alpha+beta+2*c-1)*(j+alpha+beta+2*c+1) + (j+3)*(j-ONE(FLT));
-        for (int k = 0; k < 5; k++)
-            A1b->data[k+j*5] *= D1b;
-    }
-    X(banded) * A1 = X(calloc_banded)(n, n, 0, 4);
-    X(banded_add)(-3, A1b, -3*(alpha-beta)*(alpha+beta), A1a, A1);
+    X(banded) * A1 = X(calloc_banded)(n, n, -1, 3);
+    X(gbmm)(-3*(alpha-beta)*(alpha+beta), R1, D1, 0, A1);
 
     // A = -(A1+A2+A3+A4)
 
@@ -705,8 +715,6 @@ X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, cons
     X(destroy_banded)(A2b);
     X(destroy_banded)(A2c);
     X(destroy_banded)(A2);
-    X(destroy_banded)(A1a);
-    X(destroy_banded)(A1b);
     X(destroy_banded)(A1);
 
     X(triangular_banded) * TA = malloc(sizeof(X(triangular_banded)));
@@ -720,13 +728,40 @@ X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, cons
 X(triangular_banded) * X(create_B_associated_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta) {
     X(banded) * B = X(calloc_banded)(n, n, 0, 4);
 
-    X(banded) * R0 = X(create_jacobi_raising)(n, n, gamma, delta);
+    X(banded) * D1 = X(create_jacobi_derivative)(n, n, 1, gamma, delta);
+    X(banded) * D2 = X(create_jacobi_derivative)(n, n, 2, gamma, delta);
     X(banded) * R1 = X(create_jacobi_raising)(n, n, gamma+1, delta+1);
+    X(banded) * L1 = X(create_jacobi_lowering)(n, n, gamma+1, delta+1);
+    X(banded) * M2 = X(create_jacobi_multiplication)(n, n, gamma+2, delta+2);
 
-    X(gbmm)(1, R1, R0, 0, B);
+    // B2 = [ (μ+(n+3)(n-1))(1-x²) ] D²
 
-    X(destroy_banded)(R0);
+    X(banded) * B2a = X(calloc_banded)(n, n, 0, 2);
+    X(gbmm)(1, L1, D2, 0, B2a);
+    X(banded) * B2 = X(calloc_banded)(n, n, 0, 4);
+    X(gbmm)(1, R1, B2a, 0, B2);
+
+    // B1 = [ -3*(μ+(n+3)(n-1))x ] D
+
+    X(banded) * B1a = X(calloc_banded)(n, n, -1, 3);
+    X(gbmm)(1, R1, D1, 0, B1a);
+    X(banded) * B1 = X(calloc_banded)(n, n, 0, 4);
+    X(gbmm)(-3, M2, B1a, 0, B1);
+
+    // B = -(B1+B2)
+
+    X(banded_add)(-1, B1, -1, B2, B);
+
+    X(destroy_banded)(D1);
+    X(destroy_banded)(D2);
     X(destroy_banded)(R1);
+    X(destroy_banded)(L1);
+    X(destroy_banded)(M2);
+
+    X(destroy_banded)(B2a);
+    X(destroy_banded)(B2);
+    X(destroy_banded)(B1a);
+    X(destroy_banded)(B1);
 
     X(triangular_banded) * TB = malloc(sizeof(X(triangular_banded)));
     TB->data = B->data;
@@ -734,4 +769,23 @@ X(triangular_banded) * X(create_B_associated_jacobi_to_jacobi)(const int n, cons
     TB->b = 4;
     free(B);
     return TB;
+}
+
+X(triangular_banded) * X(create_C_associated_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta) {
+    X(banded) * C = X(calloc_banded)(n, n, 0, 4);
+
+    X(banded) * R0 = X(create_jacobi_raising)(n, n, gamma, delta);
+    X(banded) * R1 = X(create_jacobi_raising)(n, n, gamma+1, delta+1);
+
+    X(gbmm)(1, R1, R0, 0, C);
+
+    X(destroy_banded)(R0);
+    X(destroy_banded)(R1);
+
+    X(triangular_banded) * TC = malloc(sizeof(X(triangular_banded)));
+    TC->data = C->data;
+    TC->n = n;
+    TC->b = 4;
+    free(C);
+    return TC;
 }

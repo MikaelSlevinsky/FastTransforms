@@ -285,6 +285,41 @@ double * plan_chebyshev_to_ultraspherical(const int normcheb, const int normultr
     return V;
 }
 
+double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta) {
+    ft_triangular_bandedl * A = ft_create_A_associated_jacobi_to_jacobil(n, alpha, beta, gamma, delta);
+    ft_triangular_bandedl * B = ft_create_B_associated_jacobi_to_jacobil(n, gamma, delta);
+    ft_triangular_bandedl * C = ft_create_C_associated_jacobi_to_jacobil(n, gamma, delta);
+    long double alphal = alpha, betal = beta, gammal = gamma, deltal = delta;
+    long double * lambdal = malloc(n*sizeof(long double));
+    for (int j = 0; j < n; j++)
+        lambdal[j] = (j+alphal+betal+2*c-1)*(j+alphal+betal+2*c+1) + (j+3)*(j-1.0L);
+    long double * Vl = calloc(n*n, sizeof(long double));
+    if (n > 0)
+        Vl[0] = 1;
+    if (n > 1)
+        Vl[1+n] = (2*c+alphal+betal+1)/(c+alphal+betal+1)*(2*c+alphal+betal+2)/(1+c)/(gammal+deltal+2);
+    for (int i = 2; i < n; i++)
+        Vl[i+i*n] = (2*(i+c)+alphal+betal-1)/(i+c+alphal+betal)*(2*(i+c)+alphal+betal)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*i/(i+c)*Vl[i-1+(i-1)*n];
+    ft_triangular_banded_eigenvectors_3argl(A, B, lambdal, C, Vl);
+    double * V = calloc(n*n, sizeof(double));
+    long double * sclrow = calloc(n, sizeof(long double));
+    if (n > 0)
+        sclrow[0] = norm2 ? sqrtl(powl(2.0L, gammal+deltal+1)*tgammal(gammal+1)*tgammal(deltal+1)/tgammal(gammal+deltal+2)) : 1.0L;
+    if (n > 1)
+        sclrow[1] = norm2 ? sqrtl((gammal+1)*(deltal+1)/(gammal+deltal+3))*sclrow[0] : 1.0L;
+    for (int i = 2; i < n; i++)
+        sclrow[i] = norm2 ? sqrtl((i+gammal)/i*(i+deltal)/(i+gammal+deltal)*(2*i+gammal+deltal-1)/(2*i+gammal+deltal+1))*sclrow[i-1] : 1.0L;
+    for (int j = 0; j < n; j++)
+        for (int i = 0; i <= j; i++)
+            V[i+j*n] = sclrow[i]*Vl[i+j*n];
+    ft_destroy_triangular_bandedl(A);
+    ft_destroy_triangular_bandedl(B);
+    ft_destroy_triangular_bandedl(C);
+    free(Vl);
+    free(sclrow);
+    return V;
+}
+
 #ifdef FT_USE_MPFR
     #include "transforms_mpfr.c"
 #endif

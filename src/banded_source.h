@@ -56,6 +56,9 @@ void X(tbsv)(char TRANS, X(triangular_banded) * A, FLT * x);
 void X(triangular_banded_eigenvalues)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * lambda);
 void X(triangular_banded_eigenvectors)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * V);
 
+void X(triangular_banded_eigenvalues_3arg)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * lambda, X(triangular_banded) * C, FLT * omega);
+void X(triangular_banded_eigenvectors_3arg)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * lambda, X(triangular_banded) * C, FLT * V);
+
 X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) * B);
 
 void X(scale_rows_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F);
@@ -81,5 +84,6 @@ X(banded) * X(create_jacobi_multiplication)(const int m, const int n, const FLT 
 X(banded) * X(create_jacobi_raising)(const int m, const int n, const FLT alpha, const FLT beta);
 X(banded) * X(create_jacobi_lowering)(const int m, const int n, const FLT alpha, const FLT beta);
 
-X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, const int c, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta);
+X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta);
 X(triangular_banded) * X(create_B_associated_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta);
+X(triangular_banded) * X(create_C_associated_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta);
