@@ -410,7 +410,6 @@ size_t X(summary_size_hierarchicalmatrix)(X(hierarchicalmatrix) * H) {
     for (int n = 0; n < N; n++)
         for (int m = 0; m < M; m++)
             switch (H->hash(m, n)) {
-                case 0: S += 0; break;
                 case 1: S += X(summary_size_hierarchicalmatrix)(H->hierarchicalmatrices(m, n)); break;
                 case 2: S += X(summary_size_densematrix)(H->densematrices(m, n)); break;
                 case 3: S += X(summary_size_lowrankmatrix)(H->lowrankmatrices(m, n)); break;
@@ -426,6 +425,71 @@ int X(nlevels_hierarchicalmatrix)(X(hierarchicalmatrix) * H) {
                 L = MAX(L, 1+X(nlevels_hierarchicalmatrix)(H->hierarchicalmatrices(m, n)));
     return L;
 }
+
+static inline FLT X(norm2_densematrix)(X(densematrix) * A) {
+    int m = A->m, n = A->n;
+    FLT ret = 0, * M = A->A;
+    for (int i = 0; i < m*n; i++)
+        ret += Y(pow)(M[i], 2);
+    return ret;
+}
+
+// ||UVᵀ||_F² = tr(UᵀU VᵀV) or ||USVᵀ||_F² = tr(UᵀUS VᵀVSᵀ)
+static inline FLT X(norm2_lowrankmatrix)(X(lowrankmatrix) * L) {
+    FLT ret = 0;
+    int m = L->m, n = L->n, r = L->r;
+    FLT * U = L->U, * S = L->S, * V = L->V;
+    if (L->N == '2') {
+        for (int l = 0; l < r; l++) {
+            for (int k = 0; k < r; k++) {
+                FLT tU = 0, tV = 0;
+                for (int i = 0; i < m; i++)
+                    tU += U[i+l*m]*U[i+k*m];
+                for (int j = 0; j < n; j++)
+                    tV += V[j+k*n]*V[j+l*n];
+                ret += tU*tV;
+            }
+        }
+    }
+    else if (L->N == '3') {
+        for (int l = 0; l < r; l++) {
+            for (int k = 0; k < r; k++) {
+                FLT tUS = 0, tVS = 0;
+                for (int j = 0; j < r; j++) {
+                    FLT tU = 0;
+                    for (int i = 0; i < m; i++)
+                        tU += U[i+l*m]*U[i+j*m];
+                    tUS += tU*S[j+k*r];
+                }
+                for (int i = 0; i < r; i++) {
+                    FLT tV = 0;
+                    for (int j = 0; j < n; j++)
+                        tV += V[j+k*n]*V[j+i*n];
+                    tVS += tV*S[l+i*r];
+                }
+                ret += tUS*tVS;
+            }
+        }
+    }
+    return ret;
+}
+
+static inline FLT X(norm2_hierarchicalmatrix)(X(hierarchicalmatrix) * H) {
+    int M = H->M, N = H->N;
+    FLT ret = 0;
+    for (int n = 0; n < N; n++)
+        for (int m = 0; m < M; m++)
+            switch (H->hash(m, n)) {
+                case 1: ret += X(norm2_hierarchicalmatrix)(H->hierarchicalmatrices(m, n)); break;
+                case 2: ret += X(norm2_densematrix)(H->densematrices(m, n)); break;
+                case 3: ret += X(norm2_lowrankmatrix)(H->lowrankmatrices(m, n)); break;
+            }
+    return ret;
+}
+
+FLT X(norm_densematrix)(X(densematrix) * A) {return Y(sqrt)(X(norm2_densematrix)(A));}
+FLT X(norm_lowrankmatrix)(X(lowrankmatrix) * L) {return Y(sqrt)(X(norm2_lowrankmatrix)(L));}
+FLT X(norm_hierarchicalmatrix)(X(hierarchicalmatrix) * H) {return Y(sqrt)(X(norm2_hierarchicalmatrix)(H));}
 
 void X(scale_rows_densematrix)(FLT alpha, FLT * x, X(densematrix) * AD) {
     int m = AD->m, n = AD->n;

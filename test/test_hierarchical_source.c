@@ -46,6 +46,13 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     err = X(norm_2arg)(v, w, m)/X(norm_1arg)(v, m);
     printf("Comparison of matrix-vector products \t (%5i×%5i) \t |%20.2e ", m, n, (double) err);
     X(checktest)(err, MAX(m, n), checksum);
+
+    FLT nrm1 = X(norm_densematrix)(A);
+    FLT nrm2 = X(norm_hierarchicalmatrix)(H);
+    err = Y(fabs)(nrm1-nrm2)/nrm1;
+    printf("Comparison of Frobenius norms \t\t (%5i×%5i) \t |%20.2e ", m, n, (double) err);
+    X(checktest)(err, MAX(m, n)*MAX(m, n), checksum);
+
     /*
     int p = MAX(m, n);
     FLT * B = calloc(n*p, sizeof(FLT));

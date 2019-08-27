@@ -71,6 +71,10 @@ size_t X(summary_size_hierarchicalmatrix)(X(hierarchicalmatrix) * H);
 
 int X(nlevels_hierarchicalmatrix)(X(hierarchicalmatrix) * H);
 
+FLT X(norm_densematrix)(X(densematrix) * A);
+FLT X(norm_lowrankmatrix)(X(lowrankmatrix) * L);
+FLT X(norm_hierarchicalmatrix)(X(hierarchicalmatrix) * H);
+
 FLT X(getindex_densematrix)(X(densematrix) * A, int i, int j);
 FLT X(getindex_lowrankmatrix)(X(lowrankmatrix) * L, int i, int j);
 FLT X(getindex_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int i, int j);
