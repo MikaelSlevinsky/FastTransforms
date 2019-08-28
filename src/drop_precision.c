@@ -148,7 +148,7 @@ X(tb_eigen_FMM) * X(drop_precision_tb_eigen_FMM)(X2(tb_eigen_FMM) * F2) {
         FLT * lambda = malloc(n*sizeof(FLT));
         for (int i = 0; i < n; i++)
             lambda[i] = F2->lambda[i];
-        F->F0 = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda, lambda+s, (unitrange) {0, s}, (unitrange) {0, n-s});
+        F->F0 = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda, lambda+s, (unitrange) {0, s}, (unitrange) {0, n-s}, 'I');
         F->F1 = X(drop_precision_tb_eigen_FMM)(F2->F1);
         F->F2 = X(drop_precision_tb_eigen_FMM)(F2->F2);
         F->X = malloc(s*b*sizeof(FLT));

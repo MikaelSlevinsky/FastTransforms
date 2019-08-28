@@ -14,11 +14,11 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
 
     gettimeofday(&start, NULL);
     for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-        X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(f, x, y, ir, jr);
+        X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(f, x, y, ir, jr, 'G');
         X(destroy_hierarchicalmatrix)(H);
     }
     gettimeofday(&end, NULL);
-    X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(f, x, y, ir, jr);
+    X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(f, x, y, ir, jr, 'G');
     printf("Time to sample hierarchically \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
 
     printf("Size of the hierarchical matrix \t\t\t |");

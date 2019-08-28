@@ -938,8 +938,8 @@ FLT * X(symmetric_dpr1_eigvecs)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lam
 X(hierarchicalmatrix) * X(symmetric_dpr1_eigvecs_FMM)(X(symmetric_dpr1) * A, FLT * lambda, FLT * lambdalo, FLT * lambdahi, int m) {
     int n = A->n;
     FLT * d = A->d, * z = A->z;
-    X(hierarchicalmatrix) * Q = X(sample_accurately_hierarchicalmatrix)(X(cauchykernel), X(cauchykernel2), d, lambda, lambdalo, lambdahi, (unitrange) {0, n}, (unitrange) {0, m});
-    X(hierarchicalmatrix) * N = X(sample_accurately_hierarchicalmatrix)(X(coulombkernel), X(coulombkernel2), d, lambda, lambdalo, lambdahi, (unitrange) {0, n}, (unitrange) {0, m});
+    X(hierarchicalmatrix) * Q = X(sample_accurately_hierarchicalmatrix)(X(cauchykernel), X(cauchykernel2), d, lambda, lambdalo, lambdahi, (unitrange) {0, n}, (unitrange) {0, m}, 'G');
+    X(hierarchicalmatrix) * N = X(sample_accurately_hierarchicalmatrix)(X(coulombkernel), X(coulombkernel2), d, lambda, lambdalo, lambdahi, (unitrange) {0, n}, (unitrange) {0, m}, 'G');
     FLT * q = calloc(m, sizeof(FLT));
     X(scale_rows_hierarchicalmatrix)(1, z, N);
     X(ghmv)('T', 1, N, z, 0, q);
@@ -998,8 +998,8 @@ FLT * X(symmetric_definite_dpr1_eigvecs)(X(symmetric_dpr1) * A, X(symmetric_idpr
 X(hierarchicalmatrix) * X(symmetric_definite_dpr1_eigvecs_FMM)(X(symmetric_dpr1) * A, X(symmetric_idpr1) * B, FLT * lambda, FLT * lambdalo, FLT * lambdahi, int m) {
     int n = A->n;
     FLT * d = A->d, * z = A->z, sigma = B->sigma;
-    X(hierarchicalmatrix) * V = X(sample_accurately_hierarchicalmatrix)(X(cauchykernel), X(cauchykernel2), d, lambda, lambdalo, lambdahi, (unitrange) {0, n}, (unitrange) {0, m});
-    X(hierarchicalmatrix) * N = X(sample_accurately_hierarchicalmatrix)(X(coulombkernel), X(coulombkernel2), d, lambda, lambdalo, lambdahi, (unitrange) {0, n}, (unitrange) {0, m});
+    X(hierarchicalmatrix) * V = X(sample_accurately_hierarchicalmatrix)(X(cauchykernel), X(cauchykernel2), d, lambda, lambdalo, lambdahi, (unitrange) {0, n}, (unitrange) {0, m}, 'G');
+    X(hierarchicalmatrix) * N = X(sample_accurately_hierarchicalmatrix)(X(coulombkernel), X(coulombkernel2), d, lambda, lambdalo, lambdahi, (unitrange) {0, n}, (unitrange) {0, m}, 'G');
     FLT * v = calloc(m, sizeof(FLT));
     X(scale_rows_hierarchicalmatrix)(1, z, V);
     X(scale_rows_hierarchicalmatrix)(1, z, N);

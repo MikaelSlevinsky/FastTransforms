@@ -236,7 +236,7 @@ static FLT X(dist)(FLT * x, FLT * y, unitrange i, unitrange j) {
 // Assumes x is an increasing sequence
 static FLT X(diam)(FLT * x, unitrange i) {return x[i.stop-1] - x[i.start];}
 
-X(hierarchicalmatrix) * X(sample_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j) {
+X(hierarchicalmatrix) * X(sample_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j, char SPLITTING) {
     int M = 2, N = 2;
     X(hierarchicalmatrix) * H = X(malloc_hierarchicalmatrix)(M, N);
     X(hierarchicalmatrix) ** HH = H->hierarchicalmatrices;
@@ -244,8 +244,18 @@ X(hierarchicalmatrix) * X(sample_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT
     X(lowrankmatrix) ** HL = H->lowrankmatrices;
 
     unitrange i1, i2, j1, j2;
-    X(indsplit)(x, i, &i1, &i2, x[i.start], x[i.stop-1]);
-    X(indsplit)(y, j, &j1, &j2, y[j.start], y[j.stop-1]);
+    if (SPLITTING == 'I') {
+        i1.start = i.start;
+        i1.stop = i2.start = i.start + (i.stop-i.start>>1);
+        i2.stop = i.stop;
+        j1.start = j.start;
+        j1.stop = j2.start = j.start + (j.stop-j.start>>1);
+        j2.stop = j.stop;
+    }
+    else if (SPLITTING == 'G') {
+        X(indsplit)(x, i, &i1, &i2, x[i.start], x[i.stop-1]);
+        X(indsplit)(y, j, &j1, &j2, y[j.start], y[j.stop-1]);
+    }
 
     if (i1.stop-i1.start < BLOCKSIZE || j1.stop-j1.start < BLOCKSIZE) {
         HD[0] = X(sample_densematrix)(f, x, y, i1, j1);
@@ -256,7 +266,7 @@ X(hierarchicalmatrix) * X(sample_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT
         H->hash(0, 0) = 3;
     }
     else {
-        HH[0] = X(sample_hierarchicalmatrix)(f, x, y, i1, j1);
+        HH[0] = X(sample_hierarchicalmatrix)(f, x, y, i1, j1, SPLITTING);
         H->hash(0, 0) = 1;
     }
 
@@ -269,7 +279,7 @@ X(hierarchicalmatrix) * X(sample_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT
         H->hash(1, 0) = 3;
     }
     else {
-        HH[1] = X(sample_hierarchicalmatrix)(f, x, y, i2, j1);
+        HH[1] = X(sample_hierarchicalmatrix)(f, x, y, i2, j1, SPLITTING);
         H->hash(1, 0) = 1;
     }
 
@@ -282,7 +292,7 @@ X(hierarchicalmatrix) * X(sample_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT
         H->hash(0, 1) = 3;
     }
     else {
-        HH[2] = X(sample_hierarchicalmatrix)(f, x, y, i1, j2);
+        HH[2] = X(sample_hierarchicalmatrix)(f, x, y, i1, j2, SPLITTING);
         H->hash(0, 1) = 1;
     }
 
@@ -295,7 +305,7 @@ X(hierarchicalmatrix) * X(sample_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT
         H->hash(1, 1) = 3;
     }
     else {
-        HH[3] = X(sample_hierarchicalmatrix)(f, x, y, i2, j2);
+        HH[3] = X(sample_hierarchicalmatrix)(f, x, y, i2, j2, SPLITTING);
         H->hash(1, 1) = 1;
     }
 
@@ -305,7 +315,7 @@ X(hierarchicalmatrix) * X(sample_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT
     return H;
 }
 
-X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT (*f2)(FLT x, FLT ylo, FLT yhi), FLT * x, FLT * y, FLT * ylo, FLT * yhi, unitrange i, unitrange j) {
+X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT (*f2)(FLT x, FLT ylo, FLT yhi), FLT * x, FLT * y, FLT * ylo, FLT * yhi, unitrange i, unitrange j, char SPLITTING) {
     int M = 2, N = 2;
     X(hierarchicalmatrix) * H = X(malloc_hierarchicalmatrix)(M, N);
     X(hierarchicalmatrix) ** HH = H->hierarchicalmatrices;
@@ -313,8 +323,18 @@ X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix)(FLT (*f)(FLT x, 
     X(lowrankmatrix) ** HL = H->lowrankmatrices;
 
     unitrange i1, i2, j1, j2;
-    X(indsplit)(x, i, &i1, &i2, x[i.start], x[i.stop-1]);
-    X(indsplit)(y, j, &j1, &j2, y[j.start], y[j.stop-1]);
+    if (SPLITTING == 'I') {
+        i1.start = i.start;
+        i1.stop = i2.start = i.start + (i.stop-i.start>>1);
+        i2.stop = i.stop;
+        j1.start = j.start;
+        j1.stop = j2.start = j.start + (j.stop-j.start>>1);
+        j2.stop = j.stop;
+    }
+    else if (SPLITTING == 'G') {
+        X(indsplit)(x, i, &i1, &i2, x[i.start], x[i.stop-1]);
+        X(indsplit)(y, j, &j1, &j2, y[j.start], y[j.stop-1]);
+    }
 
     if (i1.stop-i1.start < BLOCKSIZE || j1.stop-j1.start < BLOCKSIZE) {
         HD[0] = X(sample_accurately_densematrix)(f2, x, ylo, yhi, i1, j1);
@@ -325,7 +345,7 @@ X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix)(FLT (*f)(FLT x, 
         H->hash(0, 0) = 3;
     }
     else {
-        HH[0] = X(sample_accurately_hierarchicalmatrix)(f, f2, x, y, ylo, yhi, i1, j1);
+        HH[0] = X(sample_accurately_hierarchicalmatrix)(f, f2, x, y, ylo, yhi, i1, j1, SPLITTING);
         H->hash(0, 0) = 1;
     }
 
@@ -338,7 +358,7 @@ X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix)(FLT (*f)(FLT x, 
         H->hash(1, 0) = 3;
     }
     else {
-        HH[1] = X(sample_accurately_hierarchicalmatrix)(f, f2, x, y, ylo, yhi, i2, j1);
+        HH[1] = X(sample_accurately_hierarchicalmatrix)(f, f2, x, y, ylo, yhi, i2, j1, SPLITTING);
         H->hash(1, 0) = 1;
     }
 
@@ -351,7 +371,7 @@ X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix)(FLT (*f)(FLT x, 
         H->hash(0, 1) = 3;
     }
     else {
-        HH[2] = X(sample_accurately_hierarchicalmatrix)(f, f2, x, y, ylo, yhi, i1, j2);
+        HH[2] = X(sample_accurately_hierarchicalmatrix)(f, f2, x, y, ylo, yhi, i1, j2, SPLITTING);
         H->hash(0, 1) = 1;
     }
 
@@ -364,7 +384,7 @@ X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix)(FLT (*f)(FLT x, 
         H->hash(1, 1) = 3;
     }
     else {
-        HH[3] = X(sample_accurately_hierarchicalmatrix)(f, f2, x, y, ylo, yhi, i2, j2);
+        HH[3] = X(sample_accurately_hierarchicalmatrix)(f, f2, x, y, ylo, yhi, i2, j2, SPLITTING);
         H->hash(1, 1) = 1;
     }
 
