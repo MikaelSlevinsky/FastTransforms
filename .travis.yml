@@ -7,6 +7,14 @@ matrix:
       osx_image: xcode10
       compiler: gcc-4.9
       env: MATRIX_EVAL="brew update && brew install gcc@4.9 fftw mpfr doxygen && export CC=gcc-4.9 && export BLAS=APPLEBLAS"
+    - os: osx
+      osx_image: xcode10
+      compiler: gcc-5
+      env: MATRIX_EVAL="brew update && brew install gcc@5 fftw mpfr doxygen && export CC=gcc-5 && export BLAS=APPLEBLAS"
+    - os: osx
+      osx_image: xcode10
+      compiler: gcc-6
+      env: MATRIX_EVAL="brew update && brew install gcc@6 fftw mpfr doxygen && export CC=gcc-6 && export BLAS=APPLEBLAS"
     # Recommended system requirements
     - os: osx
       osx_image: xcode10
@@ -20,6 +28,20 @@ matrix:
           sources: ubuntu-toolchain-r-test
           packages: ['gcc-4.9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev', 'doxygen']
       env: MATRIX_EVAL="export CC=gcc-4.9 && export BLAS=OPENBLAS && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+    - os: linux
+      compiler: gcc-5
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: ['gcc-5', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev', 'doxygen']
+      env: MATRIX_EVAL="export CC=gcc-5 && export BLAS=OPENBLAS && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+    - os: linux
+      compiler: gcc-6
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: ['gcc-6', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev', 'doxygen']
+      env: MATRIX_EVAL="export CC=gcc-6 && export BLAS=OPENBLAS && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     # Recommended system requirements
     - os: linux
       compiler: gcc-7
@@ -52,6 +74,9 @@ script:
 after_success:
   - doxygen Doxyfile
 
+before_deploy:
+  - ./travis_deploy.sh
+
 deploy:
   - provider: pages
     skip_cleanup: true
@@ -61,9 +86,8 @@ deploy:
       branch: master
   - provider: releases
     api_key: $FT_BINARIES
-    file:
-      - "${TRAVIS_BUILD_DIR}/libfasttransforms.dylib"
-      - "${TRAVIS_BUILD_DIR}/libfasttransforms.so"
+    file_glob: true
+    file: libfasttransforms.*
     skip_cleanup: true
     on:
       tags: true

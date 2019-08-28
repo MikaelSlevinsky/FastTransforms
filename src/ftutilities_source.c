@@ -6,14 +6,14 @@ void X(checktest)(FLT err, FLT cst, int * checksum) {
 FLT X(norm_1arg)(FLT * A, int n) {
     FLT ret = 0;
     for (int i = 0; i < n; i++)
-        ret += Y(pow)(A[i], 2);
+        ret += A[i]*A[i];
     return Y(sqrt)(ret);
 }
 
 FLT X(norm_2arg)(FLT * A, FLT * B, int n) {
     FLT ret = 0;
     for (int i = 0; i < n; i++)
-        ret += Y(pow)(A[i]-B[i], 2);
+        ret += (A[i]-B[i])*(A[i]-B[i]);
     return Y(sqrt)(ret);
 }
 

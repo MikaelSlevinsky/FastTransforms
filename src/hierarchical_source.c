@@ -430,7 +430,7 @@ static inline FLT X(norm2_densematrix)(X(densematrix) * A) {
     int m = A->m, n = A->n;
     FLT ret = 0, * M = A->A;
     for (int i = 0; i < m*n; i++)
-        ret += Y(pow)(M[i], 2);
+        ret += M[i]*M[i];
     return ret;
 }
 

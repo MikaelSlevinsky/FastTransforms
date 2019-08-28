@@ -48,7 +48,7 @@ examples:
 	$(CC) src/ftutilities.c examples/nonlocaldiffusion.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o nonlocaldiffusion
 
 clean:
-	rm -f lib$(LIB).$(SLIB)
+	rm -f lib$(LIB).*
 	rm -f additiontheorem
 	rm -f calculus
 	rm -f holomorphic

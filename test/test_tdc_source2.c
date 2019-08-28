@@ -133,7 +133,7 @@ void Y(test_tdc_drop_precision)(int * checksum) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
 
-    int nmin = 1024, nmax = 4096;
+    int nmin = 1024, nmax = 2048;
 
     for (int n = nmin; n < nmax; n *= 2)
         X(inner_test_tdc_drop_precision)(checksum, n);

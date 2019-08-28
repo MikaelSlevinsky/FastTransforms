@@ -552,7 +552,7 @@ void X(symmetric_dpr1_eigvals)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lamb
             lambdahi[j] = X(secular)(A, 0, lambdak) > 0 ? x0 : x1;
             lambdak = lambdak - lambdahi[j];
             FLT deltak = 1+n*Y(fabs)(lambdak);
-            while (Y(fabs)(deltak) > MAX(n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
+            while (Y(fabs)(deltak) > MAX(2*n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
                 deltak = X(pick_zero_update)(A, x0, x1, lambdak, lambdahi[j]);
                 if (Y(isfinite)(deltak)) lambdak += deltak;
                 else break;
@@ -565,7 +565,7 @@ void X(symmetric_dpr1_eigvals)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lamb
         lambdahi[n-1] = d[n-1];
         lambdak = lambdak - lambdahi[n-1];
         FLT deltak = 1+n*Y(fabs)(lambdak);
-        while (Y(fabs)(deltak) > MAX(n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
+        while (Y(fabs)(deltak) > MAX(2*n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
             deltak = X(last_pick_zero_update)(A, lambdak, lambdahi[n-1]);
             if (Y(isfinite)(deltak)) lambdak += deltak;
             else break;
@@ -579,7 +579,7 @@ void X(symmetric_dpr1_eigvals)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lamb
         lambdahi[0] = d[0];
         lambdak = lambdak - lambdahi[0];
         FLT deltak = 1+n*Y(fabs)(lambdak);
-        while (Y(fabs)(deltak) > MAX(n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
+        while (Y(fabs)(deltak) > MAX(2*n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
             deltak = X(first_pick_zero_update)(A, lambdak, lambdahi[0]);
             if (Y(isfinite)(deltak)) lambdak += deltak;
             else break;
@@ -594,7 +594,7 @@ void X(symmetric_dpr1_eigvals)(X(symmetric_dpr1) * A, FLT * lambdalo, FLT * lamb
             lambdahi[j] = X(secular)(A, 0, lambdak) < 0 ? x0 : x1;
             lambdak = lambdak - lambdahi[j];
             FLT deltak = 1+n*Y(fabs)(lambdak);
-            while (Y(fabs)(deltak) > MAX(n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
+            while (Y(fabs)(deltak) > MAX(2*n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
                 deltak = X(pick_zero_update)(A, x0, x1, lambdak, lambdahi[j]);
                 if (Y(isfinite)(deltak)) lambdak += deltak;
                 else break;
@@ -645,7 +645,7 @@ void X(symmetric_definite_dpr1_eigvals)(X(symmetric_dpr1) * A, X(symmetric_idpr1
                 lambdahi[j] = X(generalized_secular)(A, B, 0, lambdak) > 0 ? x0 : x1;
                 lambdak = lambdak - lambdahi[j];
                 deltak = 1+n*Y(fabs)(lambdak);
-                while (Y(fabs)(deltak) > MAX(n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
+                while (Y(fabs)(deltak) > MAX(2*n*Y(fabs)(lambdak)*Y(eps)(), Y(floatmin)())) {
                     deltak = X(generalized_pick_zero_update)(A, B, x0, x1, lambdak, lambdahi[j]);
                     if (Y(isfinite)(deltak)) lambdak += deltak;
                     else break;
