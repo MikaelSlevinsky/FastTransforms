@@ -328,7 +328,7 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
             for (int i = 0; i < n-s; i++)
                 Y[i+j*(n-s)] = Y[i+j*(n-s)]-Y2[i+j*(n-s)];
 
-        F->F0 = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda1, lambda2, (unitrange) {0, s}, (unitrange) {0, n-s}, 'I');
+        F->F0 = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda1, lambda2, (unitrange) {0, s}, (unitrange) {0, n-s}, 'G');
         F->X = X;
         F->Y = Y;
         F->t1 = calloc(s*FT_GET_MAX_THREADS(), sizeof(FLT));
