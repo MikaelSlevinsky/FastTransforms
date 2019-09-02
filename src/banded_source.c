@@ -419,14 +419,14 @@ void X(trsv)(char TRANS, int n, FLT * A, int LDA, FLT * x) {
 }
 
 // B ← A*B, B ← Aᵀ*B
-#if defined(USE_CBLAS_S)
+#if defined(FT_USE_CBLAS_S)
     void X(trmm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N) {
         if (TRANS == 'N')
             cblas_strmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);
         else if (TRANS == 'T')
             cblas_strmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);
     }
-#elif defined(USE_CBLAS_D)
+#elif defined(FT_USE_CBLAS_D)
     void X(trmm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N) {
         if (TRANS == 'N')
             cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);
@@ -442,14 +442,14 @@ void X(trsv)(char TRANS, int n, FLT * A, int LDA, FLT * x) {
 #endif
 
 // B ← A*B, B ← Aᵀ*B
-#if defined(USE_CBLAS_S)
+#if defined(FT_USE_CBLAS_S)
     void X(trsm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N) {
         if (TRANS == 'N')
             cblas_strsm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);
         else if (TRANS == 'T')
             cblas_strsm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);
     }
-#elif defined(USE_CBLAS_D)
+#elif defined(FT_USE_CBLAS_D)
     void X(trsm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N) {
         if (TRANS == 'N')
             cblas_dtrsm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, n, N, 1, A, LDA, B, LDB);

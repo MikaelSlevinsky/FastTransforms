@@ -320,6 +320,4 @@ double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const in
     return V;
 }
 
-#ifdef FT_USE_MPFR
-    #include "transforms_mpfr.c"
-#endif
+#include "transforms_mpfr.c"

@@ -25,9 +25,7 @@
 #undef X
 #undef Y
 
-#ifdef FT_USE_MPFR
-    #include "test_transforms_mpfr.c"
-#endif
+#include "test_transforms_mpfr.c"
 
 int main(void) {
     int checksum = 0, n = 2048;
@@ -36,10 +34,8 @@ int main(void) {
     test_transformsf(&checksum, n);
     printf("\n\tDouble precision.\n\n");
     test_transforms(&checksum, n);
-    #ifdef FT_USE_MPFR
-        printf("\n\tMulti-precision.\n\n");
-        test_transforms_mpfr(&checksum, 256, 256, MPFR_RNDN);
-    #endif
+    printf("\n\tMulti-precision.\n\n");
+    test_transforms_mpfr(&checksum, 256, 256, MPFR_RNDN);
     printf("\n\tAssociated orthogonal polynomial transforms.\n\n");
     for (int c = 1; c < 9; c++) {
         n = 128;

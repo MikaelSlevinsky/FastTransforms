@@ -621,14 +621,14 @@ void X(gemv)(char TRANS, int m, int n, FLT alpha, FLT * A, int LDA, FLT * x, FLT
 }
 
 // C ← α*A*B + β*C, C ← α*Aᵀ*B + β*C
-#if defined(USE_CBLAS_S)
+#if defined(FT_USE_CBLAS_S)
     void X(gemm)(char TRANS, int m, int n, int p, FLT alpha, FLT * A, int LDA, FLT * B, int LDB, FLT beta, FLT * C, int LDC) {
         if (TRANS == 'N')
             cblas_sgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, m, p, n, alpha, A, LDA, B, LDB, beta, C, LDC);
         else if (TRANS == 'T')
             cblas_sgemm(CblasColMajor, CblasTrans, CblasNoTrans, n, p, m, alpha, A, LDA, B, LDB, beta, C, LDC);
     }
-#elif defined(USE_CBLAS_D)
+#elif defined(FT_USE_CBLAS_D)
     void X(gemm)(char TRANS, int m, int n, int p, FLT alpha, FLT * A, int LDA, FLT * B, int LDB, FLT beta, FLT * C, int LDC) {
         if (TRANS == 'N')
             cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, m, p, n, alpha, A, LDA, B, LDB, beta, C, LDC);
