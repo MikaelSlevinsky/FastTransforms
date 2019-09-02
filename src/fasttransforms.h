@@ -469,6 +469,9 @@ void ft_execute_tet2cheb(const ft_tetrahedral_harmonic_plan * P, double * A, con
 void ft_execute_cheb2tet(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M);
 
 
+int ft_fftw_init_threads(void);
+void ft_fftw_plan_with_nthreads(const int n);
+
 typedef struct {
     fftw_plan plantheta1;
     fftw_plan plantheta2;

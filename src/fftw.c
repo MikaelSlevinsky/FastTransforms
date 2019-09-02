@@ -25,6 +25,9 @@ static inline void colswap_t(double * X, const double * Y, const int N, const in
     }
 }
 
+int ft_fftw_init_threads(void) {return fftw_init_threads();}
+void ft_fftw_plan_with_nthreads(const int n) {return fftw_plan_with_nthreads(n);}
+
 void ft_destroy_sphere_fftw_plan(ft_sphere_fftw_plan * P) {
     fftw_destroy_plan(P->plantheta1);
     fftw_destroy_plan(P->plantheta2);

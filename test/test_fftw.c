@@ -29,8 +29,8 @@ int main(int argc, const char * argv[]) {
     }
     else IERR = 1;
 
-    fftw_init_threads();
-    fftw_plan_with_nthreads(FT_GET_NUM_THREADS());
+    ft_fftw_init_threads();
+    ft_fftw_plan_with_nthreads(FT_GET_NUM_THREADS());
 
     printf("\nTesting the accuracy of spherical harmonic transforms + FFTW synthesis and analysis.\n\n");
     printf("err1 = [\n");

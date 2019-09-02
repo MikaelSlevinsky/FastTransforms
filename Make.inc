@@ -16,7 +16,7 @@ endif
 
 OBJ = src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
 
-ifdef FT_DETECT_GCC
+ifeq ($(FT_DETECT_GCC), 1)
     _GCCMAJOR := $(shell gfortran -dumpversion | cut -d'.' -f1)
     _GCCMINOR := $(shell gfortran -dumpversion | cut -d'.' -f2)
     ifeq ($(_GCCMAJOR),4)
@@ -29,12 +29,12 @@ endif
 
 CFLAGS += -std=gnu99 -Ofast -march=native -mtune=native -mno-vzeroupper -I./src
 
-ifdef FT_PREDEFINED_LIBRARIES
-    CFLAGS += -I${prefix}/include
-    LDFLAGS += -L${prefix}/lib
+ifeq ($(FT_USE_PREDEFINED_LIBRARIES), 1)
+    CFLAGS += -I$(prefix)/include
+    LDFLAGS += -L$(prefix)/lib
 else
     ifeq ($(UNAME), Darwin)
-        ifdef FT_USE_APPLEBLAS
+        ifeq ($(FT_USE_APPLEBLAS), 1)
             CFLAGS += -I/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
             LDFLAGS += -L/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A
         else
@@ -48,7 +48,7 @@ endif
 
 LDLIBS += -lm -lquadmath -fopenmp -lblas -lfftw3
 
-ifndef FT_FFTW_WITH_COMBINED_THREADS
+ifneq ($(FT_FFTW_WITH_COMBINED_THREADS), 1)
     LDLIBS += -lfftw3_threads
 endif
 
