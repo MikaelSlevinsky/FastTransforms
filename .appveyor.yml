@@ -8,18 +8,17 @@ cache: c:\tools\vcpkg\installed\
 install:
   - set PATH=%PATH%;c:\tools\vcpkg
   - set PATH=%PATH%;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin\
-  - vcpkg install openblas:x64-windows fftw3:x64-windows mpir:x64-windows mpfr:x64-windows
-  #- vcpkg install openblas:x64-windows fftw3[core,threads]:x64-windows mpir:x64-windows mpfr:x64-windows --recurse
+  - vcpkg install openblas:x64-windows fftw3[core,threads]:x64-windows mpir:x64-windows mpfr:x64-windows --recurse
   - mklink c:\projects\fasttransforms\src\cblas.h c:\tools\vcpkg\installed\x64-windows\include\openblas\cblas.h
   - mklink c:\projects\fasttransforms\src\openblas_config.h c:\tools\vcpkg\installed\x64-windows\include\openblas\openblas_config.h
   - mklink c:\tools\vcpkg\installed\x64-windows\bin\blas.dll c:\tools\vcpkg\installed\x64-windows\bin\openblas.dll
-  #- mklink c:\projects\fasttransforms\src\fftw3.h c:\tools\vcpkg\installed\x64-windows\include\fftw3.h
-  #- mklink c:\projects\fasttransforms\fftw3.dll c:\tools\vcpkg\installed\x64-windows\bin\fftw3.dll
-  #- mklink c:\projects\fasttransforms\src\mpfr.h c:\tools\vcpkg\installed\x64-windows\include\mpfr.h
-  #- mklink c:\projects\fasttransforms\src\gmp.h c:\tools\vcpkg\installed\x64-windows\include\gmp.h
-  #- mklink c:\projects\fasttransforms\src\mpir.h c:\tools\vcpkg\installed\x64-windows\include\mpir.h
-  #- mklink c:\projects\fasttransforms\mpir.dll c:\tools\vcpkg\installed\x64-windows\bin\mpir.dll
-  #- mklink c:\projects\fasttransforms\mpfr.dll c:\tools\vcpkg\installed\x64-windows\bin\mpfr.dll
+  - mklink c:\projects\fasttransforms\src\fftw3.h c:\tools\vcpkg\installed\x64-windows\include\fftw3.h
+  - mklink c:\projects\fasttransforms\fftw3.dll c:\tools\vcpkg\installed\x64-windows\bin\fftw3.dll
+  - mklink c:\projects\fasttransforms\src\mpfr.h c:\tools\vcpkg\installed\x64-windows\include\mpfr.h
+  - mklink c:\projects\fasttransforms\src\gmp.h c:\tools\vcpkg\installed\x64-windows\include\gmp.h
+  - mklink c:\projects\fasttransforms\src\mpir.h c:\tools\vcpkg\installed\x64-windows\include\mpir.h
+  - mklink c:\projects\fasttransforms\mpir.dll c:\tools\vcpkg\installed\x64-windows\bin\mpir.dll
+  - mklink c:\projects\fasttransforms\mpfr.dll c:\tools\vcpkg\installed\x64-windows\bin\mpfr.dll
   - set PATH=c:\tools\vcpkg\installed\x64-windows\bin;%PATH%
 
 matrix:
@@ -43,7 +42,7 @@ test_script:
   - test_dprk.exe
   - test_tdc.exe
   - test_drivers.exe 3 3 0
-  #- test_fftw.exe 3 3 0
+  - test_fftw.exe 3 3 0
   - additiontheorem.exe
   - calculus.exe
   - holomorphic.exe

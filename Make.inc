@@ -42,8 +42,7 @@ else
             LDFLAGS += -L/usr/local/opt/openblas/lib
         endif
     else ifeq ($(UNAME), Windows)
-        CFLAGS += -I/c:/tools/vcpkg/installed/x64-windows/include -I/c:/tools/vcpkg/installed/x64-windows/include/openblas
-        LDFLAGS += -L/c:/tools/vcpkg/installed/x64-windows/bin -L.
+        LDFLAGS += -L.
     endif
 endif
 
