@@ -12,7 +12,7 @@ install:
   - vcpkg install openblas:x64-windows fftw3[core,threads]:x64-windows mpir:x64-windows mpfr:x64-windows --recurse
   #- mklink c:\projects\fasttransforms\src\cblas.h c:\tools\vcpkg\installed\x64-windows\include\openblas\cblas.h
   #- mklink c:\projects\fasttransforms\src\openblas_config.h c:\tools\vcpkg\installed\x64-windows\include\openblas\openblas_config.h
-  #- mklink c:\projects\fasttransforms\blas.dll c:\tools\vcpkg\installed\x64-windows\bin\openblas.dll
+  - mklink c:\tools\vcpkg\installed\x64-windows\bin\blas.dll c:\tools\vcpkg\installed\x64-windows\bin\openblas.dll
   #- mklink c:\projects\fasttransforms\src\fftw3.h c:\tools\vcpkg\installed\x64-windows\include\fftw3.h
   #- mklink c:\projects\fasttransforms\fftw3.dll c:\tools\vcpkg\installed\x64-windows\bin\fftw3.dll
   #- mklink c:\projects\fasttransforms\src\mpfr.h c:\tools\vcpkg\installed\x64-windows\include\mpfr.h
@@ -27,9 +27,9 @@ matrix:
     - image: Visual Studio 2015
 
 build_script:
-  - gcc --version
+  - CC --version
   - mingw32-make lib
-  - mingw32-make wintests
+  - mingw32-make tests
   - mingw32-make examples
 
 test_script:
@@ -42,6 +42,7 @@ test_script:
   - test_dprk.exe
   - test_tdc.exe
   - test_drivers.exe 3 3 0
+  - test_fftw.exe 3 3 0
   - additiontheorem.exe
   - calculus.exe
   - holomorphic.exe
