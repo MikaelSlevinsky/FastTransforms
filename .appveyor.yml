@@ -29,7 +29,7 @@ build_script:
   - set CC=gcc && set FT_FFTW_WITH_COMBINED_THREADS=1
   - gcc --version
   - mingw32-make lib
-  - mingw32-make wintests
+  - mingw32-make tests
   - mingw32-make examples
 
 test_script:
