@@ -45,7 +45,7 @@
 #define Y(name) FT_CONCAT(, name, )
 #define BLOCKRANK 2*((int) floor(-log(Y(eps)())/2.271667761226165))
 #define BLOCKSIZE 4*BLOCKRANK
-#define USE_CBLAS_D
+#define FT_USE_CBLAS_D
 #include "tridiagonal_source.c"
 #include "hierarchical_source.c"
 #include "banded_source.c"
@@ -58,7 +58,7 @@
 #undef Y
 #undef BLOCKRANK
 #undef BLOCKSIZE
-#undef USE_CBLAS_D
+#undef FT_USE_CBLAS_D
 
 #define FLT float
 #define X(name) FT_CONCAT(ft_, name, f)
@@ -66,7 +66,7 @@
 #define Y(name) FT_CONCAT(, name, f)
 #define BLOCKRANK 2*((int) floor(-log(Y(eps)())/2.271667761226165))
 #define BLOCKSIZE 4*BLOCKRANK
-#define USE_CBLAS_S
+#define FT_USE_CBLAS_S
 #include "tridiagonal_source.c"
 #include "hierarchical_source.c"
 #include "banded_source.c"
@@ -79,7 +79,7 @@
 #undef Y
 #undef BLOCKRANK
 #undef BLOCKSIZE
-#undef USE_CBLAS_S
+#undef FT_USE_CBLAS_S
 
 #undef TB_EIGEN_BLOCKSIZE
 #undef TDC_EIGEN_BLOCKSIZE

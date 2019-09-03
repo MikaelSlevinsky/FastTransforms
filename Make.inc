@@ -16,55 +16,47 @@ endif
 
 OBJ = src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
 
-#CC = gcc-8
-#CC = /usr/local/opt/llvm/bin/clang
-
-#BLAS = APPLEBLAS
-#BLAS = OPENBLAS
-
-#AVX512 = -mavx512f
-
-CFLAGS += -std=gnu99 -Ofast $(AVX512) -march=native -mtune=native -mno-vzeroupper -I./src
-
-ifeq ($(CC),/usr/local/opt/llvm/bin/clang)
-    CFLAGS += -I/usr/local/opt/llvm/include
-    LDFLAGS += -L/usr/local/opt/llvm/lib
-endif
-
-ifeq ($(BLAS), APPLEBLAS)
-	CFLAGS += -I/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
-    LDFLAGS += -L/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A
-else ifeq ($(BLAS), OPENBLAS)
-    ifeq ($(UNAME), Linux)
-        CFLAGS += -I/usr/lib/openblas-base
-        LDFLAGS += -L/usr/lib/openblas-base
-    else ifeq ($(UNAME), Darwin)
-        CFLAGS += -I/usr/local/opt/openblas/include
-        LDFLAGS += -L/usr/local/opt/openblas/lib
-        CFLAGS += -I/usr/local/opt/fftw/include
-        LDFLAGS += -L/usr/local/opt/fftw/lib
+ifeq ($(FT_DETECT_GCC), 1)
+    _GCCMAJOR := $(shell gfortran -dumpversion | cut -d'.' -f1)
+    _GCCMINOR := $(shell gfortran -dumpversion | cut -d'.' -f2)
+    ifeq ($(_GCCMAJOR),4)
+      _GCCVER := $(_GCCMAJOR)$(_GCCMINOR)
+    else
+      _GCCVER := $(_GCCMAJOR)
     endif
+    CC := gcc-$(_GCCVER)
 endif
-ifeq ($(UNAME), Windows)
-    LDFLAGS += -L.
+
+CFLAGS += -std=gnu99 -Ofast -march=native -mtune=native -mno-vzeroupper -I./src
+
+ifeq ($(FT_USE_PREDEFINED_LIBRARIES), 1)
+    CFLAGS += -I$(prefix)/include
+    LDFLAGS += -L$(prefix)/lib
+else
+    ifeq ($(UNAME), Darwin)
+        ifeq ($(FT_USE_APPLEBLAS), 1)
+            CFLAGS += -I/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
+            LDFLAGS += -L/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A
+        else
+            CFLAGS += -I/usr/local/opt/openblas/include
+            LDFLAGS += -L/usr/local/opt/openblas/lib
+        endif
+    else ifeq ($(UNAME), Windows)
+        LDFLAGS += -L.
+    endif
 endif
 
 LDLIBS += -lm -lquadmath -fopenmp -lblas -lfftw3
-ifeq ($(UNAME), Linux)
-    LDLIBS += -lfftw3_threads
-else ifeq ($(UNAME), Darwin)
+
+ifneq ($(FT_FFTW_WITH_COMBINED_THREADS), 1)
     LDLIBS += -lfftw3_threads
 endif
 
-FT_USE_MPFR=1
-
-ifdef FT_USE_MPFR
-    LDLIBS += -DFT_USE_MPFR -lmpfr
-    ifeq ($(UNAME), Linux)
-        LDLIBS += -lgmp
-    else ifeq ($(UNAME), Darwin)
-        LDLIBS += -lgmp
-    else ifeq ($(OS), Windows_NT)
-        LDLIBS += -lmpir
-    endif
+LDLIBS += -lmpfr
+ifeq ($(UNAME), Linux)
+    LDLIBS += -lgmp
+else ifeq ($(UNAME), Darwin)
+    LDLIBS += -lgmp
+else ifeq ($(OS), Windows_NT)
+    LDLIBS += -lmpir
 endif
