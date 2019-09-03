@@ -20,7 +20,7 @@ ifeq ($(FT_DETECT_GCC), 1)
     _GCCMAJOR := $(shell gfortran -dumpversion | cut -d'.' -f1)
     _GCCMINOR := $(shell gfortran -dumpversion | cut -d'.' -f2)
     ifeq ($(_GCCMAJOR),4)
-      _GCCVER := $(_GCCMAJOR)$(_GCCMINOR)
+      _GCCVER := $(_GCCMAJOR).$(_GCCMINOR)
     else
       _GCCVER := $(_GCCMAJOR)
     endif
