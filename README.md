@@ -10,35 +10,32 @@ If you feel you need help getting started, please do not hesitate to e-mail me. 
 
 ## Installation Notes
 
-Generically, the library makes use of OpenBLAS, FFTW3, and MPFR, which are easily installed via package managers such as Homebrew, apt-get, or vcpkg. When `FastTransforms` is compiled with OpenMP, the environment variable that controls multithreading is `OMP_NUM_THREADS`.
+The library makes use of OpenBLAS, FFTW3, and MPFR, which are easily installed via package managers such as Homebrew, apt-get, or vcpkg. When `FastTransforms` is compiled with OpenMP, the environment variable that controls multithreading is `OMP_NUM_THREADS`.
 
 ### macOS
 
 Apple's version of GCC does not support OpenMP. Sample installation:
 ```
-brew install gcc openblas fftw mpfr
-export CC=gcc-8 && export BLAS=OPENBLAS && make
+brew install gcc@8 fftw mpfr
+export CC=gcc-8 && export FT_USE_APPLEBLAS=1 && make
 ```
-On macOS, the OpenBLAS dependency is optional in light of the vecLib framework (see the `BLAS` variable in `Make.inc`). In case the library is compiled with vecLib, then the environment variable `VECLIB_MAXIMUM_THREADS` partially controls the multithreading.
+On macOS, the OpenBLAS dependency is optional in light of the vecLib framework. In case the library is compiled with vecLib, then the environment variable `VECLIB_MAXIMUM_THREADS` partially controls the multithreading.
 
 ### Linux
 
-To access functions from the library, you must ensure that you append the current library path to the default:
-```
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
-```
-Sample installation:
+To access functions from the library, you must ensure that you append the current library path to the default. Sample installation:
 ```
 apt-get install gcc-8 libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
-export CC=gcc-8 && export BLAS=OPENBLAS && make
+export CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:. && make
 ```
+See the [Travis build](https://github.com/MikaelSlevinsky/FastTransforms/blob/master/.travis.yml) for further details.
 
 ### Windows
 
 We use GCC 7.2.0 distributed through MinGW-w64 on Visual Studio 2015 and 2017. Sample installation:
 ```
 vcpkg install openblas:x64-windows fftw3:x64-windows mpir:x64-windows mpfr:x64-windows
-set CC=gcc && set BLAS=OPENBLAS && mingw32-make win
+set CC=gcc && mingw32-make
 ```
 See the [AppVeyor build](https://github.com/MikaelSlevinsky/FastTransforms/blob/master/.appveyor.yml) for further details.
 
@@ -59,7 +56,7 @@ The library is compiled by GNU GCC 7.3.0 with the flags `-Ofast -march=native -m
 
 ### iMac Pro
 
-The library is compiled by LLVM Clang-6.0.0 with the flags `-Ofast -mavx512f -march=native -mtune=native`, and executed on an iMac Pro (Early 2018) with a 2.3 GHz Intel Xeon W-2191B processor with 18 threads on 18 logical cores.
+The library is compiled by LLVM Clang-6.0.0 with the flags `-Ofast -march=native -mtune=native`, and executed on an iMac Pro (Early 2018) with a 2.3 GHz Intel Xeon W-2191B processor with 18 threads on 18 logical cores.
 
 | Degree            | 63       | 127      | 255      | 511      | 1023     | 2047     | 4095     | 8191     |
 | ----------------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: |
@@ -71,6 +68,6 @@ The library is compiled by LLVM Clang-6.0.0 with the flags `-Ofast -mavx512f -ma
 
 # References:
 
-   [1]  R. M. Slevinsky. <a href="https://doi.org/10.1016/j.acha.2017.11.001">Fast and backward stable transforms between spherical harmonic expansions and bivariate Fourier series</a>, in press at *Appl. Comput. Harmon. Anal.*, 2017.
+   [1]  R. M. Slevinsky. <a href="https://doi.org/10.1016/j.acha.2017.11.001">Fast and backward stable transforms between spherical harmonic expansions and bivariate Fourier series</a>, *Appl. Comput. Harmon. Anal.*, **47**:585—606, 2019.
 
    [2]  R. M. Slevinsky, <a href="https://arxiv.org/abs/1711.07866">Conquering the pre-computation in two-dimensional harmonic polynomial transforms</a>, arXiv:1711.07866, 2017.
