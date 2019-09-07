@@ -32,10 +32,10 @@ See the [Travis build](https://github.com/MikaelSlevinsky/FastTransforms/blob/ma
 
 ### Windows
 
-We use GCC 7.2.0 distributed through MinGW-w64 on Visual Studio 2015 and 2017. Sample installation:
+We use GCC 7.2.0 distributed through MinGW-w64 on Visual Studio 2017. Sample installation:
 ```
-vcpkg install openblas:x64-windows fftw3:x64-windows mpir:x64-windows mpfr:x64-windows
-set CC=gcc && mingw32-make
+vcpkg install openblas:x64-windows fftw3[core,threads]:x64-windows mpir:x64-windows mpfr:x64-windows
+set CC=gcc && set FT_FFTW_WITH_COMBINED_THREADS=1 && mingw32-make
 ```
 See the [AppVeyor build](https://github.com/MikaelSlevinsky/FastTransforms/blob/master/.appveyor.yml) for further details.
 
