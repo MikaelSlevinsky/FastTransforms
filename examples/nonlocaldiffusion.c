@@ -45,6 +45,7 @@ void oprec(const int n, double * v, const double alpha, const double delta2) {
   \int_x^1 P_i^{(\alpha,0)}(t)(1-t)^\alpha\,\mathrm{d}t = \left\{ \begin{array}{cc} \frac{(1-x)^{\alpha+1}}{\alpha+1} & \mathrm{for~}i=0,\\ \frac{1}{2i}(1-x)^{\alpha+1}(1+x)P_{i-1}^{(\alpha+1,1)}(x), & \mathrm{for~}i>0.\end{array}\right.
   \f]
   The code below implements this algorithm, making use of the Jacobi--Jacobi transform \ref ft_plan_jacobi_to_jacobi.
+  For numerical stability, the conversion from Jacobi polynomials \f$P_j^{(1,0)}(t)\f$ to \f$P_i^{(\alpha,0)}(t)\f$ is divided into conversion from \f$P_j^{(1,0)}(t)\f$ to \f$P_k^{(0,0)}(t)\f$, before conversion from \f$P_k^{(0,0)}(t)\f$ to \f$P_i^{(\alpha,0)}(t)\f$.
 */
 int main(void) {
     printf("This example calculates the spectrum of the nonlocal diffusion\n");
@@ -75,12 +76,15 @@ int main(void) {
     for (int i = 2; i < n; i++)
         lambda[i] *= -scl/(i-1);
 
-    ft_tb_eigen_FMM * P = ft_plan_jacobi_to_jacobi(0, 0, n-1, 1, 0, alpha, 0);
+    ft_tb_eigen_FMM * P = ft_plan_jacobi_to_jacobi(0, 0, n-1, 0, 0, alpha, 0);
 
     ft_bfmv('T', P, lambda+1);
 
     for (int i = 2; i < n; i++)
-        lambda[i] = lambda[i]+lambda[i-1];
+        lambda[i] = ((2*i-1)*lambda[i] + (i-1)*lambda[i-1])/i;
+
+    for (int i = 2; i < n; i++)
+        lambda[i] += lambda[i-1];
 
     printf("The spectrum, "MAGENTA("0 ≤ ℓ < %i")", ", n);
     printmat(MAGENTA("λ_ℓ(α,δ)"), FMT, lambda, n, 1);
