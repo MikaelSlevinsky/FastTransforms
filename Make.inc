@@ -41,6 +41,12 @@ else
             CFLAGS += -I/usr/local/opt/openblas/include
             LDFLAGS += -L/usr/local/opt/openblas/lib
         endif
+        CFLAGS += -I/usr/local/opt/fftw/include
+        LDFLAGS += -L/usr/local/opt/fftw/lib
+        CFLAGS += -I/usr/local/opt/mpfr/include
+        LDFLAGS += -L/usr/local/opt/mpfr/lib
+        CFLAGS += -I/usr/local/opt/gmp/include
+        LDFLAGS += -L/usr/local/opt/gmp/lib
     else ifeq ($(UNAME), Windows)
         LDFLAGS += -L.
     endif
