@@ -60,7 +60,7 @@ static inline double floatmin(void) {return M_FLT_MIN;}
 static inline long double floatminl(void) {return M_FLT_MINl;}
 static inline quadruple floatminq(void) {return M_FLT_MINq;}
 
-#if !(__APPLE__)
+#ifndef __APPLE__
     static inline float __cospif(float x) {return cosf(M_PIf*x);}
     static inline double __cospi(double x) {return cos(M_PI*x);}
     static inline float __sinpif(float x) {return sinf(M_PIf*x);}
@@ -94,7 +94,7 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
 
 #define MAX(a,b) ((a) > (b) ? a : b)
 #define MIN(a,b) ((a) < (b) ? a : b)
-#if __AVX512F__
+#ifdef __AVX512F__
     #define VECTOR_SIZE_8 8
     #define ALIGN_SIZE VECTOR_SIZE_8
     typedef double double8 __attribute__ ((vector_size (VECTOR_SIZE_8*8)));
@@ -102,7 +102,7 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
     #define vload8(v) ((double8) _mm512_load_pd(v))
     #define vstore8(u, v) (_mm512_store_pd(u, v))
 #endif
-#if __AVX__
+#ifdef __AVX__
     #define VECTOR_SIZE_4 4
     #ifndef ALIGN_SIZE
         #define ALIGN_SIZE VECTOR_SIZE_4
@@ -112,7 +112,7 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
     #define vload4(v) ((double4) _mm256_load_pd(v))
     #define vstore4(u, v) (_mm256_store_pd(u, v))
 #endif
-#if __SSE2__
+#ifdef __SSE2__
     #define VECTOR_SIZE_2 2
     #ifndef ALIGN_SIZE
         #define ALIGN_SIZE VECTOR_SIZE_2
@@ -121,6 +121,10 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
     #define vall2(x) ((double2) _mm_set1_pd(x))
     #define vload2(v) ((double2) _mm_load_pd(v))
     #define vstore2(u, v) (_mm_store_pd(u, v))
+#endif
+
+#ifndef ALIGN_SIZE
+    #define ALIGN_SIZE 1
 #endif
 
 #define VALIGN(N) ((N + ALIGN_SIZE - 1) & -ALIGN_SIZE)

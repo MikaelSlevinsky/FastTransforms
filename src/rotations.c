@@ -25,7 +25,7 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
     Y[0] = y;
 }
 
-#if __SSE2__
+#ifdef __SSE2__
     static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
         double2 x = vload2(X);
         double2 y = vload2(Y);
@@ -54,7 +54,7 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
 #endif
 
 
-#if __AVX__
+#ifdef __AVX__
     static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
         double4 x = vload4(X);
         double4 y = vload4(Y);
@@ -82,7 +82,7 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
     }
 #endif
 
-#if __AVX512F__
+#ifdef __AVX512F__
     static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {
         double8 x = vload8(X);
         double8 y = vload8(Y);
