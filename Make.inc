@@ -55,7 +55,7 @@ else
     endif
 endif
 
-LDLIBS += -lm -lquadmath -fopenmp -lblas -lfftw3
+LDLIBS += -lm -lquadmath -fopenmp -lfftw3
 
 ifneq ($(FT_FFTW_WITH_COMBINED_THREADS), 1)
     LDLIBS += -lfftw3_threads
@@ -63,9 +63,9 @@ endif
 
 LDLIBS += -lmpfr
 ifeq ($(UNAME), Linux)
-    LDLIBS += -lgmp
+    LDLIBS += -lgmp -lblas
 else ifeq ($(UNAME), Darwin)
-    LDLIBS += -lgmp
+    LDLIBS += -lgmp -lblas
 else ifeq ($(OS), Windows_NT)
-    LDLIBS += -lmpir
+    LDLIBS += -lmpir -lopenblas
 endif
