@@ -48,11 +48,14 @@ else
         CFLAGS += -I/usr/local/opt/gmp/include
         LDFLAGS += -L/usr/local/opt/gmp/lib
     else ifeq ($(UNAME), Windows)
+        CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include\openblas
+        CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include
+        LDFLAGS += -Lc:\tools\vcpkg\installed\x64-windows\bin
         LDFLAGS += -L.
     endif
 endif
 
-LDLIBS += -lm -lquadmath -fopenmp -lblas -lfftw3
+LDLIBS += -lm -lquadmath -fopenmp -lfftw3
 
 ifneq ($(FT_FFTW_WITH_COMBINED_THREADS), 1)
     LDLIBS += -lfftw3_threads
@@ -60,9 +63,9 @@ endif
 
 LDLIBS += -lmpfr
 ifeq ($(UNAME), Linux)
-    LDLIBS += -lgmp
+    LDLIBS += -lgmp -lblas
 else ifeq ($(UNAME), Darwin)
-    LDLIBS += -lgmp
+    LDLIBS += -lgmp -lblas
 else ifeq ($(OS), Windows_NT)
-    LDLIBS += -lmpir
+    LDLIBS += -lmpir -lopenblas
 endif
