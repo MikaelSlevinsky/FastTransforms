@@ -50,7 +50,6 @@ else
     else ifeq ($(UNAME), Windows)
         CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include
         LDFLAGS += -Lc:\tools\vcpkg\installed\x64-windows\bin
-        CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include\openblas
         LDFLAGS += -L.
     endif
 endif
