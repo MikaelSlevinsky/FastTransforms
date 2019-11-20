@@ -1,6 +1,6 @@
 LIB = fasttransforms
 LIBDIR = .
-LIBFLAGS = -shared -lm -fPIC
+LIBFLAGS = -shared -fPIC
 
 ifeq ($(OS), Windows_NT)
     UNAME := Windows
@@ -56,7 +56,6 @@ else
         CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include\openblas
         CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include
         LDFLAGS += -Lc:\tools\vcpkg\installed\x64-windows\bin
-        LDFLAGS += -L.
     endif
 endif
 
@@ -64,7 +63,7 @@ ifndef FT_LIBBLAS
     FT_LIBBLAS = blas
 endif
 
-LDLIBS += -fopenmp -lquadmath -lmpfr -l$(FT_LIBBLAS) -lfftw3
+LDLIBS += -fopenmp -lm -lquadmath -lmpfr -l$(FT_LIBBLAS) -lfftw3
 
 ifneq ($(FT_FFTW_WITH_COMBINED_THREADS), 1)
     LDLIBS += -lfftw3_threads
