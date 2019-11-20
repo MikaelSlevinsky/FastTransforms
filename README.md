@@ -36,7 +36,7 @@ See the [Travis build](https://github.com/MikaelSlevinsky/FastTransforms/blob/ma
 We use GCC 7.2.0 distributed through MinGW-w64 on Visual Studio 2017. Sample installation:
 ```
 vcpkg install openblas:x64-windows fftw3[core,threads]:x64-windows mpir:x64-windows mpfr:x64-windows
-mingw32-make CC=gcc FT_LIBBLAS=openblas FT_FFTW_WITH_COMBINED_THREADS=1
+mingw32-make CC=gcc FT_BLAS=openblas FT_FFTW_WITH_COMBINED_THREADS=1
 ```
 See the [AppVeyor build](https://github.com/MikaelSlevinsky/FastTransforms/blob/master/.appveyor.yml) for further details.
 

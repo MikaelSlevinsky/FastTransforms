@@ -29,13 +29,13 @@ endif
 
 CFLAGS += -std=gnu99 -Ofast -march=native -mtune=native -mno-vzeroupper -I./src
 
-ifeq ($(FT_USE_PREDEFINED_LIBRARIES), 1)
+ifdef FT_PREFIX
     ifeq ($(UNAME), Windows)
-        CFLAGS += -I$(prefix)\include
-        LDFLAGS += -L$(prefix)\bin
+        CFLAGS += -I$(FT_PREFIX)\include
+        LDFLAGS += -L$(FT_PREFIX)\bin
     else
-        CFLAGS += -I$(prefix)/include
-        LDFLAGS += -L$(prefix)/lib
+        CFLAGS += -I$(FT_PREFIX)/include
+        LDFLAGS += -L$(FT_PREFIX)/lib
     endif
 else
     ifeq ($(UNAME), Darwin)
@@ -59,11 +59,11 @@ else
     endif
 endif
 
-ifndef FT_LIBBLAS
-    FT_LIBBLAS = blas
+ifndef FT_BLAS
+    FT_BLAS = blas
 endif
 
-LDLIBS += -fopenmp -lm -lquadmath -lmpfr -l$(FT_LIBBLAS) -lfftw3
+LDLIBS += -fopenmp -lm -lquadmath -lmpfr -l$(FT_BLAS) -lfftw3
 
 ifneq ($(FT_FFTW_WITH_COMBINED_THREADS), 1)
     LDLIBS += -lfftw3_threads

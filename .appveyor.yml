@@ -16,7 +16,7 @@ matrix:
     - image: Visual Studio 2015
 
 build_script:
-  - set CC=gcc && set FT_LIBBLAS=openblas && set FT_FFTW_WITH_COMBINED_THREADS=1
+  - set CC=gcc && set FT_BLAS=openblas && set FT_FFTW_WITH_COMBINED_THREADS=1
   - gcc --version
   - mingw32-make lib
   - mingw32-make tests
