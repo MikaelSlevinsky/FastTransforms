@@ -17,7 +17,7 @@ The library makes use of OpenBLAS, FFTW3, and MPFR, which are easily installed v
 Apple's version of GCC does not support OpenMP. Sample installation:
 ```
 brew install gcc@8 fftw mpfr
-export CC=gcc-8 && export FT_USE_APPLEBLAS=1 && make
+make CC=gcc-8 FT_USE_APPLEBLAS=1
 ```
 On macOS, the OpenBLAS dependency is optional in light of the vecLib framework. In case the library is compiled with vecLib, then the environment variable `VECLIB_MAXIMUM_THREADS` partially controls the multithreading.
 
@@ -26,7 +26,8 @@ On macOS, the OpenBLAS dependency is optional in light of the vecLib framework. 
 To access functions from the library, you must ensure that you append the current library path to the default. Sample installation:
 ```
 apt-get install gcc-8 libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
-export CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:. && make
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
+make CC=gcc-8
 ```
 See the [Travis build](https://github.com/MikaelSlevinsky/FastTransforms/blob/master/.travis.yml) for further details.
 
@@ -35,7 +36,7 @@ See the [Travis build](https://github.com/MikaelSlevinsky/FastTransforms/blob/ma
 We use GCC 7.2.0 distributed through MinGW-w64 on Visual Studio 2017. Sample installation:
 ```
 vcpkg install openblas:x64-windows fftw3[core,threads]:x64-windows mpir:x64-windows mpfr:x64-windows
-set CC=gcc && set FT_FFTW_WITH_COMBINED_THREADS=1 && mingw32-make
+mingw32-make CC=gcc FT_LIBBLAS=openblas FT_FFTW_WITH_COMBINED_THREADS=1
 ```
 See the [AppVeyor build](https://github.com/MikaelSlevinsky/FastTransforms/blob/master/.appveyor.yml) for further details.
 
