@@ -1,6 +1,6 @@
 LIB = fasttransforms
 LIBDIR = .
-LIBFLAGS = -shared -lm -fPIC
+LIBFLAGS = -shared -fPIC
 
 ifeq ($(OS), Windows_NT)
     UNAME := Windows
@@ -29,9 +29,14 @@ endif
 
 CFLAGS += -std=gnu99 -Ofast -march=native -mtune=native -mno-vzeroupper -I./src
 
-ifeq ($(FT_USE_PREDEFINED_LIBRARIES), 1)
-    CFLAGS += -I$(prefix)/include
-    LDFLAGS += -L$(prefix)/lib
+ifdef FT_PREFIX
+    ifeq ($(UNAME), Windows)
+        CFLAGS += -I$(FT_PREFIX)\include
+        LDFLAGS += -L$(FT_PREFIX)\bin
+    else
+        CFLAGS += -I$(FT_PREFIX)/include
+        LDFLAGS += -L$(FT_PREFIX)/lib
+    endif
 else
     ifeq ($(UNAME), Darwin)
         ifeq ($(FT_USE_APPLEBLAS), 1)
@@ -51,21 +56,15 @@ else
         CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include\openblas
         CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include
         LDFLAGS += -Lc:\tools\vcpkg\installed\x64-windows\bin
-        LDFLAGS += -L.
     endif
 endif
 
-LDLIBS += -lm -lquadmath -fopenmp -lfftw3
+ifndef FT_BLAS
+    FT_BLAS = blas
+endif
+
+LDLIBS += -fopenmp -lm -lquadmath -lmpfr -l$(FT_BLAS) -lfftw3
 
 ifneq ($(FT_FFTW_WITH_COMBINED_THREADS), 1)
     LDLIBS += -lfftw3_threads
-endif
-
-LDLIBS += -lmpfr
-ifeq ($(UNAME), Linux)
-    LDLIBS += -lgmp -lblas
-else ifeq ($(UNAME), Darwin)
-    LDLIBS += -lgmp -lblas
-else ifeq ($(OS), Windows_NT)
-    LDLIBS += -lmpir -lopenblas
 endif
