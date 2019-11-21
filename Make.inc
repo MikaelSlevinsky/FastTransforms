@@ -45,9 +45,9 @@ OBJ = src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src
 
 machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
 
-CFLAGS += -std=gnu99 -Ofast -mtune=native
+CFLAGS += -std=gnu99 -Ofast
 ifneq (, $(findstring 86, $(machine)))
-    CFLAGS += -mno-vzeroupper
+    CFLAGS += -march=native -mtune=native -mno-vzeroupper
 endif
 CFLAGS += -I./src
 
