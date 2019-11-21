@@ -2,20 +2,6 @@ LIB = fasttransforms
 LIBDIR = .
 LIBFLAGS = -shared -fPIC
 
-ifeq ($(OS), Windows_NT)
-    UNAME := Windows
-	SLIB = dll
-else
-	UNAME := $(shell uname)
-	ifeq ($(UNAME), Darwin)
-		SLIB = dylib
-	else
-		SLIB = so
-	endif
-endif
-
-OBJ = src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
-
 ifeq ($(FT_DETECT_GCC), 1)
     _GCCMAJOR := $(shell gfortran -dumpversion | cut -d'.' -f1)
     _GCCMINOR := $(shell gfortran -dumpversion | cut -d'.' -f2)
@@ -27,14 +13,50 @@ ifeq ($(FT_DETECT_GCC), 1)
     CC := gcc-$(_GCCVER)
 endif
 
-CFLAGS += -std=gnu99 -Ofast -march=native -mtune=native -mno-vzeroupper -I./src
+ifndef target
+    target := $(shell $(CC) -dumpmachine)
+endif
+
+ifneq (, $(findstring darwin, $(target)))
+    UNAME := Darwin
+else ifneq (, $(findstring cygwin, $(target)))
+    UNAME := Windows
+else ifneq (, $(findstring mingw, $(target)))
+    UNAME := Windows
+else ifneq (, $(findstring msys, $(target)))
+    UNAME := Windows
+else ifneq (, $(findstring linux, $(target)))
+    UNAME := Linux
+else ifneq (, $(findstring freebsd, $(target)))
+    UNAME := FreeBSD
+else
+    UNAME := Unknown
+endif
+
+ifeq ($(UNAME), Darwin)
+    SLIB = dylib
+else ifeq ($(UNAME), Windows)
+    SLIB = dll
+else
+    SLIB = so
+endif
+
+OBJ = src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
+
+machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
+
+CFLAGS += -std=gnu99 -Ofast -mtune=native
+ifneq (, $(findstring 86, $(machine)))
+    CFLAGS += -mno-vzeroupper
+endif
+CFLAGS += -I./src
+
 
 ifdef FT_PREFIX
+    CFLAGS += -I$(FT_PREFIX)/include
     ifeq ($(UNAME), Windows)
-        CFLAGS += -I$(FT_PREFIX)\include
-        LDFLAGS += -L$(FT_PREFIX)\bin
+        LDFLAGS += -L$(FT_PREFIX)/bin
     else
-        CFLAGS += -I$(FT_PREFIX)/include
         LDFLAGS += -L$(FT_PREFIX)/lib
     endif
 else
