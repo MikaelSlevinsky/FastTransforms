@@ -109,7 +109,7 @@ script:
   - ./test_hierarchical
   - ./test_banded
   - ./test_dprk
-  #- ./test_tdc
+  - ./test_tdc
   - OMP_NUM_THREADS=4 ./test_drivers 3 3 0
   - OMP_NUM_THREADS=4 ./test_fftw 3 3 0
   - make examples
