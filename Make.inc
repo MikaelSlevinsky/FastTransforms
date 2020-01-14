@@ -46,11 +46,12 @@ OBJ = src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src
 machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
 
 ifndef CFLAGS
+    CFLAGS = -O3
     ifneq (, $(findstring 86, $(machine)))
-        CFLAGS = -march=native -mtune=native -mno-vzeroupper
+        CFLAGS += -march=native -mtune=native -mno-vzeroupper
     endif
 endif
-CFLAGS += -Ofast -std=gnu99 -I./src
+CFLAGS += -std=gnu99 -I./src
 
 ifdef FT_PREFIX
     CFLAGS += -I$(FT_PREFIX)/include
