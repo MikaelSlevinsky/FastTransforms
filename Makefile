@@ -8,15 +8,15 @@ all:
 
 assembly:
 	$(CC) -S $(CFLAGS) test/test_assembly.c -o test_assembly.s
-	$(CC) -S $(AFLAGS) src/recurrence/recurrence_default.c -o src/recurrence_default.s
-	$(CC) -S $(AFLAGS) $(MSSE) src/recurrence/recurrence_SSE.c -o src/recurrence_SSE.s
-	$(CC) -S $(AFLAGS) $(MSSE2) src/recurrence/recurrence_SSE2.c -o src/recurrence_SSE2.s
-	$(CC) -S $(AFLAGS) $(MAVX) src/recurrence/recurrence_AVX.c -o src/recurrence_AVX.s
-	$(CC) -S $(AFLAGS) $(MAVX) $(MFMA) src/recurrence/recurrence_AVX_FMA.c -o src/recurrence_AVX_FMA.s
-	$(CC) -S $(AFLAGS) $(MAVX512F) src/recurrence/recurrence_AVX512F.c -o src/recurrence_AVX512F.s
+	$(CC) -S $(AFLAGS) src/recurrence/recurrence_default.c -o src/recurrence/recurrence_default.s
+	$(CC) -S $(AFLAGS) $(MSSE) src/recurrence/recurrence_SSE.c -o src/recurrence/recurrence_SSE.s
+	$(CC) -S $(AFLAGS) $(MSSE2) src/recurrence/recurrence_SSE2.c -o src/recurrence/recurrence_SSE2.s
+	$(CC) -S $(AFLAGS) $(MAVX) src/recurrence/recurrence_AVX.c -o src/recurrence/recurrence_AVX.s
+	$(CC) -S $(AFLAGS) $(MAVX) $(MFMA) src/recurrence/recurrence_AVX_FMA.c -o src/recurrence/recurrence_AVX_FMA.s
+	$(CC) -S $(AFLAGS) $(MAVX512F) src/recurrence/recurrence_AVX512F.c -o src/recurrence/recurrence_AVX512F.s
 
 lib:
-	$(CC) $(CFLAGS) $(LIBFLAGS) $(OBJ) $(LDFLAGS) $(LDLIBS) $(ASM) -o lib$(LIB).$(SLIB)
+	$(CC) $(CFLAGS) $(LIBFLAGS) $(ASM) $(OBJ) $(LDFLAGS) $(LDLIBS) -o lib$(LIB).$(SLIB)
 
 tests:
 	$(CC) src/ftutilities.c test/test_recurrence.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_recurrence
@@ -39,7 +39,7 @@ examples:
 
 clean:
 	rm -f lib$(LIB).*
-	rm -f src/*.s
+	rm -f src/recurrence/*.s
 	rm -f additiontheorem
 	rm -f calculus
 	rm -f holomorphic
