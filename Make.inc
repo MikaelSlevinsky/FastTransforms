@@ -61,7 +61,8 @@ else
     SLIB = so
 endif
 
-OBJ = src/recurrence/*.s src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
+#OBJ = src/recurrence/*.s src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
+OBJ = src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
 
 machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
 
