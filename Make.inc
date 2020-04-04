@@ -100,6 +100,7 @@ else
     else ifeq ($(UNAME), Windows)
         AFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include\openblas
         AFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include
+        AFLAGS += -Lc:\tools\vcpkg\installed\x64-windows\bin
         CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include\openblas
         CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include
         LDFLAGS += -Lc:\tools\vcpkg\installed\x64-windows\bin
