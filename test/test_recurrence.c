@@ -9,6 +9,15 @@ int main(void) {
 
     int MN = 1024;
 
+    unsigned int eax = 1, ebx = 0, ecx = 0, edx = 0;
+    __get_cpuid(1, &eax, &ebx, &ecx, &edx);
+    ft_simd simd = (ft_simd) {edx & bit_SSE, edx & bit_SSE2, ecx & bit_AVX, ecx & bit_FMA, ebx & bit_AVX512F};
+    simd.sse ? printf("SSE detected.\t\t"GREEN("✓")"\n") : printf("SSE not detected.\t"RED("×")"\n");
+    simd.sse2 ? printf("SSE2 detected.\t\t"GREEN("✓")"\n") : printf("SSE2 not detected.\t"RED("×")"\n");
+    simd.avx ? printf("AVX detected.\t\t"GREEN("✓")"\n") : printf("AVX not detected.\t"RED("×")"\n");
+    simd.fma ? printf("FMA detected.\t\t"GREEN("✓")"\n") : printf("FMA not detected.\t"RED("×")"\n");
+    simd.avx512f ? printf("AVX512F detected.\t"GREEN("✓")"\n") : printf("AVX512F not detected.\t"RED("×")"\n");
+
     printf("\nTesting methods for Horner summation.\n");
     printf("\n\tSingle precision.\n\n");
 
