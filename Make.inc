@@ -65,7 +65,7 @@ OBJ = src/recurrence/*.s src/recurrence.c src/transforms.c src/rotations.c src/p
 
 machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
 
-AFLAGS = -O3 -std=gnu99 -I./src
+AFLAGS = -O3 -fPIC -std=gnu99 -I./src
 
 ifndef CFLAGS
     CFLAGS = -O3
