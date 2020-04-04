@@ -61,7 +61,7 @@ else
     SLIB = so
 endif
 
-ASM = src/recurrence/*.s
+ASM = src/*.s
 
 OBJ = src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
 
