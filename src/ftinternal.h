@@ -104,6 +104,25 @@ typedef struct {
     unsigned int avx512f;
 } ft_simd;
 
+static inline void cpuid(int level, int ecxval, int * eax, int * ebx, int * ecx, int * edx) {
+    *eax = level;
+    *ecx = ecxval;
+    *ebx = 0;
+    *edx = 0;
+    __asm__ ("xchgl %%ebx, %1  \n\t"
+             "cpuid            \n\t"
+             "xchgl %%ebx, %1  \n\t"
+             : "+a" (*eax), "+r" (*ebx), "+c" (*ecx), "+d" (*edx));
+}
+
+static inline ft_simd get_simd() {
+    unsigned int eax, ebx, ecx, edx;
+    unsigned int eax1, ebx1, ecx1, edx1;
+    cpuid(1, 0, &eax, &ebx, &ecx, &edx);
+    cpuid(7, 0, &eax1, &ebx1, &ecx1, &edx1);
+    return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_AVX), !!(ecx & bit_FMA), !!(ebx1 & bit_AVX512F)};
+}
+
 #ifdef __AVX512F__
     #define VECTOR_SIZE_8 8
     #define ALIGN_SIZE VECTOR_SIZE_8
