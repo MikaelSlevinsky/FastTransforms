@@ -4,10 +4,10 @@
 
 int main(void) {
     int checksum = 0;
-    int NLOOPS = 1000;
+    int NLOOPS = 250;
     struct timeval start, end;
 
-    int MN = 512;
+    int MN = 1024;
 
     printf("\nTesting methods for Horner summation.\n");
     printf("\n\tSingle precision.\n\n");
@@ -32,6 +32,8 @@ int main(void) {
             horner_AVXf(n, c, 1, m, x, f);
             err += powf(ft_norm_2argf(f, fd, m), 2);
             horner_AVX_FMAf(n, c, 1, m, x, f);
+            err += powf(ft_norm_2argf(f, fd, m), 2);
+            horner_AVX512Ff(n, c, 1, m, x, f);
             err += powf(ft_norm_2argf(f, fd, m), 2);
             ft_hornerf(n, c, 1, m, x, f);
             err += powf(ft_norm_2argf(f, fd, m), 2);
@@ -91,6 +93,14 @@ int main(void) {
             gettimeofday(&end, NULL);
             printf("Time for horner_AVX_FMAf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
 
+            horner_AVX512Ff(n, c, 1, m, x, f);
+            horner_AVX512Ff(n, c, 1, m, x, f);
+            gettimeofday(&start, NULL);
+            for (int ntimes = 0; ntimes < NLOOPS; ntimes++)
+                horner_AVX512Ff(n, c, 1, m, x, f);
+            gettimeofday(&end, NULL);
+            printf("Time for horner_AVX512Ff \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
+
             ft_hornerf(n, c, 1, m, x, f);
             ft_hornerf(n, c, 1, m, x, f);
             gettimeofday(&start, NULL);
@@ -127,6 +137,8 @@ int main(void) {
             horner_AVX(n, c, 1, m, x, f);
             err += pow(ft_norm_2arg(f, fd, m), 2);
             horner_AVX_FMA(n, c, 1, m, x, f);
+            err += pow(ft_norm_2arg(f, fd, m), 2);
+            horner_AVX512F(n, c, 1, m, x, f);
             err += pow(ft_norm_2arg(f, fd, m), 2);
             ft_horner(n, c, 1, m, x, f);
             err += pow(ft_norm_2arg(f, fd, m), 2);
@@ -186,6 +198,14 @@ int main(void) {
             gettimeofday(&end, NULL);
             printf("Time for horner_AVX_FMA \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
 
+            horner_AVX512F(n, c, 1, m, x, f);
+            horner_AVX512F(n, c, 1, m, x, f);
+            gettimeofday(&start, NULL);
+            for (int ntimes = 0; ntimes < NLOOPS; ntimes++)
+                horner_AVX512F(n, c, 1, m, x, f);
+            gettimeofday(&end, NULL);
+            printf("Time for horner_AVX512F \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
+
             ft_horner(n, c, 1, m, x, f);
             ft_horner(n, c, 1, m, x, f);
             gettimeofday(&start, NULL);
@@ -223,6 +243,8 @@ int main(void) {
             clenshaw_AVXf(n, c, 1, m, x, f);
             err += powf(ft_norm_2argf(f, fd, m), 2);
             clenshaw_AVX_FMAf(n, c, 1, m, x, f);
+            err += powf(ft_norm_2argf(f, fd, m), 2);
+            clenshaw_AVX512Ff(n, c, 1, m, x, f);
             err += powf(ft_norm_2argf(f, fd, m), 2);
             ft_clenshawf(n, c, 1, m, x, f);
             err += powf(ft_norm_2argf(f, fd, m), 2);
@@ -282,6 +304,14 @@ int main(void) {
             gettimeofday(&end, NULL);
             printf("Time for clenshaw_AVX_FMAf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
 
+            clenshaw_AVX512Ff(n, c, 1, m, x, f);
+            clenshaw_AVX512Ff(n, c, 1, m, x, f);
+            gettimeofday(&start, NULL);
+            for (int ntimes = 0; ntimes < NLOOPS; ntimes++)
+                clenshaw_AVX512Ff(n, c, 1, m, x, f);
+            gettimeofday(&end, NULL);
+            printf("Time for clenshaw_AVX512Ff \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
+
             ft_clenshawf(n, c, 1, m, x, f);
             ft_clenshawf(n, c, 1, m, x, f);
             gettimeofday(&start, NULL);
@@ -318,6 +348,8 @@ int main(void) {
             clenshaw_AVX(n, c, 1, m, x, f);
             err += pow(ft_norm_2arg(f, fd, m), 2);
             clenshaw_AVX_FMA(n, c, 1, m, x, f);
+            err += pow(ft_norm_2arg(f, fd, m), 2);
+            clenshaw_AVX512F(n, c, 1, m, x, f);
             err += pow(ft_norm_2arg(f, fd, m), 2);
             ft_clenshaw(n, c, 1, m, x, f);
             err += pow(ft_norm_2arg(f, fd, m), 2);
@@ -376,6 +408,14 @@ int main(void) {
                 clenshaw_AVX_FMA(n, c, 1, m, x, f);
             gettimeofday(&end, NULL);
             printf("Time for clenshaw_AVX_FMA \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
+
+            clenshaw_AVX512F(n, c, 1, m, x, f);
+            clenshaw_AVX512F(n, c, 1, m, x, f);
+            gettimeofday(&start, NULL);
+            for (int ntimes = 0; ntimes < NLOOPS; ntimes++)
+                clenshaw_AVX512F(n, c, 1, m, x, f);
+            gettimeofday(&end, NULL);
+            printf("Time for clenshaw_AVX512F \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
 
             ft_clenshaw(n, c, 1, m, x, f);
             ft_clenshaw(n, c, 1, m, x, f);
