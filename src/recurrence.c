@@ -2,9 +2,11 @@
 #include "ftinternal.h"
 
 static inline ft_simd get_simd() {
-    unsigned int eax = 1, ebx = 0, ecx = 0, edx = 0;
+    unsigned int eax, ebx, ecx, edx;
+    unsigned int eax1, ebx1, ecx1, edx1;
     __get_cpuid(1, &eax, &ebx, &ecx, &edx);
-    return (ft_simd) {edx & bit_SSE, edx & bit_SSE2, ecx & bit_AVX, ecx & bit_FMA, ebx & bit_AVX512F};
+    __get_cpuid_count(7, 0, &eax1, &ebx1, &ecx1, &edx1);
+    return (ft_simd) {edx & bit_SSE, edx & bit_SSE2, ecx & bit_AVX, ecx & bit_FMA, ebx1 & bit_AVX512F};
 }
 
 void ft_horner(const int n, const double * c, const int incc, const int m, double * x, double * f) {
