@@ -98,6 +98,8 @@ else
         CFLAGS += -I/usr/local/opt/gmp/include
         LDFLAGS += -L/usr/local/opt/gmp/lib
     else ifeq ($(UNAME), Windows)
+        AFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include\openblas
+        AFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include
         CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include\openblas
         CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include
         LDFLAGS += -Lc:\tools\vcpkg\installed\x64-windows\bin
