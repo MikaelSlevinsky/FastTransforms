@@ -101,8 +101,8 @@ matrix:
 before_install: eval "${MATRIX_EVAL}"
 
 script:
-  - make lib
-  - make tests
+  - make
+  - ./test_recurrence
   - ./test_transforms
   - ./test_rotations
   - ./test_tridiagonal
@@ -112,7 +112,6 @@ script:
   - ./test_tdc
   - OMP_NUM_THREADS=4 ./test_drivers 3 3 0
   - OMP_NUM_THREADS=4 ./test_fftw 3 3 0
-  - make examples
   - ./additiontheorem
   - ./calculus
   - ./holomorphic

@@ -23,7 +23,13 @@
 
 #define FT_CONCAT(prefix, name, suffix) prefix ## name ## suffix
 
-#include <tdc.h>
+#include "tdc.h"
+
+void ft_horner(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void ft_hornerf(const int n, const float * c, const int incc, const int m, float * x, float * f);
+
+void ft_clenshaw(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void ft_clenshawf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 
 /*!
   \brief Pre-compute a factorization of the connection coefficients between Legendre and Chebyshev polynomials in double precision so that ft_bfmv converts between expansions:
@@ -555,4 +561,4 @@ void ft_execute_disk_synthesis(const ft_disk_fftw_plan * P, double * X, const in
 void ft_execute_disk_analysis(const ft_disk_fftw_plan * P, double * X, const int N, const int M);
 
 
-#endif //FASTTRANSFORMS_H
+#endif // FASTTRANSFORMS_H

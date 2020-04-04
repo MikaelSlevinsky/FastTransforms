@@ -33,6 +33,26 @@ else
     UNAME := Unknown
 endif
 
+simd := $(shell $(CC) -march=native -E -v - </dev/null 2>&1 | grep cc1)
+
+ifneq (, $(findstring msse, $(simd)))
+    MSSE := -msse
+endif
+ifneq (, $(findstring msse2, $(simd)))
+    MSSE2 := -msse2
+endif
+ifneq (, $(findstring mavx, $(simd)))
+    MAVX := -mavx
+endif
+ifneq (, $(findstring mfma, $(simd)))
+    ifeq (, $(findstring mfma4, $(simd)))
+        MFMA := -mfma
+    endif
+endif
+ifneq (, $(findstring mavx512f, $(simd)))
+    MAVX512F := -mavx512f
+endif
+
 ifeq ($(UNAME), Darwin)
     SLIB = dylib
 else ifeq ($(UNAME), Windows)
@@ -41,9 +61,11 @@ else
     SLIB = so
 endif
 
-OBJ = src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
+OBJ = src/recurrence/*.s src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
 
 machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
+
+AFLAGS = -O3 -std=gnu99 -I./src
 
 ifndef CFLAGS
     CFLAGS = -O3

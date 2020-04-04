@@ -5,6 +5,7 @@
 #include <math.h>
 #include <quadmath.h>
 #include <immintrin.h>
+#include <cpuid.h>
 
 #define RED(string) "\x1b[31m" string "\x1b[0m"
 #define GREEN(string) "\x1b[32m" string "\x1b[0m"
@@ -94,13 +95,32 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
 
 #define MAX(a,b) ((a) > (b) ? a : b)
 #define MIN(a,b) ((a) < (b) ? a : b)
+
+typedef struct {
+    unsigned int sse;
+    unsigned int sse2;
+    unsigned int avx;
+    unsigned int fma;
+    unsigned int avx512f;
+} ft_simd;
+
 #ifdef __AVX512F__
     #define VECTOR_SIZE_8 8
     #define ALIGN_SIZE VECTOR_SIZE_8
     typedef double double8 __attribute__ ((vector_size (VECTOR_SIZE_8*8)));
     #define vall8(x) ((double8) _mm512_set1_pd(x))
     #define vload8(v) ((double8) _mm512_load_pd(v))
+    #define vloadu8(v) ((double8) _mm512_loadu_pd(v))
     #define vstore8(u, v) (_mm512_store_pd(u, v))
+    #define vstoreu8(u, v) (_mm512_storeu_pd(u, v))
+    #define vfma8(a, b, c) ((double8) _mm512_fmadd_pd(a, b, c))
+    typedef float float16 __attribute__ ((vector_size (VECTOR_SIZE_8*8)));
+    #define vall16f(x) ((float16) _mm512_set1_ps(x))
+    #define vload16f(v) ((float16) _mm512_load_ps(v))
+    #define vloadu16f(v) ((float16) _mm512_loadu_ps(v))
+    #define vstore16f(u, v) (_mm512_store_ps(u, v))
+    #define vstoreu16f(u, v) (_mm512_storeu_ps(u, v))
+    #define vfma16f(a, b, c) ((float16) _mm512_fmadd_ps(a, b, c))
 #endif
 #ifdef __AVX__
     #define VECTOR_SIZE_4 4
@@ -110,7 +130,19 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
     typedef double double4 __attribute__ ((vector_size (VECTOR_SIZE_4*8)));
     #define vall4(x) ((double4) _mm256_set1_pd(x))
     #define vload4(v) ((double4) _mm256_load_pd(v))
+    #define vloadu4(v) ((double4) _mm256_loadu_pd(v))
     #define vstore4(u, v) (_mm256_store_pd(u, v))
+    #define vstoreu4(u, v) (_mm256_storeu_pd(u, v))
+    typedef float float8 __attribute__ ((vector_size (VECTOR_SIZE_4*8)));
+    #define vall8f(x) ((float8) _mm256_set1_ps(x))
+    #define vload8f(v) ((float8) _mm256_load_ps(v))
+    #define vloadu8f(v) ((float8) _mm256_loadu_ps(v))
+    #define vstore8f(u, v) (_mm256_store_ps(u, v))
+    #define vstoreu8f(u, v) (_mm256_storeu_ps(u, v))
+    #ifdef __FMA__
+        #define vfma4(a, b, c) ((double4) _mm256_fmadd_pd(a, b, c))
+        #define vfma8f(a, b, c) ((float8) _mm256_fmadd_ps(a, b, c))
+    #endif
 #endif
 #ifdef __SSE2__
     #define VECTOR_SIZE_2 2
@@ -120,7 +152,27 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
     typedef double double2 __attribute__ ((vector_size (VECTOR_SIZE_2*8)));
     #define vall2(x) ((double2) _mm_set1_pd(x))
     #define vload2(v) ((double2) _mm_load_pd(v))
+    #define vloadu2(v) ((double2) _mm_loadu_pd(v))
     #define vstore2(u, v) (_mm_store_pd(u, v))
+    #define vstoreu2(u, v) (_mm_storeu_pd(u, v))
+    #ifdef __FMA__
+        #define vfma2(a, b, c) ((double2) _mm_fmadd_pd(a, b, c))
+    #endif
+#endif
+#ifdef __SSE__
+    #define VECTOR_SIZE_2 2
+    #ifndef ALIGN_SIZE
+        #define ALIGN_SIZE VECTOR_SIZE_2
+    #endif
+    typedef float float4 __attribute__ ((vector_size (VECTOR_SIZE_2*8)));
+    #define vall4f(x) ((float4) _mm_set1_ps(x))
+    #define vload4f(v) ((float4) _mm_load_ps(v))
+    #define vloadu4f(v) ((float4) _mm_loadu_ps(v))
+    #define vstore4f(u, v) (_mm_store_ps(u, v))
+    #define vstoreu4f(u, v) (_mm_storeu_ps(u, v))
+    #ifdef __FMA__
+        #define vfma4f(a, b, c) ((float4) _mm_fmadd_ps(a, b, c))
+    #endif
 #endif
 
 #ifndef ALIGN_SIZE
@@ -130,6 +182,93 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
 #define VALIGN(N) ((N + ALIGN_SIZE - 1) & -ALIGN_SIZE)
 #define VMALLOC(s) _mm_malloc(s, ALIGN_SIZE*8)
 #define VFREE(s) _mm_free(s)
+
+#define vmuladd(a, b, c) a*b+c
+
+#define HORNER_KERNEL(T, VT, S, L, VLOADU, VSTOREU, VMULADD, VALL)             \
+if (n < 1) {                                                                   \
+    for (int j = 0; j < m; j++)                                                \
+        f[j] = 0;                                                              \
+    return;                                                                    \
+}                                                                              \
+int j = 0;                                                                     \
+for (; j < m+1-S*L; j += S*L) {                                                \
+    VT bk[L] = {0};                                                            \
+    VT X[L];                                                                   \
+    for (int l = 0; l < L; l++)                                                \
+        X[l] = VLOADU(x+j+S*l);                                                \
+    for (int k = n-1; k >= 0; k--) {                                           \
+        for (int l = 0; l < L; l++)                                            \
+            bk[l] = VMULADD(X[l], bk[l], VALL(c[k*incc]));                     \
+    }                                                                          \
+    for (int l = 0; l < L; l++)                                                \
+        VSTOREU(f+j+S*l, bk[l]);                                               \
+}                                                                              \
+for (; j < m; j++) {                                                           \
+    T bk = 0;                                                                  \
+    for (int k = n-1; k >= 0; k--)                                             \
+        bk = x[j]*bk + c[k*incc];                                              \
+    f[j] = bk;                                                                 \
+}
+
+#define CLENSHAW_KERNEL(T, VT, S, L, VLOADU, VSTOREU, VMULADD)                 \
+if (n < 1) {                                                                   \
+    for (int j = 0; j < m; j++)                                                \
+        f[j] = 0;                                                              \
+    return;                                                                    \
+}                                                                              \
+int j = 0;                                                                     \
+for (; j < m+1-S*L; j += S*L) {                                                \
+    VT bk[3*L] = {0};                                                          \
+    VT X[L];                                                                   \
+    for (int l = 0; l < L; l++)                                                \
+        X[l] = 2*VLOADU(x+j+S*l);                                              \
+    for (int k = n-1; k >= 1; k--) {                                           \
+        for (int l = 0; l < L; l++) {                                          \
+            bk[3*l] = VMULADD(X[l], bk[3*l+1], c[k*incc] - bk[3*l+2]);         \
+            bk[3*l+2] = bk[3*l+1];                                             \
+            bk[3*l+1] = bk[3*l];                                               \
+        }                                                                      \
+    }                                                                          \
+    for (int l = 0; l < L; l++)                                                \
+        VSTOREU(f+j+S*l, X[l]/2*bk[3*l+1] + c[0] - bk[3*l+2]);                 \
+}                                                                              \
+for (; j < m; j++) {                                                           \
+    T bk = 0;                                                                  \
+    T bk1 = 0;                                                                 \
+    T bk2 = 0;                                                                 \
+    T X = 2*x[j];                                                              \
+    for (int k = n-1; k >= 1; k--) {                                           \
+        bk = X*bk1 + c[k*incc] - bk2;                                          \
+        bk2 = bk1;                                                             \
+        bk1 = bk;                                                              \
+    }                                                                          \
+    f[j] = X/2*bk1 + c[0] - bk2;                                               \
+}
+
+void horner_default(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void horner_SSE2(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void horner_AVX(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void horner_AVX_FMA(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void horner_AVX512F(const int n, const double * c, const int incc, const int m, double * x, double * f);
+
+void horner_defaultf(const int n, const float * c, const int incc, const int m, float * x, float * f);
+void horner_SSEf(const int n, const float * c, const int incc, const int m, float * x, float * f);
+void horner_AVXf(const int n, const float * c, const int incc, const int m, float * x, float * f);
+void horner_AVX_FMAf(const int n, const float * c, const int incc, const int m, float * x, float * f);
+void horner_AVX512Ff(const int n, const float * c, const int incc, const int m, float * x, float * f);
+
+void clenshaw_default(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void clenshaw_SSE2(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void clenshaw_AVX(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void clenshaw_AVX_FMA(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void clenshaw_AVX512F(const int n, const double * c, const int incc, const int m, double * x, double * f);
+
+void clenshaw_defaultf(const int n, const float * c, const int incc, const int m, float * x, float * f);
+void clenshaw_SSEf(const int n, const float * c, const int incc, const int m, float * x, float * f);
+void clenshaw_AVXf(const int n, const float * c, const int incc, const int m, float * x, float * f);
+void clenshaw_AVX_FMAf(const int n, const float * c, const int incc, const int m, float * x, float * f);
+void clenshaw_AVX512Ff(const int n, const float * c, const int incc, const int m, float * x, float * f);
 
 double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n);
 double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n);
@@ -166,4 +305,4 @@ void warp_t(double * A, const int N, const int M, const int L);
 // A bitwise OR ('|') of zero or more of the following: FFTW_ESTIMATE FFTW_MEASURE FFTW_PATIENT FFTW_EXHAUSTIVE FFTW_WISDOM_ONLY FFTW_DESTROY_INPUT FFTW_PRESERVE_INPUT FFTW_UNALIGNED
 #define FT_FFTW_FLAGS FFTW_MEASURE | FFTW_DESTROY_INPUT
 
-#endif //FTINTERNAL_H
+#endif // FTINTERNAL_H
