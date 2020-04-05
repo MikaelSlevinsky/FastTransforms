@@ -16,7 +16,7 @@ assembly:
 	$(CC) -S $(AFLAGS) $(MAVX512F) src/recurrence/recurrence_AVX512F.c -o src/recurrence/recurrence_AVX512F.s
 
 lib:
-	$(CC) $(CFLAGS) $(LIBFLAGS) $(ASM) $(OBJ) $(LDFLAGS) $(LDLIBS) -o lib$(LIB).$(SLIB)
+	$(CC) $(CFLAGS) $(LIBFLAGS) $(ASM) $(SRC) $(LDFLAGS) $(LDLIBS) -o lib$(LIB).$(SLIB)
 
 tests:
 	$(CC) src/ftutilities.c test/test_recurrence.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_recurrence
