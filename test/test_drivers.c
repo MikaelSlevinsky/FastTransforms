@@ -32,7 +32,6 @@ int main(int argc, const char * argv[]) {
     }
     else IERR = 1;
 
-    /*
     printf("\nTesting the accuracy of spherical harmonic drivers.\n\n");
     printf("err1 = [\n");
     for (int i = 0; i < IERR; i++) {
@@ -320,7 +319,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_harmonic_plan(P);
     }
     printf("];\n");
-    */
+
     printf("\nTesting the accuracy of triangular harmonic drivers.\n\n");
     printf("err5 = [\n");
     for (int i = 0; i < IERR; i++) {
@@ -482,7 +481,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_harmonic_plan(P);
     }
     printf("];\n");
-    /*
+
     printf("\nTesting the accuracy of disk harmonic drivers.\n\n");
     printf("err7 = [\n");
     for (int i = 0; i < IERR; i++) {
@@ -626,7 +625,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_harmonic_plan(P);
     }
     printf("];\n");
-    */
+
     printf("\nTesting the accuracy of tetrahedral harmonic drivers.\n\n");
     printf("err9 = [\n");
     for (int i = 0; i < IERR; i++) {
@@ -776,7 +775,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_tetrahedral_harmonic_plan(TP);
     }
     printf("];\n");
-    /*
+
     printf("\nTesting the accuracy of spin-weighted spherical harmonic drivers.\n\n");
     printf("err11 = [\n");
     for (int i = 0; i < IERR; i++) {
@@ -844,7 +843,7 @@ int main(int argc, const char * argv[]) {
         printf("\n");
     }
     printf("];\n");
-    */
+
     return 0;
 }
 
