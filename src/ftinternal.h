@@ -97,30 +97,33 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
 #define MIN(a,b) ((a) < (b) ? a : b)
 
 typedef struct {
-    unsigned int sse;
-    unsigned int sse2;
-    unsigned int avx;
-    unsigned int fma;
-    unsigned int avx512f;
+    unsigned sse     : 1;
+    unsigned sse2    : 1;
+    unsigned avx     : 1;
+    unsigned avx2    : 1;
+    unsigned fma     : 1;
+    unsigned avx512f : 1;
 } ft_simd;
 
-static inline void cpuid(int level, int ecxval, int * eax, int * ebx, int * ecx, int * edx) {
-    *eax = level;
-    *ecx = ecxval;
-    *ebx = 0;
-    *edx = 0;
-    __asm__ ("xchgl %%ebx, %1  \n\t"
-             "cpuid            \n\t"
-             "xchgl %%ebx, %1  \n\t"
-             : "+a" (*eax), "+r" (*ebx), "+c" (*ecx), "+d" (*edx));
+static inline void cpuid(unsigned op, unsigned count, unsigned *eax, unsigned *ebx, unsigned *ecx, unsigned *edx) {
+    #if defined(__i386__) && defined(__PIC__)
+        __asm__ __volatile__
+        ("mov %%ebx, %%edi;"
+         "cpuid;"
+         "xchgl %%ebx, %%edi;"
+         : "=a" (*eax), "=D" (*ebx), "=c" (*ecx), "=d" (*edx) : "0" (op), "2" (count) : "cc");
+    #else
+        __asm__ __volatile__
+        ("cpuid": "=a" (*eax), "=b" (*ebx), "=c" (*ecx), "=d" (*edx) : "0" (op), "2" (count) : "cc");
+    #endif
 }
 
-static inline ft_simd get_simd() {
-    unsigned int eax, ebx, ecx, edx;
-    unsigned int eax1, ebx1, ecx1, edx1;
+static inline ft_simd get_simd(void) {
+    unsigned eax, ebx, ecx, edx;
+    unsigned eax1, ebx1, ecx1, edx1;
     cpuid(1, 0, &eax, &ebx, &ecx, &edx);
     cpuid(7, 0, &eax1, &ebx1, &ecx1, &edx1);
-    return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_AVX), !!(ecx & bit_FMA), !!(ebx1 & bit_AVX512F)};
+    return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_AVX), !!(ebx1 & bit_AVX2), !!(ecx & bit_FMA), !!(ebx1 & bit_AVX512F)};
 }
 
 #ifdef __AVX512F__
@@ -133,6 +136,7 @@ static inline ft_simd get_simd() {
     #define vstore8(u, v) (_mm512_store_pd(u, v))
     #define vstoreu8(u, v) (_mm512_storeu_pd(u, v))
     #define vfma8(a, b, c) ((double8) _mm512_fmadd_pd(a, b, c))
+    #define vfms8(a, b, c) ((double8) _mm512_fmsub_pd(a, b, c))
     typedef float float16 __attribute__ ((vector_size (VECTOR_SIZE_8*8)));
     #define vall16f(x) ((float16) _mm512_set1_ps(x))
     #define vload16f(v) ((float16) _mm512_load_ps(v))
@@ -140,6 +144,7 @@ static inline ft_simd get_simd() {
     #define vstore16f(u, v) (_mm512_store_ps(u, v))
     #define vstoreu16f(u, v) (_mm512_storeu_ps(u, v))
     #define vfma16f(a, b, c) ((float16) _mm512_fmadd_ps(a, b, c))
+    #define vfms16f(a, b, c) ((float16) _mm512_fmsub_ps(a, b, c))
 #endif
 #ifdef __AVX__
     #define VECTOR_SIZE_4 4
@@ -160,7 +165,9 @@ static inline ft_simd get_simd() {
     #define vstoreu8f(u, v) (_mm256_storeu_ps(u, v))
     #ifdef __FMA__
         #define vfma4(a, b, c) ((double4) _mm256_fmadd_pd(a, b, c))
+        #define vfms4(a, b, c) ((double4) _mm256_fmsub_pd(a, b, c))
         #define vfma8f(a, b, c) ((float8) _mm256_fmadd_ps(a, b, c))
+        #define vfms8f(a, b, c) ((float8) _mm256_fmsub_ps(a, b, c))
     #endif
 #endif
 #ifdef __SSE2__
@@ -176,6 +183,7 @@ static inline ft_simd get_simd() {
     #define vstoreu2(u, v) (_mm_storeu_pd(u, v))
     #ifdef __FMA__
         #define vfma2(a, b, c) ((double2) _mm_fmadd_pd(a, b, c))
+        #define vfms2(a, b, c) ((double2) _mm_fmsub_pd(a, b, c))
     #endif
 #endif
 #ifdef __SSE__
@@ -191,6 +199,7 @@ static inline ft_simd get_simd() {
     #define vstoreu4f(u, v) (_mm_storeu_ps(u, v))
     #ifdef __FMA__
         #define vfma4f(a, b, c) ((float4) _mm_fmadd_ps(a, b, c))
+        #define vfms4f(a, b, c) ((float4) _mm_fmsub_ps(a, b, c))
     #endif
 #endif
 
@@ -198,72 +207,12 @@ static inline ft_simd get_simd() {
     #define ALIGN_SIZE 1
 #endif
 
-#define VALIGN(N) ((N + ALIGN_SIZE - 1) & -ALIGN_SIZE)
-#define VMALLOC(s) _mm_malloc(s, ALIGN_SIZE*8)
-#define VFREE(s) _mm_free(s)
+#define VALIGN(N) N // ((N + ALIGN_SIZE - 1) & -ALIGN_SIZE)
+#define VMALLOC(s) malloc(s) // _mm_malloc(s, ALIGN_SIZE*8)
+#define VFREE(s) free(s) // _mm_free(s)
 
-#define vmuladd(a, b, c) a*b+c
-
-#define HORNER_KERNEL(T, VT, S, L, VLOADU, VSTOREU, VMULADD, VALL)             \
-if (n < 1) {                                                                   \
-    for (int j = 0; j < m; j++)                                                \
-        f[j] = 0;                                                              \
-    return;                                                                    \
-}                                                                              \
-int j = 0;                                                                     \
-for (; j < m+1-S*L; j += S*L) {                                                \
-    VT bk[L] = {0};                                                            \
-    VT X[L];                                                                   \
-    for (int l = 0; l < L; l++)                                                \
-        X[l] = VLOADU(x+j+S*l);                                                \
-    for (int k = n-1; k >= 0; k--) {                                           \
-        for (int l = 0; l < L; l++)                                            \
-            bk[l] = VMULADD(X[l], bk[l], VALL(c[k*incc]));                     \
-    }                                                                          \
-    for (int l = 0; l < L; l++)                                                \
-        VSTOREU(f+j+S*l, bk[l]);                                               \
-}                                                                              \
-for (; j < m; j++) {                                                           \
-    T bk = 0;                                                                  \
-    for (int k = n-1; k >= 0; k--)                                             \
-        bk = x[j]*bk + c[k*incc];                                              \
-    f[j] = bk;                                                                 \
-}
-
-#define CLENSHAW_KERNEL(T, VT, S, L, VLOADU, VSTOREU, VMULADD)                 \
-if (n < 1) {                                                                   \
-    for (int j = 0; j < m; j++)                                                \
-        f[j] = 0;                                                              \
-    return;                                                                    \
-}                                                                              \
-int j = 0;                                                                     \
-for (; j < m+1-S*L; j += S*L) {                                                \
-    VT bk[3*L] = {0};                                                          \
-    VT X[L];                                                                   \
-    for (int l = 0; l < L; l++)                                                \
-        X[l] = 2*VLOADU(x+j+S*l);                                              \
-    for (int k = n-1; k >= 1; k--) {                                           \
-        for (int l = 0; l < L; l++) {                                          \
-            bk[3*l] = VMULADD(X[l], bk[3*l+1], c[k*incc] - bk[3*l+2]);         \
-            bk[3*l+2] = bk[3*l+1];                                             \
-            bk[3*l+1] = bk[3*l];                                               \
-        }                                                                      \
-    }                                                                          \
-    for (int l = 0; l < L; l++)                                                \
-        VSTOREU(f+j+S*l, X[l]/2*bk[3*l+1] + c[0] - bk[3*l+2]);                 \
-}                                                                              \
-for (; j < m; j++) {                                                           \
-    T bk = 0;                                                                  \
-    T bk1 = 0;                                                                 \
-    T bk2 = 0;                                                                 \
-    T X = 2*x[j];                                                              \
-    for (int k = n-1; k >= 1; k--) {                                           \
-        bk = X*bk1 + c[k*incc] - bk2;                                          \
-        bk2 = bk1;                                                             \
-        bk1 = bk;                                                              \
-    }                                                                          \
-    f[j] = X/2*bk1 + c[0] - bk2;                                               \
-}
+#define vmuladd(a, b, c) ((a)*(b)+(c))
+#define vmulsub(a, b, c) ((a)*(b)-(c))
 
 void horner_default(const int n, const double * c, const int incc, const int m, double * x, double * f);
 void horner_SSE2(const int n, const double * c, const int incc, const int m, double * x, double * f);
@@ -289,6 +238,18 @@ void clenshaw_AVXf(const int n, const float * c, const int incc, const int m, fl
 void clenshaw_AVX_FMAf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void clenshaw_AVX512Ff(const int n, const float * c, const int incc, const int m, float * x, float * f);
 
+void orthogonal_polynomial_clenshaw_default(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
+void orthogonal_polynomial_clenshaw_SSE2(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
+void orthogonal_polynomial_clenshaw_AVX(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
+void orthogonal_polynomial_clenshaw_AVX_FMA(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
+void orthogonal_polynomial_clenshaw_AVX512F(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
+
+void orthogonal_polynomial_clenshaw_defaultf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
+void orthogonal_polynomial_clenshaw_SSEf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
+void orthogonal_polynomial_clenshaw_AVXf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
+void orthogonal_polynomial_clenshaw_AVX_FMAf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
+void orthogonal_polynomial_clenshaw_AVX512Ff(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
+
 double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n);
 double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n);
 double * plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, const double lambda, const double mu);
@@ -302,6 +263,40 @@ double * plan_ultraspherical_to_chebyshev(const int normultra, const int normche
 double * plan_chebyshev_to_ultraspherical(const int normcheb, const int normultra, const int n, const double lambda);
 double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta);
 
+#ifndef FT_ROTATION_PLAN
+#define FT_ROTATION_PLAN
+    typedef struct {
+        double * s;
+        double * c;
+        int n;
+    } ft_rotation_plan;
+#endif
+
+void kernel_tri_hi2lo_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_tri_lo2hi_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_tri_hi2lo_SSE2(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_tri_lo2hi_SSE2(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_tri_hi2lo_AVX(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_tri_lo2hi_AVX(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_tri_hi2lo_AVX_FMA(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_tri_lo2hi_AVX_FMA(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_tri_hi2lo_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_tri_lo2hi_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+
+void execute_tri_hi2lo_default(const ft_rotation_plan * RP, double * A, const int M);
+void execute_tri_lo2hi_default(const ft_rotation_plan * RP, double * A, const int M);
+void execute_tri_hi2lo_SSE2(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_tri_lo2hi_SSE2(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_tri_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_tri_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_tri_hi2lo_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_tri_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_tri_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_tri_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_tri_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_tri_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
+
+
 void permute(const double * A, double * B, const int N, const int M, const int L);
 void permute_t(double * A, const double * B, const int N, const int M, const int L);
 
@@ -311,6 +306,9 @@ void permute_t_sph(double * A, const double * B, const int N, const int M, const
 void permute_tri(const double * A, double * B, const int N, const int M, const int L);
 void permute_t_tri(double * A, const double * B, const int N, const int M, const int L);
 
+void old_permute_tri(const double * A, double * B, const int N, const int M, const int L);
+void old_permute_t_tri(double * A, const double * B, const int N, const int M, const int L);
+
 #define permute_disk(A, B, N, M, L) permute_sph(A, B, N, M, L)
 #define permute_t_disk(A, B, N, M, L) permute_t_sph(A, B, N, M, L)
 
@@ -318,6 +316,17 @@ void permute_t_tri(double * A, const double * B, const int N, const int M, const
 #define permute_t_spinsph(A, B, N, M, L) permute_t_sph(A, B, N, M, L)
 
 void swap_warp(double * A, double * B, const int N);
+void swap_warp_default(double * A, double * B, const int N);
+void swap_warp_SSE2(double * A, double * B, const int N);
+void swap_warp_AVX(double * A, double * B, const int N);
+void swap_warp_AVX512F(double * A, double * B, const int N);
+
+void swap_warpf(float * A, float * B, const int N);
+void swap_warp_defaultf(float * A, float * B, const int N);
+void swap_warp_SSEf(float * A, float * B, const int N);
+void swap_warp_AVXf(float * A, float * B, const int N);
+void swap_warp_AVX512Ff(float * A, float * B, const int N);
+
 void warp(double * A, const int N, const int M, const int L);
 void warp_t(double * A, const int N, const int M, const int L);
 

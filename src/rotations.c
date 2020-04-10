@@ -27,19 +27,19 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
 
 #ifdef __SSE2__
     static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
-        double2 x = vload2(X);
-        double2 y = vload2(Y);
+        double2 x = vloadu2(X);
+        double2 y = vloadu2(Y);
 
-        vstore2(X, C*x + S*y);
-        vstore2(Y, C*y - S*x);
+        vstoreu2(X, C*x + S*y);
+        vstoreu2(Y, C*y - S*x);
     }
 
     static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y) {
-        double2 x = vload2(X);
-        double2 y = vload2(Y);
+        double2 x = vloadu2(X);
+        double2 y = vloadu2(Y);
 
-        vstore2(X, C*x - S*y);
-        vstore2(Y, C*y + S*x);
+        vstoreu2(X, C*x - S*y);
+        vstoreu2(Y, C*y + S*x);
     }
 #else
     static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
@@ -56,19 +56,19 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
 
 #ifdef __AVX__
     static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
-        double4 x = vload4(X);
-        double4 y = vload4(Y);
+        double4 x = vloadu4(X);
+        double4 y = vloadu4(Y);
 
-        vstore4(X, C*x + S*y);
-        vstore4(Y, C*y - S*x);
+        vstoreu4(X, C*x + S*y);
+        vstoreu4(Y, C*y - S*x);
     }
 
     static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y) {
-        double4 x = vload4(X);
-        double4 y = vload4(Y);
+        double4 x = vloadu4(X);
+        double4 y = vloadu4(Y);
 
-        vstore4(X, C*x - S*y);
-        vstore4(Y, C*y + S*x);
+        vstoreu4(X, C*x - S*y);
+        vstoreu4(Y, C*y + S*x);
     }
 #else
     static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
@@ -84,19 +84,19 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
 
 #ifdef __AVX512F__
     static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {
-        double8 x = vload8(X);
-        double8 y = vload8(Y);
+        double8 x = vloadu8(X);
+        double8 y = vloadu8(Y);
 
-        vstore8(X, C*x + S*y);
-        vstore8(Y, C*y - S*x);
+        vstoreu8(X, C*x + S*y);
+        vstoreu8(Y, C*y - S*x);
     }
 
     static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y) {
-        double8 x = vload8(X);
-        double8 y = vload8(Y);
+        double8 x = vloadu8(X);
+        double8 y = vloadu8(Y);
 
-        vstore8(X, C*x - S*y);
-        vstore8(Y, C*y + S*x);
+        vstoreu8(X, C*x - S*y);
+        vstoreu8(Y, C*y + S*x);
     }
 #else
     static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {
@@ -225,112 +225,12 @@ ft_rotation_plan * ft_plan_rottriangle(const int n, const double alpha, const do
     return RP;
 }
 
-void ft_kernel_tri_hi2lo(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int j = m-1; j >= 0; j--)
-        for (int l = n-2-j; l >= 0; l--)
-            apply_givens(RP->s(l, j), RP->c(l, j), A+l, A+l+1);
+void ft_kernel_tri_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
+    kernel_tri_hi2lo_default(RP, m1, m2, A, S);
 }
 
-void ft_kernel_tri_lo2hi(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int j = 0; j < m; j++)
-        for (int l = 0; l <= n-2-j; l++)
-            apply_givens_t(RP->s(l, j), RP->c(l, j), A+l, A+l+1);
-}
-
-void ft_kernel_tri_hi2lo_SSE(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int l = n-2-m; l >= 0; l--)
-        apply_givens(RP->s(l, m), RP->c(l, m), A+2*l+1, A+2*(l+1)+1);
-    for (int j = m-1; j >= 0; j--)
-        for (int l = n-2-j; l >= 0; l--)
-            apply_givens_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+1));
-}
-
-void ft_kernel_tri_lo2hi_SSE(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int j = 0; j < m; j++)
-        for (int l = 0; l <= n-2-j; l++)
-            apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+1));
-    for (int l = 0; l <= n-2-m; l++)
-        apply_givens_t(RP->s(l, m), RP->c(l, m), A+2*l+1, A+2*(l+1)+1);
-}
-
-void ft_kernel_tri_hi2lo_AVX(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int l = n-2-m; l >= 0; l--)
-        apply_givens(RP->s(l, m), RP->c(l, m), A+4*l+1, A+4*(l+1)+1);
-    for (int l = n-4-m; l >= 0; l--)
-        apply_givens(RP->s(l, m+2), RP->c(l, m+2), A+4*l+3, A+4*(l+1)+3);
-    for (int j = m+1; j >= m; j--)
-        for (int l = n-2-j; l >= 0; l--)
-            apply_givens_SSE(RP->s(l, j), RP->c(l, j), A+4*l+2, A+4*(l+1)+2);
-    for (int j = m-1; j >= 0; j--)
-        for (int l = n-2-j; l >= 0; l--)
-            apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+1));
-}
-
-void ft_kernel_tri_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int j = 0; j < m; j++)
-        for (int l = 0; l <= n-2-j; l++)
-            apply_givens_t_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+1));
-    for (int j = m; j <= m+1; j++)
-        for (int l = 0; l <= n-2-j; l++)
-            apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+4*l+2, A+4*(l+1)+2);
-    for (int l = 0; l <= n-4-m; l++)
-        apply_givens_t(RP->s(l, m+2), RP->c(l, m+2), A+4*l+3, A+4*(l+1)+3);
-    for (int l = 0; l <= n-2-m; l++)
-        apply_givens_t(RP->s(l, m), RP->c(l, m), A+4*l+1, A+4*(l+1)+1);
-}
-
-void ft_kernel_tri_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int l = n-2-m; l >= 0; l--)
-        apply_givens(RP->s(l, m), RP->c(l, m), A+8*l+1, A+8*(l+1)+1);
-    for (int l = n-4-m; l >= 0; l--)
-        apply_givens(RP->s(l, m+2), RP->c(l, m+2), A+8*l+3, A+8*(l+1)+3);
-    for (int l = n-6-m; l >= 0; l--)
-        apply_givens(RP->s(l, m+4), RP->c(l, m+4), A+8*l+5, A+8*(l+1)+5);
-    for (int l = n-8-m; l >= 0; l--)
-        apply_givens(RP->s(l, m+6), RP->c(l, m+6), A+8*l+7, A+8*(l+1)+7);
-    for (int j = m+1; j >= m; j--)
-        for (int l = n-2-j; l >= 0; l--)
-            apply_givens_SSE(RP->s(l, j), RP->c(l, j), A+8*l+2, A+8*(l+1)+2);
-    for (int j = m+5; j >= m+4; j--)
-        for (int l = n-2-j; l >= 0; l--)
-            apply_givens_SSE(RP->s(l, j), RP->c(l, j), A+8*l+6, A+8*(l+1)+6);
-    for (int j = m+3; j >= m; j--)
-        for (int l = n-2-j; l >= 0; l--)
-            apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+8*l+4, A+8*(l+1)+4);
-    for (int j = m-1; j >= 0; j--)
-        for (int l = n-2-j; l >= 0; l--)
-            apply_givens_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+1));
-}
-
-void ft_kernel_tri_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int j = 0; j < m; j++)
-        for (int l = 0; l <= n-2-j; l++)
-            apply_givens_t_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+1));
-    for (int j = m; j <= m+3; j++)
-        for (int l = 0; l <= n-2-j; l++)
-            apply_givens_t_AVX(RP->s(l, j), RP->c(l, j), A+8*l+4, A+8*(l+1)+4);
-    for (int j = m+4; j <= m+5; j++)
-        for (int l = 0; l <= n-2-j; l++)
-            apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+8*l+6, A+8*(l+1)+6);
-    for (int j = m; j <= m+1; j++)
-        for (int l = 0; l <= n-2-j; l++)
-            apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+8*l+2, A+8*(l+1)+2);
-    for (int l = 0; l <= n-8-m; l++)
-        apply_givens_t(RP->s(l, m+6), RP->c(l, m+6), A+8*l+7, A+8*(l+1)+7);
-    for (int l = 0; l <= n-6-m; l++)
-        apply_givens_t(RP->s(l, m+4), RP->c(l, m+4), A+8*l+5, A+8*(l+1)+5);
-    for (int l = 0; l <= n-4-m; l++)
-        apply_givens_t(RP->s(l, m+2), RP->c(l, m+2), A+8*l+3, A+8*(l+1)+3);
-    for (int l = 0; l <= n-2-m; l++)
-        apply_givens_t(RP->s(l, m), RP->c(l, m), A+8*l+1, A+8*(l+1)+1);
+void ft_kernel_tri_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
+    kernel_tri_lo2hi_default(RP, m1, m2, A, S);
 }
 
 #undef s

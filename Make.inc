@@ -61,7 +61,22 @@ else
     SLIB = so
 endif
 
-ASM = src/recurrence/recurrence_default.s src/recurrence/recurrence_SSE.s src/recurrence/recurrence_SSE2.s src/recurrence/recurrence_AVX.s src/recurrence/recurrence_AVX_FMA.s src/recurrence/recurrence_AVX512F.s
+ASM = src/recurrence/recurrence_default.s \
+      src/recurrence/recurrence_SSE.s \
+      src/recurrence/recurrence_SSE2.s \
+      src/recurrence/recurrence_AVX.s \
+      src/recurrence/recurrence_AVX_FMA.s \
+      src/recurrence/recurrence_AVX512F.s \
+      src/permute/permute_default.s \
+      src/permute/permute_SSE.s \
+      src/permute/permute_SSE2.s \
+      src/permute/permute_AVX.s \
+      src/permute/permute_AVX512F.s \
+      src/rotations/rotations_default.s \
+      src/rotations/rotations_SSE2.s \
+      src/rotations/rotations_AVX.s \
+      src/rotations/rotations_AVX_FMA.s \
+      src/rotations/rotations_AVX512F.s
 
 SRC = src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
 
@@ -72,7 +87,7 @@ AFLAGS = -O3 -fPIC -std=gnu99 -I./src
 ifndef CFLAGS
     CFLAGS = -O3
     ifneq (, $(findstring 86, $(machine)))
-        CFLAGS += -march=native -mtune=native -mno-vzeroupper
+        CFLAGS += -march=native
     endif
 endif
 CFLAGS += -std=gnu99 -I./src

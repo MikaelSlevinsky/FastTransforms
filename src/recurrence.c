@@ -64,3 +64,35 @@ void ft_clenshawf(const int n, const float * c, const int incc, const int m, flo
     else
         return clenshaw_defaultf(n, c, incc, m, x, f);
 }
+
+void ft_orthogonal_polynomial_clenshaw(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f) {
+    ft_simd simd = get_simd();
+    if (simd.avx512f)
+        return orthogonal_polynomial_clenshaw_AVX512F(n, c, incc, A, B, C, m, x, phi0, f);
+    else if (simd.avx) {
+        if (simd.fma)
+            return orthogonal_polynomial_clenshaw_AVX_FMA(n, c, incc, A, B, C, m, x, phi0, f);
+        else
+            return orthogonal_polynomial_clenshaw_AVX(n, c, incc, A, B, C, m, x, phi0, f);
+    }
+    else if (simd.sse2)
+        return orthogonal_polynomial_clenshaw_SSE2(n, c, incc, A, B, C, m, x, phi0, f);
+    else
+        return orthogonal_polynomial_clenshaw_default(n, c, incc, A, B, C, m, x, phi0, f);
+}
+
+void ft_orthogonal_polynomial_clenshawf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f) {
+    ft_simd simd = get_simd();
+    if (simd.avx512f)
+        return orthogonal_polynomial_clenshaw_AVX512Ff(n, c, incc, A, B, C, m, x, phi0, f);
+    else if (simd.avx) {
+        if (simd.fma)
+            return orthogonal_polynomial_clenshaw_AVX_FMAf(n, c, incc, A, B, C, m, x, phi0, f);
+        else
+            return orthogonal_polynomial_clenshaw_AVXf(n, c, incc, A, B, C, m, x, phi0, f);
+    }
+    else if (simd.sse)
+        return orthogonal_polynomial_clenshaw_SSEf(n, c, incc, A, B, C, m, x, phi0, f);
+    else
+        return orthogonal_polynomial_clenshaw_defaultf(n, c, incc, A, B, C, m, x, phi0, f);
+}

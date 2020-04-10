@@ -12,6 +12,14 @@
 
 #define FT_CONCAT(prefix, name, suffix) prefix ## name ## suffix
 
+#define FT_TIME(BLOCK, START, END, NTIMES)                                     \
+BLOCK;                                                                         \
+BLOCK;                                                                         \
+gettimeofday(&START, NULL);                                                    \
+for (int ntimes = 0; ntimes < NTIMES; ntimes++)                                \
+    BLOCK;                                                                     \
+gettimeofday(&END, NULL);
+
 void printmat(char * MAT, char * FMT, double * A, int n, int m);
 void print_summary_size(size_t i);
 double * copymat(double * A, int n, int m);

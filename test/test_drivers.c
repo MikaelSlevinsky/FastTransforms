@@ -18,7 +18,7 @@ int main(int argc, const char * argv[]) {
     //double alpha = -0.5, beta = -0.5, gamma = -0.5, delta = -0.5; // best case scenario
     double alpha = 0.0, beta = 0.0, gamma = 0.0, delta = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 
-    int IERR, ITIME, J, N, L, M, NLOOPS;
+    int IERR, ITIME, J, N, L, M, NTIMES;
 
 
     if (argc > 1) {
@@ -32,7 +32,7 @@ int main(int argc, const char * argv[]) {
     }
     else IERR = 1;
 
-
+    /*
     printf("\nTesting the accuracy of spherical harmonic drivers.\n\n");
     printf("err1 = [\n");
     for (int i = 0; i < IERR; i++) {
@@ -98,74 +98,35 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NTIMES = 1 + pow(2048/N, 2);
 
         A = sphones(N, M);
         B = aligned_copymat(A, N, M);
         RP = ft_plan_rotsphere(N);
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sph_hi2lo(RP, A, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_sph_hi2lo(RP, A, M), start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_sph_lo2hi(RP, A, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sph_lo2hi(RP, A, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_sph_hi2lo_SSE(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_sph_lo2hi_SSE(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sph_hi2lo_SSE(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_sph_hi2lo_AVX(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_sph_lo2hi_AVX(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sph_lo2hi_SSE(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_sph_hi2lo_AVX512(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sph_hi2lo_AVX(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sph_lo2hi_AVX(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sph_hi2lo_AVX512(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sph_lo2hi_AVX512(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_sph_lo2hi_AVX512(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         VFREE(B);
@@ -200,26 +161,16 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NTIMES = 1 + pow(2048/N, 2);
 
         A = sphrand(N, M);
         P = ft_plan_sph2fourier(N);
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sph2fourier(P, A, N, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_sph2fourier(P, A, N, M), start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_fourier2sph(P, A, N, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_fourier2sph(P, A, N, M), start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         ft_destroy_harmonic_plan(P);
@@ -291,74 +242,35 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NTIMES = 1 + pow(2048/N, 2);
 
         A = sphones(N, M);
         B = aligned_copymat(A, N, M);
         RP = ft_plan_rotsphere(N);
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sphv_hi2lo(RP, A, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_sphv_hi2lo(RP, A, M), start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_sphv_lo2hi(RP, A, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sphv_lo2hi(RP, A, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_sphv_hi2lo_SSE(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_sphv_lo2hi_SSE(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sphv_hi2lo_SSE(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_sphv_hi2lo_AVX(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_sphv_lo2hi_AVX(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sphv_lo2hi_SSE(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_sphv_hi2lo_AVX512(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sphv_hi2lo_AVX(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sphv_lo2hi_AVX(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sphv_hi2lo_AVX512(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sphv_lo2hi_AVX512(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_sphv_lo2hi_AVX512(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         VFREE(B);
@@ -393,32 +305,22 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NTIMES = 1 + pow(2048/N, 2);
 
         A = sphrand(N, M);
         P = ft_plan_sph2fourier(N);
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sphv2fourier(P, A, N, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_sphv2fourier(P, A, N, M), start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_fourier2sphv(P, A, N, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_fourier2sphv(P, A, N, M), start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         ft_destroy_harmonic_plan(P);
     }
     printf("];\n");
-
+    */
     printf("\nTesting the accuracy of triangular harmonic drivers.\n\n");
     printf("err5 = [\n");
     for (int i = 0; i < IERR; i++) {
@@ -430,50 +332,62 @@ int main(int argc, const char * argv[]) {
         B = copymat(A, N, M);
         RP = ft_plan_rottriangle(N, alpha, beta, gamma);
 
-        ft_execute_tri_hi2lo(RP, A, M);
-        ft_execute_tri_lo2hi(RP, A, M);
+        execute_tri_hi2lo_default(RP, A, M);
+        execute_tri_lo2hi_default(RP, A, M);
 
         printf("%d  %1.2e  ", N, ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_tri_hi2lo_SSE(RP, A, Ac, M);
-        ft_execute_tri_lo2hi(RP, A, M);
+        execute_tri_hi2lo_SSE2(RP, A, Ac, M);
+        execute_tri_lo2hi_default(RP, A, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_tri_hi2lo(RP, A, M);
-        ft_execute_tri_lo2hi_SSE(RP, A, Ac, M);
+        execute_tri_hi2lo_default(RP, A, M);
+        execute_tri_lo2hi_SSE2(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_tri_hi2lo_AVX(RP, A, Ac, M);
-        ft_execute_tri_lo2hi_SSE(RP, A, Ac, M);
+        execute_tri_hi2lo_AVX(RP, A, Ac, M);
+        execute_tri_lo2hi_SSE2(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_tri_hi2lo_SSE(RP, A, Ac, M);
-        ft_execute_tri_lo2hi_AVX(RP, A, Ac, M);
+        execute_tri_hi2lo_SSE2(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_tri_hi2lo_AVX(RP, A, Ac, M);
-        ft_execute_tri_lo2hi_AVX512(RP, A, Ac, M);
+        execute_tri_hi2lo_AVX_FMA(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_tri_hi2lo_AVX512(RP, A, Ac, M);
-        ft_execute_tri_lo2hi_AVX(RP, A, Ac, M);
+        execute_tri_hi2lo_AVX(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX_FMA(RP, A, Ac, M);
+
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
+
+        execute_tri_hi2lo_AVX_FMA(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX512F(RP, A, Ac, M);
+
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
+
+        execute_tri_hi2lo_AVX512F(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX_FMA(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
         free(A);
-        VFREE(Ac);
+        free(Ac);
         free(B);
         ft_destroy_rotation_plan(RP);
     }
@@ -484,78 +398,44 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = N;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NTIMES = 1 + pow(2048/N, 2);
 
         A = triones(N, M);
         B = aligned_copymat(A, N, M);
         RP = ft_plan_rottriangle(N, alpha, beta, gamma);
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tri_hi2lo(RP, A, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(execute_tri_hi2lo_default(RP, A, M), start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
+        FT_TIME(execute_tri_lo2hi_default(RP, A, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tri_lo2hi(RP, A, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(execute_tri_hi2lo_SSE2(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+        FT_TIME(execute_tri_lo2hi_SSE2(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tri_hi2lo_SSE(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(execute_tri_hi2lo_AVX(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+        FT_TIME(execute_tri_lo2hi_AVX(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tri_lo2hi_SSE(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(execute_tri_hi2lo_AVX_FMA(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+        FT_TIME(execute_tri_lo2hi_AVX_FMA(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tri_hi2lo_AVX(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(execute_tri_hi2lo_AVX512F(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tri_lo2hi_AVX(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tri_hi2lo_AVX512(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tri_lo2hi_AVX512(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME(execute_tri_lo2hi_AVX512F(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
-        VFREE(B);
+        free(B);
         ft_destroy_rotation_plan(RP);
     }
     printf("];\n");
@@ -587,32 +467,22 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = N;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NTIMES = 1 + pow(2048/N, 2);
 
         A = trirand(N, M);
         P = ft_plan_tri2cheb(N, alpha, beta, gamma);
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tri2cheb(P, A, N, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_tri2cheb(P, A, N, M), start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_cheb2tri(P, A, N, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_cheb2tri(P, A, N, M), start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         ft_destroy_harmonic_plan(P);
     }
     printf("];\n");
-
+    /*
     printf("\nTesting the accuracy of disk harmonic drivers.\n\n");
     printf("err7 = [\n");
     for (int i = 0; i < IERR; i++) {
@@ -678,75 +548,35 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 4*N-3;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NTIMES = 1 + pow(2048/N, 2);
 
         A = diskones(N, M);
         B = aligned_copymat(A, N, M);
         RP = ft_plan_rotdisk(N);
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_disk_hi2lo(RP, A, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_disk_hi2lo(RP, A, M), start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_disk_lo2hi(RP, A, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_disk_lo2hi(RP, A, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_disk_hi2lo_SSE(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_disk_lo2hi_SSE(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_disk_hi2lo_SSE(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_disk_hi2lo_AVX(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_disk_lo2hi_AVX(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_disk_lo2hi_SSE(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_disk_hi2lo_AVX512(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_disk_hi2lo_AVX(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_disk_lo2hi_AVX(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_disk_hi2lo_AVX512(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_disk_lo2hi_AVX512(RP, A, B, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_disk_lo2hi_AVX512(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         VFREE(B);
@@ -781,32 +611,22 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 4*N-3;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NTIMES = 1 + pow(2048/N, 2);
 
         A = diskrand(N, M);
         P = ft_plan_disk2cxf(N);
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_disk2cxf(P, A, N, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_disk2cxf(P, A, N, M), start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_cxf2disk(P, A, N, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_cxf2disk(P, A, N, M), start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         ft_destroy_harmonic_plan(P);
     }
     printf("];\n");
-
+    */
     printf("\nTesting the accuracy of tetrahedral harmonic drivers.\n\n");
     printf("err9 = [\n");
     for (int i = 0; i < IERR; i++) {
@@ -875,7 +695,7 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 16*pow(2, i)+J;
         L = M = N;
-        NLOOPS = 1 + pow(512/N, 2);
+        NTIMES = 1 + pow(512/N, 2);
 
         A = tetones(N, L, M);
         B = aligned_copymat(A, N, L*M);
@@ -883,69 +703,29 @@ int main(int argc, const char * argv[]) {
         RP1 = ft_plan_rottriangle(N, alpha, beta, gamma + delta + 1.0);
         RP2 = ft_plan_rottriangle(N, beta, gamma, delta);
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tet_hi2lo(RP1, RP2, A, L, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_tet_hi2lo(RP1, RP2, A, L, M), start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_tet_lo2hi(RP1, RP2, A, L, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tet_lo2hi(RP1, RP2, A, L, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_tet_hi2lo_SSE(RP1, RP2, A, B, L, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_tet_lo2hi_SSE(RP1, RP2, A, B, L, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tet_hi2lo_SSE(RP1, RP2, A, B, L, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_tet_hi2lo_AVX(RP1, RP2, A, B, L, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_tet_lo2hi_AVX(RP1, RP2, A, B, L, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tet_lo2hi_SSE(RP1, RP2, A, B, L, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_tet_hi2lo_AVX512(RP1, RP2, A, B, L, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tet_hi2lo_AVX(RP1, RP2, A, B, L, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tet_lo2hi_AVX(RP1, RP2, A, B, L, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tet_hi2lo_AVX512(RP1, RP2, A, B, L, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tet_lo2hi_AVX512(RP1, RP2, A, B, L, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_tet_lo2hi_AVX512(RP1, RP2, A, B, L, M), start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         VFREE(B);
@@ -981,32 +761,22 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 16*pow(2, i)+J;
         L = M = N;
-        NLOOPS = 1 + pow(512/N, 2);
+        NTIMES = 1 + pow(512/N, 2);
 
         A = tetrand(N, L, M);
         TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tet2cheb(TP, A, N, L, M);
-        }
-        gettimeofday(&end, NULL);
+        FT_TIME(ft_execute_tet2cheb(TP, A, N, L, M), start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_cheb2tet(TP, A, N, L, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME(ft_execute_cheb2tet(TP, A, N, L, M), start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         ft_destroy_tetrahedral_harmonic_plan(TP);
     }
     printf("];\n");
-
+    /*
     printf("\nTesting the accuracy of spin-weighted spherical harmonic drivers.\n\n");
     printf("err11 = [\n");
     for (int i = 0; i < IERR; i++) {
@@ -1052,7 +822,7 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NTIMES = 1 + pow(2048/N, 2);
 
         printf("%d", N);
 
@@ -1061,21 +831,11 @@ int main(int argc, const char * argv[]) {
             B = copymat(A, N, M);
             SRP = ft_plan_rotspinsphere(N, S);
 
-            gettimeofday(&start, NULL);
-            for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-                ft_execute_spinsph_hi2lo(SRP, A, M);
-            }
-            gettimeofday(&end, NULL);
+            FT_TIME(ft_execute_spinsph_hi2lo(SRP, A, M), start, end, NTIMES)
+            printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-            printf("  %.6f", elapsed(&start, &end, NLOOPS));
-
-            gettimeofday(&start, NULL);
-            for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-                ft_execute_spinsph_lo2hi(SRP, A, M);
-            }
-            gettimeofday(&end, NULL);
-
-            printf("  %.6f", elapsed(&start, &end, NLOOPS));
+            FT_TIME(ft_execute_spinsph_lo2hi(SRP, A, M), start, end, NTIMES)
+            printf("  %.6f", elapsed(&start, &end, NTIMES));
 
             free(A);
             free(B);
@@ -1084,7 +844,7 @@ int main(int argc, const char * argv[]) {
         printf("\n");
     }
     printf("];\n");
-
+    */
     return 0;
 }
 

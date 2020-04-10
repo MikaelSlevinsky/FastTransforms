@@ -15,7 +15,7 @@ int main(int argc, const char * argv[]) {
     //double alpha = -0.5, beta = -0.5, gamma = -0.5, delta = -0.5; // best case scenario
     double alpha = 0.0, beta = 0.0, gamma = 0.0, delta = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 
-    int IERR, ITIME, J, N, L, M, NLOOPS;
+    int IERR, ITIME, J, N, L, M, NTIMES;
 
 
     if (argc > 1) {
@@ -65,35 +65,18 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NTIMES = 1 + pow(2048/N, 2);
 
         A = sphrand(N, M);
         P = ft_plan_sph2fourier(N);
         PS = ft_plan_sph_synthesis(N, M);
         PA = ft_plan_sph_analysis(N, M);
 
-        ft_execute_sph_synthesis(PS, A, N, M);
-        ft_execute_sph_analysis(PA, A, N, M);
-        ft_execute_sph_synthesis(PS, A, N, M);
-        ft_execute_sph_analysis(PA, A, N, M);
+        FT_TIME({ft_execute_sph2fourier(P, A, N, M); ft_execute_sph_synthesis(PS, A, N, M);}, start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sph2fourier(P, A, N, M);
-            ft_execute_sph_synthesis(PS, A, N, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sph_analysis(PA, A, N, M);
-            ft_execute_fourier2sph(P, A, N, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME({ft_execute_sph_analysis(PA, A, N, M); ft_execute_fourier2sph(P, A, N, M);}, start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         ft_destroy_harmonic_plan(P);
@@ -135,35 +118,18 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NTIMES = 1 + pow(2048/N, 2);
 
         A = sphrand(N, M);
         P = ft_plan_sph2fourier(N);
         PS = ft_plan_sphv_synthesis(N, M);
         PA = ft_plan_sphv_analysis(N, M);
 
-        ft_execute_sphv_synthesis(PS, A, N, M);
-        ft_execute_sphv_analysis(PA, A, N, M);
-        ft_execute_sphv_synthesis(PS, A, N, M);
-        ft_execute_sphv_analysis(PA, A, N, M);
+        FT_TIME({ft_execute_sphv2fourier(P, A, N, M); ft_execute_sphv_synthesis(PS, A, N, M);}, start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sphv2fourier(P, A, N, M);
-            ft_execute_sphv_synthesis(PS, A, N, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_sphv_analysis(PA, A, N, M);
-            ft_execute_fourier2sphv(P, A, N, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME({ft_execute_sphv_analysis(PA, A, N, M); ft_execute_fourier2sphv(P, A, N, M);}, start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         ft_destroy_harmonic_plan(P);
@@ -205,35 +171,18 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = N;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NTIMES = 1 + pow(2048/N, 2);
 
         A = trirand(N, M);
         P = ft_plan_tri2cheb(N, alpha, beta, gamma);
         QS = ft_plan_tri_synthesis(N, M);
         QA = ft_plan_tri_analysis(N, M);
 
-        ft_execute_tri_synthesis(QS, A, N, M);
-        ft_execute_tri_analysis(QA, A, N, M);
-        ft_execute_tri_synthesis(QS, A, N, M);
-        ft_execute_tri_analysis(QA, A, N, M);
+        FT_TIME({ft_execute_tri2cheb(P, A, N, M); ft_execute_tri_synthesis(QS, A, N, M);}, start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tri2cheb(P, A, N, M);
-            ft_execute_tri_synthesis(QS, A, N, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tri_analysis(QA, A, N, M);
-            ft_execute_cheb2tri(P, A, N, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME({ft_execute_tri_analysis(QA, A, N, M); ft_execute_cheb2tri(P, A, N, M);}, start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         ft_destroy_harmonic_plan(P);
@@ -275,35 +224,18 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 4*N-3;
-        NLOOPS = 1 + pow(2048/N, 2);
+        NTIMES = 1 + pow(2048/N, 2);
 
         A = diskrand(N, M);
         P = ft_plan_disk2cxf(N);
         RS = ft_plan_disk_synthesis(N, M);
         RA = ft_plan_disk_analysis(N, M);
 
-        ft_execute_disk_synthesis(RS, A, N, M);
-        ft_execute_disk_analysis(RA, A, N, M);
-        ft_execute_disk_synthesis(RS, A, N, M);
-        ft_execute_disk_analysis(RA, A, N, M);
+        FT_TIME({ft_execute_disk2cxf(P, A, N, M); ft_execute_disk_synthesis(RS, A, N, M);}, start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_disk2cxf(P, A, N, M);
-            ft_execute_disk_synthesis(RS, A, N, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_disk_analysis(RA, A, N, M);
-            ft_execute_cxf2disk(P, A, N, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME({ft_execute_disk_analysis(RA, A, N, M); ft_execute_cxf2disk(P, A, N, M);}, start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         ft_destroy_harmonic_plan(P);
@@ -345,35 +277,18 @@ int main(int argc, const char * argv[]) {
     for (int i = 0; i < ITIME; i++) {
         N = 16*pow(2, i)+J;
         L = M = N;
-        NLOOPS = 1 + pow(512/N, 2);
+        NTIMES = 1 + pow(512/N, 2);
 
         A = tetrand(N, L, M);
         TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
         SS = ft_plan_tet_synthesis(N, L, M);
         SA = ft_plan_tet_analysis(N, L, M);
 
-        ft_execute_tet_synthesis(SS, A, N, L, M);
-        ft_execute_tet_analysis(SA, A, N, L, M);
-        ft_execute_tet_synthesis(SS, A, N, L, M);
-        ft_execute_tet_analysis(SA, A, N, L, M);
+        FT_TIME({ft_execute_tet2cheb(TP, A, N, L, M); ft_execute_tet_synthesis(SS, A, N, L, M);}, start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tet2cheb(TP, A, N, L, M);
-            ft_execute_tet_synthesis(SS, A, N, L, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("%d  %.6f", N, elapsed(&start, &end, NLOOPS));
-
-        gettimeofday(&start, NULL);
-        for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-            ft_execute_tet_analysis(SA, A, N, L, M);
-            ft_execute_cheb2tet(TP, A, N, L, M);
-        }
-        gettimeofday(&end, NULL);
-
-        printf("  %.6f\n", elapsed(&start, &end, NLOOPS));
+        FT_TIME({ft_execute_tet_analysis(SA, A, N, L, M); ft_execute_cheb2tet(TP, A, N, L, M);}, start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         ft_destroy_tetrahedral_harmonic_plan(TP);

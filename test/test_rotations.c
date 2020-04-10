@@ -126,8 +126,8 @@ int main(void) {
                 A[i] = B[i] = 1.0;
             for (int i = n-m; i < n; i++)
                 A[i] = B[i] = 0.0;
-            ft_kernel_tri_hi2lo(RP, m, A);
-            ft_kernel_tri_lo2hi(RP, m, A);
+            ft_kernel_tri_hi2lo(RP, 0, m, A, 1);
+            ft_kernel_tri_lo2hi(RP, 0, m, A, 1);
             err += pow(ft_norm_2arg(A, B, n)/ft_norm_1arg(B, n), 2);
         }
         err = sqrt(err);
@@ -147,17 +147,17 @@ int main(void) {
             }
             for (int i = n-m; i < n; i++)
                 A[i] = A[i+n] = Ac[i] = Ac[i+n] = B[i] = B[i+n] = 0.0;
-            ft_kernel_tri_hi2lo(RP, m, A);
-            ft_kernel_tri_hi2lo(RP, m+1, A+n);
+            kernel_tri_hi2lo_default(RP, 0, m, A, 1);
+            kernel_tri_hi2lo_default(RP, 0, m+1, A+n, 1);
             permute(A, Ac, n, 2, 2);
-            ft_kernel_tri_lo2hi_SSE(RP, m, Ac);
+            kernel_tri_lo2hi_SSE2(RP, 0, m, Ac, 2);
             permute_t(A, Ac, n, 2, 2);
             err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
             permute(A, Ac, n, 2, 2);
-            ft_kernel_tri_hi2lo_SSE(RP, m, Ac);
+            kernel_tri_hi2lo_SSE2(RP, 0, m, Ac, 2);
             permute_t(A, Ac, n, 2, 2);
-            ft_kernel_tri_lo2hi(RP, m, A);
-            ft_kernel_tri_lo2hi(RP, m+1, A+n);
+            kernel_tri_lo2hi_default(RP, 0, m, A, 1);
+            kernel_tri_lo2hi_default(RP, 0, m+1, A+n, 1);
             err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
         }
         err = sqrt(err);
@@ -180,21 +180,21 @@ int main(void) {
             }
             for (int i = n-m; i < n; i++)
                 A[i] = A[i+n] = A[i+2*n] = A[i+3*n] = Ac[i] = Ac[i+n] = Ac[i+2*n] = Ac[i+3*n] = B[i] = B[i+n] = B[i+2*n] = B[i+3*n] = 0.0;
-            ft_kernel_tri_hi2lo(RP, m, A);
-            ft_kernel_tri_hi2lo(RP, m+1, A+n);
-            ft_kernel_tri_hi2lo(RP, m+2, A+2*n);
-            ft_kernel_tri_hi2lo(RP, m+3, A+3*n);
+            kernel_tri_hi2lo_default(RP, 0, m, A, 1);
+            kernel_tri_hi2lo_default(RP, 0, m+1, A+n, 1);
+            kernel_tri_hi2lo_default(RP, 0, m+2, A+2*n, 1);
+            kernel_tri_hi2lo_default(RP, 0, m+3, A+3*n, 1);
             permute(A, Ac, n, 4, 4);
-            ft_kernel_tri_lo2hi_AVX(RP, m, Ac);
+            kernel_tri_lo2hi_AVX(RP, 0, m, Ac, 4);
             permute_t(A, Ac, n, 4, 4);
             err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
             permute(A, Ac, n, 4, 4);
-            ft_kernel_tri_hi2lo_AVX(RP, m, Ac);
+            kernel_tri_hi2lo_AVX(RP, 0, m, Ac, 4);
             permute_t(A, Ac, n, 4, 4);
-            ft_kernel_tri_lo2hi(RP, m, A);
-            ft_kernel_tri_lo2hi(RP, m+1, A+n);
-            ft_kernel_tri_lo2hi(RP, m+2, A+2*n);
-            ft_kernel_tri_lo2hi(RP, m+3, A+3*n);
+            kernel_tri_lo2hi_default(RP, 0, m, A, 1);
+            kernel_tri_lo2hi_default(RP, 0, m+1, A+n, 1);
+            kernel_tri_lo2hi_default(RP, 0, m+2, A+2*n, 1);
+            kernel_tri_lo2hi_default(RP, 0, m+3, A+3*n, 1);
             err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
         }
         err = sqrt(err);
