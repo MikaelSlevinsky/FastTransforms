@@ -293,8 +293,6 @@ void execute_tri_hi2lo_AVX_FMA(const ft_rotation_plan * RP, double * A, double *
 void execute_tri_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_tri_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_tri_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void execute_tri_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void execute_tri_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
 
 void permute(const double * A, double * B, const int N, const int M, const int L);
