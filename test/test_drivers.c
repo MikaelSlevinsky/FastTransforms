@@ -43,44 +43,56 @@ int main(int argc, const char * argv[]) {
         B = copymat(A, N, M);
         RP = ft_plan_rotsphere(N);
 
-        ft_execute_sph_hi2lo(RP, A, M);
-        ft_execute_sph_lo2hi(RP, A, M);
+        execute_sph_hi2lo_default(RP, A, M);
+        execute_sph_lo2hi_default(RP, A, M);
 
         printf("%d  %1.2e  ", N, ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_sph_hi2lo_SSE(RP, A, Ac, M);
-        ft_execute_sph_lo2hi(RP, A, M);
+        execute_sph_hi2lo_SSE2(RP, A, Ac, M);
+        execute_sph_lo2hi_default(RP, A, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_sph_hi2lo(RP, A, M);
-        ft_execute_sph_lo2hi_SSE(RP, A, Ac, M);
+        execute_sph_hi2lo_default(RP, A, M);
+        execute_sph_lo2hi_SSE2(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_sph_hi2lo_AVX(RP, A, Ac, M);
-        ft_execute_sph_lo2hi_SSE(RP, A, Ac, M);
+        execute_sph_hi2lo_AVX(RP, A, Ac, M);
+        execute_sph_lo2hi_SSE2(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_sph_hi2lo_SSE(RP, A, Ac, M);
-        ft_execute_sph_lo2hi_AVX(RP, A, Ac, M);
+        execute_sph_hi2lo_SSE2(RP, A, Ac, M);
+        execute_sph_lo2hi_AVX(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_sph_hi2lo_AVX512(RP, A, Ac, M);
-        ft_execute_sph_lo2hi_AVX(RP, A, Ac, M);
+        execute_sph_hi2lo_AVX_FMA(RP, A, Ac, M);
+        execute_sph_lo2hi_AVX(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_sph_hi2lo_AVX(RP, A, Ac, M);
-        ft_execute_sph_lo2hi_AVX512(RP, A, Ac, M);
+        execute_sph_hi2lo_AVX(RP, A, Ac, M);
+        execute_sph_lo2hi_AVX_FMA(RP, A, Ac, M);
+
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
+
+        execute_sph_hi2lo_AVX512F(RP, A, Ac, M);
+        execute_sph_lo2hi_AVX_FMA(RP, A, Ac, M);
+
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
+
+        execute_sph_hi2lo_AVX_FMA(RP, A, Ac, M);
+        execute_sph_lo2hi_AVX512F(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
@@ -103,28 +115,34 @@ int main(int argc, const char * argv[]) {
         B = aligned_copymat(A, N, M);
         RP = ft_plan_rotsphere(N);
 
-        FT_TIME(ft_execute_sph_hi2lo(RP, A, M), start, end, NTIMES)
+        FT_TIME(execute_sph_hi2lo_default(RP, A, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sph_lo2hi(RP, A, M), start, end, NTIMES)
+        FT_TIME(execute_sph_lo2hi_default(RP, A, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sph_hi2lo_SSE(RP, A, B, M), start, end, NTIMES)
+        FT_TIME(execute_sph_hi2lo_SSE2(RP, A, B, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sph_lo2hi_SSE(RP, A, B, M), start, end, NTIMES)
+        FT_TIME(execute_sph_lo2hi_SSE2(RP, A, B, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sph_hi2lo_AVX(RP, A, B, M), start, end, NTIMES)
+        FT_TIME(execute_sph_hi2lo_AVX(RP, A, B, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sph_lo2hi_AVX(RP, A, B, M), start, end, NTIMES)
+        FT_TIME(execute_sph_lo2hi_AVX(RP, A, B, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sph_hi2lo_AVX512(RP, A, B, M), start, end, NTIMES)
+        FT_TIME(execute_sph_hi2lo_AVX_FMA(RP, A, B, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sph_lo2hi_AVX512(RP, A, B, M), start, end, NTIMES)
+        FT_TIME(execute_sph_lo2hi_AVX_FMA(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
+
+        FT_TIME(execute_sph_hi2lo_AVX512F(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
+
+        FT_TIME(execute_sph_lo2hi_AVX512F(RP, A, B, M), start, end, NTIMES)
         printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
@@ -187,44 +205,56 @@ int main(int argc, const char * argv[]) {
         B = copymat(A, N, M);
         RP = ft_plan_rotsphere(N);
 
-        ft_execute_sphv_hi2lo(RP, A, M);
-        ft_execute_sphv_lo2hi(RP, A, M);
+        execute_sphv_hi2lo_default(RP, A, M);
+        execute_sphv_lo2hi_default(RP, A, M);
 
         printf("%d  %1.2e  ", N, ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_sphv_hi2lo_SSE(RP, A, Ac, M);
-        ft_execute_sphv_lo2hi(RP, A, M);
+        execute_sphv_hi2lo_SSE2(RP, A, Ac, M);
+        execute_sphv_lo2hi_default(RP, A, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_sphv_hi2lo(RP, A, M);
-        ft_execute_sphv_lo2hi_SSE(RP, A, Ac, M);
+        execute_sphv_hi2lo_default(RP, A, M);
+        execute_sphv_lo2hi_SSE2(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_sphv_hi2lo_AVX(RP, A, Ac, M);
-        ft_execute_sphv_lo2hi_SSE(RP, A, Ac, M);
+        execute_sphv_hi2lo_AVX(RP, A, Ac, M);
+        execute_sphv_lo2hi_SSE2(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_sphv_hi2lo_SSE(RP, A, Ac, M);
-        ft_execute_sphv_lo2hi_AVX(RP, A, Ac, M);
+        execute_sphv_hi2lo_SSE2(RP, A, Ac, M);
+        execute_sphv_lo2hi_AVX(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_sphv_hi2lo_AVX512(RP, A, Ac, M);
-        ft_execute_sphv_lo2hi_AVX(RP, A, Ac, M);
+        execute_sphv_hi2lo_AVX_FMA(RP, A, Ac, M);
+        execute_sphv_lo2hi_AVX(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        ft_execute_sphv_hi2lo_AVX(RP, A, Ac, M);
-        ft_execute_sphv_lo2hi_AVX512(RP, A, Ac, M);
+        execute_sphv_hi2lo_AVX(RP, A, Ac, M);
+        execute_sphv_lo2hi_AVX_FMA(RP, A, Ac, M);
+
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
+
+        execute_sphv_hi2lo_AVX512F(RP, A, Ac, M);
+        execute_sphv_lo2hi_AVX(RP, A, Ac, M);
+
+        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
+        printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
+
+        execute_sphv_hi2lo_AVX(RP, A, Ac, M);
+        execute_sphv_lo2hi_AVX512F(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
@@ -247,28 +277,34 @@ int main(int argc, const char * argv[]) {
         B = aligned_copymat(A, N, M);
         RP = ft_plan_rotsphere(N);
 
-        FT_TIME(ft_execute_sphv_hi2lo(RP, A, M), start, end, NTIMES)
+        FT_TIME(execute_sphv_hi2lo_default(RP, A, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sphv_lo2hi(RP, A, M), start, end, NTIMES)
+        FT_TIME(execute_sphv_lo2hi_default(RP, A, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sphv_hi2lo_SSE(RP, A, B, M), start, end, NTIMES)
+        FT_TIME(execute_sphv_hi2lo_SSE2(RP, A, B, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sphv_lo2hi_SSE(RP, A, B, M), start, end, NTIMES)
+        FT_TIME(execute_sphv_lo2hi_SSE2(RP, A, B, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sphv_hi2lo_AVX(RP, A, B, M), start, end, NTIMES)
+        FT_TIME(execute_sphv_hi2lo_AVX(RP, A, B, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sphv_lo2hi_AVX(RP, A, B, M), start, end, NTIMES)
+        FT_TIME(execute_sphv_lo2hi_AVX(RP, A, B, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sphv_hi2lo_AVX512(RP, A, B, M), start, end, NTIMES)
+        FT_TIME(execute_sphv_hi2lo_AVX_FMA(RP, A, B, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_sphv_lo2hi_AVX512(RP, A, B, M), start, end, NTIMES)
+        FT_TIME(execute_sphv_lo2hi_AVX_FMA(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
+
+        FT_TIME(execute_sphv_hi2lo_AVX512F(RP, A, B, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
+
+        FT_TIME(execute_sphv_lo2hi_AVX512F(RP, A, B, M), start, end, NTIMES)
         printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
@@ -373,14 +409,14 @@ int main(int argc, const char * argv[]) {
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        execute_tri_hi2lo_AVX_FMA(RP, A, Ac, M);
-        execute_tri_lo2hi_AVX512F(RP, A, Ac, M);
+        execute_tri_hi2lo_AVX512F(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX_FMA(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e  ", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
-        execute_tri_hi2lo_AVX512F(RP, A, Ac, M);
-        execute_tri_lo2hi_AVX_FMA(RP, A, Ac, M);
+        execute_tri_hi2lo_AVX_FMA(RP, A, Ac, M);
+        execute_tri_lo2hi_AVX512F(RP, A, Ac, M);
 
         printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));

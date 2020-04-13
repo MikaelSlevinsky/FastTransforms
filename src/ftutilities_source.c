@@ -1,6 +1,6 @@
 void X(checktest)(FLT err, FLT cst, int * checksum) {
     if (Y(fabs)(err) < cst*Y(eps)()) printf(GREEN("✓")"\n");
-    else {printf(RED("×")"\n"); (*checksum)++;}
+    else {printf(RED("✗")"\n"); (*checksum)++;}
 }
 
 FLT X(norm_1arg)(FLT * A, int n) {

@@ -132,78 +132,12 @@ ft_rotation_plan * ft_plan_rotsphere(const int n) {
     return RP;
 }
 
-void ft_kernel_sph_hi2lo(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int j = m-2; j >= 0; j -= 2)
-        for (int l = n-3-j; l >= 0; l--)
-            apply_givens(RP->s(l, j), RP->c(l, j), A+l, A+l+2);
+void ft_kernel_sph_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
+    kernel_sph_hi2lo_default(RP, m1, m2, A, S);
 }
 
-void ft_kernel_sph_lo2hi(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int j = m%2; j < m-1; j += 2)
-        for (int l = 0; l <= n-3-j; l++)
-            apply_givens_t(RP->s(l, j), RP->c(l, j), A+l, A+l+2);
-}
-
-void ft_kernel_sph_hi2lo_SSE(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int j = m-2; j >= 0; j -= 2)
-        for (int l = n-3-j; l >= 0; l--)
-            apply_givens_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+2));
-}
-
-void ft_kernel_sph_lo2hi_SSE(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int j = m%2; j < m-1; j += 2)
-        for (int l = 0; l <= n-3-j; l++)
-            apply_givens_t_SSE(RP->s(l, j), RP->c(l, j), A+2*l, A+2*(l+2));
-}
-
-void ft_kernel_sph_hi2lo_AVX(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int l = n-3-m; l >= 0; l--)
-        apply_givens_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+2)+2);
-    for (int j = m-2; j >= 0; j -= 2)
-        for (int l = n-3-j; l >= 0; l--)
-            apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+2));
-}
-
-void ft_kernel_sph_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int j = m%2; j < m-1; j += 2)
-        for (int l = 0; l <= n-3-j; l++)
-            apply_givens_t_AVX(RP->s(l, j), RP->c(l, j), A+4*l, A+4*(l+2));
-    for (int l = 0; l <= n-3-m; l++)
-        apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+4*l+2, A+4*(l+2)+2);
-}
-
-void ft_kernel_sph_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int l = n-3-m; l >= 0; l--)
-        apply_givens_SSE(RP->s(l, m), RP->c(l, m), A+8*l+2, A+8*(l+2)+2);
-    for (int l = n-7-m; l >= 0; l--)
-        apply_givens_SSE(RP->s(l, m+4), RP->c(l, m+4), A+8*l+6, A+8*(l+2)+6);
-    for (int j = m+2; j >= m; j -= 2)
-        for (int l = n-3-j; l >= 0; l--)
-            apply_givens_AVX(RP->s(l, j), RP->c(l, j), A+8*l+4, A+8*(l+2)+4);
-    for (int j = m-2; j >= 0; j -= 2)
-        for (int l = n-3-j; l >= 0; l--)
-            apply_givens_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+2));
-}
-
-void ft_kernel_sph_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double * A) {
-    int n = RP->n;
-    for (int j = m%2; j < m-1; j += 2)
-        for (int l = 0; l <= n-3-j; l++)
-            apply_givens_t_AVX512(RP->s(l, j), RP->c(l, j), A+8*l, A+8*(l+2));
-    for (int j = m; j <= m+2; j += 2)
-        for (int l = 0; l <= n-3-j; l++)
-            apply_givens_t_AVX(RP->s(l, j), RP->c(l, j), A+8*l+4, A+8*(l+2)+4);
-    for (int l = 0; l <= n-7-m; l++)
-        apply_givens_t_SSE(RP->s(l, m+4), RP->c(l, m+4), A+8*l+6, A+8*(l+2)+6);
-    for (int l = 0; l <= n-3-m; l++)
-        apply_givens_t_SSE(RP->s(l, m), RP->c(l, m), A+8*l+2, A+8*(l+2)+2);
+void ft_kernel_sph_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
+    kernel_sph_lo2hi_default(RP, m1, m2, A, S);
 }
 
 ft_rotation_plan * ft_plan_rottriangle(const int n, const double alpha, const double beta, const double gamma) {

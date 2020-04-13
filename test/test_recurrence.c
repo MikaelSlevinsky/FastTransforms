@@ -9,12 +9,12 @@ int main(void) {
     int MN = 1024;
 
     ft_simd simd = get_simd();
-    simd.sse ? printf("SSE detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("SSE not detected.\t\t\t\t\t\t\t       "RED("×")"\n");
-    simd.sse2 ? printf("SSE2 detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("SSE2 not detected.\t\t\t\t\t\t\t       "RED("×")"\n");
-    simd.avx ? printf("AVX detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("AVX not detected.\t\t\t\t\t\t\t       "RED("×")"\n");
-    simd.avx2 ? printf("AVX2 detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("AVX2 not detected.\t\t\t\t\t\t\t       "RED("×")"\n");
-    simd.fma ? printf("FMA detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("FMA not detected.\t\t\t\t\t\t\t       "RED("×")"\n");
-    simd.avx512f ? printf("AVX512F detected.\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("AVX512F not detected.\t\t\t\t\t\t\t       "RED("×")"\n");
+    simd.sse ? printf("SSE detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("SSE not detected.\t\t\t\t\t\t\t       "RED("✗")"\n");
+    simd.sse2 ? printf("SSE2 detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("SSE2 not detected.\t\t\t\t\t\t\t       "RED("✗")"\n");
+    simd.avx ? printf("AVX detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("AVX not detected.\t\t\t\t\t\t\t       "RED("✗")"\n");
+    simd.avx2 ? printf("AVX2 detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("AVX2 not detected.\t\t\t\t\t\t\t       "RED("✗")"\n");
+    simd.fma ? printf("FMA detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("FMA not detected.\t\t\t\t\t\t\t       "RED("✗")"\n");
+    simd.avx512f ? printf("AVX512F detected.\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("AVX512F not detected.\t\t\t\t\t\t\t       "RED("✗")"\n");
     printf("The "CYAN("sizeof(ft_simd)")" is \t\t\t\t\t\t\t       %i\n", sizeof(ft_simd));
 
     printf("\nTesting methods for Horner summation.\n");

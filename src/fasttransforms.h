@@ -235,25 +235,10 @@ void ft_destroy_rotation_plan(ft_rotation_plan * RP);
 
 ft_rotation_plan * ft_plan_rotsphere(const int n);
 
-/// Convert a single vector of spherical harmonics of order m to 0/1.
-void ft_kernel_sph_hi2lo(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert a single vector of spherical harmonics of order 0/1 to m.
-void ft_kernel_sph_lo2hi(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert a pair of vectors of spherical harmonics of order m to 0/1.
-void ft_kernel_sph_hi2lo_SSE(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert a pair of vectors of spherical harmonics of order 0/1 to m.
-void ft_kernel_sph_lo2hi_SSE(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert four vectors of spherical harmonics of order m, m, m+2, m+2 to 0/1.
-void ft_kernel_sph_hi2lo_AVX(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert four vectors of spherical harmonics of order 0/1 to m, m, m+2, m+2.
-void ft_kernel_sph_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert eight vectors of spherical harmonics of order m, m, m+2, m+2, m+4, m+4, m+6, m+6 to 0/1.
-void ft_kernel_sph_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert eight vectors of spherical harmonics of order 0/1 to m, m, m+2, m+2, m+4, m+4, m+6, m+6.
-void ft_kernel_sph_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double * A);
+/// Convert a single vector of spherical harmonic coefficients in A with stride S from order m2 down to order m1.
+void ft_kernel_sph_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+/// Convert a single vector of spherical harmonic coefficients in A with stride S from order m1 up to order m2.
+void ft_kernel_sph_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
 ft_rotation_plan * ft_plan_rottriangle(const int n, const double alpha, const double beta, const double gamma);
 
@@ -324,29 +309,11 @@ void ft_kernel_spinsph_hi2lo_AVX512(const ft_spin_rotation_plan * SRP, const int
 void ft_kernel_spinsph_lo2hi_AVX512(const ft_spin_rotation_plan * SRP, const int m, double * A);
 
 
-void ft_execute_sph_hi2lo(const ft_rotation_plan * RP, double * A, const int M);
-void ft_execute_sph_lo2hi(const ft_rotation_plan * RP, double * A, const int M);
+void ft_execute_sph_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_sph_lo2hi(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
-void ft_execute_sph_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_sph_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_sph_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_sph_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_sph_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_sph_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_sphv_hi2lo(const ft_rotation_plan * RP, double * A, const int M);
-void ft_execute_sphv_lo2hi(const ft_rotation_plan * RP, double * A, const int M);
-
-void ft_execute_sphv_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_sphv_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_sphv_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_sphv_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_sphv_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_sphv_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_sphv_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_sphv_lo2hi(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
 void ft_execute_tri_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void ft_execute_tri_lo2hi(const ft_rotation_plan * RP, double * A, double * B, const int M);
