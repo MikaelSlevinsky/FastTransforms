@@ -132,7 +132,7 @@ for (int m = 2; m <= (M%(2*S))/2; m++) {                                       \
     KERNEL_DEFAULT(RP, m%2, m, B+N*(2*m), 1);                                  \
 }                                                                              \
 _Pragma("omp parallel")                                                        \
-for (int m = (M%(2*S)+1)/2 + S*FT_GET_THREAD_NUM(); m <= M/2; m += S*FT_GET_NUM_THREADS()) {     \
+for (int m = (M%(2*S)+1)/2 + S*FT_GET_THREAD_NUM(); m <= M/2; m += S*FT_GET_NUM_THREADS()) { \
     KERNEL_SIMD(RP, m%2, m, B+N*(2*m-1), S);                                   \
     KERNEL_SIMD(RP, (m+1)%2, m+1, B+N*(2*m-1+S), S);                           \
 }                                                                              \
@@ -231,7 +231,7 @@ for (int m = 2; m <= ((M-2)%(2*S))/2; m++) {                                   \
     KERNEL_DEFAULT(RP, m%2, m, B+N*(2*m+2), 1);                                \
 }                                                                              \
 _Pragma("omp parallel")                                                        \
-for (int m = ((M-2)%(2*S)+1)/2 + S*FT_GET_THREAD_NUM(); m <= M/2-1; m += S*FT_GET_NUM_THREADS()) {     \
+for (int m = ((M-2)%(2*S)+1)/2 + S*FT_GET_THREAD_NUM(); m <= M/2-1; m += S*FT_GET_NUM_THREADS()) { \
     KERNEL_SIMD(RP, m%2, m, B+N*(2*m+1), S);                                   \
     KERNEL_SIMD(RP, (m+1)%2, m+1, B+N*(2*m+1+S), S);                           \
 }                                                                              \

@@ -10,7 +10,7 @@
 int n = RP->n, row, col;                                                       \
 T ts, tc;                                                                      \
 VT X[3*L], T1, T2;                                                             \
-for (int s = 1; s < VS/2; s += 2) {                                            \
+for (int s = 1; s < VS/2; s++) {                                               \
     kernel_sph_hi2lo_default(RP, m2, m2+2*s, A+2*s, S);                        \
     kernel_sph_hi2lo_default(RP, m2, m2+2*s, A+2*s+1, S);                      \
 }                                                                              \
@@ -54,7 +54,7 @@ int n = RP->n, row, col;                                                       \
 T ts, tc;                                                                      \
 VT X[3*L], T1, T2;                                                             \
 int j = m1;                                                                    \
-for (; j < m2-2*L+2; j += 2*L) {                                               \
+for (; j < m2-2*L-2*VS+4; j += 2*L) {                                          \
     int k = 2*L+(n-L-2-j)%L;                                                   \
     for (int lj = 0; lj < L; lj++) {                                           \
         for (int lk = 0; lk < k-2*lj; lk++) {                                  \
@@ -87,7 +87,7 @@ for (; j < m2; j += 2) {                                                       \
         APPLY_GIVENS_T(RP->s(k, j), RP->c(k, j), A+k*S, A+(k+2)*S);            \
     }                                                                          \
 }                                                                              \
-for (int s = 1; s < VS/2; s += 2) {                                            \
+for (int s = 1; s < VS/2; s++) {                                               \
     kernel_sph_lo2hi_default(RP, m2, m2+2*s, A+2*s, S);                        \
     kernel_sph_lo2hi_default(RP, m2, m2+2*s, A+2*s+1, S);                      \
 }
@@ -138,7 +138,7 @@ int n = RP->n, row, col;                                                       \
 T ts, tc;                                                                      \
 VT X[2*L], T1, T2;                                                             \
 int j = m1;                                                                    \
-for (; j < m2-L+1; j += L) {                                                   \
+for (; j < m2-L-VS+2; j += L) {                                                \
     int k = L+(n-L-1-j)%L;                                                     \
     for (int lj = 0; lj < L; lj++) {                                           \
         for (int lk = 0; lk < k-lj; lk++) {                                    \
