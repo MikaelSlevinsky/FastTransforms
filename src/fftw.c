@@ -25,6 +25,24 @@ static inline void colswap_t(double * X, const double * Y, const int N, const in
     }
 }
 
+static inline void data_r2c(const double * X, fftw_complex * Y, const int N, const int M) {
+    for (int i = 0; i < N; i++)
+        Y[i] = X[i];
+    for (int j = 1; j < M/2+1; j++)
+        for (int i = 0; i < N; i++)
+            Y[i+j*N] = X[i+(2*j)*N] - I*X[i+(2*j-1)*N];
+}
+
+static inline void data_c2r(double * X, const fftw_complex * Y, const int N, const int M) {
+    for (int i = 0; i < N; i++)
+        X[i] = creal(Y[i]);
+    for (int j = 1; j < M/2+1; j++)
+        for (int i = 0; i < N; i++) {
+            X[i+(2*j)*N] = creal(Y[i+j*N]);
+            X[i+(2*j-1)*N] = -cimag(Y[i+j*N]);
+        }
+}
+
 int ft_fftw_init_threads(void) {return fftw_init_threads();}
 void ft_fftw_plan_with_nthreads(const int n) {return fftw_plan_with_nthreads(n);}
 
@@ -47,7 +65,7 @@ ft_sphere_fftw_plan * ft_plan_sph_with_kind(const int N, const int M, const fftw
 
     ft_sphere_fftw_plan * P = malloc(sizeof(ft_sphere_fftw_plan));
 
-    P->Y = fftw_malloc(N*M*sizeof(double));
+    P->Y = fftw_malloc(N*2*(M/2+1)*sizeof(double));
 
     int howmany = (M+3)/4;
     P->plantheta1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
@@ -65,8 +83,10 @@ ft_sphere_fftw_plan * ft_plan_sph_with_kind(const int N, const int M, const fftw
     idist = odist = 1;
     istride = ostride = N;
     howmany = N;
-    P->planphi = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[2], FT_FFTW_FLAGS);
-
+    if (kind[2][0] == FFTW_HC2R)
+        P->planphi = fftw_plan_many_dft_c2r(rank, n, howmany, (fftw_complex *) P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, FT_FFTW_FLAGS);
+    else if (kind[2][0] == FFTW_R2HC)
+        P->planphi = fftw_plan_many_dft_r2c(rank, n, howmany, P->Y, inembed, istride, idist, (fftw_complex *) P->Y, onembed, ostride, odist, FT_FFTW_FLAGS);
     return P;
 }
 
@@ -104,13 +124,13 @@ void ft_execute_sph_synthesis(const ft_sphere_fftw_plan * P, double * X, const i
         X[i] *= M_1_4_SQRT_PI;
     for (int i = 0; i < N; i++)
         X[i] *= M_SQRT2;
-    colswap(X, P->Y, N, M);
-    fftw_execute_r2r(P->planphi, P->Y, X);
+    data_r2c(X, (fftw_complex *) P->Y, N, M);
+    fftw_execute_dft_c2r(P->planphi, (fftw_complex *) P->Y, X);
 }
 
 void ft_execute_sph_analysis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
-    fftw_execute_r2r(P->planphi, X, P->Y);
-    colswap_t(X, P->Y, N, M);
+    fftw_execute_dft_r2c(P->planphi, X, (fftw_complex *) P->Y);
+    data_c2r(X, (fftw_complex *) P->Y, N, M);
     for (int i = 0; i < N*M; i++)
         X[i] *= M_4_SQRT_PI/(2*N*M);
     for (int i = 0; i < N; i++)
@@ -139,13 +159,13 @@ void ft_execute_sphv_synthesis(const ft_sphere_fftw_plan * P, double * X, const 
         X[i] *= M_1_4_SQRT_PI;
     for (int i = 0; i < N; i++)
         X[i] *= M_SQRT2;
-    colswap(X, P->Y, N, M);
-    fftw_execute_r2r(P->planphi, P->Y, X);
+    data_r2c(X, (fftw_complex *) P->Y, N, M);
+    fftw_execute_dft_c2r(P->planphi, (fftw_complex *) P->Y, X);
 }
 
 void ft_execute_sphv_analysis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
-    fftw_execute_r2r(P->planphi, X, P->Y);
-    colswap_t(X, P->Y, N, M);
+    fftw_execute_dft_r2c(P->planphi, X, (fftw_complex *) P->Y);
+    data_c2r(X, (fftw_complex *) P->Y, N, M);
     for (int i = 0; i < N*M; i++)
         X[i] *= M_4_SQRT_PI/(2*N*M);
     for (int i = 0; i < N; i++)
@@ -272,7 +292,7 @@ ft_disk_fftw_plan * ft_plan_disk_with_kind(const int N, const int M, const fftw_
 
     ft_disk_fftw_plan * P = malloc(sizeof(ft_disk_fftw_plan));
 
-    P->Y = fftw_malloc(N*M*sizeof(double));
+    P->Y = fftw_malloc(N*2*(M/2+1)*sizeof(double));
 
     int howmany = (M+3)/4;
     P->planr1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
@@ -290,8 +310,10 @@ ft_disk_fftw_plan * ft_plan_disk_with_kind(const int N, const int M, const fftw_
     idist = odist = 1;
     istride = ostride = N;
     howmany = N;
-    P->plantheta = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[2], FT_FFTW_FLAGS);
-
+    if (kind[2][0] == FFTW_HC2R)
+        P->plantheta = fftw_plan_many_dft_c2r(rank, n, howmany, (fftw_complex *) P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, FT_FFTW_FLAGS);
+    else if (kind[2][0] == FFTW_R2HC)
+        P->plantheta = fftw_plan_many_dft_r2c(rank, n, howmany, P->Y, inembed, istride, idist, (fftw_complex *) P->Y, onembed, ostride, odist, FT_FFTW_FLAGS);
     return P;
 }
 
@@ -319,13 +341,13 @@ void ft_execute_disk_synthesis(const ft_disk_fftw_plan * P, double * X, const in
         X[i] *= M_1_4_SQRT_PI;
     for (int i = 0; i < N; i++)
         X[i] *= M_SQRT2;
-    colswap(X, P->Y, N, M);
-    fftw_execute_r2r(P->plantheta, P->Y, X);
+    data_r2c(X, (fftw_complex *) P->Y, N, M);
+    fftw_execute_dft_c2r(P->plantheta, (fftw_complex *) P->Y, X);
 }
 
 void ft_execute_disk_analysis(const ft_disk_fftw_plan * P, double * X, const int N, const int M) {
-    fftw_execute_r2r(P->plantheta, X, P->Y);
-    colswap_t(X, P->Y, N, M);
+    fftw_execute_dft_r2c(P->plantheta, X, (fftw_complex *) P->Y);
+    data_c2r(X, (fftw_complex *) P->Y, N, M);
     for (int i = 0; i < N*M; i++)
         X[i] *= M_4_SQRT_PI/(2*N*M);
     for (int i = 0; i < N; i++)
