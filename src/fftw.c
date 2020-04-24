@@ -107,22 +107,22 @@ ft_sphere_fftw_plan * ft_plan_sph_with_kind(const int N, const int M, const fftw
 }
 
 ft_sphere_fftw_plan * ft_plan_sph_synthesis(const int N, const int M) {
-    fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_RODFT01}, {FFTW_HC2R}};
+    const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_RODFT01}, {FFTW_HC2R}};
     return ft_plan_sph_with_kind(N, M, kind);
 }
 
 ft_sphere_fftw_plan * ft_plan_sph_analysis(const int N, const int M) {
-    fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_RODFT10}, {FFTW_R2HC}};
+    const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_RODFT10}, {FFTW_R2HC}};
     return ft_plan_sph_with_kind(N, M, kind);
 }
 
 ft_sphere_fftw_plan * ft_plan_sphv_synthesis(const int N, const int M) {
-    fftw_r2r_kind kind[3][1] = {{FFTW_RODFT01}, {FFTW_REDFT01}, {FFTW_HC2R}};
+    const fftw_r2r_kind kind[3][1] = {{FFTW_RODFT01}, {FFTW_REDFT01}, {FFTW_HC2R}};
     return ft_plan_sph_with_kind(N, M, kind);
 }
 
 ft_sphere_fftw_plan * ft_plan_sphv_analysis(const int N, const int M) {
-    fftw_r2r_kind kind[3][1] = {{FFTW_RODFT10}, {FFTW_REDFT10}, {FFTW_R2HC}};
+    const fftw_r2r_kind kind[3][1] = {{FFTW_RODFT10}, {FFTW_REDFT10}, {FFTW_R2HC}};
     return ft_plan_sph_with_kind(N, M, kind);
 }
 
@@ -334,12 +334,12 @@ ft_disk_fftw_plan * ft_plan_disk_with_kind(const int N, const int M, const fftw_
 }
 
 ft_disk_fftw_plan * ft_plan_disk_synthesis(const int N, const int M) {
-    fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_REDFT11}, {FFTW_HC2R}};
+    const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_REDFT11}, {FFTW_HC2R}};
     return ft_plan_disk_with_kind(N, M, kind);
 }
 
 ft_disk_fftw_plan * ft_plan_disk_analysis(const int N, const int M) {
-    fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_REDFT11}, {FFTW_R2HC}};
+    const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_REDFT11}, {FFTW_R2HC}};
     return ft_plan_disk_with_kind(N, M, kind);
 }
 
@@ -423,29 +423,15 @@ ft_spinsphere_fftw_plan * ft_plan_spinsph_with_kind(const int N, const int M, co
 }
 
 ft_spinsphere_fftw_plan * ft_plan_spinsph_synthesis(const int N, const int M, const int S) {
-    fftw_r2r_kind kind[2][1];
-    if (S%2 == 0) {
-        kind[0][0] = FFTW_REDFT01;
-        kind[1][0] = FFTW_RODFT01;
-    }
-    else {
-        kind[0][0] = FFTW_RODFT01;
-        kind[1][0] = FFTW_REDFT01;
-    }
-    return ft_plan_spinsph_with_kind(N, M, S, kind, FFTW_BACKWARD);
+    const fftw_r2r_kind evenkind[2][1] = {{FFTW_REDFT01}, {FFTW_RODFT01}};
+    const fftw_r2r_kind  oddkind[2][1] = {{FFTW_RODFT01}, {FFTW_REDFT01}};
+    return ft_plan_spinsph_with_kind(N, M, S, S%2 == 0 ? evenkind : oddkind, FFTW_BACKWARD);
 }
 
 ft_spinsphere_fftw_plan * ft_plan_spinsph_analysis(const int N, const int M, const int S) {
-    fftw_r2r_kind kind[2][1];
-    if (S%2 == 0) {
-        kind[0][0] = FFTW_REDFT10;
-        kind[1][0] = FFTW_RODFT10;
-    }
-    else {
-        kind[0][0] = FFTW_RODFT10;
-        kind[1][0] = FFTW_REDFT10;
-    }
-    return ft_plan_spinsph_with_kind(N, M, S, kind, FFTW_FORWARD);
+    const fftw_r2r_kind evenkind[2][1] = {{FFTW_REDFT10}, {FFTW_RODFT10}};
+    const fftw_r2r_kind  oddkind[2][1] = {{FFTW_RODFT10}, {FFTW_REDFT10}};
+    return ft_plan_spinsph_with_kind(N, M, S, S%2 == 0 ? evenkind : oddkind, FFTW_FORWARD);
 }
 
 void ft_execute_spinsph_synthesis(const ft_spinsphere_fftw_plan * P, ft_complex * X, const int N, const int M) {
@@ -478,13 +464,13 @@ void ft_execute_spinsph_synthesis(const ft_spinsphere_fftw_plan * P, ft_complex 
     fftw_execute_r2r(P->plantheta4, XD+6*N+1, XD+6*N+1);
     for (int i = 0; i < 2*N*M; i++)
         XD[i] *= M_1_2_SQRT_2PI;
-    colswap(X, (ft_complex *) P->Y, N, M);
+    colswap((const ft_complex *) X, (ft_complex *) P->Y, N, M);
     fftw_execute_dft(P->planphi, (fftw_complex *) P->Y, (fftw_complex *) X);
 }
 
 void ft_execute_spinsph_analysis(const ft_spinsphere_fftw_plan * P, ft_complex * X, const int N, const int M) {
     fftw_execute_dft(P->planphi, (fftw_complex *) X, (fftw_complex *) P->Y);
-    colswap_t(X, (ft_complex *) P->Y, N, M);
+    colswap_t(X, (const ft_complex *) P->Y, N, M);
     double * XD = (double *) X;
     for (int i = 0; i < 2*N*M; i++)
         XD[i] *= M_2_SQRT_2PI/(2*N*M);

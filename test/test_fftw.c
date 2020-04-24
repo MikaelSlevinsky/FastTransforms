@@ -302,7 +302,8 @@ int main(int argc, const char * argv[]) {
     printf("];\n");
 
     printf("\nTesting the accuracy of spin-weighted SHTs + FFTW synthesis and analysis.\n\n");
-    printf("err6 = [\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
@@ -339,7 +340,6 @@ int main(int argc, const char * argv[]) {
             ft_destroy_spinsphere_fftw_plan(TA);
         }
     }
-    printf("];\n");
 
     printf("\nTiming spin-weighted SHTs + FFTW synthesis and analysis.\n\n");
     printf("t6 = [\n");

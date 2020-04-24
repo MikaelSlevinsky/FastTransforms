@@ -136,10 +136,10 @@ double * plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, co
     long double * Vl = calloc(n*n, sizeof(long double));
     if (n > 0)
         Vl[0] = 1;
+    for (int i = 1; i < n; i++)
+        Vl[i+i*n] = (2*i+alphal+betal-1)/(i+alphal+betal)*(2*i+alphal+betal)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*Vl[i-1+(i-1)*n];
     if (n > 1)
         Vl[1+n] = (alphal+betal+2)/(gammal+deltal+2);
-    for (int i = 2; i < n; i++)
-        Vl[i+i*n] = (2*i+alphal+betal-1)/(i+alphal+betal)*(2*i+alphal+betal)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*Vl[i-1+(i-1)*n];
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
     double * V = calloc(n*n, sizeof(double));
     long double * sclrow = calloc(n, sizeof(long double));

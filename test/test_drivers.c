@@ -701,7 +701,7 @@ int main(int argc, const char * argv[]) {
         ft_checktest(err, 8*sqrt(N), &checksum);
         err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
         printf("ϵ_∞ \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
-        ft_checktest(err, 2*N, &checksum);
+        ft_checktest(err, 4*N, &checksum);
 
         //printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
         //printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));

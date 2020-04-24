@@ -15,7 +15,7 @@ int main(void) {
     simd.avx2 ? printf("AVX2 detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("AVX2 not detected.\t\t\t\t\t\t\t       "RED("✗")"\n");
     simd.fma ? printf("FMA detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("FMA not detected.\t\t\t\t\t\t\t       "RED("✗")"\n");
     simd.avx512f ? printf("AVX512F detected.\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("AVX512F not detected.\t\t\t\t\t\t\t       "RED("✗")"\n");
-    printf("The "CYAN("sizeof(ft_simd)")" is \t\t\t\t\t\t\t       %i\n", sizeof(ft_simd));
+    printf("The "CYAN("sizeof(ft_simd)")" is \t\t\t\t\t\t\t       %li\n", sizeof(ft_simd));
 
     printf("\nTesting methods for Horner summation.\n");
     printf("\n\tSingle precision.\n\n");
