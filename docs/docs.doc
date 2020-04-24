@@ -299,8 +299,6 @@ then \ref ft_plan_tet2cheb creates the appropriate \ref ft_tetrahedral_harmonic_
 f_n(x,y,z) = \sum_{k=0}^n\sum_{\ell=0}^n\sum_{m=0}^n g_{k,\ell}^m T_k(2x-1) T_\ell\left(\frac{2y}{1-x}-1\right) T_m\left(\frac{2z}{1-x-y}-1\right).
 \f]
 
-\section FT2 Under construction
-
 \subsection spinsph2fourier
 
 Spin-weighted spherical harmonics are:
@@ -339,6 +337,8 @@ f_n(\theta,\varphi) = \sum_{\ell=0}^n\sum_{m=-n}^{+n} g_\ell^m \frac{e^{\ii m\va
 \f]
 Since \c ft_execute_spinsph2fourier only transforms columns of the arrays, the routine is indifferent to the choice of longitudinal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
 
+\section FT2 Under construction
+
 \subsection sgl2cxf
 
 Spherical Gauss--Laguerre functions are:
@@ -373,7 +373,7 @@ FastTransforms provides templates for FFTW synthesis and analysis on the sphere,
 
 \section SA1 FFTW Synthesis and Analysis
 
-\subsection ft_fftw_sphere_plan
+\subsection SA11 ft_fftw_sphere_plan & ft_fftw_spinsphere_plan
 
 On the sphere, the \f$N\times M\f$ equiangular grids are:
 \f{align*}
