@@ -4,14 +4,12 @@
     static inline void apply_givens_AVX512F(const double S, const double C, double * X, double * Y) {
         double8 x = vloadu8(X);
         double8 y = vloadu8(Y);
-
         vstoreu8(X, C*x + S*y);
         vstoreu8(Y, C*y - S*x);
     }
     static inline void apply_givens_t_AVX512F(const double S, const double C, double * X, double * Y) {
         double8 x = vloadu8(X);
         double8 y = vloadu8(Y);
-
         vstoreu8(X, C*x - S*y);
         vstoreu8(Y, C*y + S*x);
     }

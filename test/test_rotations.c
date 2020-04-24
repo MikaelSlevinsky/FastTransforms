@@ -375,35 +375,51 @@ int main(void) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
     for (int n = 64; n < N; n *= 2) {
-        for (int s = 0; s < 9; s++) {
+        for (int s = -4; s <= 4; s++) {
+            int as = abs(s);
             RP = ft_plan_rotsphere(n);
             SRP = ft_plan_rotspinsphere(n, s);
 
             err = 0;
-            A = calloc(n, sizeof(double));
-            B = calloc(n, sizeof(double));
+            A = calloc(2*n, sizeof(double));
+            ft_complex * AC = (ft_complex *) A;
+            B = calloc(2*n, sizeof(double));
             err = 0;
-            for (int m = 0; m < n; m++) {
-                for (int i = 0; i < n-MAX(m, s); i++)
-                    A[i] = B[i] = 1.0;
-                for (int i = n-MAX(m, s); i < n; i++)
-                    A[i] = B[i] = 0.0;
-                ft_kernel_spinsph_hi2lo(SRP, m, A);
-                ft_kernel_spinsph_lo2hi(SRP, m, A);
-                err += pow(ft_norm_2arg(A, B, n)/ft_norm_1arg(B, n), 2);
+            for (int m = -n+1; m < n; m++) {
+                int am = abs(m);
+                for (int i = 0; i < n-MAX(am, as); i++)
+                    A[2*i] = A[2*i+1] = B[2*i] = B[2*i+1] = 1.0;
+                for (int i = n-MAX(am, as); i < n; i++)
+                    A[2*i] = A[2*i+1] = B[2*i] = B[2*i+1] = 0.0;
+                kernel_spinsph_hi2lo_default(SRP, m, AC, 1);
+                kernel_spinsph_lo2hi_SSE2(SRP, m, AC, 1);
+                err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+                kernel_spinsph_hi2lo_SSE2(SRP, m, AC, 1);
+                kernel_spinsph_lo2hi_default(SRP, m, AC, 1);
+                err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
                 if (s == 0) {
-                    ft_kernel_spinsph_hi2lo(SRP, m, A);
-                    ft_kernel_sph_lo2hi(RP, m%2, m, A, 1);
-                    err += pow(ft_norm_2arg(A, B, n)/ft_norm_1arg(B, n), 2);
-                    ft_kernel_sph_hi2lo(RP, m%2, m, A, 1);
-                    ft_kernel_spinsph_lo2hi(SRP, m, A);
-                    err += pow(ft_norm_2arg(A, B, n)/ft_norm_1arg(B, n), 2);
+                    kernel_spinsph_hi2lo_default(SRP, m, AC, 1);
+                    kernel_sph_lo2hi_default(RP, am%2, am, A, 2);
+                    kernel_sph_lo2hi_default(RP, am%2, am, A+1, 2);
+                    err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+                    kernel_sph_hi2lo_default(RP, am%2, am, A, 2);
+                    kernel_sph_hi2lo_default(RP, am%2, am, A+1, 2);
+                    kernel_spinsph_lo2hi_SSE2(SRP, m, AC, 1);
+                    err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+                    kernel_spinsph_hi2lo_SSE2(SRP, m, AC, 1);
+                    kernel_sph_lo2hi_default(RP, am%2, am, A, 2);
+                    kernel_sph_lo2hi_default(RP, am%2, am, A+1, 2);
+                    err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+                    kernel_sph_hi2lo_default(RP, am%2, am, A, 2);
+                    kernel_sph_hi2lo_default(RP, am%2, am, A+1, 2);
+                    kernel_spinsph_lo2hi_default(SRP, m, AC, 1);
+                    err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
                 }
             }
-            if (s == 0) err /= 3.0;
+            if (s == 0) err /= 6.0;
             err = sqrt(err);
             printf("Applying the rotations with spin s = %1i at n = %3i: \t |%20.2e ", s, n, err);
-            ft_checktest(err, n, &checksum);
+            ft_checktest(err, 2*n, &checksum);
             free(A);
             free(B);
             ft_destroy_rotation_plan(RP);

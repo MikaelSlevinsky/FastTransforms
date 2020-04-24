@@ -31,8 +31,8 @@ double * diskones(int n, int m);
 double * diskrand(int n, int m);
 double * tetones(int n, int l, int m);
 double * tetrand(int n, int l, int m);
-double * spinsphones(int n, int m, int s);
-double * spinsphrand(int n, int m, int s);
+ft_complex * spinsphones(int n, int m, int s);
+ft_complex * spinsphrand(int n, int m, int s);
 double elapsed(struct timeval * start, struct timeval * end, int N);
 
 #define FLT float

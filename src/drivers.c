@@ -612,128 +612,60 @@ void ft_execute_tet_lo2hi_AVX512(const ft_rotation_plan * RP1, const ft_rotation
 }
 
 
-void ft_execute_spinsph_hi2lo(const ft_spin_rotation_plan * SRP, double * A, const int M) {
+void ft_execute_spinsph_hi2lo(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M) {
+    ft_simd simd = get_simd();
+    if (simd.sse2)
+        return execute_spinsph_hi2lo_SSE2(SRP, A, M);
+    else
+        return execute_spinsph_hi2lo_default(SRP, A, M);
+}
+
+void ft_execute_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M) {
+    ft_simd simd = get_simd();
+    if (simd.sse2)
+        return execute_spinsph_lo2hi_SSE2(SRP, A, M);
+    else
+        return execute_spinsph_lo2hi_default(SRP, A, M);
+}
+
+void execute_spinsph_hi2lo_default(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M) {
     int N = SRP->n;
-    ft_kernel_spinsph_hi2lo(SRP, 0, A);
+    kernel_spinsph_hi2lo_default(SRP, 0, A, 1);
     #pragma omp parallel
     for (int m = 1 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS()) {
-        ft_kernel_spinsph_hi2lo(SRP, m, A + N*(2*m-1));
-        ft_kernel_spinsph_hi2lo(SRP, m, A + N*(2*m));
+        kernel_spinsph_hi2lo_default(SRP, -m, A + N*(2*m-1), 1);
+        kernel_spinsph_hi2lo_default(SRP,  m, A + N*(2*m), 1);
     }
 }
 
-void ft_execute_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, double * A, const int M) {
+void execute_spinsph_lo2hi_default(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M) {
     int N = SRP->n;
-    ft_kernel_spinsph_lo2hi(SRP, 0, A);
+    kernel_spinsph_lo2hi_default(SRP, 0, A, 1);
     #pragma omp parallel
     for (int m = 1 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS()) {
-        ft_kernel_spinsph_lo2hi(SRP, m, A + N*(2*m-1));
-        ft_kernel_spinsph_lo2hi(SRP, m, A + N*(2*m));
+        kernel_spinsph_lo2hi_default(SRP, -m, A + N*(2*m-1), 1);
+        kernel_spinsph_lo2hi_default(SRP,  m, A + N*(2*m), 1);
     }
 }
 
-void ft_execute_spinsph_hi2lo_SSE(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M) {
+void execute_spinsph_hi2lo_SSE2(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M) {
     int N = SRP->n;
-    int NB = VALIGN(N);
-    permute_spinsph(A, B, N, M, 2);
-    ft_kernel_spinsph_hi2lo(SRP, 0, B);
+    kernel_spinsph_hi2lo_SSE2(SRP, 0, A, 1);
     #pragma omp parallel
-    for (int m = 1 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
-        ft_kernel_spinsph_hi2lo_SSE(SRP, m, B + NB*(2*m-1));
-   permute_t_spinsph(A, B, N, M, 2);
+    for (int m = 1 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS()) {
+        kernel_spinsph_hi2lo_SSE2(SRP, -m, A + N*(2*m-1), 1);
+        kernel_spinsph_hi2lo_SSE2(SRP,  m, A + N*(2*m), 1);
+    }
 }
 
-void ft_execute_spinsph_lo2hi_SSE(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M) {
+void execute_spinsph_lo2hi_SSE2(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M) {
     int N = SRP->n;
-    int NB = VALIGN(N);
-    permute_spinsph(A, B, N, M, 2);
-    ft_kernel_spinsph_lo2hi(SRP, 0, B);
+    kernel_spinsph_lo2hi_SSE2(SRP, 0, A, 1);
     #pragma omp parallel
-    for (int m = 1 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
-        ft_kernel_spinsph_lo2hi_SSE(SRP, m, B + NB*(2*m-1));
-   permute_t_spinsph(A, B, N, M, 2);
-}
-
-void ft_execute_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M) {
-    int N = SRP->n;
-    int NB = VALIGN(N);
-    warp(A, N, M, 2);
-    permute_spinsph(A, B, N, M, 4);
-    ft_kernel_spinsph_hi2lo(SRP, 0, B);
-    for (int m = 1; m <= (M%8)/2; m++)
-        ft_kernel_spinsph_hi2lo_SSE(SRP, m, B + NB*(2*m-1));
-    #pragma omp parallel
-    for (int m = (M%8+1)/2 + 4*FT_GET_THREAD_NUM(); m <= M/2; m += 4*FT_GET_NUM_THREADS()) {
-        ft_kernel_spinsph_hi2lo_AVX(SRP, m, B + NB*(2*m-1));
-        ft_kernel_spinsph_hi2lo_AVX(SRP, m+1, B + NB*(2*m+3));
+    for (int m = 1 + FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS()) {
+        kernel_spinsph_lo2hi_SSE2(SRP, -m, A + N*(2*m-1), 1);
+        kernel_spinsph_lo2hi_SSE2(SRP,  m, A + N*(2*m), 1);
     }
-   permute_t_spinsph(A, B, N, M, 4);
-   warp(A, N, M, 2);
-}
-
-void ft_execute_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M) {
-    int N = SRP->n;
-    int NB = VALIGN(N);
-    warp(A, N, M, 2);
-    permute_spinsph(A, B, N, M, 4);
-    ft_kernel_spinsph_lo2hi(SRP, 0, B);
-    for (int m = 1; m <= (M%8)/2; m++)
-        ft_kernel_spinsph_lo2hi_SSE(SRP, m, B + NB*(2*m-1));
-    #pragma omp parallel
-    for (int m = (M%8+1)/2 + 4*FT_GET_THREAD_NUM(); m <= M/2; m += 4*FT_GET_NUM_THREADS()) {
-        ft_kernel_spinsph_lo2hi_AVX(SRP, m, B + NB*(2*m-1));
-        ft_kernel_spinsph_lo2hi_AVX(SRP, m+1, B + NB*(2*m+3));
-    }
-   permute_t_spinsph(A, B, N, M, 4);
-   warp(A, N, M, 2);
-}
-
-void ft_execute_spinsph_hi2lo_AVX512(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M) {
-    int N = SRP->n;
-    int NB = VALIGN(N);
-    int M_star = M%16;
-    warp(A, N, M, 4);
-    warp(A, N, M_star, 2);
-    permute_spinsph(A, B, N, M, 8);
-    ft_kernel_spinsph_hi2lo(SRP, 0, B);
-    for (int m = 1; m <= (M_star%8)/2; m++)
-        ft_kernel_spinsph_hi2lo_SSE(SRP, m, B + NB*(2*m-1));
-    for (int m = (M_star%8+1)/2; m <= M_star/2; m += 4) {
-        ft_kernel_spinsph_hi2lo_AVX(SRP, m, B + NB*(2*m-1));
-        ft_kernel_spinsph_hi2lo_AVX(SRP, m+1, B + NB*(2*m+3));
-    }
-    #pragma omp parallel
-    for (int m = (M_star+1)/2 + 8*FT_GET_THREAD_NUM(); m <= M/2; m += 8*FT_GET_NUM_THREADS()) {
-        ft_kernel_spinsph_hi2lo_AVX512(SRP, m, B + NB*(2*m-1));
-        ft_kernel_spinsph_hi2lo_AVX512(SRP, m+1, B + NB*(2*m+7));
-    }
-    permute_t_spinsph(A, B, N, M, 8);
-    warp(A, N, M_star, 2);
-    warp_t(A, N, M, 4);
-}
-
-void ft_execute_spinsph_lo2hi_AVX512(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M) {
-    int N = SRP->n;
-    int M_star = M%16;
-    int NB = VALIGN(N);
-    warp(A, N, M, 4);
-    warp(A, N, M_star, 2);
-    permute_spinsph(A, B, N, M, 8);
-    ft_kernel_spinsph_lo2hi(SRP, 0, B);
-    for (int m = 1; m <= (M_star%8)/2; m++)
-        ft_kernel_spinsph_lo2hi_SSE(SRP, m, B + NB*(2*m-1));
-    for (int m = (M_star%8+1)/2; m <= M_star/2; m += 4) {
-        ft_kernel_spinsph_lo2hi_AVX(SRP, m, B + NB*(2*m-1));
-        ft_kernel_spinsph_lo2hi_AVX(SRP, m+1, B + NB*(2*m+3));
-    }
-    #pragma omp parallel
-    for (int m = (M_star+1)/2 + 8*FT_GET_THREAD_NUM(); m <= M/2; m += 8*FT_GET_NUM_THREADS()) {
-        ft_kernel_spinsph_lo2hi_AVX512(SRP, m, B + NB*(2*m-1));
-        ft_kernel_spinsph_lo2hi_AVX512(SRP, m+1, B + NB*(2*m+7));
-    }
-    permute_t_spinsph(A, B, N, M, 8);
-    warp(A, N, M_star, 2);
-    warp_t(A, N, M, 4);
 }
 
 
@@ -917,4 +849,74 @@ void ft_execute_cheb2tet(const ft_tetrahedral_harmonic_plan * P, double * A, con
         for (int m = 0; m < M; m++)
             cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P1inv, N, A+N*L*m, N);
     ft_execute_tet_lo2hi_AVX512(P->RP1, P->RP2, A, P->B, L, M);
+}
+
+void ft_destroy_spin_harmonic_plan(ft_spin_harmonic_plan * P) {
+    ft_destroy_spin_rotation_plan(P->SRP);
+    VFREE(P->B);
+    free(P->P1);
+    free(P->P2);
+    free(P->P1inv);
+    free(P->P2inv);
+    free(P);
+}
+
+ft_spin_harmonic_plan * ft_plan_spinsph2fourier(const int n, const int s) {
+    ft_spin_harmonic_plan * P = malloc(sizeof(ft_spin_harmonic_plan));
+    P->SRP = ft_plan_rotspinsphere(n, s);
+    P->B = VMALLOC(VALIGN(n) * (2*n-1) * sizeof(ft_complex));
+    double * P1 = plan_legendre_to_chebyshev(1, 0, n);
+    double * P2 = plan_ultraspherical_to_ultraspherical(1, 0, n, 1.5, 1.0);
+    double * P1inv = plan_chebyshev_to_legendre(0, 1, n);
+    double * P2inv = plan_ultraspherical_to_ultraspherical(0, 1, n, 1.0, 1.5);
+    P->P1 = calloc(n*n, sizeof(ft_complex));
+    P->P2 = calloc(n*n, sizeof(ft_complex));
+    P->P1inv = calloc(n*n, sizeof(ft_complex));
+    P->P2inv = calloc(n*n, sizeof(ft_complex));
+    for (int i = 0; i < n*n; i++) {
+        P->P1[i][0] = P1[i];
+        P->P2[i][0] = P2[i];
+        P->P1inv[i][0] = P1inv[i];
+        P->P2inv[i][0] = P2inv[i];
+    }
+    free(P1);
+    free(P2);
+    free(P1inv);
+    free(P2inv);
+    P->s = s;
+    return P;
+}
+
+void ft_execute_spinsph2fourier(const ft_spin_harmonic_plan * P, ft_complex * A, const int N, const int M) {
+    ft_execute_spinsph_hi2lo(P->SRP, A, P->B, M);
+    ft_complex alpha = {1.0, 0.0};
+    if (P->s%2 == 0) {
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, &alpha, P->P1, N, A, 4*N);
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, &alpha, P->P2, N, A+N, 4*N);
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, &alpha, P->P2, N, A+2*N, 4*N);
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, &alpha, P->P1, N, A+3*N, 4*N);
+    }
+    else {
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, &alpha, P->P2, N, A, 4*N);
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, &alpha, P->P1, N, A+N, 4*N);
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, &alpha, P->P1, N, A+2*N, 4*N);
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, &alpha, P->P2, N, A+3*N, 4*N);
+    }
+}
+
+void ft_execute_fourier2spinsph(const ft_spin_harmonic_plan * P, ft_complex * A, const int N, const int M) {
+    ft_complex alpha = {1.0, 0.0};
+    if (P->s%2 == 0) {
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, &alpha, P->P1inv, N, A, 4*N);
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, &alpha, P->P2inv, N, A+N, 4*N);
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, &alpha, P->P2inv, N, A+2*N, 4*N);
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, &alpha, P->P1inv, N, A+3*N, 4*N);
+    }
+    else {
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, &alpha, P->P2inv, N, A, 4*N);
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, &alpha, P->P1inv, N, A+N, 4*N);
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, &alpha, P->P1inv, N, A+2*N, 4*N);
+        cblas_ztrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, &alpha, P->P2inv, N, A+3*N, 4*N);
+    }
+    ft_execute_spinsph_lo2hi(P->SRP, A, P->B, M);
 }

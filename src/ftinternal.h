@@ -17,6 +17,8 @@
 #define M_SQRT_PI      1.772453850905516027   /* sqrt(pi)           */
 #define M_1_SQRT_PI    0.564189583547756287   /* 1/sqrt(pi)         */
 #define M_SQRT_PI_2    0.886226925452758014   /* sqrt(pi)/2         */
+#define M_2_SQRT_2PI   5.013256549262001005   /* 2*sqrt(2*pi)       */
+#define M_1_2_SQRT_2PI 0.199471140200716338   /* 1/(2*sqrt(2*pi))   */
 #define M_4_SQRT_PI    7.089815403622064109   /* 4*sqrt(pi)         */
 #define M_1_4_SQRT_PI  0.141047395886939072   /* 1/(4*sqrt(pi))     */
 #define M_PI_2_POW_0P5 1.253314137315500251   /* sqrt(pi/2)         */
@@ -95,6 +97,8 @@ static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
 
 #define MAX(a,b) ((a) > (b) ? a : b)
 #define MIN(a,b) ((a) < (b) ? a : b)
+
+typedef double ft_complex[2];
 
 typedef struct {
     unsigned sse     : 1;
@@ -267,14 +271,11 @@ double * plan_ultraspherical_to_chebyshev(const int normultra, const int normche
 double * plan_chebyshev_to_ultraspherical(const int normcheb, const int normultra, const int n, const double lambda);
 double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta);
 
-#ifndef FT_ROTATION_PLAN
-#define FT_ROTATION_PLAN
-    typedef struct {
-        double * s;
-        double * c;
-        int n;
-    } ft_rotation_plan;
-#endif
+typedef struct ft_rotation_plan_s {
+    double * s;
+    double * c;
+    int n;
+} ft_rotation_plan;
 
 void kernel_sph_hi2lo_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_sph_lo2hi_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
@@ -297,6 +298,20 @@ void kernel_tri_hi2lo_AVX_FMA(const ft_rotation_plan * RP, const int m1, const i
 void kernel_tri_lo2hi_AVX_FMA(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_tri_hi2lo_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_tri_lo2hi_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+
+typedef struct ft_spin_rotation_plan_s {
+    double * s1;
+    double * c1;
+    double * s2;
+    double * c2;
+    int n;
+    int s;
+} ft_spin_rotation_plan;
+
+void kernel_spinsph_hi2lo_default(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
+void kernel_spinsph_lo2hi_default(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
+void kernel_spinsph_hi2lo_SSE2(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
+void kernel_spinsph_lo2hi_SSE2(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
 
 void execute_sph_hi2lo_default(const ft_rotation_plan * RP, double * A, const int M);
 void execute_sph_lo2hi_default(const ft_rotation_plan * RP, double * A, const int M);
@@ -330,6 +345,11 @@ void execute_tri_hi2lo_AVX_FMA(const ft_rotation_plan * RP, double * A, double *
 void execute_tri_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_tri_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_tri_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+
+void execute_spinsph_hi2lo_default(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);
+void execute_spinsph_lo2hi_default(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);
+void execute_spinsph_hi2lo_SSE2(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);
+void execute_spinsph_lo2hi_SSE2(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);
 
 
 void permute(const double * A, double * B, const int N, const int M, const int L);

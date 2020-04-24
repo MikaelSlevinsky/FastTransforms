@@ -33,8 +33,8 @@ test_script:
   - test_banded.exe
   - test_dprk.exe
   - test_tdc.exe
-  - test_drivers.exe 3 3 0
-  - test_fftw.exe 3 3 0
+  - test_drivers.exe 1 3 0
+  - test_fftw.exe 1 3 0
   - additiontheorem.exe
   - calculus.exe
   - holomorphic.exe

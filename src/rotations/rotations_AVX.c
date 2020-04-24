@@ -4,14 +4,12 @@
     static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
         double4 x = vloadu4(X);
         double4 y = vloadu4(Y);
-
         vstoreu4(X, C*x + S*y);
         vstoreu4(Y, C*y - S*x);
     }
     static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y) {
         double4 x = vloadu4(X);
         double4 y = vloadu4(Y);
-
         vstoreu4(X, C*x - S*y);
         vstoreu4(Y, C*y + S*x);
     }

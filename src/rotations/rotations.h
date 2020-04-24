@@ -6,6 +6,12 @@
 #define s(l,m) s[l+(m)*(2*n+1-(m))/2]
 #define c(l,m) c[l+(m)*(2*n+1-(m))/2]
 
+#define s1(l,m) s1[l+(m)*n]
+#define c1(l,m) c1[l+(m)*n]
+
+#define s2(l,j,m) s2[l+(j)*n+(m)*as*n]
+#define c2(l,j,m) c2[l+(j)*n+(m)*as*n]
+
 #define KERNEL_SPH_HI2LO(T, VT, VS, L, VLOAD, VSTORE, APPLY_GIVENS)            \
 int n = RP->n, row, col;                                                       \
 T ts, tc;                                                                      \
