@@ -299,6 +299,17 @@ void kernel_tri_lo2hi_AVX_FMA(const ft_rotation_plan * RP, const int m1, const i
 void kernel_tri_hi2lo_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_tri_lo2hi_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
+void kernel_disk_hi2lo_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_disk_lo2hi_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_disk_hi2lo_SSE2(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_disk_lo2hi_SSE2(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_disk_hi2lo_AVX(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_disk_lo2hi_AVX(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_disk_hi2lo_AVX_FMA(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_disk_lo2hi_AVX_FMA(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_disk_hi2lo_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_disk_lo2hi_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+
 typedef struct ft_spin_rotation_plan_s {
     double * s1;
     double * c1;
@@ -346,6 +357,17 @@ void execute_tri_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double *
 void execute_tri_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_tri_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
+void execute_disk_hi2lo_default(const ft_rotation_plan * RP, double * A, const int M);
+void execute_disk_lo2hi_default(const ft_rotation_plan * RP, double * A, const int M);
+void execute_disk_hi2lo_SSE2(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_disk_lo2hi_SSE2(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_disk_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_disk_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_disk_hi2lo_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_disk_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_disk_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_disk_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+
 void execute_spinsph_hi2lo_default(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);
 void execute_spinsph_lo2hi_default(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);
 void execute_spinsph_hi2lo_SSE2(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);
@@ -361,17 +383,11 @@ void permute_t_sph(double * A, const double * B, const int N, const int M, const
 void permute_tri(const double * A, double * B, const int N, const int M, const int L);
 void permute_t_tri(double * A, const double * B, const int N, const int M, const int L);
 
-void old_permute_sph(const double * A, double * B, const int N, const int M, const int L);
-void old_permute_t_sph(double * A, const double * B, const int N, const int M, const int L);
-
 void old_permute_tri(const double * A, double * B, const int N, const int M, const int L);
 void old_permute_t_tri(double * A, const double * B, const int N, const int M, const int L);
 
-#define permute_disk(A, B, N, M, L) old_permute_sph(A, B, N, M, L)
-#define permute_t_disk(A, B, N, M, L) old_permute_t_sph(A, B, N, M, L)
-
-#define permute_spinsph(A, B, N, M, L) old_permute_sph(A, B, N, M, L)
-#define permute_t_spinsph(A, B, N, M, L) old_permute_t_sph(A, B, N, M, L)
+#define permute_disk(A, B, N, M, L) permute_sph(A, B, N, M, L)
+#define permute_t_disk(A, B, N, M, L) permute_t_sph(A, B, N, M, L)
 
 void swap_warp(double * A, double * B, const int N);
 void swap_warp_default(double * A, double * B, const int N);

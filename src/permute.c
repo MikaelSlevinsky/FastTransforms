@@ -37,32 +37,6 @@ void permute_t_tri(double * A, const double * B, const int N, const int M, const
     permute_t(A+M%L*N, B+M%L*N, N, M-M%L, L);
 }
 
-void old_permute_sph(const double * A, double * B, const int N, const int M, const int L) {
-    int NB = VALIGN(N);
-    if (L == 2) {
-        for (int i = 0; i < N; i++)
-            B[i] = A[i];
-        permute(A+N, B+NB, N, M-1, 2);
-    }
-    else {
-        old_permute_sph(A, B, N, M%(2*L), L/2);
-        permute(A+M%(2*L)*N, B+M%(2*L)*NB, N, M-M%(2*L), L);
-    }
-}
-
-void old_permute_t_sph(double * A, const double * B, const int N, const int M, const int L) {
-    int NB = VALIGN(N);
-    if (L == 2) {
-        for (int i = 0; i < N; i++)
-            A[i] = B[i];
-        permute_t(A+N, B+NB, N, M-1, 2);
-    }
-    else {
-        old_permute_t_sph(A, B, N, M%(2*L), L/2);
-        permute_t(A+M%(2*L)*N, B+M%(2*L)*NB, N, M-M%(2*L), L);
-    }
-}
-
 void old_permute_tri(const double * A, double * B, const int N, const int M, const int L) {
     int NB = VALIGN(N);
     if (L == 2) {

@@ -15,25 +15,17 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
 }
 
 static inline void apply_givensc(const double S, const double C, ft_complex * X, ft_complex * Y) {
-    double x = C*X[0][0] + S*Y[0][0];
-    double y = C*Y[0][0] - S*X[0][0];
-    X[0][0] = x;
-    Y[0][0] = y;
-    x = C*X[0][1] + S*Y[0][1];
-    y = C*Y[0][1] - S*X[0][1];
-    X[0][1] = x;
-    Y[0][1] = y;
+    double * XD = (double *) X;
+    double * YD = (double *) Y;
+    apply_givens(S, C, XD, YD);
+    apply_givens(S, C, XD+1, YD+1);
 }
 
 static inline void apply_givens_tc(const double S, const double C, ft_complex * X, ft_complex * Y) {
-    double x = C*X[0][0] - S*Y[0][0];
-    double y = C*Y[0][0] + S*X[0][0];
-    X[0][0] = x;
-    Y[0][0] = y;
-    x = C*X[0][1] - S*Y[0][1];
-    y = C*Y[0][1] + S*X[0][1];
-    X[0][1] = x;
-    Y[0][1] = y;
+    double * XD = (double *) X;
+    double * YD = (double *) Y;
+    apply_givens_t(S, C, XD, YD);
+    apply_givens_t(S, C, XD+1, YD+1);
 }
 
 void kernel_sph_hi2lo_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
@@ -62,6 +54,20 @@ void kernel_tri_lo2hi_default(const ft_rotation_plan * RP, const int m1, const i
     for (int j = m1; j < m2; j++)
         for (int k = 0; k <= n-2-j; k++)
             apply_givens_t(RP->s(k, j), RP->c(k, j), A+k*S, A+(k+1)*S);
+}
+
+void kernel_disk_hi2lo_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
+    int n = RP->n;
+    for (int j = m2-2; j >= m1; j -= 2)
+        for (int k = n-2-(j+1)/2; k >= 0; k--)
+            apply_givens(RP->sd(k, j), RP->cd(k, j), A+k*S, A+(k+1)*S);
+}
+
+void kernel_disk_lo2hi_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
+    int n = RP->n;
+    for (int j = m1; j < m2; j += 2)
+        for (int k = 0; k <= n-2-(j+1)/2; k++)
+            apply_givens_t(RP->sd(k, j), RP->cd(k, j), A+k*S, A+(k+1)*S);
 }
 
 void kernel_spinsph_hi2lo_default(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S) {

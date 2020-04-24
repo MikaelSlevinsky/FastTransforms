@@ -244,25 +244,10 @@ void ft_kernel_tri_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2
 
 ft_rotation_plan * ft_plan_rotdisk(const int n);
 
-/// Convert a single vector of disk harmonics of order m to 0/1.
-void ft_kernel_disk_hi2lo(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert a single vector of disk harmonics of order 0/1 to m.
-void ft_kernel_disk_lo2hi(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert a pair of vectors of disk harmonics of order m to 0/1.
-void ft_kernel_disk_hi2lo_SSE(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert a pair of vectors of disk harmonics of order 0/1 to m.
-void ft_kernel_disk_lo2hi_SSE(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert four vectors of disk harmonics of order m, m, m+2, m+2 to 0/1.
-void ft_kernel_disk_hi2lo_AVX(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert four vectors of disk harmonics of order 0/1 to m, m, m+2, m+2.
-void ft_kernel_disk_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert eight vectors of disk harmonics of order m, m, m+2, m+2, m+4, m+4, m+6, m+6 to 0/1.
-void ft_kernel_disk_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert eight vectors of disk harmonics of order 0/1 to m, m, m+2, m+2, m+4, m+4, m+6, m+6.
-void ft_kernel_disk_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double * A);
+/// Convert a single vector of disk harmonic coefficients in A with stride S from order m2 down to order m1.
+void ft_kernel_disk_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+/// Convert a single vector of disk harmonic coefficients in A with stride S from order m1 up to order m2.
+void ft_kernel_disk_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
 void ft_kernel_tet_hi2lo(const ft_rotation_plan * RP, const int L, const int m, double * A);
 void ft_kernel_tet_lo2hi(const ft_rotation_plan * RP, const int L, const int m, double * A);
@@ -299,17 +284,8 @@ void ft_execute_sphv_lo2hi(const ft_rotation_plan * RP, double * A, double * B, 
 void ft_execute_tri_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void ft_execute_tri_lo2hi(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
-void ft_execute_disk_hi2lo(const ft_rotation_plan * RP, double * A, const int M);
-void ft_execute_disk_lo2hi(const ft_rotation_plan * RP, double * A, const int M);
-
-void ft_execute_disk_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_disk_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_disk_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_disk_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_disk_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_disk_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_disk_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_disk_lo2hi(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
 void ft_execute_tet_hi2lo(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M);
 void ft_execute_tet_lo2hi(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M);
