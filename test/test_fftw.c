@@ -36,8 +36,9 @@ int main(int argc, const char * argv[]) {
     ft_fftw_init_threads();
     ft_fftw_plan_with_nthreads(FT_GET_NUM_THREADS());
 
-    printf("\nTesting the accuracy of spherical harmonic transforms + FFTW synthesis and analysis.\n\n");
-    printf("err1 = [\n");
+    printf("\nTesting the accuracy of SHTs + FFTW synthesis and analysis.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
@@ -53,8 +54,12 @@ int main(int argc, const char * argv[]) {
         ft_execute_sph_analysis(PA, A, N, M);
         ft_execute_fourier2sph(P, A, N, M);
 
-        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
-        printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
+        err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+        printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 4*sqrt(N), &checksum);
+        err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+        printf("ϵ_∞ \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 2*N, &checksum);
 
         free(A);
         free(B);
@@ -62,7 +67,6 @@ int main(int argc, const char * argv[]) {
         ft_destroy_sphere_fftw_plan(PS);
         ft_destroy_sphere_fftw_plan(PA);
     }
-    printf("];\n");
 
     printf("\nTiming spherical harmonic transforms + FFTW synthesis and analysis.\n\n");
     printf("t1 = [\n");
@@ -89,8 +93,9 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    printf("\nTesting the accuracy of spherical vector field transforms + FFTW synthesis and analysis.\n\n");
-    printf("err2 = [\n");
+    printf("\nTesting the accuracy of vector SHTs + FFTW synthesis and analysis.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
@@ -106,8 +111,12 @@ int main(int argc, const char * argv[]) {
         ft_execute_sphv_analysis(PA, A, N, M);
         ft_execute_fourier2sphv(P, A, N, M);
 
-        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
-        printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
+        err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+        printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 4*sqrt(N), &checksum);
+        err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+        printf("ϵ_∞ \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 2*N, &checksum);
 
         free(A);
         free(B);
@@ -115,7 +124,6 @@ int main(int argc, const char * argv[]) {
         ft_destroy_sphere_fftw_plan(PS);
         ft_destroy_sphere_fftw_plan(PA);
     }
-    printf("];\n");
 
     printf("\nTiming spherical vector field transforms + FFTW synthesis and analysis.\n\n");
     printf("t2 = [\n");
@@ -142,8 +150,9 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    printf("\nTesting the accuracy of triangular harmonic transforms + FFTW synthesis and analysis.\n\n");
-    printf("err3 = [\n");
+    printf("\nTesting the accuracy of Proriol² transforms + FFTW synthesis and analysis.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i)+J;
         M = N;
@@ -159,8 +168,12 @@ int main(int argc, const char * argv[]) {
         ft_execute_tri_analysis(QA, A, N, M);
         ft_execute_cheb2tri(P, A, N, M);
 
-        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
-        printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
+        err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+        printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 8*sqrt(N), &checksum);
+        err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+        printf("ϵ_∞ \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 4*N, &checksum);
 
         free(A);
         free(B);
@@ -168,9 +181,8 @@ int main(int argc, const char * argv[]) {
         ft_destroy_triangle_fftw_plan(QS);
         ft_destroy_triangle_fftw_plan(QA);
     }
-    printf("];\n");
 
-    printf("\nTiming triangular harmonic transforms + FFTW synthesis and analysis.\n\n");
+    printf("\nTiming Proriol² transforms + FFTW synthesis and analysis.\n\n");
     printf("t3 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
@@ -195,8 +207,9 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    printf("\nTesting the accuracy of disk harmonic transforms + FFTW synthesis and analysis.\n\n");
-    printf("err4 = [\n");
+    printf("\nTesting the accuracy of Zernike transforms + FFTW synthesis and analysis.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
     for (int i = 0; i < IERR; i++) {
         N = 64*pow(2, i)+J;
         M = 4*N-3;
@@ -212,8 +225,12 @@ int main(int argc, const char * argv[]) {
         ft_execute_disk_analysis(RA, A, N, M);
         ft_execute_cxf2disk(P, A, N, M);
 
-        printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
-        printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
+        err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+        printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 8*sqrt(N), &checksum);
+        err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+        printf("ϵ_∞ \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 4*N, &checksum);
 
         free(A);
         free(B);
@@ -221,9 +238,8 @@ int main(int argc, const char * argv[]) {
         ft_destroy_disk_fftw_plan(RS);
         ft_destroy_disk_fftw_plan(RA);
     }
-    printf("];\n");
 
-    printf("\nTiming disk harmonic transforms + FFTW synthesis and analysis.\n\n");
+    printf("\nTiming Zernike transforms + FFTW synthesis and analysis.\n\n");
     printf("t4 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
@@ -248,8 +264,9 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    printf("\nTesting the accuracy of tetrahedral harmonic transforms + FFTW synthesis and analysis.\n\n");
-    printf("err5 = [\n");
+    printf("\nTesting the accuracy of Proriol³ transforms + FFTW synthesis and analysis.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
     for (int i = 0; i < IERR; i++) {
         N = 16*pow(2, i)+J;
         L = M = N;
@@ -265,8 +282,12 @@ int main(int argc, const char * argv[]) {
         ft_execute_tet_analysis(SA, A, N, L, M);
         ft_execute_cheb2tet(TP, A, N, L, M);
 
-        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
-        printf("%1.2e\n", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 8*pow(N*L*M, 1.0/3.0), &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 4*pow(N*L*M, 2.0/3.0), &checksum);
 
         free(A);
         free(B);
@@ -274,14 +295,13 @@ int main(int argc, const char * argv[]) {
         ft_destroy_tetrahedron_fftw_plan(SS);
         ft_destroy_tetrahedron_fftw_plan(SA);
     }
-    printf("];\n");
 
-    printf("\nTiming tetrahedral harmonic transforms + FFTW synthesis and analysis.\n\n");
+    printf("\nTiming Proriol³ transforms + FFTW synthesis and analysis.\n\n");
     printf("t5 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 16*pow(2, i)+J;
         L = M = N;
-        NTIMES = 1 + pow(512/N, 2);
+        NTIMES = 1 + pow(256/N, 2);
 
         A = tetrand(N, L, M);
         TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
@@ -329,9 +349,6 @@ int main(int argc, const char * argv[]) {
             err = ft_normInf_2arg(A, B, 2*N*M)/ft_normInf_1arg(B, 2*N*M);
             printf("ϵ_∞ \t\t\t (N×M, S) = (%5ix%5i,%3i): \t |%20.2e ", N, M, S, err);
             ft_checktest(err, 2*N, &checksum);
-
-            //printf("%1.2e  ", ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M));
-            //printf("%1.2e\n", ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M));
 
             free(AC);
             free(BC);

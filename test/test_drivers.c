@@ -440,7 +440,7 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    printf("\nTesting the accuracy of triangular harmonic drivers.\n\n");
+    printf("\nTesting the accuracy of Proriol² drivers.\n\n");
     printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
     for (int i = 0; i < IERR; i++) {
@@ -548,7 +548,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_rotation_plan(RP);
     }
 
-    printf("\nTiming triangular harmonic drivers.\n\n");
+    printf("\nTiming Proriol² drivers.\n\n");
     printf("t5 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
@@ -595,7 +595,7 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    printf("\nTesting the accuracy of triangular harmonic transforms.\n\n");
+    printf("\nTesting the accuracy of Proriol² transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
     for (int i = 0; i < IERR; i++) {
@@ -621,7 +621,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_harmonic_plan(P);
     }
 
-    printf("\nTiming triangular harmonic transforms.\n\n");
+    printf("\nTiming Proriol² transforms.\n\n");
     printf("t6 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
@@ -642,7 +642,7 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    printf("\nTesting the accuracy of disk harmonic drivers.\n\n");
+    printf("\nTesting the accuracy of Zernike drivers.\n\n");
     printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
     for (int i = 0; i < IERR; i++) {
@@ -750,7 +750,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_rotation_plan(RP);
     }
 
-    printf("\nTiming disk harmonic drivers.\n\n");
+    printf("\nTiming Zernike drivers.\n\n");
     printf("t7 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
@@ -797,7 +797,7 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    printf("\nTesting the accuracy of disk harmonic transforms.\n\n");
+    printf("\nTesting the accuracy of Zernike transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
     for (int i = 0; i < IERR; i++) {
@@ -823,7 +823,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_harmonic_plan(P);
     }
 
-    printf("\nTiming disk harmonic transforms.\n\n");
+    printf("\nTiming Zernike transforms.\n\n");
     printf("t8 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
@@ -844,8 +844,9 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    printf("\nTesting the accuracy of tetrahedral harmonic drivers.\n\n");
-    printf("err9 = [\n");
+    printf("\nTesting the accuracy of Proriol³ drivers.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
     for (int i = 0; i < IERR; i++) {
         N = 16*pow(2, i)+J;
         L = M = N;
@@ -860,44 +861,72 @@ int main(int argc, const char * argv[]) {
         ft_execute_tet_hi2lo(RP1, RP2, A, L, M);
         ft_execute_tet_lo2hi(RP1, RP2, A, L, M);
 
-        printf("%d  %1.2e  ", N, ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
-        printf("%1.2e  ", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 default \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 8*pow(N*L*M, 1.0/3.0), &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ default \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 4*pow(N*L*M, 2.0/3.0), &checksum);
 
         ft_execute_tet_hi2lo_SSE(RP1, RP2, A, Ac, L, M);
         ft_execute_tet_lo2hi(RP1, RP2, A, L, M);
 
-        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
-        printf("%1.2e  ", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 SSE-default  (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 8*pow(N*L*M, 1.0/3.0), &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ SSE-default  (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 4*pow(N*L*M, 2.0/3.0), &checksum);
 
         ft_execute_tet_hi2lo(RP1, RP2, A, L, M);
         ft_execute_tet_lo2hi_SSE(RP1, RP2, A, Ac, L, M);
 
-        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
-        printf("%1.2e  ", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 default-SSE  (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 8*pow(N*L*M, 1.0/3.0), &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ default-SSE  (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 4*pow(N*L*M, 2.0/3.0), &checksum);
 
         ft_execute_tet_hi2lo_AVX(RP1, RP2, A, Ac, L, M);
         ft_execute_tet_lo2hi_SSE(RP1, RP2, A, Ac, L, M);
 
-        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
-        printf("%1.2e  ", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 AVX-SSE \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 8*pow(N*L*M, 1.0/3.0), &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ AVX-SSE \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 4*pow(N*L*M, 2.0/3.0), &checksum);
 
         ft_execute_tet_hi2lo_SSE(RP1, RP2, A, Ac, L, M);
         ft_execute_tet_lo2hi_AVX(RP1, RP2, A, Ac, L, M);
 
-        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
-        printf("%1.2e  ", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 SSE-AVX \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 8*pow(N*L*M, 1.0/3.0), &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ SSE-AVX \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 4*pow(N*L*M, 2.0/3.0), &checksum);
 
         ft_execute_tet_hi2lo_AVX512(RP1, RP2, A, Ac, L, M);
         ft_execute_tet_lo2hi_AVX(RP1, RP2, A, Ac, L, M);
 
-        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
-        printf("%1.2e  ", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 AVX512-AVX \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 8*pow(N*L*M, 1.0/3.0), &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ AVX512-AVX \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 4*pow(N*L*M, 2.0/3.0), &checksum);
 
         ft_execute_tet_hi2lo_AVX(RP1, RP2, A, Ac, L, M);
         ft_execute_tet_lo2hi_AVX512(RP1, RP2, A, Ac, L, M);
 
-        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
-        printf("%1.2e\n", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 AVX-AVX512 \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 8*pow(N*L*M, 1.0/3.0), &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ AVX-AVX512 \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 4*pow(N*L*M, 2.0/3.0), &checksum);
 
         free(A);
         VFREE(Ac);
@@ -905,9 +934,8 @@ int main(int argc, const char * argv[]) {
         ft_destroy_rotation_plan(RP1);
         ft_destroy_rotation_plan(RP2);
     }
-    printf("];\n");
 
-    printf("\nTiming tetrahedral harmonic drivers.\n\n");
+    printf("\nTiming Proriol³ drivers.\n\n");
     printf("t9 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 16*pow(2, i)+J;
@@ -951,8 +979,9 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
-    printf("\nTesting the accuracy of tetrahedral harmonic transforms.\n\n");
-    printf("err10 = [\n");
+    printf("\nTesting the accuracy of Proriol³ transforms.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
     for (int i = 0; i < IERR; i++) {
         N = 16*pow(2, i)+J;
         L = M = N;
@@ -964,16 +993,19 @@ int main(int argc, const char * argv[]) {
         ft_execute_tet2cheb(TP, A, N, L, M);
         ft_execute_cheb2tet(TP, A, N, L, M);
 
-        printf("%1.2e  ", ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M));
-        printf("%1.2e\n", ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M));
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 8*pow(N*L*M, 1.0/3.0), &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 4*pow(N*L*M, 2.0/3.0), &checksum);
 
         free(A);
         free(B);
         ft_destroy_tetrahedral_harmonic_plan(TP);
     }
-    printf("];\n");
 
-    printf("\nTiming tetrahedral harmonic transforms.\n\n");
+    printf("\nTiming Proriol³ transforms.\n\n");
     printf("t10 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 16*pow(2, i)+J;
