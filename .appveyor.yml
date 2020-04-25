@@ -39,3 +39,4 @@ test_script:
   - calculus.exe
   - holomorphic.exe
   - nonlocaldiffusion.exe
+  - spinweighted.exe

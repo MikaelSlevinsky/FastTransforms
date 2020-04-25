@@ -116,12 +116,10 @@ script:
   - ./calculus
   - ./holomorphic
   - ./nonlocaldiffusion
+  - ./spinweighted
 
 after_success:
   - doxygen Doxyfile
-
-before_deploy:
-  - ./travis_deploy.sh
 
 deploy:
   - provider: pages
@@ -130,13 +128,6 @@ deploy:
     github_token: $FT_DOCS
     on:
       branch: master
-  - provider: releases
-    api_key: $FT_BINARIES
-    file_glob: true
-    file: libfasttransforms.*
-    skip_cleanup: true
-    on:
-      tags: true
 
 notifications:
   email: false

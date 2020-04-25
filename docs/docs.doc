@@ -321,7 +321,7 @@ f_{n}^0 & f_{n}^{-1} & f_{n}^1 & f_n^{-2} & f_n^2 &  & \vdots & \vdots\\
 0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
 \end{pmatrix},
 \f]
-then \c ft_execute_spinsph2fourier returns the bivariate Fourier coefficients:
+then \ref ft_execute_spinsph2fourier returns the bivariate Fourier coefficients:
 \f[
 G = \begin{pmatrix}
 g_0^0 & g_0^{-1} & g_0^1 & \cdots & g_0^{-n} & g_0^n\\
@@ -335,7 +335,10 @@ That is:
 \f[
 f_n(\theta,\varphi) = \sum_{\ell=0}^n\sum_{m=-n}^{+n} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m+s~{\rm even},\\ \sin((\ell+1)\theta) & m+s~{\rm odd}.\end{array}\right.
 \f]
-Since \c ft_execute_spinsph2fourier only transforms columns of the arrays, the routine is indifferent to the choice of longitudinal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
+Spin-weighted spherical harmonics are orthonormalized and have positive real phase, which implies identities such as:
+\f[
+\overline{Y}_{\ell,m}^s(\theta,\varphi) = Y_{\ell,-m}^{-s}(\theta,\varphi).
+\f]
 
 \section FT2 Under construction
 
