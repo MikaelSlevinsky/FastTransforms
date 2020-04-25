@@ -18,7 +18,7 @@ double3 r(double theta, double phi) {return (double3) {sin(theta)*cos(phi), sin(
   \f[
   f(r) = e^{{\rm i} k\cdot r},
   \f]
-  for some \f$k\in\mathbb{R}^3\f$ and where \f$r\in\mathbb{S}^2\f$, using spin-0 spherical harmonics. It applies \f$\dh\f$, the spin-raising operator, both on the spin-0 coefficients as well as the original function, followed by a spin-1 analysis to compare coefficients.
+  for some \f$k\in\mathbb{R}^3\f$ and where \f$r\in\mathbb{S}^2\f$, using spin-0 spherical harmonics. It applies ð, the spin-raising operator, both on the spin-0 coefficients as well as the original function, followed by a spin-1 analysis to compare coefficients.
 */
 int main(void) {
     printf("This example plays with analysis of\n");
