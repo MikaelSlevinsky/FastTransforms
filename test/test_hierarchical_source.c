@@ -1,25 +1,15 @@
 void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FLT y), FLT * x, FLT * y) {
-    int NLOOPS = 3;
+    int NTIMES = 3;
     struct timeval start, end;
     unitrange ir = {0, m}, jr = {0, n};
     FLT err = 0;
-    gettimeofday(&start, NULL);
-    for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-        X(densematrix) * A = X(sample_densematrix)(f, x, y, ir, jr);
-        X(destroy_densematrix)(A);
-    }
-    gettimeofday(&end, NULL);
     X(densematrix) * A = X(sample_densematrix)(f, x, y, ir, jr);
-    printf("Time to sample densely \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
+    FT_TIME({X(densematrix) * A = X(sample_densematrix)(f, x, y, ir, jr); X(destroy_densematrix)(A);}, start, end, NTIMES)
+    printf("Time to sample densely \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-    gettimeofday(&start, NULL);
-    for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-        X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(f, x, y, ir, jr, 'G');
-        X(destroy_hierarchicalmatrix)(H);
-    }
-    gettimeofday(&end, NULL);
     X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(f, x, y, ir, jr, 'G');
-    printf("Time to sample hierarchically \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
+    FT_TIME({X(hierarchicalmatrix) * H = X(sample_hierarchicalmatrix)(f, x, y, ir, jr, 'G'); X(destroy_hierarchicalmatrix)(H);}, start, end, NTIMES)
+    printf("Time to sample hierarchically \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
     printf("Size of the hierarchical matrix \t\t\t |");
     print_summary_size(X(summary_size_hierarchicalmatrix)(H));
@@ -28,20 +18,12 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     for (int j = 0; j < n; j++)
         u[j] = 1/(j+ONE(FLT));
     FLT * v = calloc(m, sizeof(FLT));
-    gettimeofday(&start, NULL);
-    for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-        X(demv)('N', 1, A, u, 0, v);
-    }
-    gettimeofday(&end, NULL);
-    printf("Time to multiply densely \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
+    FT_TIME(X(demv)('N', 1, A, u, 0, v), start, end, NTIMES)
+    printf("Time to multiply densely \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
     FLT * w = calloc(m, sizeof(FLT));
-    gettimeofday(&start, NULL);
-    for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-        X(ghmv)('N', 1, H, u, 0, w);
-    }
-    gettimeofday(&end, NULL);
-    printf("Time to multiply hierarchically \t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
+    FT_TIME(X(ghmv)('N', 1, H, u, 0, w), start, end, NTIMES)
+    printf("Time to multiply hierarchically \t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
     err = X(norm_2arg)(v, w, m)/X(norm_1arg)(v, m);
     printf("Comparison of matrix-vector products \t (%5i×%5i) \t |%20.2e ", m, n, (double) err);
@@ -60,20 +42,17 @@ void X(inner_test_hierarchical)(int * checksum, int m, int n, FLT (*f)(FLT x, FL
     for (int i = 0; i < n*p; i++)
         B[i] = i;
     gettimeofday(&start, NULL);
-    for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
+    for (int ntimes = 0; ntimes < NTIMES; ntimes++) {
         #pragma omp parallel for
         for (int q = 0; q < p; q++)
             X(ghmv)('N', 1, H, B+q*n, 0, C+q*m);
     }
     gettimeofday(&end, NULL);
-    printf("Time for naïve ghmm \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
+    printf("Time for naïve ghmm \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
     FLT * D = calloc(m*p, sizeof(FLT));
-    gettimeofday(&start, NULL);
-    for (int ntimes = 0; ntimes < NLOOPS; ntimes++)
-        X(ghmm)('N', p, 1, H, B, n, 0, D, m);
-    gettimeofday(&end, NULL);
-    printf("Time for blocked ghmm \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NLOOPS));
+    FT_TIME(X(ghmm)('N', p, 1, H, B, n, 0, D, m), start, end, NTIMES)
+    printf("Time for blocked ghmm \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
     err = X(norm_2arg)(C, D, m*p)/X(norm_1arg)(C, m*p);
     printf("Comparison of matrix-matrix products \t (%5i×%5i) \t |%20.2e ", m, p, (double) err);

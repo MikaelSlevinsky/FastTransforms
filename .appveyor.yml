@@ -18,12 +18,14 @@ matrix:
 build_script:
   - set CC=gcc && set FT_BLAS=openblas && set FT_FFTW_WITH_COMBINED_THREADS=1
   - gcc --version
+  - mingw32-make assembly
   - mingw32-make lib
   - mingw32-make tests
   - mingw32-make examples
 
 test_script:
   - set OMP_NUM_THREADS=4
+  - test_recurrence.exe
   - test_transforms.exe
   - test_rotations.exe
   - test_tridiagonal.exe
@@ -31,9 +33,10 @@ test_script:
   - test_banded.exe
   - test_dprk.exe
   - test_tdc.exe
-  - test_drivers.exe 3 3 0
-  - test_fftw.exe 3 3 0
+  - test_drivers.exe 1 3 0
+  - test_fftw.exe 1 3 0
   - additiontheorem.exe
   - calculus.exe
   - holomorphic.exe
   - nonlocaldiffusion.exe
+  - spinweighted.exe

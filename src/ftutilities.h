@@ -12,6 +12,14 @@
 
 #define FT_CONCAT(prefix, name, suffix) prefix ## name ## suffix
 
+#define FT_TIME(BLOCK, START, END, NTIMES)                                     \
+BLOCK;                                                                         \
+BLOCK;                                                                         \
+gettimeofday(&START, NULL);                                                    \
+for (int ntimes = 0; ntimes < NTIMES; ntimes++)                                \
+    BLOCK;                                                                     \
+gettimeofday(&END, NULL);
+
 void printmat(char * MAT, char * FMT, double * A, int n, int m);
 void print_summary_size(size_t i);
 double * copymat(double * A, int n, int m);
@@ -23,8 +31,8 @@ double * diskones(int n, int m);
 double * diskrand(int n, int m);
 double * tetones(int n, int l, int m);
 double * tetrand(int n, int l, int m);
-double * spinsphones(int n, int m, int s);
-double * spinsphrand(int n, int m, int s);
+ft_complex * spinsphones(int n, int m, int s);
+ft_complex * spinsphrand(int n, int m, int s);
 double elapsed(struct timeval * start, struct timeval * end, int N);
 
 #define FLT float

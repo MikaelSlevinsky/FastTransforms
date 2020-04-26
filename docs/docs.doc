@@ -168,34 +168,34 @@ Spherical harmonics are:
 \f[
 Y_\ell^m(\theta,\varphi) = \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} (-1)^{\abs{m}}\sqrt{(\ell+\frac{1}{2})\frac{(\ell-\abs{m})!}{(\ell+\abs{m})!}} P_\ell^{\abs{m}}(\cos\theta),
 \f]
-where \f$P_\ell^m(\cos\theta)\f$ are the associated Legendre functions. A degree-\f$n\f$ expansion in spherical harmonics is given by:
+where \f$P_\ell^m(\cos\theta)\f$ are the associated Legendre functions. A degree-\f$(n-1)\f$ expansion in spherical harmonics is given by:
 \f[
-f_n(\theta,\varphi) = \sum_{\ell=0}^{n}\sum_{m=-\ell}^{+\ell} f_\ell^m Y_\ell^m(\theta,\varphi).
+f_{n-1}(\theta,\varphi) = \sum_{\ell=0}^{n-1}\sum_{m=-\ell}^{+\ell} f_\ell^m Y_\ell^m(\theta,\varphi).
 \f]
 If spherical harmonic expansion coefficients are organized into the array:
 \f[
 F = \begin{pmatrix}
-f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_n^{-n} & f_n^n\\
+f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_{n-1}^{1-n} & f_{n-1}^{n-1}\\
 f_1^0 & f_2^{-1} & f_2^1 & f_3^{-2} & f_3^2 & \cdots & 0 & 0\\
 \vdots & \vdots & \vdots &  \vdots &  \vdots & \ddots & \vdots & \vdots\\
-f_{n-2}^0 & f_{n-1}^{-1} & f_{n-1}^1 & f_n^{-2} & f_n^2 &  & \vdots & \vdots\\
-f_{n-1}^0 & f_n^{-1} & f_n^1 & 0 & 0 & \cdots & 0 & 0\\
-f_n^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+f_{n-3}^0 & f_{n-2}^{-1} & f_{n-2}^1 & f_{n-1}^{-2} & f_{n-1}^2 &  & \vdots & \vdots\\
+f_{n-2}^0 & f_{n-1}^{-1} & f_{n-1}^1 & 0 & 0 & \cdots & 0 & 0\\
+f_{n-1}^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
 \end{pmatrix},
 \f]
 then \ref ft_plan_sph2fourier creates the appropriate \ref ft_harmonic_plan, and \ref ft_execute_sph2fourier returns the bivariate Fourier coefficients:
 \f[
 G = \begin{pmatrix}
-g_0^0 & g_0^{-1} & g_0^1 & \cdots & g_0^{-n} & g_0^n\\
-g_1^0 & g_1^{-1} & g_1^1 & \cdots & g_1^{-n} & g_1^n\\
+g_0^0 & g_0^{-1} & g_0^1 & \cdots & g_0^{1-n} & g_0^{n-1}\\
+g_1^0 & g_1^{-1} & g_1^1 & \cdots & g_1^{1-n} & g_1^{n-1}\\
 \vdots & \vdots & \vdots & \ddots & \vdots & \vdots\\
-g_{n-1}^0 & g_{n-1}^{-1} & g_{n-1}^1& \cdots & g_{n-1}^{-n} & g_{n-1}^n\\
-g_n^0 & 0 & 0 & \cdots & g_n^{-n} & g_n^n\\
+g_{n-2}^0 & g_{n-2}^{-1} & g_{n-2}^1& \cdots & g_{n-2}^{1-n} & g_{n-2}^{n-1}\\
+g_{n-1}^0 & 0 & 0 & \cdots & g_{n-1}^{1-n} & g_{n-1}^{n-1}\\
 \end{pmatrix}.
 \f]
 That is:
 \f[
-f_n(\theta,\varphi) = \sum_{\ell=0}^n\sum_{m=-n}^{+n} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m~{\rm even},\\ \sin((\ell+1)\theta) & m~{\rm odd},\end{array}\right.
+f_n(\theta,\varphi) = \sum_{\ell=0}^{n-1}\sum_{m=1-n}^{n-1} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m~{\rm even},\\ \sin((\ell+1)\theta) & m~{\rm odd},\end{array}\right.
 \f]
 and \ref ft_execute_fourier2sph converts them back. Since the routines only transform columns of the arrays, they are indifferent to the choice of longitudinal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
 
@@ -206,34 +206,34 @@ Disk harmonics are Zernike polynomials:
 \f[
 Z_\ell^m(r,\theta) = \sqrt{2\ell+2} r^{\abs{m}}P_{\frac{\ell-\abs{m}}{2}}^{(0,\abs{m})}(2r^2-1)\frac{e^{\ii m\theta}}{\sqrt{2\pi}}.
 \f]
-A degree-\f$2n\f$ expansion in disk harmonics is given by:
+A degree-\f$(2n-2)\f$ expansion in disk harmonics is given by:
 \f[
-f_{2n}(r,\theta) = \sum_{\ell=0}^{2n}\sum_{m=-\ell,2}^{+\ell} f_\ell^m Z_\ell^m(r,\theta),
+f_{2n-2}(r,\theta) = \sum_{\ell=0}^{2n-2}\sum_{m=-\ell,2}^{+\ell} f_\ell^m Z_\ell^m(r,\theta),
 \f]
 where the \f$,2\f$ in the inner summation index implies that the inner summation runs from \f$m=-\ell\f$ in steps of \f$2\f$ up to \f$+\ell\f$. If disk harmonic expansion coefficients are organized into the array:
 \f[
 F = \begin{pmatrix}
-f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_{2n}^{-2n} & f_{2n}^{2n}\\
+f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_{2n-2}^{2-2n} & f_{2n-2}^{2n-2}\\
 f_2^0 & f_3^{-1} & f_3^1 & f_4^{-2} & f_4^2 & \cdots & 0 & 0\\
 \vdots & \vdots & \vdots &  \vdots &  \vdots & \ddots & \vdots & \vdots\\
-f_{2n-4}^0 & f_{2n-3}^{-1} & f_{2n-3}^1 & f_{2n-2}^{-2} & f_{2n-2}^2 &  & \vdots & \vdots\\
-f_{2n-2}^0 & f_{2n-1}^{-1} & f_{2n-1}^1 & f_{2n}^{-2} & f_{2n}^2 & \cdots & 0 & 0\\
-f_{2n}^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+f_{2n-6}^0 & f_{2n-5}^{-1} & f_{2n-5}^1 & f_{2n-4}^{-2} & f_{2n-4}^2 &  & \vdots & \vdots\\
+f_{2n-4}^0 & f_{2n-3}^{-1} & f_{2n-3}^1 & f_{2n-2}^{-2} & f_{2n-2}^2 & \cdots & 0 & 0\\
+f_{2n-2}^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
 \end{pmatrix},
 \f]
 then \ref ft_plan_disk2cxf creates the appropriate \ref ft_harmonic_plan, and \ref ft_execute_disk2cxf returns the even Chebyshev--Fourier coefficients:
 \f[
 G = \begin{pmatrix}
-g_0^0 & g_0^{-1} & g_0^1 & g_0^{-2} & g_0^2 & \cdots & g_0^{-2n} & g_0^{2n}\\
-g_2^0 & g_2^{-1} & g_2^1 & g_2^{-2} & g_2^2 & \cdots & g_2^{-2n} & g_2^{2n}\\
+g_0^0 & g_0^{-1} & g_0^1 & g_0^{-2} & g_0^2 & \cdots & g_0^{2-2n} & g_0^{2n-2}\\
+g_2^0 & g_2^{-1} & g_2^1 & g_2^{-2} & g_2^2 & \cdots & g_2^{2-2n} & g_2^{2n-2}\\
 \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots\\
-g_{2n-2}^0 & g_{2n-2}^{-1} & g_{2n-2}^1 & g_{2n-2}^{-2} & g_{2n-2}^2 & \cdots & g_{2n-2}^{-2n} & g_{2n-2}^{2n}\\
-g_{2n}^0 & 0 & 0 & g_{2n}^{-2} & g_{2n}^2 & \cdots & g_{2n}^{-2n} & g_{2n}^{2n}\\
+g_{2n-4}^0 & g_{2n-4}^{-1} & g_{2n-4}^1 & g_{2n-4}^{-2} & g_{2n-4}^2 & \cdots & g_{2n-4}^{2-2n} & g_{2n-4}^{2n-2}\\
+g_{2n-2}^0 & 0 & 0 & g_{2n-2}^{-2} & g_{2n-2}^2 & \cdots & g_{2n-2}^{2-2n} & g_{2n-2}^{2n-2}\\
 \end{pmatrix}.
 \f]
 That is:
 \f[
-f_{2n}(r,\theta) = \sum_{\ell=0}^{n}\sum_{m=-2n}^{+2n} g_{2\ell}^m \frac{e^{\ii m\theta}}{\sqrt{2\pi}} \left\{\begin{array}{lr} T_{2\ell}(r) & m~{\rm even},\\ T_{2\ell+1}(r) & m~{\rm odd},\end{array}\right.
+f_{2n-2}(r,\theta) = \sum_{\ell=0}^{n-1}\sum_{m=2-2n}^{2n-2} g_{2\ell}^m \frac{e^{\ii m\theta}}{\sqrt{2\pi}} \left\{\begin{array}{lr} T_{2\ell}(r) & m~{\rm even},\\ T_{2\ell+1}(r) & m~{\rm odd},\end{array}\right.
 \f]
 and \ref ft_execute_cxf2disk converts them back. Since \ref ft_execute_disk2cxf only transforms columns of the arrays, the routine is indifferent to the choice of azimuthal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
 
@@ -244,32 +244,32 @@ Triangular harmonics are:
 \f[
 \tilde{P}_{\ell,m}^{(\alpha,\beta,\gamma)}(x,y) = (2-2x)^m \tilde{P}_{\ell-m}^{(2m+\beta+\gamma+1,\alpha)}(2x-1) \tilde{P}_m^{(\gamma,\beta)}\left(\frac{2y}{1-x}-1\right),
 \f]
-where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-\f$n\f$ expansion in triangular harmonics is given by:
+where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-\f$(n-1)\f$ expansion in triangular harmonics is given by:
 \f[
-f_n(x,y) = \sum_{\ell=0}^{n}\sum_{m = 0}^\ell f_\ell^m \tilde{P}_{\ell,m}^{(\alpha,\beta,\gamma)}(x,y).
+f_{n-1}(x,y) = \sum_{\ell=0}^{n-1}\sum_{m=0}^\ell f_\ell^m \tilde{P}_{\ell,m}^{(\alpha,\beta,\gamma)}(x,y).
 \f]
 If triangular harmonic expansion coefficients are organized into the array:
 \f[
 F = \begin{pmatrix}
-f_0^0 & f_1^1 & f_2^2 & \cdots & f_n^n\\
+f_0^0 & f_1^1 & f_2^2 & \cdots & f_{n-1}^{n-1}\\
 \vdots & \vdots &  \vdots & \ddots & 0\\
-f_{n-2}^0 & f_{n-1}^1 & f_n^2 & & \vdots\\
-f_{n-1}^0 & f_n^1 & 0 & \cdots & 0\\
-f_n^0 & 0 & 0 & \cdots & 0\\
+f_{n-3}^0 & f_{n-2}^1 & f_{n-1}^2 & & \vdots\\
+f_{n-2}^0 & f_{n-1}^1 & 0 & \cdots & 0\\
+f_{n-1}^0 & 0 & 0 & \cdots & 0\\
 \end{pmatrix},
 \f]
 then \ref ft_plan_tri2cheb creates the appropriate \ref ft_harmonic_plan, and \ref ft_execute_tri2cheb returns the bivariate Chebyshev coefficients:
 \f[
 G = \begin{pmatrix}
-g_0^0 & g_0^1 & \cdots & g_0^n\\
-g_1^0 & g_1^1 & \cdots & g_1^n\\
+g_0^0 & g_0^1 & \cdots & g_0^{n-1}\\
+g_1^0 & g_1^1 & \cdots & g_1^{n-1}\\
 \vdots & \vdots & \ddots & \vdots\\
-g_n^0 & g_n^1 & \cdots & g_n^n\\
+g_{n-1}^0 & g_{n-1}^1 & \cdots & g_{n-1}^{n-1}\\
 \end{pmatrix}.
 \f]
 That is:
 \f[
-f_n(x,y) = \sum_{\ell=0}^n\sum_{m=0}^n g_\ell^m T_\ell(2x-1) T_m\left(\frac{2y}{1-x}-1\right),
+f_{n-1}(x,y) = \sum_{\ell=0}^{n-1}\sum_{m=0}^{n-1} g_\ell^m T_\ell(2x-1) T_m\left(\frac{2y}{1-x}-1\right),
 \f]
 and \ref ft_execute_cheb2tri converts them back.
 
@@ -280,26 +280,24 @@ Tetrahedral harmonics are:
 \f[
 \tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z) = (2-2x)^{\ell+m} \tilde{P}_{k-\ell-m}^{(2\ell+2m+\beta+\gamma+\delta+2,\alpha)}(2x-1) \left(2-\frac{2y}{1-x}\right)^m \tilde{P}_\ell^{(2m+\gamma+\delta+1,\beta)}\left(\frac{2y}{1-x}-1\right) \tilde{P}_m^{(\delta,\gamma)}\left(\frac{2z}{1-x-y}-1\right),
 \f]
-where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-\f$n\f$ expansion in tetrahedral harmonics is given by:
+where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-\f$(n-1)\f$ expansion in tetrahedral harmonics is given by:
 \f[
-f_n(x,y,z) = \sum_{k=0}^n\sum_{\ell=0}^k\sum_{m=0}^{k-\ell} f_{k,\ell}^m \tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z) = \sum_{m=0}^n\sum_{\ell=0}^{n-m}\sum_{k=\ell+m}^n f_{k,\ell}^m \tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z).
+f_{n-1}(x,y,z) = \sum_{k=0}^{n-1}\sum_{\ell=0}^k\sum_{m=0}^{k-\ell} f_{k,\ell}^m \tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z) = \sum_{m=0}^{n-1}\sum_{\ell=0}^{n-1-m}\sum_{k=\ell+m}^{n-1} f_{k,\ell}^m \tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z).
 \f]
 If tetrahedral harmonic expansion coefficients are organized into the rank-\f$3\f$ array whose \f$m^{\rm th}\f$ slice is:
 \f[
-F[0:n-m,0:n-m,m] = \begin{pmatrix}
-f_{m,0}^m & f_{1+m,1}^m & f_{2+m,2}^m & \cdots & f_{n,n-m}^m\\
+F[0:n-m-1,0:n-m-1,m] = \begin{pmatrix}
+f_{m,0}^m & f_{1+m,1}^m & f_{2+m,2}^m & \cdots & f_{n-1,n-1-m}^m\\
 \vdots & \vdots &  \vdots & \ddots & 0\\
-f_{n-2,0}^m & f_{n-1,1}^m & f_{n,2}^m & & \vdots\\
-f_{n-1,0}^m & f_{n,1}^m & 0 & \cdots & 0\\
-f_{n,0}^m & 0 & 0 & \cdots & 0\\
+f_{n-3,0}^m & f_{n-2,1}^m & f_{n-1,2}^m & & \vdots\\
+f_{n-2,0}^m & f_{n-1,1}^m & 0 & \cdots & 0\\
+f_{n-1,0}^m & 0 & 0 & \cdots & 0\\
 \end{pmatrix},
 \f]
 then \ref ft_plan_tet2cheb creates the appropriate \ref ft_tetrahedral_harmonic_plan, and \ref ft_execute_tet2cheb returns the trivariate Chebyshev coefficients stored in the rank-\f$3\f$ array \f$G\f$. That is:
 \f[
-f_n(x,y,z) = \sum_{k=0}^n\sum_{\ell=0}^n\sum_{m=0}^n g_{k,\ell}^m T_k(2x-1) T_\ell\left(\frac{2y}{1-x}-1\right) T_m\left(\frac{2z}{1-x-y}-1\right).
+f_{n-1}(x,y,z) = \sum_{k=0}^{n-1}\sum_{\ell=0}^{n-1}\sum_{m=0}^{n-1} g_{k,\ell}^m T_k(2x-1) T_\ell\left(\frac{2y}{1-x}-1\right) T_m\left(\frac{2z}{1-x-y}-1\right).
 \f]
-
-\section FT2 Under construction
 
 \subsection spinsph2fourier
 
@@ -308,36 +306,41 @@ Spin-weighted spherical harmonics are:
 Y_{\ell,m}^s(\theta,\varphi) & = \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \sqrt{(\ell+\tfrac{1}{2})\frac{(\ell+\ell_0)!(\ell-\ell_0)!}{(\ell+\ell_1)!(\ell-\ell_1)!}}\nonumber\\
 & \times \sin^{\abs{m+s}}(\tfrac{\theta}{2})\cos^{\abs{m-s}}(\tfrac{\theta}{2}) P_{\ell-\ell_0}^{(\abs{m+s},\abs{m-s})}(\cos\theta).
 \f}
-where \f$P_n^{(\alpha,\beta)}(\cos\theta)\f$ are the Jacobi polynomials and \f$\ell_0 = \max\{\abs{m},\abs{s}\}\f$ and \f$\ell_1 = \min\{\abs{m},\abs{s}\}\f$. A degree-\f$n\f$ expansion in spin-weighted spherical harmonics is given by:
+where \f$P_n^{(\alpha,\beta)}(\cos\theta)\f$ are the Jacobi polynomials and \f$\ell_0 = \max\{\abs{m},\abs{s}\}\f$ and \f$\ell_1 = \min\{\abs{m},\abs{s}\}\f$. A degree-\f$(n-1)\f$ expansion in spin-weighted spherical harmonics is given by:
 \f[
-f_n^s(\theta,\varphi) = \sum_{\ell=\ell_0}^{n}\sum_{m=-\ell}^{+\ell} f_\ell^m Y_{\ell,m}^s(\theta,\varphi).
+f_{n-1}^s(\theta,\varphi) = \sum_{\ell=\ell_0}^{n-1}\sum_{m=-\ell}^{+\ell} f_\ell^m Y_{\ell,m}^s(\theta,\varphi).
 \f]
 If spin-weighted spherical harmonic expansion coefficients with \f$s=2\f$, for example, are organized into the array:
 \f[
 F = \begin{pmatrix}
-f_2^0 & f_2^{-1} & f_2^1 & f_2^{-2} & f_2^2 & \cdots & f_n^{-n} & f_n^n\\
+f_2^0 & f_2^{-1} & f_2^1 & f_2^{-2} & f_2^2 & \cdots & f_{n-1}^{1-n} & f_{n-1}^{n-1}\\
 f_3^0 & f_3^{-1} & f_3^1 & f_3^{-2} & f_3^2 & \cdots & 0 & 0\\
 \vdots & \vdots & \vdots &  \vdots &  \vdots & \ddots & \vdots & \vdots\\
-f_{n}^0 & f_{n}^{-1} & f_{n}^1 & f_n^{-2} & f_n^2 &  & \vdots & \vdots\\
+f_{n-1}^0 & f_{n-1}^{-1} & f_{n-1}^1 & f_{n-1}^{-2} & f_{n-1}^2 &  & \vdots & \vdots\\
 0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
 0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
 \end{pmatrix},
 \f]
-then \c ft_execute_spinsph2fourier returns the bivariate Fourier coefficients:
+then \ref ft_execute_spinsph2fourier returns the bivariate Fourier coefficients:
 \f[
 G = \begin{pmatrix}
-g_0^0 & g_0^{-1} & g_0^1 & \cdots & g_0^{-n} & g_0^n\\
-g_1^0 & g_1^{-1} & g_1^1 & \cdots & g_1^{-n} & g_1^n\\
+g_0^0 & g_0^{-1} & g_0^1 & \cdots & g_0^{1-n} & g_0^{n-1}\\
+g_1^0 & g_1^{-1} & g_1^1 & \cdots & g_1^{1-n} & g_1^{n-1}\\
 \vdots & \vdots & \vdots & \ddots & \vdots & \vdots\\
-g_{n-1}^0 & g_{n-1}^{-1} & g_{n-1}^1& \cdots & g_{n-1}^{-n} & g_{n-1}^n\\
-g_n^0 & 0 & 0 & \cdots & g_n^{-n} & g_n^n\\
+g_{n-2}^0 & g_{n-2}^{-1} & g_{n-2}^1& \cdots & g_{n-2}^{1-n} & g_{n-2}^{n-1}\\
+g_{n-1}^0 & 0 & 0 & \cdots & g_{n-1}^{1-n} & g_{n-1}^{n-1}\\
 \end{pmatrix}.
 \f]
 That is:
 \f[
-f_n(\theta,\varphi) = \sum_{\ell=0}^n\sum_{m=-n}^{+n} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m+s~{\rm even},\\ \sin((\ell+1)\theta) & m+s~{\rm odd}.\end{array}\right.
+f_{n-1}^s(\theta,\varphi) = \sum_{\ell=0}^{n-1}\sum_{m=1-n}^{n-1} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m+s~{\rm even},\\ \sin((\ell+1)\theta) & m+s~{\rm odd}.\end{array}\right.
 \f]
-Since \c ft_execute_spinsph2fourier only transforms columns of the arrays, the routine is indifferent to the choice of longitudinal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
+Spin-weighted spherical harmonics are orthonormalized in \f$L^2(\mathbb{S}^2)\f$ and have positive real phase, which implies identities such as:
+\f[
+\overline{Y}_{\ell,m}^s(\theta,\varphi) = Y_{\ell,-m}^{-s}(\theta,\varphi).
+\f]
+
+\section FT2 Under construction
 
 \subsection sgl2cxf
 
@@ -345,9 +348,9 @@ Spherical Gauss--Laguerre functions are:
 \f[
 \psi_{k,\ell,m}(r,\theta,\varphi) = r^\ell \tilde{L}_{k-\ell}^{(2\ell+2)}(r) Y_\ell^m(\theta,\varphi),
 \f]
-where the \f$Y_\ell^m(\theta,\varphi)\f$ are \ref sh "spherical harmonics", and the \f$\tilde{L}_n^{(\alpha)}(r)\f$ are normalized generalized Laguerre polynomials. A degree-\f$n\f$ expansion in spherical Gauss--Laguerre functions is given by:
+where the \f$Y_\ell^m(\theta,\varphi)\f$ are \ref sh "spherical harmonics", and the \f$\tilde{L}_n^{(\alpha)}(r)\f$ are normalized generalized Laguerre polynomials. A degree-\f$(n-1)\f$ expansion in spherical Gauss--Laguerre functions is given by:
 \f[
-f_n(r,\theta,\varphi) = \sum_{k=0}^n\sum_{\ell=0}^k\sum_{m=-\ell}^{+\ell}f_{k,\ell}^m \psi_{k,\ell,m}(r,\theta,\varphi).
+f_{n-1}(r,\theta,\varphi) = \sum_{k=0}^{n-1}\sum_{\ell=0}^k\sum_{m=-\ell}^{+\ell}f_{k,\ell}^m \psi_{k,\ell,m}(r,\theta,\varphi).
 \f]
 
 */
@@ -373,7 +376,7 @@ FastTransforms provides templates for FFTW synthesis and analysis on the sphere,
 
 \section SA1 FFTW Synthesis and Analysis
 
-\subsection ft_fftw_sphere_plan
+\subsection SA11 ft_fftw_sphere_plan & ft_fftw_spinsphere_plan
 
 On the sphere, the \f$N\times M\f$ equiangular grids are:
 \f{align*}

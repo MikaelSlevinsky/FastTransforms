@@ -33,6 +33,26 @@ else
     UNAME := Unknown
 endif
 
+simd := $(shell $(CC) -march=native -E -v - </dev/null 2>&1 | grep cc1)
+
+ifneq (, $(findstring msse, $(simd)))
+    MSSE := -msse
+endif
+ifneq (, $(findstring msse2, $(simd)))
+    MSSE2 := -msse2
+endif
+ifneq (, $(findstring mavx, $(simd)))
+    MAVX := -mavx
+endif
+ifneq (, $(findstring mfma, $(simd)))
+    ifeq (, $(findstring mfma4, $(simd)))
+        MFMA := -mfma
+    endif
+endif
+ifneq (, $(findstring mavx512f, $(simd)))
+    MAVX512F := -mavx512f
+endif
+
 ifeq ($(UNAME), Darwin)
     SLIB = dylib
 else ifeq ($(UNAME), Windows)
@@ -41,14 +61,33 @@ else
     SLIB = so
 endif
 
-OBJ = src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
+ASM = src/recurrence/recurrence_default.s \
+      src/recurrence/recurrence_SSE.s \
+      src/recurrence/recurrence_SSE2.s \
+      src/recurrence/recurrence_AVX.s \
+      src/recurrence/recurrence_AVX_FMA.s \
+      src/recurrence/recurrence_AVX512F.s \
+      src/permute/permute_default.s \
+      src/permute/permute_SSE.s \
+      src/permute/permute_SSE2.s \
+      src/permute/permute_AVX.s \
+      src/permute/permute_AVX512F.s \
+      src/rotations/rotations_default.s \
+      src/rotations/rotations_SSE2.s \
+      src/rotations/rotations_AVX.s \
+      src/rotations/rotations_AVX_FMA.s \
+      src/rotations/rotations_AVX512F.s
+
+SRC = src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
 
 machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
+
+AFLAGS = -O3 -fPIC -std=gnu99 -I./src
 
 ifndef CFLAGS
     CFLAGS = -O3
     ifneq (, $(findstring 86, $(machine)))
-        CFLAGS += -march=native -mtune=native -mno-vzeroupper
+        CFLAGS += -march=native
     endif
 endif
 CFLAGS += -std=gnu99 -I./src

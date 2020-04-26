@@ -23,7 +23,7 @@ static inline X(triangular_banded) * X(create_B_test)(const int n) {
 }
 
 void X(inner_test_banded)(int * checksum, int n) {
-    int NLOOPS = 10;
+    int NTIMES = 10;
     struct timeval start, end;
 
     X(triangular_banded) * A = X(create_A_test)(n);
@@ -140,13 +140,8 @@ void X(inner_test_banded)(int * checksum, int n) {
     printf("Size of the triangular banded eigendecomposition \t |");
     print_summary_size(X(summary_size_tb_eigen_FMM)(F));
 
-    gettimeofday(&start, NULL);
-    for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-        X(bfmv)('N', F, x);
-        X(bfsv)('N', F, x);
-    }
-    gettimeofday(&end, NULL);
-    printf("Time for fwd-bckwd solves \t\t (%5i×%5i) \t |%20.6f s\n", n, n, elapsed(&start, &end, NLOOPS));
+    FT_TIME({X(bfmv)('N', F, x); X(bfsv)('N', F, x);}, start, end, NTIMES)
+    printf("Time for fwd-bckwd solves \t\t (%5i×%5i) \t |%20.6f s\n", n, n, elapsed(&start, &end, NTIMES));
 
     err = X(norm_2arg)(x, y, n)/X(norm_1arg)(y, n);
     printf("Error of fwd-bckwd solves \t\t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
@@ -187,7 +182,7 @@ void X(inner_test_banded)(int * checksum, int n) {
 }
 
 void X(inner_timing_test_banded)(int * checksum, int n) {
-    int NLOOPS = 10;
+    int NTIMES = 10;
     struct timeval start, end;
 
     X(triangular_banded) * A = X(create_A_test)(n);
@@ -209,13 +204,8 @@ void X(inner_timing_test_banded)(int * checksum, int n) {
     FLT * y = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++)
         y[i] = x[i] = ONE(FLT)/(i+1);
-    gettimeofday(&start, NULL);
-    for (int ntimes = 0; ntimes < NLOOPS; ntimes++) {
-        X(bfmv)('N', F, x);
-        X(bfsv)('N', F, x);
-    }
-    gettimeofday(&end, NULL);
-    printf("Time for fwd-bckwd solves \t (%7i×%7i) \t |%20.6f s\n", n, n, elapsed(&start, &end, NLOOPS));
+    FT_TIME({X(bfmv)('N', F, x); X(bfsv)('N', F, x);}, start, end, NTIMES)
+    printf("Time for fwd-bckwd solves \t (%7i×%7i) \t |%20.6f s\n", n, n, elapsed(&start, &end, NTIMES));
 
     FLT err = X(norm_2arg)(x, y, n)/X(norm_1arg)(y, n);
     printf("Error of fwd-bckwd solves \t (%7i×%7i) \t |%20.2e ", n, n, (double) err);

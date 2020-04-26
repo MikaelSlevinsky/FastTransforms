@@ -8,6 +8,8 @@
 #include <cblas.h>
 #include <fftw3.h>
 
+typedef double ft_complex[2];
+
 #ifdef _OPENMP
     #include <omp.h>
     #define FT_GET_THREAD_NUM() omp_get_thread_num()
@@ -23,7 +25,16 @@
 
 #define FT_CONCAT(prefix, name, suffix) prefix ## name ## suffix
 
-#include <tdc.h>
+void ft_horner(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void ft_hornerf(const int n, const float * c, const int incc, const int m, float * x, float * f);
+
+void ft_clenshaw(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void ft_clenshawf(const int n, const float * c, const int incc, const int m, float * x, float * f);
+
+void ft_orthogonal_polynomial_clenshaw(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
+void ft_orthogonal_polynomial_clenshawf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
+
+#include "tdc.h"
 
 /*!
   \brief Pre-compute a factorization of the connection coefficients between Legendre and Chebyshev polynomials in double precision so that ft_bfmv converts between expansions:
@@ -212,192 +223,66 @@ mpfr_t * ft_mpfr_plan_chebyshev_to_ultraspherical(const int normcheb, const int 
 void ft_set_num_threads(const int n);
 
 /// Data structure to store sines and cosines of Givens rotations.
-typedef struct {
-    double * s;
-    double * c;
-    int n;
-} ft_rotation_plan;
+typedef struct ft_rotation_plan_s ft_rotation_plan;
 
 /// Destroy a \ref ft_rotation_plan.
 void ft_destroy_rotation_plan(ft_rotation_plan * RP);
 
 ft_rotation_plan * ft_plan_rotsphere(const int n);
 
-/// Convert a single vector of spherical harmonics of order m to 0/1.
-void ft_kernel_sph_hi2lo(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert a single vector of spherical harmonics of order 0/1 to m.
-void ft_kernel_sph_lo2hi(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert a pair of vectors of spherical harmonics of order m to 0/1.
-void ft_kernel_sph_hi2lo_SSE(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert a pair of vectors of spherical harmonics of order 0/1 to m.
-void ft_kernel_sph_lo2hi_SSE(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert four vectors of spherical harmonics of order m, m, m+2, m+2 to 0/1.
-void ft_kernel_sph_hi2lo_AVX(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert four vectors of spherical harmonics of order 0/1 to m, m, m+2, m+2.
-void ft_kernel_sph_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert eight vectors of spherical harmonics of order m, m, m+2, m+2, m+4, m+4, m+6, m+6 to 0/1.
-void ft_kernel_sph_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert eight vectors of spherical harmonics of order 0/1 to m, m, m+2, m+2, m+4, m+4, m+6, m+6.
-void ft_kernel_sph_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double * A);
+/// Convert a single vector of spherical harmonic coefficients in A with stride S from order m2 down to order m1.
+void ft_kernel_sph_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+/// Convert a single vector of spherical harmonic coefficients in A with stride S from order m1 up to order m2.
+void ft_kernel_sph_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
 ft_rotation_plan * ft_plan_rottriangle(const int n, const double alpha, const double beta, const double gamma);
 
-/// Convert a single vector of triangular harmonics of order m to 0.
-void ft_kernel_tri_hi2lo(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert a single vector of triangular harmonics of order 0 to m.
-void ft_kernel_tri_lo2hi(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert two vectors of triangular harmonics of order m and m+1 to 0.
-void ft_kernel_tri_hi2lo_SSE(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert two vectors of triangular harmonics of order 0 to m and m+1.
-void ft_kernel_tri_lo2hi_SSE(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert four vectors of triangular harmonics of order m, m+1, m+2, m+3 to 0.
-void ft_kernel_tri_hi2lo_AVX(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert four vectors of triangular harmonics of order 0 to m, m+1, m+2, m+3.
-void ft_kernel_tri_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert eight vectors of triangular harmonics of order m, m+1, m+2, m+3, m+4, m+5, m+6, m+7 to 0.
-void ft_kernel_tri_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert eight vectors of triangular harmonics of order 0 to m, m+1, m+2, m+3, m+4, m+5, m+6, m+7.
-void ft_kernel_tri_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double * A);
+/// Convert a single vector of triangular harmonic coefficients in A with stride S from order m2 down to order m1.
+void ft_kernel_tri_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+/// Convert a single vector of triangular harmonic coefficients in A with stride S from order m1 up to order m2.
+void ft_kernel_tri_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
 ft_rotation_plan * ft_plan_rotdisk(const int n);
 
-/// Convert a single vector of disk harmonics of order m to 0/1.
-void ft_kernel_disk_hi2lo(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert a single vector of disk harmonics of order 0/1 to m.
-void ft_kernel_disk_lo2hi(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert a pair of vectors of disk harmonics of order m to 0/1.
-void ft_kernel_disk_hi2lo_SSE(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert a pair of vectors of disk harmonics of order 0/1 to m.
-void ft_kernel_disk_lo2hi_SSE(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert four vectors of disk harmonics of order m, m, m+2, m+2 to 0/1.
-void ft_kernel_disk_hi2lo_AVX(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert four vectors of disk harmonics of order 0/1 to m, m, m+2, m+2.
-void ft_kernel_disk_lo2hi_AVX(const ft_rotation_plan * RP, const int m, double * A);
-
-/// Convert eight vectors of disk harmonics of order m, m, m+2, m+2, m+4, m+4, m+6, m+6 to 0/1.
-void ft_kernel_disk_hi2lo_AVX512(const ft_rotation_plan * RP, const int m, double * A);
-/// Convert eight vectors of disk harmonics of order 0/1 to m, m, m+2, m+2, m+4, m+4, m+6, m+6.
-void ft_kernel_disk_lo2hi_AVX512(const ft_rotation_plan * RP, const int m, double * A);
+/// Convert a single vector of disk harmonic coefficients in A with stride S from order m2 down to order m1.
+void ft_kernel_disk_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+/// Convert a single vector of disk harmonic coefficients in A with stride S from order m1 up to order m2.
+void ft_kernel_disk_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
 void ft_kernel_tet_hi2lo(const ft_rotation_plan * RP, const int L, const int m, double * A);
 void ft_kernel_tet_lo2hi(const ft_rotation_plan * RP, const int L, const int m, double * A);
 
-void ft_kernel_tet_hi2lo_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A);
-void ft_kernel_tet_lo2hi_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A);
+/// Data structure to store sines and cosines of Givens rotations for spin-weighted harmonics.
+typedef struct ft_spin_rotation_plan_s ft_spin_rotation_plan;
 
-void ft_kernel_tet_hi2lo_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A);
-void ft_kernel_tet_lo2hi_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A);
-
-void ft_kernel_tet_hi2lo_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A);
-void ft_kernel_tet_lo2hi_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A);
-
-typedef struct {
-    double * s1;
-    double * c1;
-    double * s2;
-    double * c2;
-    double * s3;
-    double * c3;
-    int n;
-    int s;
-} ft_spin_rotation_plan;
-
+/// Destroy a \ref ft_spin_rotation_plan.
 void ft_destroy_spin_rotation_plan(ft_spin_rotation_plan * SRP);
 
 ft_spin_rotation_plan * ft_plan_rotspinsphere(const int n, const int s);
 
-void ft_kernel_spinsph_hi2lo(const ft_spin_rotation_plan * SRP, const int m, double * A);
-void ft_kernel_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, const int m, double * A);
-
-void ft_kernel_spinsph_hi2lo_SSE(const ft_spin_rotation_plan * SRP, const int m, double * A);
-void ft_kernel_spinsph_lo2hi_SSE(const ft_spin_rotation_plan * SRP, const int m, double * A);
-
-void ft_kernel_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, const int m, double * A);
-void ft_kernel_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, const int m, double * A);
-
-void ft_kernel_spinsph_hi2lo_AVX512(const ft_spin_rotation_plan * SRP, const int m, double * A);
-void ft_kernel_spinsph_lo2hi_AVX512(const ft_spin_rotation_plan * SRP, const int m, double * A);
+/// Convert a single vector of spin-weighted spherical harmonic coefficients in A with stride S from order m down to order m%2.
+void ft_kernel_spinsph_hi2lo(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
+/// Convert a single vector of spin-weighted spherical harmonic coefficients in A with stride S from order m%2 up to order m.
+void ft_kernel_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
 
 
-void ft_execute_sph_hi2lo(const ft_rotation_plan * RP, double * A, const int M);
-void ft_execute_sph_lo2hi(const ft_rotation_plan * RP, double * A, const int M);
+void ft_execute_sph_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_sph_lo2hi(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
-void ft_execute_sph_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_sph_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_sphv_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_sphv_lo2hi(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
-void ft_execute_sph_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_sph_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_tri_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_tri_lo2hi(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
-void ft_execute_sph_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_sph_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_sphv_hi2lo(const ft_rotation_plan * RP, double * A, const int M);
-void ft_execute_sphv_lo2hi(const ft_rotation_plan * RP, double * A, const int M);
-
-void ft_execute_sphv_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_sphv_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_sphv_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_sphv_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_sphv_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_sphv_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_tri_hi2lo(const ft_rotation_plan * RP, double * A, const int M);
-void ft_execute_tri_lo2hi(const ft_rotation_plan * RP, double * A, const int M);
-
-void ft_execute_tri_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_tri_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_tri_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_tri_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_tri_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_tri_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_disk_hi2lo(const ft_rotation_plan * RP, double * A, const int M);
-void ft_execute_disk_lo2hi(const ft_rotation_plan * RP, double * A, const int M);
-
-void ft_execute_disk_hi2lo_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_disk_lo2hi_SSE(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_disk_hi2lo_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_disk_lo2hi_AVX(const ft_rotation_plan * RP, double * A, double * B, const int M);
-
-void ft_execute_disk_hi2lo_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
-void ft_execute_disk_lo2hi_AVX512(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_disk_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_disk_lo2hi(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
 void ft_execute_tet_hi2lo(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M);
 void ft_execute_tet_lo2hi(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M);
 
-void ft_execute_tet_hi2lo_SSE(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
-void ft_execute_tet_lo2hi_SSE(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
-
-void ft_execute_tet_hi2lo_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
-void ft_execute_tet_lo2hi_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
-
-void ft_execute_tet_hi2lo_AVX512(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
-void ft_execute_tet_lo2hi_AVX512(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
-
-void ft_execute_spinsph_hi2lo(const ft_spin_rotation_plan * SRP, double * A, const int M);
-void ft_execute_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, double * A, const int M);
-
-void ft_execute_spinsph_hi2lo_SSE(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M);
-void ft_execute_spinsph_lo2hi_SSE(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M);
-
-void ft_execute_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M);
-void ft_execute_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M);
-
-void ft_execute_spinsph_hi2lo_AVX512(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M);
-void ft_execute_spinsph_lo2hi_AVX512(const ft_spin_rotation_plan * SRP, double * A, double * B, const int M);
+void ft_execute_spinsph_hi2lo(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
+void ft_execute_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
 
 /// Data structure to store a \ref ft_rotation_plan, and various arrays to represent 1D orthogonal polynomial transforms.
 typedef struct {
@@ -467,6 +352,28 @@ ft_tetrahedral_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha,
 void ft_execute_tet2cheb(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M);
 /// Transform a trivariate Chebyshev series to a tetrahedral harmonic expansion.
 void ft_execute_cheb2tet(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M);
+
+/// Data structure to store a \ref ft_spin_rotation_plan, and various arrays to represent 1D orthogonal polynomial transforms.
+typedef struct {
+    ft_spin_rotation_plan * SRP;
+    ft_complex * B;
+    ft_complex * P1;
+    ft_complex * P2;
+    ft_complex * P1inv;
+    ft_complex * P2inv;
+    int s;
+} ft_spin_harmonic_plan;
+
+/// Destroy a \ref ft_spin_harmonic_plan.
+void ft_destroy_spin_harmonic_plan(ft_spin_harmonic_plan * P);
+
+/// Plan a spin-weighted spherical harmonic transform.
+ft_spin_harmonic_plan * ft_plan_spinsph2fourier(const int n, const int s);
+
+/// Transform a spin-weighted spherical harmonic expansion to a bivariate Fourier series.
+void ft_execute_spinsph2fourier(const ft_spin_harmonic_plan * P, ft_complex * A, const int N, const int M);
+/// Transform a bivariate Fourier series to a spin-weighted spherical harmonic expansion.
+void ft_execute_fourier2spinsph(const ft_spin_harmonic_plan * P, ft_complex * A, const int N, const int M);
 
 
 int ft_fftw_init_threads(void);
@@ -554,5 +461,28 @@ void ft_execute_disk_synthesis(const ft_disk_fftw_plan * P, double * X, const in
 /// Execute FFTW analysis on the disk.
 void ft_execute_disk_analysis(const ft_disk_fftw_plan * P, double * X, const int N, const int M);
 
+typedef struct {
+    fftw_plan plantheta1;
+    fftw_plan plantheta2;
+    fftw_plan plantheta3;
+    fftw_plan plantheta4;
+    fftw_plan planphi;
+    double * Y;
+    int S;
+} ft_spinsphere_fftw_plan;
 
-#endif //FASTTRANSFORMS_H
+/// Destroy a \ref ft_spinsphere_fftw_plan.
+void ft_destroy_spinsphere_fftw_plan(ft_spinsphere_fftw_plan * P);
+
+ft_spinsphere_fftw_plan * ft_plan_spinsph_with_kind(const int N, const int M, const int S, const fftw_r2r_kind kind[2][1], const int sign);
+/// Plan FFTW synthesis on the sphere with spin.
+ft_spinsphere_fftw_plan * ft_plan_spinsph_synthesis(const int N, const int M, const int S);
+/// Plan FFTW analysis on the sphere with spin.
+ft_spinsphere_fftw_plan * ft_plan_spinsph_analysis(const int N, const int M, const int S);
+
+/// Execute FFTW synthesis on the sphere with spin.
+void ft_execute_spinsph_synthesis(const ft_spinsphere_fftw_plan * P, ft_complex * X, const int N, const int M);
+/// Execute FFTW analysis on the sphere with spin.
+void ft_execute_spinsph_analysis(const ft_spinsphere_fftw_plan * P, ft_complex * X, const int N, const int M);
+
+#endif // FASTTRANSFORMS_H

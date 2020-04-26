@@ -130,19 +130,23 @@ double * tetrand(int n, int l, int m) {
     return A;
 }
 
-double * spinsphones(int n, int m, int s) {
-    double * A = calloc(n * m, sizeof(double));
-    for (int i = 0; i < n-s; i++)
-        for (int j = 0; j < m-2*i; j++)
-            A(i,j) = 1.0;
+ft_complex * spinsphones(int n, int m, int s) {
+    ft_complex * A = calloc(n * m, sizeof(ft_complex));
+    for (int i = 0; i < n-abs(s); i++)
+        for (int j = 0; j < m-2*i; j++) {
+            A[i+n*j][0] = 1.0;
+            A[i+n*j][1] = 1.0;
+        }
     return A;
 }
 
-double * spinsphrand(int n, int m, int s) {
-    double * A = calloc(n * m, sizeof(double));
-    for (int i = 0; i < n-s; i++)
-        for (int j = 0; j < m-2*i; j++)
-            A(i,j) = 2.0*(((double) rand())/RAND_MAX)-1.0;
+ft_complex * spinsphrand(int n, int m, int s) {
+    ft_complex * A = calloc(n * m, sizeof(ft_complex));
+    for (int i = 0; i < n-abs(s); i++)
+        for (int j = 0; j < m-2*i; j++) {
+            A[i+n*j][0] = 2.0*(((double) rand())/RAND_MAX)-1.0;
+            A[i+n*j][1] = 2.0*(((double) rand())/RAND_MAX)-1.0;
+        }
     return A;
 }
 
