@@ -50,7 +50,9 @@ ifneq (, $(findstring mfma, $(simd)))
     endif
 endif
 ifneq (, $(findstring mavx512f, $(simd)))
-    MAVX512F := -mavx512f
+    ifneq ($(UNAME), Windows)
+        MAVX512F := -mavx512f
+    endif
 endif
 
 ifeq ($(UNAME), Darwin)
@@ -82,7 +84,7 @@ SRC = src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c 
 
 machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
 
-AFLAGS = -O3 -fPIC -std=gnu99 -I./src
+AFLAGS += -O3 -fPIC -std=gnu99 -I./src
 
 ifndef CFLAGS
     CFLAGS = -O3
