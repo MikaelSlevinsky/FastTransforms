@@ -55,7 +55,7 @@ The library is compiled by GNU GCC 8.3.0 as above with the compiler optimization
 | **ϵ<sub>2</sub>** | 5.42e-16 | 7.79e-16 | 9.23e-16 | 1.27e-15 | 1.80e-15 | 2.52e-15 | 3.54e-15 | 4.98e-15 |
 | **ϵ<sub>∞</sub>** | 1.33e-15 | 2.55e-15 | 4.55e-15 | 5.22e-15 | 9.33e-15 | 1.11e-14 | 1.81e-14 | 3.80e-14 |
 
-### Proriol series to bivariate Chebyshev series (`tri2cheb`) (α, β, γ) = (0, 0, 0)
+### Proriol series to bivariate Chebyshev series (`tri2cheb`) with (α, β, γ) = (0, 0, 0)
 
 | Degree            | 63       | 127      | 255      | 511      | 1023     | 2047     | 4095     | 8191     |
 | ----------------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: |
