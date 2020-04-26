@@ -252,15 +252,6 @@ void ft_kernel_disk_lo2hi(const ft_rotation_plan * RP, const int m1, const int m
 void ft_kernel_tet_hi2lo(const ft_rotation_plan * RP, const int L, const int m, double * A);
 void ft_kernel_tet_lo2hi(const ft_rotation_plan * RP, const int L, const int m, double * A);
 
-void ft_kernel_tet_hi2lo_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A);
-void ft_kernel_tet_lo2hi_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A);
-
-void ft_kernel_tet_hi2lo_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A);
-void ft_kernel_tet_lo2hi_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A);
-
-void ft_kernel_tet_hi2lo_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A);
-void ft_kernel_tet_lo2hi_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A);
-
 /// Data structure to store sines and cosines of Givens rotations for spin-weighted harmonics.
 typedef struct ft_spin_rotation_plan_s ft_spin_rotation_plan;
 
@@ -289,15 +280,6 @@ void ft_execute_disk_lo2hi(const ft_rotation_plan * RP, double * A, double * B, 
 
 void ft_execute_tet_hi2lo(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M);
 void ft_execute_tet_lo2hi(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M);
-
-void ft_execute_tet_hi2lo_SSE(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
-void ft_execute_tet_lo2hi_SSE(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
-
-void ft_execute_tet_hi2lo_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
-void ft_execute_tet_lo2hi_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
-
-void ft_execute_tet_hi2lo_AVX512(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
-void ft_execute_tet_lo2hi_AVX512(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
 
 void ft_execute_spinsph_hi2lo(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
 void ft_execute_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);

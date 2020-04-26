@@ -479,7 +479,7 @@ void ft_execute_tet_lo2hi(const ft_rotation_plan * RP1, const ft_rotation_plan *
     }
 }
 
-void ft_execute_tet_hi2lo_SSE(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
+void execute_tet_hi2lo_SSE2(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
     int N = RP1->n;
     int NB = VALIGN(N);
     #pragma omp parallel
@@ -491,18 +491,18 @@ void ft_execute_tet_hi2lo_SSE(const ft_rotation_plan * RP1, const ft_rotation_pl
             kernel_tri_hi2lo_SSE2(RP1, 0, l+m, B+NB*(l+L*m), 2);
         old_permute_t_tri(A+N*L*m, B+NB*L*m, N, L-m, 2);
         permute(A+N*L*m, B+NB*L*m, N, L, 1);
-        ft_kernel_tet_hi2lo_SSE(RP2, L, m, B+NB*L*m);
+        kernel_tet_hi2lo_SSE2(RP2, L, m, B+NB*L*m);
         permute_t(A+N*L*m, B+NB*L*m, N, L, 1);
     }
 }
 
-void ft_execute_tet_lo2hi_SSE(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
+void execute_tet_lo2hi_SSE2(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
     int N = RP1->n;
     int NB = VALIGN(N);
     #pragma omp parallel
     for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
         permute(A+N*L*m, B+NB*L*m, N, L, 1);
-        ft_kernel_tet_lo2hi_SSE(RP2, L, m, B+NB*L*m);
+        kernel_tet_lo2hi_SSE2(RP2, L, m, B+NB*L*m);
         permute_t(A+N*L*m, B+NB*L*m, N, L, 1);
         old_permute_tri(A+N*L*m, B+NB*L*m, N, L-m, 2);
         if ((L-m)%2)
@@ -513,7 +513,7 @@ void ft_execute_tet_lo2hi_SSE(const ft_rotation_plan * RP1, const ft_rotation_pl
     }
 }
 
-void ft_execute_tet_hi2lo_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
+void execute_tet_hi2lo_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
     int N = RP1->n;
     int NB = VALIGN(N);
     #pragma omp parallel
@@ -527,18 +527,18 @@ void ft_execute_tet_hi2lo_AVX(const ft_rotation_plan * RP1, const ft_rotation_pl
             kernel_tri_hi2lo_AVX(RP1, 0, l+m, B+NB*(l+L*m), 4);
         old_permute_t_tri(A+N*L*m, B+NB*L*m, N, L-m, 4);
         permute(A+N*L*m, B+NB*L*m, N, L, 1);
-        ft_kernel_tet_hi2lo_AVX(RP2, L, m, B+NB*L*m);
+        kernel_tet_hi2lo_AVX(RP2, L, m, B+NB*L*m);
         permute_t(A+N*L*m, B+NB*L*m, N, L, 1);
     }
 }
 
-void ft_execute_tet_lo2hi_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
+void execute_tet_lo2hi_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
     int N = RP1->n;
     int NB = VALIGN(N);
     #pragma omp parallel
     for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
         permute(A+N*L*m, B+NB*L*m, N, L, 1);
-        ft_kernel_tet_lo2hi_AVX(RP2, L, m, B+NB*L*m);
+        kernel_tet_lo2hi_AVX(RP2, L, m, B+NB*L*m);
         permute_t(A+N*L*m, B+NB*L*m, N, L, 1);
         old_permute_tri(A+N*L*m, B+NB*L*m, N, L-m, 4);
         if ((L-m)%2)
@@ -551,7 +551,7 @@ void ft_execute_tet_lo2hi_AVX(const ft_rotation_plan * RP1, const ft_rotation_pl
     }
 }
 
-void ft_execute_tet_hi2lo_AVX512(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
+void execute_tet_hi2lo_AVX512F(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
     int N = RP1->n;
     int NB = VALIGN(N);
     #pragma omp parallel
@@ -567,18 +567,18 @@ void ft_execute_tet_hi2lo_AVX512(const ft_rotation_plan * RP1, const ft_rotation
             kernel_tri_hi2lo_AVX512F(RP1, 0, l+m, B+NB*(l+L*m), 8);
         old_permute_t_tri(A+N*L*m, B+NB*L*m, N, L-m, 8);
         permute(A+N*L*m, B+NB*L*m, N, L, 1);
-        ft_kernel_tet_hi2lo_AVX512(RP2, L, m, B+NB*L*m);
+        kernel_tet_hi2lo_AVX512F(RP2, L, m, B+NB*L*m);
         permute_t(A+N*L*m, B+NB*L*m, N, L, 1);
     }
 }
 
-void ft_execute_tet_lo2hi_AVX512(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
+void execute_tet_lo2hi_AVX512F(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M) {
     int N = RP1->n;
     int NB = VALIGN(N);
     #pragma omp parallel
     for (int m = FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS()) {
         permute(A+N*L*m, B+NB*L*m, N, L, 1);
-        ft_kernel_tet_lo2hi_AVX512(RP2, L, m, B+NB*L*m);
+        kernel_tet_lo2hi_AVX512F(RP2, L, m, B+NB*L*m);
         permute_t(A+N*L*m, B+NB*L*m, N, L, 1);
         old_permute_tri(A+N*L*m, B+NB*L*m, N, L-m, 8);
         if ((L-m)%2)
@@ -804,7 +804,7 @@ ft_tetrahedral_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha,
 }
 
 void ft_execute_tet2cheb(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M) {
-    ft_execute_tet_hi2lo_AVX512(P->RP1, P->RP2, A, P->B, L, M);
+    execute_tet_hi2lo_AVX512F(P->RP1, P->RP2, A, P->B, L, M);
     if ((P->beta + P->gamma + P->delta != -2.5) || (P->alpha != -0.5))
         for (int m = 0; m < M; m++)
             cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P1, N, A+N*L*m, N);
@@ -830,7 +830,7 @@ void ft_execute_cheb2tet(const ft_tetrahedral_harmonic_plan * P, double * A, con
     if ((P->alpha != -0.5) || (P->beta + P->gamma + P->delta != -2.5))
         for (int m = 0; m < M; m++)
             cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P1inv, N, A+N*L*m, N);
-    ft_execute_tet_lo2hi_AVX512(P->RP1, P->RP2, A, P->B, L, M);
+    execute_tet_lo2hi_AVX512F(P->RP1, P->RP2, A, P->B, L, M);
 }
 
 void ft_destroy_spin_harmonic_plan(ft_spin_harmonic_plan * P) {

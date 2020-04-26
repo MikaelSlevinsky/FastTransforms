@@ -310,6 +310,13 @@ void kernel_disk_lo2hi_AVX_FMA(const ft_rotation_plan * RP, const int m1, const 
 void kernel_disk_hi2lo_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_disk_lo2hi_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
+void kernel_tet_hi2lo_SSE2(const ft_rotation_plan * RP, const int L, const int m, double * A);
+void kernel_tet_lo2hi_SSE2(const ft_rotation_plan * RP, const int L, const int m, double * A);
+void kernel_tet_hi2lo_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A);
+void kernel_tet_lo2hi_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A);
+void kernel_tet_hi2lo_AVX512F(const ft_rotation_plan * RP, const int L, const int m, double * A);
+void kernel_tet_lo2hi_AVX512F(const ft_rotation_plan * RP, const int L, const int m, double * A);
+
 typedef struct ft_spin_rotation_plan_s {
     double * s1;
     double * c1;
@@ -367,6 +374,13 @@ void execute_disk_hi2lo_AVX_FMA(const ft_rotation_plan * RP, double * A, double 
 void execute_disk_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_disk_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_disk_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+
+void execute_tet_hi2lo_SSE2(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
+void execute_tet_lo2hi_SSE2(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
+void execute_tet_hi2lo_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
+void execute_tet_lo2hi_AVX(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
+void execute_tet_hi2lo_AVX512F(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
+void execute_tet_lo2hi_AVX512F(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
 
 void execute_spinsph_hi2lo_default(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);
 void execute_spinsph_lo2hi_default(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);

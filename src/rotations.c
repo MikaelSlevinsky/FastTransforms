@@ -26,7 +26,7 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
 }
 
 #ifdef __SSE2__
-    static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
+    static inline void apply_givens_SSE2(const double S, const double C, double * X, double * Y) {
         double2 x = vloadu2(X);
         double2 y = vloadu2(Y);
 
@@ -34,7 +34,7 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
         vstoreu2(Y, C*y - S*x);
     }
 
-    static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y) {
+    static inline void apply_givens_t_SSE2(const double S, const double C, double * X, double * Y) {
         double2 x = vloadu2(X);
         double2 y = vloadu2(Y);
 
@@ -42,12 +42,12 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
         vstoreu2(Y, C*y + S*x);
     }
 #else
-    static inline void apply_givens_SSE(const double S, const double C, double * X, double * Y) {
+    static inline void apply_givens_SSE2(const double S, const double C, double * X, double * Y) {
         apply_givens(S, C, X, Y);
         apply_givens(S, C, X+1, Y+1);
     }
 
-    static inline void apply_givens_t_SSE(const double S, const double C, double * X, double * Y) {
+    static inline void apply_givens_t_SSE2(const double S, const double C, double * X, double * Y) {
         apply_givens_t(S, C, X, Y);
         apply_givens_t(S, C, X+1, Y+1);
     }
@@ -72,18 +72,18 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
     }
 #else
     static inline void apply_givens_AVX(const double S, const double C, double * X, double * Y) {
-        apply_givens_SSE(S, C, X, Y);
-        apply_givens_SSE(S, C, X+2, Y+2);
+        apply_givens_SSE2(S, C, X, Y);
+        apply_givens_SSE2(S, C, X+2, Y+2);
     }
 
     static inline void apply_givens_t_AVX(const double S, const double C, double * X, double * Y) {
-        apply_givens_t_SSE(S, C, X, Y);
-        apply_givens_t_SSE(S, C, X+2, Y+2);
+        apply_givens_t_SSE2(S, C, X, Y);
+        apply_givens_t_SSE2(S, C, X+2, Y+2);
     }
 #endif
 
 #ifdef __AVX512F__
-    static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {
+    static inline void apply_givens_AVX512F(const double S, const double C, double * X, double * Y) {
         double8 x = vloadu8(X);
         double8 y = vloadu8(Y);
 
@@ -91,7 +91,7 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
         vstoreu8(Y, C*y - S*x);
     }
 
-    static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y) {
+    static inline void apply_givens_t_AVX512F(const double S, const double C, double * X, double * Y) {
         double8 x = vloadu8(X);
         double8 y = vloadu8(Y);
 
@@ -99,12 +99,12 @@ static inline void apply_givens_t(const double S, const double C, double * X, do
         vstoreu8(Y, C*y + S*x);
     }
 #else
-    static inline void apply_givens_AVX512(const double S, const double C, double * X, double * Y) {
+    static inline void apply_givens_AVX512F(const double S, const double C, double * X, double * Y) {
         apply_givens_AVX(S, C, X, Y);
         apply_givens_AVX(S, C, X+4, Y+4);
     }
 
-    static inline void apply_givens_t_AVX512(const double S, const double C, double * X, double * Y) {
+    static inline void apply_givens_t_AVX512F(const double S, const double C, double * X, double * Y) {
         apply_givens_t_AVX(S, C, X, Y);
         apply_givens_t_AVX(S, C, X+4, Y+4);
     }
@@ -223,7 +223,7 @@ void ft_kernel_tet_lo2hi(const ft_rotation_plan * RP, const int L, const int m, 
     }
 }
 
-void ft_kernel_tet_hi2lo_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+void kernel_tet_hi2lo_SSE2(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
     int nb = VALIGN(n);
     double s, c;
@@ -232,14 +232,14 @@ void ft_kernel_tet_hi2lo_SSE(const ft_rotation_plan * RP, const int L, const int
             s = RP->s(l, j);
             c = RP->c(l, j);
             for (int k = 0; k < n-n%2; k += 2)
-                apply_givens_SSE(s, c, A+k+nb*l, A+k+nb*(l+1));
+                apply_givens_SSE2(s, c, A+k+nb*l, A+k+nb*(l+1));
             for (int k = n-n%2; k < n; k++)
                 apply_givens(s, c, A+k+nb*l, A+k+nb*(l+1));
         }
     }
 }
 
-void ft_kernel_tet_lo2hi_SSE(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+void kernel_tet_lo2hi_SSE2(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
     int nb = VALIGN(n);
     double s, c;
@@ -248,14 +248,14 @@ void ft_kernel_tet_lo2hi_SSE(const ft_rotation_plan * RP, const int L, const int
             s = RP->s(l, j);
             c = RP->c(l, j);
             for (int k = 0; k < n-n%2; k += 2)
-                apply_givens_t_SSE(s, c, A+k+nb*l, A+k+nb*(l+1));
+                apply_givens_t_SSE2(s, c, A+k+nb*l, A+k+nb*(l+1));
             for (int k = n-n%2; k < n; k++)
                 apply_givens_t(s, c, A+k+nb*l, A+k+nb*(l+1));
         }
     }
 }
 
-void ft_kernel_tet_hi2lo_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+void kernel_tet_hi2lo_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
     int nb = VALIGN(n);
     double s, c;
@@ -266,14 +266,14 @@ void ft_kernel_tet_hi2lo_AVX(const ft_rotation_plan * RP, const int L, const int
             for (int k = 0; k < n-n%4; k += 4)
                 apply_givens_AVX(s, c, A+k+nb*l, A+k+nb*(l+1));
             for (int k = n-n%4; k < n-n%2; k += 2)
-                apply_givens_SSE(s, c, A+k+nb*l, A+k+nb*(l+1));
+                apply_givens_SSE2(s, c, A+k+nb*l, A+k+nb*(l+1));
             for (int k = n-n%2; k < n; k++)
                 apply_givens(s, c, A+k+nb*l, A+k+nb*(l+1));
         }
     }
 }
 
-void ft_kernel_tet_lo2hi_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+void kernel_tet_lo2hi_AVX(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
     int nb = VALIGN(n);
     double s, c;
@@ -284,14 +284,14 @@ void ft_kernel_tet_lo2hi_AVX(const ft_rotation_plan * RP, const int L, const int
             for (int k = 0; k < n-n%4; k += 4)
                 apply_givens_t_AVX(s, c, A+k+nb*l, A+k+nb*(l+1));
             for (int k = n-n%4; k < n-n%2; k += 2)
-                apply_givens_t_SSE(s, c, A+k+nb*l, A+k+nb*(l+1));
+                apply_givens_t_SSE2(s, c, A+k+nb*l, A+k+nb*(l+1));
             for (int k = n-n%2; k < n; k++)
                 apply_givens_t(s, c, A+k+nb*l, A+k+nb*(l+1));
         }
     }
 }
 
-void ft_kernel_tet_hi2lo_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+void kernel_tet_hi2lo_AVX512F(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
     int nb = VALIGN(n);
     double s, c;
@@ -300,18 +300,18 @@ void ft_kernel_tet_hi2lo_AVX512(const ft_rotation_plan * RP, const int L, const 
             s = RP->s(l, j);
             c = RP->c(l, j);
             for (int k = 0; k < n-n%8; k += 8)
-                apply_givens_AVX512(s, c, A+k+nb*l, A+k+nb*(l+1));
+                apply_givens_AVX512F(s, c, A+k+nb*l, A+k+nb*(l+1));
             for (int k = n-n%8; k < n-n%4; k += 4)
                 apply_givens_AVX(s, c, A+k+nb*l, A+k+nb*(l+1));
             for (int k = n-n%4; k < n-n%2; k += 2)
-                apply_givens_SSE(s, c, A+k+nb*l, A+k+nb*(l+1));
+                apply_givens_SSE2(s, c, A+k+nb*l, A+k+nb*(l+1));
             for (int k = n-n%2; k < n; k++)
                 apply_givens(s, c, A+k+nb*l, A+k+nb*(l+1));
         }
     }
 }
 
-void ft_kernel_tet_lo2hi_AVX512(const ft_rotation_plan * RP, const int L, const int m, double * A) {
+void kernel_tet_lo2hi_AVX512F(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;
     int nb = VALIGN(n);
     double s, c;
@@ -320,11 +320,11 @@ void ft_kernel_tet_lo2hi_AVX512(const ft_rotation_plan * RP, const int L, const 
             s = RP->s(l, j);
             c = RP->c(l, j);
             for (int k = 0; k < n-n%8; k += 8)
-                apply_givens_t_AVX512(s, c, A+k+nb*l, A+k+nb*(l+1));
+                apply_givens_t_AVX512F(s, c, A+k+nb*l, A+k+nb*(l+1));
             for (int k = n-n%8; k < n-n%4; k += 4)
                 apply_givens_t_AVX(s, c, A+k+nb*l, A+k+nb*(l+1));
             for (int k = n-n%4; k < n-n%2; k += 2)
-                apply_givens_t_SSE(s, c, A+k+nb*l, A+k+nb*(l+1));
+                apply_givens_t_SSE2(s, c, A+k+nb*l, A+k+nb*(l+1));
             for (int k = n-n%2; k < n; k++)
                 apply_givens_t(s, c, A+k+nb*l, A+k+nb*(l+1));
         }
