@@ -42,30 +42,38 @@ See the [AppVeyor build](https://github.com/MikaelSlevinsky/FastTransforms/blob/
 
 ## Performance Benchmark
 
-The tables below shows the current timings and accuracies for transforming orthonormal spherical harmonic coefficients drawn from U(-1,1) to bivariate Fourier series and back. The timings are reported in seconds and the error is measured in the relative 2- and ∞-norms, treating the matrices of coefficients as vectors.
+The tables below shows the current timings and accuracies for the transforms with pseudorandom coefficients drawn from U(-1,1) and converted back. The timings are reported in seconds and the error is measured in the relative 2- and ∞-norms.
 
-### MacBook Pro
+The library is compiled by GNU GCC 8.3.0 as above with the compiler optimization flags `-O3 -march=native`, and executed on an iMac Pro (Early 2018) with a 2.3 GHz Intel Xeon W-2191B processor with 18 threads on 18 logical cores.
 
-The library is compiled by GNU GCC 7.3.0 with the flags `-Ofast -march=native -mtune=native`, and executed on a MacBook Pro (Mid 2014) with a 2.8 GHz Intel Core i7-4980HQ processor with 8 threads on 4 logical cores.
-
-| Degree            | 63       | 127      | 255      | 511      | 1023     | 2047     | 4095     | 8191     |
-| ----------------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: |
-| **Forward**       | 0.000088 | 0.000529 | 0.002194 | 0.017071 | 0.121610 | 1.033182 | 12.38314 | 139.3769 |
-| **Backward**      | 0.000092 | 0.000535 | 0.002409 | 0.017507 | 0.111388 | 0.795846 | 6.526968 | 101.6704 |
-| **ϵ<sub>2</sub>** | 6.01e-16 | 8.36e-16 | 9.68e-16 | 1.31e-15 | 1.82e-15 | 2.54e-15 | 3.55e-15 | 5.00e-15 |
-| **ϵ<sub>∞</sub>** | 1.55e-15 | 3.00e-15 | 3.22e-15 | 5.22e-15 | 8.44e-15 | 1.25e-14 | 1.71e-14 | 3.62e-14 |
-
-### iMac Pro
-
-The library is compiled by LLVM Clang-6.0.0 with the flags `-Ofast -march=native -mtune=native`, and executed on an iMac Pro (Early 2018) with a 2.3 GHz Intel Xeon W-2191B processor with 18 threads on 18 logical cores.
+### Spherical harmonic series to bivariate Fourier series (`sph2fourier`)
 
 | Degree            | 63       | 127      | 255      | 511      | 1023     | 2047     | 4095     | 8191     |
 | ----------------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: |
-| **Forward**       | 0.000091 | 0.000513 | 0.001119 | 0.004180 | 0.021416 | 0.185732 | 2.445858 | 24.53793 |
-| **Backward**      | 0.000089 | 0.000516 | 0.001105 | 0.004265 | 0.022442 | 0.130701 | 1.386275 | 20.40340 |
-| **ϵ<sub>2</sub>** | 6.69e-16 | 8.55e-16 | 1.05e-15 | 1.41e-15 | 1.95e-15 | 2.79e-15 | 3.95e-15 | 5.86e-15 |
-| **ϵ<sub>∞</sub>** | 2.44e-15 | 2.78e-15 | 4.44e-15 | 6.33e-15 | 8.22e-15 | 1.23e-14 | 1.99e-14 | 4.17e-14 |
+| **Forward**       | 0.000159 | 0.000540 | 0.001852 | 0.005510 | 0.022874 | 0.120082 | 0.786019 | 4.902573 |
+| **Backward**      | 0.000159 | 0.000555 | 0.001852 | 0.005501 | 0.023940 | 0.119339 | 0.778569 | 4.939324 |
+| **ϵ<sub>2</sub>** | 5.42e-16 | 7.79e-16 | 9.23e-16 | 1.27e-15 | 1.80e-15 | 2.52e-15 | 3.54e-15 | 4.98e-15 |
+| **ϵ<sub>∞</sub>** | 1.33e-15 | 2.55e-15 | 4.55e-15 | 5.22e-15 | 9.33e-15 | 1.11e-14 | 1.81e-14 | 3.80e-14 |
 
+### Proriol series to bivariate Chebyshev series (`tri2cheb`) (α, β, γ) = (0, 0, 0)
+
+| Degree            | 63       | 127      | 255      | 511      | 1023     | 2047     | 4095     | 8191     |
+| ----------------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: |
+| **Forward**       | 0.000128 | 0.000313 | 0.000969 | 0.003482 | 0.015711 | 0.093525 | 0.638155 | 4.591086 |
+| **Backward**      | 0.000125 | 0.000302 | 0.000948 | 0.003543 | 0.016041 | 0.094016 | 0.670728 | 4.420676 |
+| **ϵ<sub>2</sub>** | 2.30e-15 | 3.94e-15 | 8.14e-15 | 1.68e-14 | 3.55e-14 | 7.30e-14 | 1.44e-13 | 2.97e-13 |
+| **ϵ<sub>∞</sub>** | 1.09e-14 | 1.84e-14 | 5.49e-14 | 1.49e-13 | 9.06e-13 | 1.95e-12 | 3.73e-12 | 1.05e-11 |
+
+The error growth rate is significantly reduced if (α, β, γ) = (-0.5, -0.5, -0.5).
+
+### Zernike series to Chebyshev×Fourier series (`disk2cxf`)
+
+| Degree            | 63       | 127      | 255      | 511      | 1023     | 2047     | 4095     | 8191     |
+| ----------------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: |
+| **Forward**       | 0.000275 | 0.001069 | 0.003448 | 0.011251 | 0.053583 | 0.329135 | 2.157533 | 15.33666 |
+| **Backward**      | 0.000280 | 0.001031 | 0.003435 | 0.011320 | 0.053093 | 0.317026 | 2.203625 | 15.42320 |
+| **ϵ<sub>2</sub>** | 7.60e-16 | 9.35e-16 | 1.31e-15 | 1.84e-15 | 2.56e-15 | 3.59e-15 | 5.05e-15 | 7.15e-15 |
+| **ϵ<sub>∞</sub>** | 1.78e-15 | 2.66e-15 | 5.33e-15 | 7.11e-15 | 1.27e-14 | 1.79e-14 | 2.91e-14 | 1.66e-13 |
 
 # References:
 
