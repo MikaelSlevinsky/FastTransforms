@@ -804,7 +804,7 @@ ft_tetrahedral_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha,
 }
 
 void ft_execute_tet2cheb(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M) {
-    execute_tet_hi2lo_AVX512F(P->RP1, P->RP2, A, P->B, L, M);
+    execute_tet_hi2lo_AVX(P->RP1, P->RP2, A, P->B, L, M);
     if ((P->beta + P->gamma + P->delta != -2.5) || (P->alpha != -0.5))
         for (int m = 0; m < M; m++)
             cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P1, N, A+N*L*m, N);
@@ -830,7 +830,7 @@ void ft_execute_cheb2tet(const ft_tetrahedral_harmonic_plan * P, double * A, con
     if ((P->alpha != -0.5) || (P->beta + P->gamma + P->delta != -2.5))
         for (int m = 0; m < M; m++)
             cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P1inv, N, A+N*L*m, N);
-    execute_tet_lo2hi_AVX512F(P->RP1, P->RP2, A, P->B, L, M);
+    execute_tet_lo2hi_AVX(P->RP1, P->RP2, A, P->B, L, M);
 }
 
 void ft_destroy_spin_harmonic_plan(ft_spin_harmonic_plan * P) {
