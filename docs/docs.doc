@@ -164,15 +164,15 @@ The <tt>ft_execute_*</tt> functions are drivers that perform transforms as defin
 \subsection sph2fourier
 
 \anchor sh
-Spherical harmonics are:
-\f[
-Y_\ell^m(\theta,\varphi) = \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} (-1)^{\abs{m}}\sqrt{(\ell+\frac{1}{2})\frac{(\ell-\abs{m})!}{(\ell+\abs{m})!}} P_\ell^{\abs{m}}(\cos\theta),
-\f]
+Real orthonormal spherical harmonics in \f$L^2(\mathbb{S}^2)\f$ are:
+\f{align*}
+Y_\ell^m(\theta,\varphi) & = (-1)^{\abs{m}}\sqrt{(\ell+\tfrac{1}{2})\frac{(\ell-\abs{m})!}{(\ell+\abs{m})!}} P_\ell^{\abs{m}}(\cos\theta) \sqrt{\frac{2-\delta_{m,0}}{2\pi}} \left\{\begin{array}{ccc} \cos(m\varphi) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\varphi) & {\rm for} & m < 0.\end{array}\right.,
+\f}
 where \f$P_\ell^m(\cos\theta)\f$ are the associated Legendre functions. A degree-\f$(n-1)\f$ expansion in spherical harmonics is given by:
 \f[
 f_{n-1}(\theta,\varphi) = \sum_{\ell=0}^{n-1}\sum_{m=-\ell}^{+\ell} f_\ell^m Y_\ell^m(\theta,\varphi).
 \f]
-If spherical harmonic expansion coefficients are organized into the array:
+If real spherical harmonic expansion coefficients are organized into the array:
 \f[
 F = \begin{pmatrix}
 f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_{n-1}^{1-n} & f_{n-1}^{n-1}\\
@@ -195,16 +195,16 @@ g_{n-1}^0 & 0 & 0 & \cdots & g_{n-1}^{1-n} & g_{n-1}^{n-1}\\
 \f]
 That is:
 \f[
-f_n(\theta,\varphi) = \sum_{\ell=0}^{n-1}\sum_{m=1-n}^{n-1} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m~{\rm even},\\ \sin((\ell+1)\theta) & m~{\rm odd},\end{array}\right.
+f_n(\theta,\varphi) = \sum_{\ell=0}^{n-1}\sum_{m=1-n}^{n-1} g_\ell^m \left\{\begin{array}{ccc} \cos(\ell\theta) & {\rm for} & m~{\rm even},\\ \sin((\ell+1)\theta) & {\rm for} & m~{\rm odd},\end{array}\right\} \sqrt{\frac{2-\delta_{m,0}}{2\pi}}\left\{\begin{array}{ccc} \cos(m\varphi) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\varphi) & {\rm for} & m < 0.\end{array}\right.,
 \f]
-and \ref ft_execute_fourier2sph converts them back. Since the routines only transform columns of the arrays, they are indifferent to the choice of longitudinal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
+and \ref ft_execute_fourier2sph converts them back.
 
 
 \subsection disk2cxf
 
-Disk harmonics are Zernike polynomials:
+Real orthonormal Zernike polynomials in \f$L^2(\mathbb{D}^2)\f$ are:
 \f[
-Z_\ell^m(r,\theta) = \sqrt{2\ell+2} r^{\abs{m}}P_{\frac{\ell-\abs{m}}{2}}^{(0,\abs{m})}(2r^2-1)\frac{e^{\ii m\theta}}{\sqrt{2\pi}}.
+Z_\ell^m(r,\theta) = \sqrt{2\ell+2} r^{\abs{m}}P_{\frac{\ell-\abs{m}}{2}}^{(0,\abs{m})}(2r^2-1) \sqrt{\frac{2-\delta_{m,0}}{2\pi}} \left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0.\end{array}\right..
 \f]
 A degree-\f$(2n-2)\f$ expansion in disk harmonics is given by:
 \f[
@@ -233,22 +233,22 @@ g_{2n-2}^0 & 0 & 0 & g_{2n-2}^{-2} & g_{2n-2}^2 & \cdots & g_{2n-2}^{2-2n} & g_{
 \f]
 That is:
 \f[
-f_{2n-2}(r,\theta) = \sum_{\ell=0}^{n-1}\sum_{m=2-2n}^{2n-2} g_{2\ell}^m \frac{e^{\ii m\theta}}{\sqrt{2\pi}} \left\{\begin{array}{lr} T_{2\ell}(r) & m~{\rm even},\\ T_{2\ell+1}(r) & m~{\rm odd},\end{array}\right.
+f_{2n-2}(r,\theta) = \sum_{\ell=0}^{n-1}\sum_{m=2-2n}^{2n-2} g_{2\ell}^m \left\{\begin{array}{ccc} T_{2\ell}(r) & {\rm for} & m~{\rm even},\\ T_{2\ell+1}(r) & {\rm for} & m~{\rm odd},\end{array}\right\} \sqrt{\frac{2-\delta_{m,0}}{2\pi}}\left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0.\end{array}\right.,
 \f]
-and \ref ft_execute_cxf2disk converts them back. Since \ref ft_execute_disk2cxf only transforms columns of the arrays, the routine is indifferent to the choice of azimuthal basis; it may be complex exponentials or sines and cosines, with no particular normalization.
+and \ref ft_execute_cxf2disk converts them back.
 
 
 \subsection tri2cheb
 
-Triangular harmonics are:
+Proriol polynomials on the triangle with vertices \f$(0,0)\f$, \f$(1,0)\f$, and \f$(0,1)\f$ are:
 \f[
 \tilde{P}_{\ell,m}^{(\alpha,\beta,\gamma)}(x,y) = (2-2x)^m \tilde{P}_{\ell-m}^{(2m+\beta+\gamma+1,\alpha)}(2x-1) \tilde{P}_m^{(\gamma,\beta)}\left(\frac{2y}{1-x}-1\right),
 \f]
-where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-\f$(n-1)\f$ expansion in triangular harmonics is given by:
+where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-\f$(n-1)\f$ expansion in Proriol polynomials is given by:
 \f[
 f_{n-1}(x,y) = \sum_{\ell=0}^{n-1}\sum_{m=0}^\ell f_\ell^m \tilde{P}_{\ell,m}^{(\alpha,\beta,\gamma)}(x,y).
 \f]
-If triangular harmonic expansion coefficients are organized into the array:
+If Proriol expansion coefficients are organized into the array:
 \f[
 F = \begin{pmatrix}
 f_0^0 & f_1^1 & f_2^2 & \cdots & f_{n-1}^{n-1}\\
@@ -276,15 +276,15 @@ and \ref ft_execute_cheb2tri converts them back.
 
 \subsection tet2cheb
 
-Tetrahedral harmonics are:
+Proriol polynomials on the simplex with vertices \f$(0,0,0)\f$, \f$(1,0,0)\f$, \f$(0,1,0)\f$, and \f$(0,0,1)\f$ are:
 \f[
 \tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z) = (2-2x)^{\ell+m} \tilde{P}_{k-\ell-m}^{(2\ell+2m+\beta+\gamma+\delta+2,\alpha)}(2x-1) \left(2-\frac{2y}{1-x}\right)^m \tilde{P}_\ell^{(2m+\gamma+\delta+1,\beta)}\left(\frac{2y}{1-x}-1\right) \tilde{P}_m^{(\delta,\gamma)}\left(\frac{2z}{1-x-y}-1\right),
 \f]
-where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-\f$(n-1)\f$ expansion in tetrahedral harmonics is given by:
+where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-\f$(n-1)\f$ expansion in Proriol polynomials is given by:
 \f[
 f_{n-1}(x,y,z) = \sum_{k=0}^{n-1}\sum_{\ell=0}^k\sum_{m=0}^{k-\ell} f_{k,\ell}^m \tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z) = \sum_{m=0}^{n-1}\sum_{\ell=0}^{n-1-m}\sum_{k=\ell+m}^{n-1} f_{k,\ell}^m \tilde{P}_{k,\ell,m}^{(\alpha,\beta,\gamma,\delta)}(x,y,z).
 \f]
-If tetrahedral harmonic expansion coefficients are organized into the rank-\f$3\f$ array whose \f$m^{\rm th}\f$ slice is:
+If Proriol expansion coefficients are organized into the rank-\f$3\f$ array whose \f$m^{\rm th}\f$ slice is:
 \f[
 F[0:n-m-1,0:n-m-1,m] = \begin{pmatrix}
 f_{m,0}^m & f_{1+m,1}^m & f_{2+m,2}^m & \cdots & f_{n-1,n-1-m}^m\\
@@ -301,10 +301,9 @@ f_{n-1}(x,y,z) = \sum_{k=0}^{n-1}\sum_{\ell=0}^{n-1}\sum_{m=0}^{n-1} g_{k,\ell}^
 
 \subsection spinsph2fourier
 
-Spin-weighted spherical harmonics are:
+Complex-valued orthonormal spin-weighted spherical harmonics in \f$L^2(\mathbb{S}^2)\f$ are:
 \f{align*}
-Y_{\ell,m}^s(\theta,\varphi) & = \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \sqrt{(\ell+\tfrac{1}{2})\frac{(\ell+\ell_0)!(\ell-\ell_0)!}{(\ell+\ell_1)!(\ell-\ell_1)!}}\nonumber\\
-& \times \sin^{\abs{m+s}}(\tfrac{\theta}{2})\cos^{\abs{m-s}}(\tfrac{\theta}{2}) P_{\ell-\ell_0}^{(\abs{m+s},\abs{m-s})}(\cos\theta).
+Y_{\ell,m}^s(\theta,\varphi) & = \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \sqrt{(\ell+\tfrac{1}{2})\frac{(\ell+\ell_0)!(\ell-\ell_0)!}{(\ell+\ell_1)!(\ell-\ell_1)!}} \sin^{\abs{m+s}}(\tfrac{\theta}{2})\cos^{\abs{m-s}}(\tfrac{\theta}{2}) P_{\ell-\ell_0}^{(\abs{m+s},\abs{m-s})}(\cos\theta).
 \f}
 where \f$P_n^{(\alpha,\beta)}(\cos\theta)\f$ are the Jacobi polynomials and \f$\ell_0 = \max\{\abs{m},\abs{s}\}\f$ and \f$\ell_1 = \min\{\abs{m},\abs{s}\}\f$. A degree-\f$(n-1)\f$ expansion in spin-weighted spherical harmonics is given by:
 \f[
@@ -333,9 +332,9 @@ g_{n-1}^0 & 0 & 0 & \cdots & g_{n-1}^{1-n} & g_{n-1}^{n-1}\\
 \f]
 That is:
 \f[
-f_{n-1}^s(\theta,\varphi) = \sum_{\ell=0}^{n-1}\sum_{m=1-n}^{n-1} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{lr} \cos(\ell\theta) & m+s~{\rm even},\\ \sin((\ell+1)\theta) & m+s~{\rm odd}.\end{array}\right.
+f_{n-1}^s(\theta,\varphi) = \sum_{\ell=0}^{n-1}\sum_{m=1-n}^{n-1} g_\ell^m \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \left\{\begin{array}{ccc} \cos(\ell\theta) & {\rm for} & m+s~{\rm even},\\ \sin((\ell+1)\theta) & {\rm for} & m+s~{\rm odd}.\end{array}\right.
 \f]
-Spin-weighted spherical harmonics are orthonormalized in \f$L^2(\mathbb{S}^2)\f$ and have positive real phase, which implies identities such as:
+This convention has positive real phase, which implies identities such as:
 \f[
 \overline{Y}_{\ell,m}^s(\theta,\varphi) = Y_{\ell,-m}^{-s}(\theta,\varphi).
 \f]
