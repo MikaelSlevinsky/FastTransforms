@@ -1,7 +1,7 @@
 # Documentation: http://docs.travis-ci.com/user/languages/c/
 language: c
 
-matrix:
+jobs:
   include:
     # Minimum system requirements
     - os: osx
@@ -9,96 +9,110 @@ matrix:
       compiler: gcc-4.9
       addons:
         homebrew:
-          packages: ['gcc@4.9', 'fftw', 'mpfr', 'doxygen']
+          packages: ['gcc@4.9', 'fftw', 'mpfr']
           update: true
-      env: MATRIX_EVAL="export CC=gcc-4.9 && export FT_USE_APPLEBLAS=1"
+      env: JOBS_EVAL="export CC=gcc-4.9 && export FT_USE_APPLEBLAS=1"
     - os: osx
       osx_image: xcode10
       compiler: gcc-5
       addons:
         homebrew:
-          packages: ['gcc@5', 'fftw', 'mpfr', 'doxygen']
+          packages: ['gcc@5', 'fftw', 'mpfr']
           update: true
-      env: MATRIX_EVAL="export CC=gcc-5 && export FT_USE_APPLEBLAS=1"
+      env: JOBS_EVAL="export CC=gcc-5 && export FT_USE_APPLEBLAS=1"
     - os: osx
       osx_image: xcode10
       compiler: gcc-6
       addons:
         homebrew:
-          packages: ['gcc@6', 'fftw', 'mpfr', 'doxygen']
+          packages: ['gcc@6', 'fftw', 'mpfr']
           update: true
-      env: MATRIX_EVAL="export CC=gcc-6 && export FT_USE_APPLEBLAS=1"
+      env: JOBS_EVAL="export CC=gcc-6 && export FT_USE_APPLEBLAS=1"
     # Recommended system requirements
     - os: osx
       osx_image: xcode10
       compiler: gcc-7
       addons:
         homebrew:
-          packages: ['gcc@7', 'fftw', 'mpfr', 'doxygen']
+          packages: ['gcc@7', 'fftw', 'mpfr']
           update: true
-      env: MATRIX_EVAL="export CC=gcc-7 && export FT_USE_APPLEBLAS=1"
+      env: JOBS_EVAL="export CC=gcc-7 && export FT_USE_APPLEBLAS=1"
     - os: osx
       osx_image: xcode10
       compiler: gcc-8
       addons:
         homebrew:
-          packages: ['gcc@8', 'fftw', 'mpfr', 'doxygen']
+          packages: ['gcc@8', 'fftw', 'mpfr']
           update: true
-      env: MATRIX_EVAL="export CC=gcc-8 && export FT_USE_APPLEBLAS=1"
+      env: JOBS_EVAL="export CC=gcc-8 && export FT_USE_APPLEBLAS=1"
     - os: osx
       osx_image: xcode10
       compiler: gcc-9
       addons:
         homebrew:
-          packages: ['gcc@9', 'fftw', 'mpfr', 'doxygen']
+          packages: ['gcc@9', 'fftw', 'mpfr']
           update: true
-      env: MATRIX_EVAL="export CC=gcc-9 && export FT_USE_APPLEBLAS=1"
+      env: JOBS_EVAL="export CC=gcc-9 && export FT_USE_APPLEBLAS=1"
     # Minimum system requirements
     - os: linux
       compiler: gcc-4.9
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
-          packages: ['gcc-4.9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev', 'doxygen']
-      env: MATRIX_EVAL="export CC=gcc-4.9 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+          packages: ['gcc-4.9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=gcc-4.9 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     - os: linux
       compiler: gcc-5
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
-          packages: ['gcc-5', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev', 'doxygen']
-      env: MATRIX_EVAL="export CC=gcc-5 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+          packages: ['gcc-5', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=gcc-5 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     - os: linux
       compiler: gcc-6
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
-          packages: ['gcc-6', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev', 'doxygen']
-      env: MATRIX_EVAL="export CC=gcc-6 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+          packages: ['gcc-6', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=gcc-6 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     # Recommended system requirements
     - os: linux
       compiler: gcc-7
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
-          packages: ['gcc-7', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev', 'doxygen']
-      env: MATRIX_EVAL="export CC=gcc-7 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+          packages: ['gcc-7', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=gcc-7 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     - os: linux
       compiler: gcc-8
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
-          packages: ['gcc-8', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev', 'doxygen']
-      env: MATRIX_EVAL="export CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+          packages: ['gcc-8', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     - os: linux
       compiler: gcc-9
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
-          packages: ['gcc-9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev', 'doxygen']
-      env: MATRIX_EVAL="export CC=gcc-9 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+          packages: ['gcc-9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=gcc-9 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+    - stage: "Documentation"
+      os: linux
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: doxygen
+      script: doxygen Doxyfile
+      deploy:
+        - provider: pages
+          cleanup: false
+          local_dir: docs/html
+          token: $FT_DOCS
+          on:
+            branch: master
 
-before_install: eval "${MATRIX_EVAL}"
+before_install: eval "${JOBS_EVAL}"
 
 script:
   - make
@@ -117,17 +131,6 @@ script:
   - ./holomorphic
   - ./nonlocaldiffusion
   - ./spinweighted
-
-after_success:
-  - doxygen Doxyfile
-
-deploy:
-  - provider: pages
-    skip_cleanup: true
-    local_dir: docs/html
-    github_token: $FT_DOCS
-    on:
-      branch: master
 
 notifications:
   email: false
