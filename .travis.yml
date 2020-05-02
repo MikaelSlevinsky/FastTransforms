@@ -107,11 +107,12 @@ jobs:
       script: doxygen Doxyfile
       deploy:
         - provider: pages
-          cleanup: false
+          edge: true
+          keep_history: false
           local_dir: docs/html
-          token: $FT_DOCS
           on:
             branch: master
+          token: $FT_DOCS
 
 before_install: eval "${JOBS_EVAL}"
 
