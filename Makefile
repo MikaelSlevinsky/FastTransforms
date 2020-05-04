@@ -58,6 +58,7 @@ clean:
 	rm -f calculus
 	rm -f holomorphic
 	rm -f nonlocaldiffusion
+	rm -f spinweighted
 	rm -f test_*
 
 .PHONY: all assembly lib tests examples clean
