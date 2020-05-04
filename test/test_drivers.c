@@ -1130,7 +1130,7 @@ int main(int argc, const char * argv[]) {
 
         for (int S = -2; S <= 2; S++) {
             ft_complex * AC = spinsphones(N, M, S);
-            ft_complex * BC = (ft_complex *) copymat(A, 2*N, M);
+            ft_complex * BC = (ft_complex *) copymat((double *) AC, 2*N, M);
             SRP = ft_plan_rotspinsphere(N, S);
 
             FT_TIME(execute_spinsph_hi2lo_default(SRP, AC, M), start, end, NTIMES)
