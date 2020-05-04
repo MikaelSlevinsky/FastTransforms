@@ -596,7 +596,13 @@ void execute_tet_lo2hi_AVX512F(const ft_rotation_plan * RP1, const ft_rotation_p
 
 void ft_execute_spinsph_hi2lo(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M) {
     ft_simd simd = get_simd();
-    if (simd.sse2)
+    if (simd.avx) {
+        if (simd.fma)
+            return execute_spinsph_hi2lo_AVX_FMA(SRP, A, B, M);
+        else
+            return execute_spinsph_hi2lo_AVX(SRP, A, B, M);
+    }
+    else if (simd.sse2)
         return execute_spinsph_hi2lo_SSE2(SRP, A, M);
     else
         return execute_spinsph_hi2lo_default(SRP, A, M);
@@ -604,7 +610,13 @@ void ft_execute_spinsph_hi2lo(const ft_spin_rotation_plan * SRP, ft_complex * A,
 
 void ft_execute_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M) {
     ft_simd simd = get_simd();
-    if (simd.sse2)
+    if (simd.avx) {
+        if (simd.fma)
+            return execute_spinsph_lo2hi_AVX_FMA(SRP, A, B, M);
+        else
+            return execute_spinsph_lo2hi_AVX(SRP, A, B, M);
+    }
+    else if (simd.sse2)
         return execute_spinsph_lo2hi_SSE2(SRP, A, M);
     else
         return execute_spinsph_lo2hi_default(SRP, A, M);
@@ -648,6 +660,62 @@ void execute_spinsph_lo2hi_SSE2(const ft_spin_rotation_plan * SRP, ft_complex * 
         kernel_spinsph_lo2hi_SSE2(SRP, -m, A + N*(2*m-1), 1);
         kernel_spinsph_lo2hi_SSE2(SRP,  m, A + N*(2*m), 1);
     }
+}
+
+void execute_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M) {
+    int N = SRP->n;
+    double * AD = (double *) A;
+    double * BD = (double *) B;
+    permute_sph(AD, BD, 2*N, M, 2);
+    kernel_spinsph_hi2lo_default(SRP, 0, B, 1);
+    kernel_spinsph_hi2lo_default(SRP, -1, B + N, 1);
+    kernel_spinsph_hi2lo_default(SRP, 1, B + 2*N, 1);
+    #pragma omp parallel
+    for (int m = 2+FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
+        kernel_spinsph_hi2lo_AVX(SRP, m, B + N*(2*m-1), 2);
+    permute_t_sph(AD, BD, 2*N, M, 2);
+}
+
+void execute_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M) {
+    int N = SRP->n;
+    double * AD = (double *) A;
+    double * BD = (double *) B;
+    permute_sph(AD, BD, 2*N, M, 2);
+    kernel_spinsph_lo2hi_default(SRP, 0, B, 1);
+    kernel_spinsph_lo2hi_default(SRP, -1, B + N, 1);
+    kernel_spinsph_lo2hi_default(SRP, 1, B + 2*N, 1);
+    #pragma omp parallel
+    for (int m = 2+FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
+        kernel_spinsph_lo2hi_AVX(SRP, m, B + N*(2*m-1), 2);
+    permute_t_sph(AD, BD, 2*N, M, 2);
+}
+
+void execute_spinsph_hi2lo_AVX_FMA(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M) {
+    int N = SRP->n;
+    double * AD = (double *) A;
+    double * BD = (double *) B;
+    permute_sph(AD, BD, 2*N, M, 2);
+    kernel_spinsph_hi2lo_default(SRP, 0, B, 1);
+    kernel_spinsph_hi2lo_default(SRP, -1, B + N, 1);
+    kernel_spinsph_hi2lo_default(SRP, 1, B + 2*N, 1);
+    #pragma omp parallel
+    for (int m = 2+FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
+        kernel_spinsph_hi2lo_AVX_FMA(SRP, m, B + N*(2*m-1), 2);
+    permute_t_sph(AD, BD, 2*N, M, 2);
+}
+
+void execute_spinsph_lo2hi_AVX_FMA(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M) {
+    int N = SRP->n;
+    double * AD = (double *) A;
+    double * BD = (double *) B;
+    permute_sph(AD, BD, 2*N, M, 2);
+    kernel_spinsph_lo2hi_default(SRP, 0, B, 1);
+    kernel_spinsph_lo2hi_default(SRP, -1, B + N, 1);
+    kernel_spinsph_lo2hi_default(SRP, 1, B + 2*N, 1);
+    #pragma omp parallel
+    for (int m = 2+FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
+        kernel_spinsph_lo2hi_AVX_FMA(SRP, m, B + N*(2*m-1), 2);
+    permute_t_sph(AD, BD, 2*N, M, 2);
 }
 
 

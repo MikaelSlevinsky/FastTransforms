@@ -912,20 +912,20 @@ int main(int argc, const char * argv[]) {
         execute_tet_lo2hi_AVX(RP1, RP2, A, Ac, L, M);
 
         err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
-        printf("ϵ_2 AVX512F-AVX \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        printf("ϵ_2 AVX512F-AVX  (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
         ft_checktest(err, 8*pow(N*L*M, 1.0/3.0), &checksum);
         err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
-        printf("ϵ_∞ AVX512F-AVX \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        printf("ϵ_∞ AVX512F-AVX  (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
         ft_checktest(err, 4*pow(N*L*M, 2.0/3.0), &checksum);
 
         execute_tet_hi2lo_AVX(RP1, RP2, A, Ac, L, M);
         execute_tet_lo2hi_AVX512F(RP1, RP2, A, Ac, L, M);
 
         err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
-        printf("ϵ_2 AVX-AVX512F \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        printf("ϵ_2 AVX-AVX512F  (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
         ft_checktest(err, 8*pow(N*L*M, 1.0/3.0), &checksum);
         err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
-        printf("ϵ_∞ AVX-AVX512F \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        printf("ϵ_∞ AVX-AVX512F  (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
         ft_checktest(err, 4*pow(N*L*M, 2.0/3.0), &checksum);
 
         free(A);
@@ -1035,8 +1035,10 @@ int main(int argc, const char * argv[]) {
 
         for (int S = -4; S <= 4; S++) {
             ft_complex * AC = spinsphones(N, M, S);
-            ft_complex * BC = (ft_complex *) copymat((double *) AC, 2*N, M);
             A = (double *) AC;
+            ft_complex * AcC = (ft_complex *) aligned_copymat(A, 2*N, M);
+            ft_complex * BC = (ft_complex *) copymat(A, 2*N, M);
+            Ac = (double *) AcC;
             B = (double *) BC;
             SRP = ft_plan_rotspinsphere(N, S);
 
@@ -1070,7 +1072,48 @@ int main(int argc, const char * argv[]) {
             printf("ϵ_∞ default-SSE2 \t (N×M, S) = (%5ix%5i,%3i): \t |%20.2e ", N, M, S, err);
             ft_checktest(err, 2*N, &checksum);
 
+            execute_spinsph_hi2lo_AVX(SRP, AC, AcC, M);
+            execute_spinsph_lo2hi_SSE2(SRP, AC, M);
+
+            err = ft_norm_2arg(A, B, 2*N*M)/ft_norm_1arg(B, 2*N*M);
+            printf("ϵ_2 AVX-SSE2 \t\t (N×M, S) = (%5ix%5i,%3i): \t |%20.2e ", N, M, S, err);
+            ft_checktest(err, 4*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, 2*N*M)/ft_normInf_1arg(B, 2*N*M);
+            printf("ϵ_∞ AVX-SSE2 \t\t (N×M, S) = (%5ix%5i,%3i): \t |%20.2e ", N, M, S, err);
+            ft_checktest(err, 2*N, &checksum);
+
+            execute_spinsph_hi2lo_SSE2(SRP, AC, M);
+            execute_spinsph_lo2hi_AVX(SRP, AC, AcC, M);
+
+            err = ft_norm_2arg(A, B, 2*N*M)/ft_norm_1arg(B, 2*N*M);
+            printf("ϵ_2 SSE2-AVX \t\t (N×M, S) = (%5ix%5i,%3i): \t |%20.2e ", N, M, S, err);
+            ft_checktest(err, 4*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, 2*N*M)/ft_normInf_1arg(B, 2*N*M);
+            printf("ϵ_∞ SSE2-AVX \t\t (N×M, S) = (%5ix%5i,%3i): \t |%20.2e ", N, M, S, err);
+            ft_checktest(err, 2*N, &checksum);
+
+            execute_spinsph_hi2lo_AVX_FMA(SRP, AC, AcC, M);
+            execute_spinsph_lo2hi_AVX(SRP, AC, AcC, M);
+
+            err = ft_norm_2arg(A, B, 2*N*M)/ft_norm_1arg(B, 2*N*M);
+            printf("ϵ_2 AVX_FMA-AVX \t (N×M, S) = (%5ix%5i,%3i): \t |%20.2e ", N, M, S, err);
+            ft_checktest(err, 4*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, 2*N*M)/ft_normInf_1arg(B, 2*N*M);
+            printf("ϵ_∞ AVX_FMA-AVX \t (N×M, S) = (%5ix%5i,%3i): \t |%20.2e ", N, M, S, err);
+            ft_checktest(err, 2*N, &checksum);
+
+            execute_spinsph_hi2lo_AVX(SRP, AC, AcC, M);
+            execute_spinsph_lo2hi_AVX_FMA(SRP, AC, AcC, M);
+
+            err = ft_norm_2arg(A, B, 2*N*M)/ft_norm_1arg(B, 2*N*M);
+            printf("ϵ_2 AVX-AVX_FMA \t (N×M, S) = (%5ix%5i,%3i): \t |%20.2e ", N, M, S, err);
+            ft_checktest(err, 4*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, 2*N*M)/ft_normInf_1arg(B, 2*N*M);
+            printf("ϵ_∞ AVX-AVX_FMA \t (N×M, S) = (%5ix%5i,%3i): \t |%20.2e ", N, M, S, err);
+            ft_checktest(err, 2*N, &checksum);
+
             free(AC);
+            VFREE(AcC);
             free(BC);
             ft_destroy_spin_rotation_plan(SRP);
         }
@@ -1083,14 +1126,15 @@ int main(int argc, const char * argv[]) {
         M = 2*N-1;
         NTIMES = 1 + pow(2048/N, 2);
 
-        printf("%d", N);
+        printf("%d\n", N);
 
         for (int S = -2; S <= 2; S++) {
             ft_complex * AC = spinsphones(N, M, S);
+            ft_complex * BC = (ft_complex *) copymat(A, 2*N, M);
             SRP = ft_plan_rotspinsphere(N, S);
 
             FT_TIME(execute_spinsph_hi2lo_default(SRP, AC, M), start, end, NTIMES)
-            printf("  %.6f", elapsed(&start, &end, NTIMES));
+            printf("%d  %.6f", S, elapsed(&start, &end, NTIMES));
 
             FT_TIME(execute_spinsph_lo2hi_default(SRP, AC, M), start, end, NTIMES)
             printf("  %.6f", elapsed(&start, &end, NTIMES));
@@ -1101,7 +1145,20 @@ int main(int argc, const char * argv[]) {
             FT_TIME(execute_spinsph_lo2hi_SSE2(SRP, AC, M), start, end, NTIMES)
             printf("  %.6f", elapsed(&start, &end, NTIMES));
 
+            FT_TIME(execute_spinsph_hi2lo_AVX(SRP, AC, BC, M), start, end, NTIMES)
+            printf("  %.6f", elapsed(&start, &end, NTIMES));
+
+            FT_TIME(execute_spinsph_lo2hi_AVX(SRP, AC, BC, M), start, end, NTIMES)
+            printf("  %.6f", elapsed(&start, &end, NTIMES));
+
+            FT_TIME(execute_spinsph_hi2lo_AVX_FMA(SRP, AC, BC, M), start, end, NTIMES)
+            printf("  %.6f", elapsed(&start, &end, NTIMES));
+
+            FT_TIME(execute_spinsph_lo2hi_AVX_FMA(SRP, AC, BC, M), start, end, NTIMES)
+            printf("  %.6f\n", elapsed(&start, &end, NTIMES));
+
             free(AC);
+            free(BC);
             ft_destroy_spin_rotation_plan(SRP);
         }
         printf("\n");
@@ -1145,12 +1202,13 @@ int main(int argc, const char * argv[]) {
         M = 2*N-1;
         NTIMES = 1 + pow(2048/N, 2);
 
+        printf("%d\n", N);
         for (int S = -2; S <= 2; S++) {
             ft_complex * AC = spinsphrand(N, M, S);
             SP = ft_plan_spinsph2fourier(N, S);
 
             FT_TIME(ft_execute_spinsph2fourier(SP, AC, N, M), start, end, NTIMES)
-            printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
+            printf("%d  %.6f", S, elapsed(&start, &end, NTIMES));
 
             FT_TIME(ft_execute_fourier2spinsph(SP, AC, N, M), start, end, NTIMES)
             printf("  %.6f\n", elapsed(&start, &end, NTIMES));

@@ -149,6 +149,7 @@ static inline ft_simd get_simd(void) {
     #define vstoreu8(u, v) (_mm512_storeu_pd(u, v))
     #define vfma8(a, b, c) ((double8) _mm512_fmadd_pd(a, b, c))
     #define vfms8(a, b, c) ((double8) _mm512_fmsub_pd(a, b, c))
+    #define vfmas8(a, b, c) ((double8) _mm512_fmaddsub_pd(a, b, c))
     typedef float float16 __attribute__ ((vector_size (VECTOR_SIZE_8*8)));
     #define vall16f(x) ((float16) _mm512_set1_ps(x))
     #define vload16f(v) ((float16) _mm512_load_ps(v))
@@ -157,6 +158,7 @@ static inline ft_simd get_simd(void) {
     #define vstoreu16f(u, v) (_mm512_storeu_ps(u, v))
     #define vfma16f(a, b, c) ((float16) _mm512_fmadd_ps(a, b, c))
     #define vfms16f(a, b, c) ((float16) _mm512_fmsub_ps(a, b, c))
+    #define vfmas16f(a, b, c) ((float16) _mm512_fmaddsub_ps(a, b, c))
 #endif
 #ifdef __AVX__
     #define VECTOR_SIZE_4 4
@@ -175,11 +177,15 @@ static inline ft_simd get_simd(void) {
     #define vloadu8f(v) ((float8) _mm256_loadu_ps(v))
     #define vstore8f(u, v) (_mm256_store_ps(u, v))
     #define vstoreu8f(u, v) (_mm256_storeu_ps(u, v))
+    #define vas4(a, b) ((double4) _mm256_addsub_pd(a, b))
+    #define vas8f(a, b) ((float8) _mm256_addsub_ps(a, b))
     #ifdef __FMA__
         #define vfma4(a, b, c) ((double4) _mm256_fmadd_pd(a, b, c))
         #define vfms4(a, b, c) ((double4) _mm256_fmsub_pd(a, b, c))
+        #define vfmas4(a, b, c) ((double4) _mm256_fmaddsub_pd(a, b, c))
         #define vfma8f(a, b, c) ((float8) _mm256_fmadd_ps(a, b, c))
         #define vfms8f(a, b, c) ((float8) _mm256_fmsub_ps(a, b, c))
+        #define vfmas8f(a, b, c) ((float8) _mm256_fmaddsub_ps(a, b, c))
     #endif
 #endif
 #ifdef __SSE2__
@@ -196,6 +202,7 @@ static inline ft_simd get_simd(void) {
     #ifdef __FMA__
         #define vfma2(a, b, c) ((double2) _mm_fmadd_pd(a, b, c))
         #define vfms2(a, b, c) ((double2) _mm_fmsub_pd(a, b, c))
+        #define vfmas2(a, b, c) ((double2) _mm_fmaddsub_pd(a, b, c))
     #endif
 #endif
 #ifdef __SSE__
@@ -212,6 +219,7 @@ static inline ft_simd get_simd(void) {
     #ifdef __FMA__
         #define vfma4f(a, b, c) ((float4) _mm_fmadd_ps(a, b, c))
         #define vfms4f(a, b, c) ((float4) _mm_fmsub_ps(a, b, c))
+        #define vfmas4f(a, b, c) ((float4) _mm_fmaddsub_ps(a, b, c))
     #endif
 #endif
 
@@ -334,6 +342,10 @@ void kernel_spinsph_hi2lo_default(const ft_spin_rotation_plan * SRP, const int m
 void kernel_spinsph_lo2hi_default(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
 void kernel_spinsph_hi2lo_SSE2(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
 void kernel_spinsph_lo2hi_SSE2(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
+void kernel_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
+void kernel_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
+void kernel_spinsph_hi2lo_AVX_FMA(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
+void kernel_spinsph_lo2hi_AVX_FMA(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
 
 void execute_sph_hi2lo_default(const ft_rotation_plan * RP, double * A, const int M);
 void execute_sph_lo2hi_default(const ft_rotation_plan * RP, double * A, const int M);
@@ -390,6 +402,10 @@ void execute_spinsph_hi2lo_default(const ft_spin_rotation_plan * SRP, ft_complex
 void execute_spinsph_lo2hi_default(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);
 void execute_spinsph_hi2lo_SSE2(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);
 void execute_spinsph_lo2hi_SSE2(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);
+void execute_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
+void execute_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
+void execute_spinsph_hi2lo_AVX_FMA(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
+void execute_spinsph_lo2hi_AVX_FMA(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
 
 
 void permute(const double * A, double * B, const int N, const int M, const int L);
