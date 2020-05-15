@@ -195,6 +195,12 @@ void ft_mpfr_trmv(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t * x, mpfr_rnd_t
 void ft_mpfr_trsv(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t * x, mpfr_rnd_t rnd);
 void ft_mpfr_trmm(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t * B, int LDB, int N, mpfr_rnd_t rnd);
 void ft_mpfr_trsm(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t * B, int LDB, int N, mpfr_rnd_t rnd);
+// C -- Julia interoperability. Julia `BigFloat` does not have the same size as `mpfr_t`.
+// So we give all Julia-owned data its own address, and dereference to retrieve the number.
+void ft_mpfr_trmv_ptr(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t ** x, mpfr_rnd_t rnd);
+void ft_mpfr_trsv_ptr(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t ** x, mpfr_rnd_t rnd);
+void ft_mpfr_trmm_ptr(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t ** B, int LDB, int N, mpfr_rnd_t rnd);
+void ft_mpfr_trsm_ptr(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t ** B, int LDB, int N, mpfr_rnd_t rnd);
 
 /// A multi-precision version of \ref ft_plan_legendre_to_chebyshev that returns a dense array of connection coefficients.
 mpfr_t * ft_mpfr_plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n, mpfr_prec_t prec, mpfr_rnd_t rnd);
