@@ -49,6 +49,29 @@ examples:
 	$(CC) src/ftutilities.c examples/nonlocaldiffusion.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o nonlocaldiffusion
 	$(CC) src/ftutilities.c examples/spinweighted.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o spinweighted
 
+runtests:
+	./test_recurrence
+	./test_transforms
+	./test_permute
+	./test_rotations
+	./test_tridiagonal
+	./test_hierarchical
+	./test_banded
+	./test_dprk
+	./test_tdc
+	OMP_NUM_THREADS=$(FT_NUM_THREADS) ./test_drivers 1 3 0
+	OMP_NUM_THREADS=$(FT_NUM_THREADS) ./test_fftw 1 3 0
+
+runexamples:
+	./additiontheorem
+	./calculus
+	./holomorphic
+	./nonlocaldiffusion
+	./spinweighted
+
+coverage:
+	$(COV) $(SRC) -o $(LIBDIR)
+
 clean:
 	rm -f lib$(LIB).*
 	rm -f src/recurrence/*.s
@@ -60,5 +83,8 @@ clean:
 	rm -f nonlocaldiffusion
 	rm -f spinweighted
 	rm -f test_*
+	rm -f *.gcda
+	rm -f *.gcno
+	rm -f *.gcov
 
-.PHONY: all assembly lib tests examples clean
+.PHONY: all assembly lib tests examples runtests runexamples coverage clean
