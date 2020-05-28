@@ -12,13 +12,8 @@ install:
   - set PATH=c:\tools\vcpkg\installed\x64-windows\bin;%PATH%
 
 build_script:
-  - set CC=gcc
-  - set COV=gcov
-  - set FT_BLAS=openblas
-  - set FT_FFTW_WITH_COMBINED_THREADS=1
-  - set FT_COVERAGE=1
+  - set CC=gcc && set FT_BLAS=openblas && set FT_FFTW_WITH_COMBINED_THREADS=1
   - gcc --version
-  - gcov --version
   - mingw32-make assembly
   - mingw32-make lib
   - mingw32-make tests
@@ -41,7 +36,3 @@ test_script:
   - holomorphic.exe
   - nonlocaldiffusion.exe
   - spinweighted.exe
-
-on_success:
-  - mingw32-make coverage
-  - bash <(curl -s https://codecov.io/bash)

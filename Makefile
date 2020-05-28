@@ -74,17 +74,15 @@ coverage:
 
 clean:
 	rm -f lib$(LIB).*
-	rm -f src/recurrence/*.s
-	rm -f src/permute/*.s
-	rm -f src/rotations/*.s
 	rm -f additiontheorem
 	rm -f calculus
 	rm -f holomorphic
 	rm -f nonlocaldiffusion
 	rm -f spinweighted
 	rm -f test_*
-	rm -f *.gcda
-	rm -f *.gcno
-	rm -f *.gcov
+	find . -type f -name '*.s' -delete
+	find . -type f -name '*.gcda' -delete
+	find . -type f -name '*.gcno' -delete
+	find . -type f -name '*.gcov' -delete
 
 .PHONY: all assembly lib tests examples runtests runexamples coverage clean
