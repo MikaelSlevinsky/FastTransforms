@@ -37,6 +37,6 @@ test_script:
   - nonlocaldiffusion.exe
   - spinweighted.exe
 
-after_success:
+on_success:
   - mingw32-make coverage
   - bash <(curl -s https://codecov.io/bash)
