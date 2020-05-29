@@ -106,7 +106,7 @@ jobs:
         homebrew:
           packages: ['gcc@7', 'fftw', 'mpfr']
           update: true
-      env: JOBS_EVAL="export CC=gcc-7 && export FT_USE_APPLEBLAS=1"
+      env: JOBS_EVAL="export CC=gcc-7 && export COV=gcov && export FT_COVERAGE=1 && export FT_USE_APPLEBLAS=1"
       after_success:
         - make coverage
         - bash <(curl -s https://codecov.io/bash)
