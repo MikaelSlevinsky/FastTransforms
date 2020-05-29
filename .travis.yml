@@ -98,27 +98,27 @@ jobs:
           packages: ['gcc-9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
       env: JOBS_EVAL="export CC=gcc-9 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     - stage: "Coverage"
-      - os: osx
-        osx_image: xcode10
-        compiler: gcc-7
-        addons:
-          homebrew:
-            packages: ['gcc@7', 'fftw', 'mpfr']
-            update: true
-        env: JOBS_EVAL="export CC=gcc-7 && export FT_USE_APPLEBLAS=1"
-        after_success:
-          - make coverage
-          - bash <(curl -s https://codecov.io/bash)
-      - os: linux
-        compiler: gcc
-        addons:
-          apt:
-            sources: ubuntu-toolchain-r-test
-            packages: ['libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
-        env: JOBS_EVAL="export CC=gcc && export COV=gcov && export FT_COVERAGE=1 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
-        after_success:
-          - make coverage
-          - bash <(curl -s https://codecov.io/bash)
+    - os: osx
+      osx_image: xcode10
+      compiler: gcc-7
+      addons:
+        homebrew:
+          packages: ['gcc@7', 'fftw', 'mpfr']
+          update: true
+      env: JOBS_EVAL="export CC=gcc-7 && export FT_USE_APPLEBLAS=1"
+      after_success:
+        - make coverage
+        - bash <(curl -s https://codecov.io/bash)
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: ['libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=gcc && export COV=gcov && export FT_COVERAGE=1 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+      after_success:
+        - make coverage
+        - bash <(curl -s https://codecov.io/bash)
     - stage: "Documentation"
       os: osx
       osx_image: xcode10
