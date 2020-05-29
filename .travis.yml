@@ -98,7 +98,7 @@ jobs:
           packages: ['gcc-9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
       env: JOBS_EVAL="export CC=gcc-9 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     - stage: "Coverage"
-    - os: osx
+      os: osx
       osx_image: xcode10
       compiler: gcc-7
       addons:
