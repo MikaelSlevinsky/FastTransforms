@@ -11,6 +11,7 @@ ifeq ($(FT_DETECT_GCC), 1)
       _GCCVER := $(_GCCMAJOR)
     endif
     CC := gcc-$(_GCCVER)
+    COV := gcov-$(_GCCVER)
 endif
 
 ifndef target
@@ -93,6 +94,14 @@ ifndef CFLAGS
     endif
 endif
 CFLAGS += -std=gnu99 -I./src
+
+ifeq ($(FT_COVERAGE), 1)
+    CFLAGS += -coverage
+endif
+
+ifndef FT_NUM_THREADS
+    FT_NUM_THREADS = 1
+endif
 
 ifdef FT_PREFIX
     CFLAGS += -I$(FT_PREFIX)/include

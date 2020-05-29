@@ -3,8 +3,9 @@ language: c
 
 jobs:
   include:
+    - stage: "Test"
     # Minimum system requirements
-    - os: osx
+      os: osx
       osx_image: xcode10
       compiler: gcc-4.9
       addons:
@@ -97,6 +98,28 @@ jobs:
           sources: ubuntu-toolchain-r-test
           packages: ['gcc-9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
       env: JOBS_EVAL="export CC=gcc-9 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+    - stage: "Coverage"
+      os: osx
+      osx_image: xcode10
+      compiler: gcc-7
+      addons:
+        homebrew:
+          packages: ['gcc@7', 'fftw', 'mpfr']
+          update: true
+      env: JOBS_EVAL="export CC=gcc-7 && export COV=gcov-7 && export FT_COVERAGE=1 && export FT_USE_APPLEBLAS=1"
+      after_success:
+        - make coverage
+        - bash <(curl -s https://codecov.io/bash)
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: ['libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=gcc && export COV=gcov && export FT_COVERAGE=1 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+      after_success:
+        - make coverage
+        - bash <(curl -s https://codecov.io/bash)
     - stage: "Documentation"
       os: osx
       osx_image: xcode10
@@ -118,21 +141,8 @@ before_install: eval "${JOBS_EVAL}"
 
 script:
   - make
-  - ./test_recurrence
-  - ./test_transforms
-  - ./test_rotations
-  - ./test_tridiagonal
-  - ./test_hierarchical
-  - ./test_banded
-  - ./test_dprk
-  - ./test_tdc
-  - OMP_NUM_THREADS=4 ./test_drivers 1 3 0
-  - OMP_NUM_THREADS=4 ./test_fftw 1 3 0
-  - ./additiontheorem
-  - ./calculus
-  - ./holomorphic
-  - ./nonlocaldiffusion
-  - ./spinweighted
+  - make runtests FT_NUM_THREADS=4
+  - make runexamples
 
 notifications:
   email: false
