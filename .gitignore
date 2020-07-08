@@ -74,3 +74,6 @@ docs/html
 *.gcno
 *.gcda
 *.gcov
+
+# Gvim swap file
+*.swp

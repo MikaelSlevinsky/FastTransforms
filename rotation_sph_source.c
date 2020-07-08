@@ -324,6 +324,49 @@ void Y(symmetric_tridiagonal_printmat)(char * MAT, char * FMT, ft_symmetric_trid
     printf("]\n");
 }
 
+// Correct the sign of jth column of J using the sign pattern.
+// Odd and even here refer to indices starting at zero.
+void X(correct_J_column_signs)(FLT * J, int l, int j){
+	int begin = -1, end = -1, step = 0;
+	if(j < l){ // Odd rows.
+		if(j % 2 == 0){ // Zero from row 0 to l-1.
+			begin = 2*l-1;
+			end = l;
+			step = -2;
+		}
+		else{ // Zero from row l to 2l.
+			begin = 1;
+			end = l;
+			step = 2;
+		}
+	}
+	else{ // Even rows.
+		if(j % 2 == 0){
+			begin = 2*l;
+			end = l;
+			step = -2;
+		}
+		else{
+			begin = 0;
+			end = l;
+			step = 2;
+		}
+	}
+
+	int k = begin;
+	while(1){
+		J[k + j*(2*l+1)] = -1 * J[k + j*(2*l+1)];
+		k = k + step;
+
+		if(step == -2 && k < end){
+			break;
+		}
+		else if(step == 2 && k > end){
+			break;
+		}
+	}
+}
+
 FLT * X(J_eigen)(int l){
 	FLT* Gyl = X(Gy)(l);
 	FLT* Y = X(sphzeros)(2*l+1, 2*l+1);
@@ -421,6 +464,35 @@ FLT * X(J_eigen)(int l){
 		}
 	}
 
+	// Correcting signs of J.
+	if(Eigen_Jl[2*l-1] > 0)
+		X(correct_J_column_signs)(Eigen_Jl, l, 0);
+	if(Eigen_Jl[1 + 2*l+1] < 0)
+		X(correct_J_column_signs)(Eigen_Jl, l, 1);
+	if(Eigen_Jl[2*l + 2*l*(2*l+1)] < 0)
+		X(correct_J_column_signs)(Eigen_Jl, l, 2*l);
+	if(Eigen_Jl[(2*l-1)*(2*l+1)] > 0)
+		X(correct_J_column_signs)(Eigen_Jl, l, 2*l-1);
+
+	// Now use first, second, second to last and last columns to correct remaining phases.
+	// TODO: first, second to last and last.
+	for(int i = 2*l-3; i >= l; i = i - 2){ // Column j = 0. Note that column 2*l-1 was already corrected.
+		if((Eigen_Jl[i] < 0 ? 1 : 0) != (Eigen_Jl[i*(2*l+1)] < 0 ? 1 : 0))
+			X(correct_J_column_signs)(Eigen_Jl, l, i);
+	}
+	for(int i = 3; i <= l; i = i + 2){ // Column j = 1.
+		if((Eigen_Jl[i + 1*(2*l+1)] < 0 ? 1 : 0) != (Eigen_Jl[1 + i*(2*l+1)] < 0 ? 1 : 0))
+			X(correct_J_column_signs)(Eigen_Jl, l, i);
+	}
+	for(int i = 0; i <= l; i = i + 2){ // Column j = 2*l-1.
+		if((Eigen_Jl[i + (2*l-1)*(2*l+1)] < 0 ? 1 : 0) != (Eigen_Jl[2*l-1 + i*(2*l+1)] < 0 ? 1 : 0))
+			X(correct_J_column_signs)(Eigen_Jl, l, i);
+	}
+	for(int i = 2*l-2; i >= l; i = i - 2){ // Column j = 2*l.
+		if((Eigen_Jl[i + (2*l)*(2*l+1)] < 0 ? 1 : 0) != (Eigen_Jl[2*l + i*(2*l+1)] < 0 ? 1 : 0))
+			X(correct_J_column_signs)(Eigen_Jl, l, i);
+	}
+
 	// -- ONLY FOR TESTING -- //
 	Y(printmat)("Eigen_Jl", "%0.6f", Eigen_Jl, 2*l+1, 2*l+1);
 
@@ -441,7 +513,7 @@ FLT * X(J_eigen)(int l){
 }
 
 void X(do_a_test()){
-	int l = 3;
+	int l = 6;
 	
 	FLT * Jl_eigen = X(J_eigen)(l);
 
