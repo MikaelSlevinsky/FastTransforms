@@ -8,6 +8,15 @@ FLT * X(sphzeros)(int m, int n){
 	return A;
 }
 
+void X(threshold)(FLT * A, int m, int n, FLT eps){
+	for(int i = 0; i < m; ++i){
+		for(int j = 0; j < n; ++j){
+			if(Y(fabs)(A[i + j*m]) < eps)
+				A[i + j*m] = 0;
+		}
+	}
+}
+
 void Y(print_mat)(FLT * A, char * FMT, int m, int n){
 	printf("[\n");
 	for (int i = 0; i < m ; ++i){
@@ -326,28 +335,29 @@ void Y(symmetric_tridiagonal_printmat)(char * MAT, char * FMT, ft_symmetric_trid
 
 // Correct the sign of jth column of J using the sign pattern.
 // Odd and even here refer to indices starting at zero.
-void X(correct_J_column_signs)(FLT * J, int l, int j){
+// In case symmetry != 0, only strict lower triangular part will be corrected.
+void X(correct_J_column_sign)(FLT * J, int l, int j, int symmetry){
 	int begin = -1, end = -1, step = 0;
-	if(j < l){ // Odd rows.
+	if(j < l){ // First half.
 		if(j % 2 == 0){ // Zero from row 0 to l-1.
 			begin = 2*l-1;
-			end = l;
+			end = (symmetry != 0 ? j : l);
 			step = -2;
 		}
 		else{ // Zero from row l to 2l.
-			begin = 1;
+			begin = (symmetry != 0 ? j+2 : 1);
 			end = l;
 			step = 2;
 		}
 	}
-	else{ // Even rows.
-		if(j % 2 == 0){
+	else{ // j >= l.
+		if(j % 2 == 0){ // Even rows.
 			begin = 2*l;
-			end = l;
+			end = (symmetry != 0 ? j : l);
 			step = -2;
 		}
-		else{
-			begin = 0;
+		else{ 
+			begin = (symmetry != 0 ? j+2 : 0);
 			end = l;
 			step = 2;
 		}
@@ -355,50 +365,35 @@ void X(correct_J_column_signs)(FLT * J, int l, int j){
 
 	int k = begin;
 	while(1){
-		J[k + j*(2*l+1)] = -1 * J[k + j*(2*l+1)];
-		k = k + step;
-
 		if(step == -2 && k < end){
 			break;
 		}
 		else if(step == 2 && k > end){
 			break;
 		}
+
+		if(symmetry != 0){
+			if((J[k + j*(2*l+1)] < 0 ? 1 : 0) != (J[j + k*(2*l+1)] < 0))
+				J[k + j*(2*l+1)] = J[j + k*(2*l+1)];
+		}
+		else{
+			J[k + j*(2*l+1)] = -1 * J[k + j*(2*l+1)];
+		}
+		k = k + step;
 	}
 }
 
+void X(correct_J_column_signs)(FLT * J, int l, int j){
+	X(correct_J_column_sign)(J, l, j, 0);
+}
+
+void X(correct_J_column_symmetry)(FLT * J, int l, int j){
+	X(correct_J_column_sign)(J, l, j, 1);
+}
+
 FLT * X(J_eigen)(int l){
-	FLT* Gyl = X(Gy)(l);
-	FLT* Y = X(sphzeros)(2*l+1, 2*l+1);
-
-	// Y = Gyl' * Gyl
-	X(gemm)('T', 2*l+3, 2*l+1, 2*l+1, 1, Gyl, 2*l+3, Gyl, 2*l+3, 0, Y, 2*l+1);
-	Y(printmat)("Y", "%0.6f", Y, 2*l + 1, 2*l + 1);
-
 	int n1 = ceil((FLT)(2*l+1)/2); 
 	int n2 = 2*l+1 - n1;
-	FLT * Y1 = calloc((n1)*(n1), sizeof(FLT));
-	FLT * Y2 = calloc((n2)*(n2), sizeof(FLT));
-	FLT * Y1_test = calloc(n1*n1, sizeof(FLT));
-	FLT * Y2_test = calloc(n2*n2, sizeof(FLT));
-
-	for(int j = 0; j < n1; ++j){
-		for(int i = 0; i < n1; ++i){
-			Y1_test[i + j*n1] = X(Y_index)(l, 2*i, 2*j);
-		}
-	}
-	for(int j = 0; j < n2; ++j){
-		for(int i = 0; i < n2; ++i){
-			Y2_test[i + j*n2] = X(Y_index)(l, 2*i+1, 2*j+1);
-		}
-	}
-	X(divide_Y)(Y, l, Y1, &n1, Y2, &n2);
-	Y(printmat)("Y1", "%0.6f", Y1, n1, n1);
-	Y(printmat)("Y2", "%0.6f", Y2, n2, n2);
-	Y(printmat)("Y1_test", "%0.6f", Y1_test, n1, n1);
-	Y(printmat)("Y2_test", "%0.6f", Y2_test, n2, n2);
-
-	// TRIDIAGONAL.
 	X(symmetric_tridiagonal) * Y1st = malloc(sizeof(X(symmetric_tridiagonal)));
 	X(symmetric_tridiagonal) * Y2st = malloc(sizeof(X(symmetric_tridiagonal)));
 	FLT * a1 = malloc(n1*sizeof(FLT));
@@ -417,8 +412,6 @@ FLT * X(J_eigen)(int l){
 	Y1st->a = a1; Y2st->a = a2; 
 	Y1st->b = b1; Y2st->b = b2;
 	Y1st->n = n1; Y2st->n = n2;
-	Y(symmetric_tridiagonal_printmat)("Y1st", "%0.6f", Y1st);
-	Y(symmetric_tridiagonal_printmat)("Y2st", "%0.6f", Y2st);
 
 	FLT * Y1st_lambda = calloc(n1, sizeof(FLT));
 	FLT * Y2st_lambda = calloc(n2, sizeof(FLT));
@@ -432,24 +425,6 @@ FLT * X(J_eigen)(int l){
 	// Eigenvalues and eigenvectors.
 	X(symmetric_tridiagonal_eig)(Y1st, Y1st_V, Y1st_lambda);
 	X(symmetric_tridiagonal_eig)(Y2st, Y2st_V, Y2st_lambda);
-	
-	// -- ONLY FOR TESTING -- //
-	printf("\n===== Test with symmetric_tridiagonal_eig =====\n");
-	printf("Y1st eigenvalues = \n[");
-	for(int i = 0; i < n1; ++i){
-		printf("%0.6f", Y1st_lambda[i]);
-		if(i < n1-1) printf("  ");
-	}
-	printf("]\n");
-	Y(printmat)("Eigenvectors of Y1st", "%0.6f", Y1st_V, n1, n1);
-	printf("Y2st eigenvalues = \n[");
-	for(int i = 0; i < n2; ++i){
-		printf("%0.6f", Y2st_lambda[i]);
-		if(i < n2-1) printf("  ");
-	}
-	printf("]\n");
-	Y(printmat)("Eigenvectors of Y2st", "%0.6f", Y2st_V, n2, n2);
-	// ----------------- //
 
 	// Jl from Eigenvectors of Y1 and Y2.
 	FLT * Eigen_Jl = X(sphzeros)(2*l+1, 2*l+1);
@@ -464,61 +439,29 @@ FLT * X(J_eigen)(int l){
 		}
 	}
 
-	// Correcting signs of J.
-	if(Eigen_Jl[2*l-1] > 0)
-		X(correct_J_column_signs)(Eigen_Jl, l, 0);
-	if(Eigen_Jl[1 + 2*l+1] < 0)
-		X(correct_J_column_signs)(Eigen_Jl, l, 1);
-	if(Eigen_Jl[2*l + 2*l*(2*l+1)] < 0)
-		X(correct_J_column_signs)(Eigen_Jl, l, 2*l);
-	if(Eigen_Jl[(2*l-1)*(2*l+1)] > 0)
-		X(correct_J_column_signs)(Eigen_Jl, l, 2*l-1);
-
-	// Now use first, second, second to last and last columns to correct remaining phases.
-	// TODO: first, second to last and last.
-	for(int i = 2*l-3; i >= l; i = i - 2){ // Column j = 0. Note that column 2*l-1 was already corrected.
-		if((Eigen_Jl[i] < 0 ? 1 : 0) != (Eigen_Jl[i*(2*l+1)] < 0 ? 1 : 0))
-			X(correct_J_column_signs)(Eigen_Jl, l, i);
+	// Correcting symmetry.
+	for(int j = 0; j < 2*l-1; ++j){
+		X(correct_J_column_symmetry)(Eigen_Jl, l, j);
 	}
-	for(int i = 3; i <= l; i = i + 2){ // Column j = 1.
-		if((Eigen_Jl[i + 1*(2*l+1)] < 0 ? 1 : 0) != (Eigen_Jl[1 + i*(2*l+1)] < 0 ? 1 : 0))
-			X(correct_J_column_signs)(Eigen_Jl, l, i);
-	}
-	for(int i = 0; i <= l; i = i + 2){ // Column j = 2*l-1.
-		if((Eigen_Jl[i + (2*l-1)*(2*l+1)] < 0 ? 1 : 0) != (Eigen_Jl[2*l-1 + i*(2*l+1)] < 0 ? 1 : 0))
-			X(correct_J_column_signs)(Eigen_Jl, l, i);
-	}
-	for(int i = 2*l-2; i >= l; i = i - 2){ // Column j = 2*l.
-		if((Eigen_Jl[i + (2*l)*(2*l+1)] < 0 ? 1 : 0) != (Eigen_Jl[2*l + i*(2*l+1)] < 0 ? 1 : 0))
-			X(correct_J_column_signs)(Eigen_Jl, l, i);
-	}
+	X(threshold)(Eigen_Jl, 2*l+1, 2*l+1, Y(eps)());
 
-	// -- ONLY FOR TESTING -- //
-	Y(printmat)("Eigen_Jl", "%0.6f", Eigen_Jl, 2*l+1, 2*l+1);
-
-	// Constructing Zl from Yl eigenvalues.
-	FLT * Zl = X(sphzeros)(2*l+1, 2*l+1);
-	for(int i = 0; i < n2; ++i)
-		Zl[i + i*(2*l+1)] = Y2st_lambda[i];
-	for(int i = 0; i < n1; ++i)
-		Zl[(i+n2) + (i+n2)*(2*l+1)] = Y1st_lambda[n1-1-i];
-	//Y(printmat)("Zl", "%0.6f", Zl, 2*l+1, 2*l+1);
-	// ----------------- //
-
-
-	free(Gyl);
-	free(Y1);
-	free(Y2);
+	free(Y1st_lambda);
+	free(Y2st_lambda);
+	free(Y1st_V);
+	free(Y2st_V);
+	X(destroy_symmetric_tridiagonal)(Y1st);
+	X(destroy_symmetric_tridiagonal)(Y2st);
 	return Eigen_Jl;
 }
 
 void X(do_a_test()){
-	int l = 6;
+	int l = 5;
 	
-	FLT * Jl_eigen = X(J_eigen)(l);
-
+	FLT * Eigen_Jl = X(J_eigen)(l);
 	FLT * Slow_Jl = X(J)(l);
+
 	Y(printmat)("Slow_Jl", "%0.6f", Slow_Jl, 2*l+1, 2*l+1);
+	Y(printmat)("Eigen_Jl", "%0.6f", Eigen_Jl, 2*l+1, 2*l+1);
 
 	FLT * Gy = X(Gy)(l);
 	FLT * Gy_test = X(Gy_dense_test)(l);
@@ -528,31 +471,26 @@ void X(do_a_test()){
 	FLT * Yl_test = X(Y_dense_test)(l);
 	//Y(printmat)("Y_test", "%0.6f", Yl_test, 2*l+1, 2*l+1);
 
-	free(Jl_eigen);
+	free(Eigen_Jl);
 	free(Slow_Jl);
 
-	// Testing FMM.
-	// Gy is anti-banded.
-	//FLT* Gyl = X(Gy)(l);
-	//FLT* Y = X(sphzeros)(2*l+1, 2*l+1);
-
-	//// Y = Gyl' * Gyl
-	//X(gemm)('T', 2*l+3, 2*l+1, 2*l+1, 1, Gyl, 2*l+3, Gyl, 2*l+3, 0, Y, 2*l+1);
-
-	//int n1 = ceil((FLT)(2*l+1)/2); 
-	//int n2 = 2*l+1 - n1;
-	//FLT * Y1 = calloc((n1)*(n1), sizeof(FLT));
-	//FLT * Y2 = calloc((n2)*(n2), sizeof(FLT));
-	//X(divide_Y)(Y, l, Y1, &n1, Y2, &n2);
-
-	//X(symmetric_tridiagonal) stY1 = malloc(sizeof(X(symmetric_tridiagonal)));
-	//X(symmetric_tridiagonal) stY2 = malloc(sizeof(X(symmetric_tridiagonal)));
-	//FLT * a1 = malloc(n1*sizeof(FLT));
-	//FLT * a2 = malloc(n2*sizeof(FLT));
-	//FLT * b1 = malloc((n1-1)*sizeof(FLT));
-	//FLT * b2 = malloc((n2-1)*sizeof(FLT));
-
-	
+	//int number_of_tests = 10000;
+	//for(int k = 1; k <= number_of_tests; ++k){
+	//	FLT * _Eigen_Jl = X(J_eigen)(k);
+	//
+	//	// Testing symmetry. (Slow)
+	//	for(int j = 0; j < 2*k+1; ++j){
+	//		for(int i = 0; i < 2*k+1; ++i){
+	//			if(_Eigen_Jl[i + j*(2*k+1)] - _Eigen_Jl[j + i*(2*k+1)] > 1e-8){
+	//				printf("ERROR: Eigen_Jl not symmetric for k = %d and [%d, %d]\n", k, i, j);
+	//				printf("Eigen_Jl[i, j] = %.30f\n", _Eigen_Jl[i + j*(2*k+1)]);
+	//				printf("Eigen_Jl[j, i] = %.30f\n\n", _Eigen_Jl[j + i*(2*k+1)]);
+	//				return;
+	//			}
+	//		}
+	//	}
+	//	
+	//	free(_Eigen_Jl);
+	//}
+	//printf("Test done.\n");
 }
-
-

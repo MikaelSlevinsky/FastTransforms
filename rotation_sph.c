@@ -1,6 +1,7 @@
 #include "src/ftutilities.h"
 #include "src/fasttransforms.h"
 #include <cblas.h>
+#include <math.h>
 #include <openblas/lapack.h>
 
 #define FLT double 
