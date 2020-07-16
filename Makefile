@@ -53,16 +53,40 @@ examples:
 rotation_sph: rotation_sph.c rotation_sph_source.c
 	$(CC) src/ftutilities.c rotation_sph.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -lopenblas $(LDFLAGS) $(LDLIBS) -o rotation_sph
 
+runtests:
+	./test_recurrence
+	./test_transforms
+	./test_permute
+	./test_rotations
+	./test_tridiagonal
+	./test_hierarchical
+	./test_banded
+	./test_dprk
+	./test_tdc
+	OMP_NUM_THREADS=$(FT_NUM_THREADS) ./test_drivers 1 3 0
+	OMP_NUM_THREADS=$(FT_NUM_THREADS) ./test_fftw 1 3 0
+
+runexamples:
+	./additiontheorem
+	./calculus
+	./holomorphic
+	./nonlocaldiffusion
+	./spinweighted
+
+coverage:
+	$(COV) $(SRC) -o $(LIBDIR)
+
 clean:
 	rm -f lib$(LIB).*
-	rm -f src/recurrence/*.s
-	rm -f src/permute/*.s
-	rm -f src/rotations/*.s
 	rm -f additiontheorem
 	rm -f calculus
 	rm -f holomorphic
 	rm -f nonlocaldiffusion
 	rm -f spinweighted
 	rm -f test_*
+	find . -type f -name '*.s' -delete
+	find . -type f -name '*.gcda' -delete
+	find . -type f -name '*.gcno' -delete
+	find . -type f -name '*.gcov' -delete
 
-.PHONY: all assembly lib tests examples clean
+.PHONY: all assembly lib tests examples runtests runexamples coverage clean
