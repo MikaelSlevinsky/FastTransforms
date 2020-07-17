@@ -6,7 +6,7 @@ jobs:
     - stage: "Test"
     # Minimum system requirements
       os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       compiler: clang
       addons:
         homebrew:
@@ -14,7 +14,7 @@ jobs:
           update: true
       env: JOBS_EVAL="export FT_USE_APPLEBLAS=1"
     - os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       compiler: gcc-4.9
       addons:
         homebrew:
@@ -22,7 +22,7 @@ jobs:
           update: true
       env: JOBS_EVAL="export CC=gcc-4.9 && export FT_QUADMATH=1 && export FT_USE_APPLEBLAS=1"
     - os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       compiler: gcc-5
       addons:
         homebrew:
@@ -30,7 +30,7 @@ jobs:
           update: true
       env: JOBS_EVAL="export CC=gcc-5 && export FT_QUADMATH=1 && export FT_USE_APPLEBLAS=1"
     - os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       compiler: gcc-6
       addons:
         homebrew:
@@ -42,7 +42,7 @@ jobs:
         - bash <(curl -s https://codecov.io/bash)
     # Recommended system requirements
     - os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       compiler: gcc-7
       addons:
         homebrew:
@@ -50,7 +50,7 @@ jobs:
           update: true
       env: JOBS_EVAL="export CC=gcc-7 && export FT_QUADMATH=1 && export FT_USE_APPLEBLAS=1"
     - os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       compiler: gcc-8
       addons:
         homebrew:
@@ -58,7 +58,7 @@ jobs:
           update: true
       env: JOBS_EVAL="export CC=gcc-8 && export FT_QUADMATH=1 && export FT_USE_APPLEBLAS=1"
     - os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       compiler: gcc-9
       addons:
         homebrew:
@@ -114,7 +114,7 @@ jobs:
       env: JOBS_EVAL="export CC=gcc-9 && export FT_QUADMATH=1 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     - stage: "Documentation"
       os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       addons:
         homebrew:
           packages: doxygen
