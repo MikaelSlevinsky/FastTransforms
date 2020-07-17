@@ -42,7 +42,7 @@ FLT * X(chebyshev_barycentric_weights)(char KIND, int n) {
 // Evaluate a polynomial interpolant of degree n-1 through the distinct points
 // y_j, 0 ≤ j < n at the distinct points x_i, 0 ≤ i < m. This is effected by a
 // matrix-vector product with A_{i,j} and the polynomial interpolant's ordinates.
-void * X(barycentricmatrix)(FLT * A, FLT * x, int m, FLT * y, FLT * l, int n) {
+void X(barycentricmatrix)(FLT * A, FLT * x, int m, FLT * y, FLT * l, int n) {
     int k;
     FLT yj, lj, temp;
     for (int j = 0; j < n; j++) {
@@ -246,10 +246,10 @@ X(hierarchicalmatrix) * X(sample_hierarchicalmatrix)(FLT (*f)(FLT x, FLT y), FLT
     unitrange i1, i2, j1, j2;
     if (SPLITTING == 'I') {
         i1.start = i.start;
-        i1.stop = i2.start = i.start + (i.stop-i.start>>1);
+        i1.stop = i2.start = i.start + ((i.stop-i.start)>>1);
         i2.stop = i.stop;
         j1.start = j.start;
-        j1.stop = j2.start = j.start + (j.stop-j.start>>1);
+        j1.stop = j2.start = j.start + ((j.stop-j.start)>>1);
         j2.stop = j.stop;
     }
     else if (SPLITTING == 'G') {
@@ -325,10 +325,10 @@ X(hierarchicalmatrix) * X(sample_accurately_hierarchicalmatrix)(FLT (*f)(FLT x, 
     unitrange i1, i2, j1, j2;
     if (SPLITTING == 'I') {
         i1.start = i.start;
-        i1.stop = i2.start = i.start + (i.stop-i.start>>1);
+        i1.stop = i2.start = i.start + ((i.stop-i.start)>>1);
         i2.stop = i.stop;
         j1.start = j.start;
-        j1.stop = j2.start = j.start + (j.stop-j.start>>1);
+        j1.stop = j2.start = j.start + ((j.stop-j.start)>>1);
         j2.stop = j.stop;
     }
     else if (SPLITTING == 'G') {
@@ -416,10 +416,10 @@ static inline int X(size_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int k) {
 static inline int X(blocksize_hierarchicalmatrix)(X(hierarchicalmatrix) * H, int m, int n, int k) {
     int M = H->M, N = H->N;
     switch (H->hash(m, n)) {
-        case 0: return 1;
         case 1: return X(size_hierarchicalmatrix)(H->hierarchicalmatrices(m, n), k);
         case 2: return X(size_densematrix)(H->densematrices(m, n), k);
         case 3: return X(size_lowrankmatrix)(H->lowrankmatrices(m, n), k);
+        default: return 1;
     }
 }
 

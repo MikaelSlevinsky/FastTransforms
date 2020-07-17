@@ -25,13 +25,15 @@
 #undef X
 #undef Y
 
-#define FLT quadruple
-#define X(name) FT_CONCAT(ft_, name, q)
-#define Y(name) FT_CONCAT(, name, q)
-#include "test_banded_source.c"
-#undef FLT
-#undef X
-#undef Y
+#if defined(FT_QUADMATH)
+    #define FLT quadruple
+    #define X(name) FT_CONCAT(ft_, name, q)
+    #define Y(name) FT_CONCAT(, name, q)
+    #include "test_banded_source.c"
+    #undef FLT
+    #undef X
+    #undef Y
+#endif
 
 int main(void) {
     int checksum = 0;
@@ -42,8 +44,10 @@ int main(void) {
     test_banded(&checksum);
     printf("\n\tLong double precision.\n\n");
     test_bandedl(&checksum);
-    printf("\n\tQuadruple precision.\n\n");
-    test_bandedq(&checksum);
+    #if defined(FT_QUADMATH)
+        printf("\n\tQuadruple precision.\n\n");
+        test_bandedq(&checksum);
+    #endif
     printf("\n");
     return checksum;
 }

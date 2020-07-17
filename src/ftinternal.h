@@ -3,9 +3,19 @@
 
 #include <stdlib.h>
 #include <math.h>
-#include <quadmath.h>
-#include <immintrin.h>
-#include <cpuid.h>
+#if defined(__i386__) || defined(__x86_64__)
+    #include <immintrin.h>
+    #include <cpuid.h>
+    #ifndef bit_SSE4_1
+        #define bit_SSE4_1 bit_SSE41
+    #endif
+    #ifndef bit_SSE4_2
+        #define bit_SSE4_2 bit_SSE42
+    #endif
+    #ifndef bit_AVX2
+        #define bit_AVX2 0
+    #endif
+#endif
 
 #define RED(string) "\x1b[31m" string "\x1b[0m"
 #define GREEN(string) "\x1b[32m" string "\x1b[0m"
@@ -28,11 +38,13 @@
 #define M_EPSf         0x1p-23f               /* powf(2.0f, -23)    */
 #define M_EPS          0x1p-52                /* pow(2.0, -52)      */
 #define M_EPSl         0x1p-64l               /* powl(2.0l, -64)    */
-#define M_EPSq         0x1p-112q              /* powq(2.0q, -112)   */
 #define M_FLT_MINf     0x1p-126f              /* powf(2.0f, -126)   */
 #define M_FLT_MIN      0x1p-1022              /* pow(2.0, -1022)    */
+#if defined(__i386__) || defined(__x86_64__)
 #define M_FLT_MINl     0x1p-16382l            /* powl(2.0l, -16382) */
-#define M_FLT_MINq     0x1p-16382q            /* powq(2.0q, -16382) */
+#else // #elif defined(__POWERPC__)
+#define M_FLT_MINl     0x1p-1022l            /* powl(2.0l, -1022) */
+#endif
 
 #define M_PIf          0xc.90fdaap-2f         // 3.1415927f0
 #ifndef M_PIl
@@ -51,17 +63,14 @@
     #define M_2_PIl     0xa.2f9836e4e44152ap-4L
 #endif
 
-typedef __float128 quadruple;
 
 static inline float epsf(void) {return M_EPSf;}
 static inline double eps(void) {return M_EPS;}
 static inline long double epsl(void) {return M_EPSl;}
-static inline quadruple epsq(void) {return M_EPSq;}
 
 static inline float floatminf(void) {return M_FLT_MINf;}
 static inline double floatmin(void) {return M_FLT_MIN;}
 static inline long double floatminl(void) {return M_FLT_MINl;}
-static inline quadruple floatminq(void) {return M_FLT_MINq;}
 
 #ifndef __APPLE__
     static inline float __cospif(float x) {return cosf(M_PIf*x);}
@@ -72,11 +81,20 @@ static inline quadruple floatminq(void) {return M_FLT_MINq;}
     static inline double __tanpi(double x) {return tan(M_PI*x);}
 #endif
 static inline long double __cospil(long double x) {return cosl(M_PIl*x);}
-static inline quadruple __cospiq(quadruple x) {return cosq(M_PIq*x);}
 static inline long double __sinpil(long double x) {return sinl(M_PIl*x);}
-static inline quadruple __sinpiq(quadruple x) {return sinq(M_PIq*x);}
 static inline long double __tanpil(long double x) {return tanl(M_PIl*x);}
-static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
+
+#if defined(FT_QUADMATH)
+    #include <quadmath.h>
+    typedef __float128 quadruple;
+    #define M_EPSq         0x1p-112q              /* powq(2.0q, -112)   */
+    #define M_FLT_MINq     0x1p-16382q            /* powq(2.0q, -16382) */
+    static inline quadruple epsq(void) {return M_EPSq;}
+    static inline quadruple floatminq(void) {return M_FLT_MINq;}
+    static inline quadruple __cospiq(quadruple x) {return cosq(M_PIq*x);}
+    static inline quadruple __sinpiq(quadruple x) {return sinq(M_PIq*x);}
+    static inline quadruple __tanpiq(quadruple x) {return tanq(M_PIq*x);}
+#endif
 
 #define ZERO(FLT) ((FLT) 0)
 #define ONE(FLT) ((FLT) 1)
@@ -113,30 +131,33 @@ typedef struct {
     unsigned avx512f : 1;
 } ft_simd;
 
-static inline void cpuid(unsigned op, unsigned count, unsigned *eax, unsigned *ebx, unsigned *ecx, unsigned *edx) {
-    #if defined(__i386__) && defined(__PIC__)
-        __asm__ __volatile__
-        ("mov %%ebx, %%edi;"
-         "cpuid;"
-         "xchgl %%ebx, %%edi;"
-         : "=a" (*eax), "=D" (*ebx), "=c" (*ecx), "=d" (*edx) : "0" (op), "2" (count) : "cc");
-    #else
-        __asm__ __volatile__
-        ("cpuid": "=a" (*eax), "=b" (*ebx), "=c" (*ecx), "=d" (*edx) : "0" (op), "2" (count) : "cc");
-    #endif
-}
-
-static inline ft_simd get_simd(void) {
-    unsigned eax, ebx, ecx, edx;
-    unsigned eax1, ebx1, ecx1, edx1;
-    cpuid(1, 0, &eax, &ebx, &ecx, &edx);
-    cpuid(7, 0, &eax1, &ebx1, &ecx1, &edx1);
-    #ifndef bit_AVX512F
-        return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_SSE3), !!(ecx & bit_SSSE3), !!(ecx & bit_SSE4_1), !!(ecx & bit_SSE4_2), !!(ecx & bit_AVX), !!(ebx1 & bit_AVX2), !!(ecx & bit_FMA), 0};
-    #else
-        return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_SSE3), !!(ecx & bit_SSSE3), !!(ecx & bit_SSE4_1), !!(ecx & bit_SSE4_2), !!(ecx & bit_AVX), !!(ebx1 & bit_AVX2), !!(ecx & bit_FMA), !!(ebx1 & bit_AVX512F)};
-    #endif
-}
+#if defined(__i386__) || defined(__x86_64__)
+    static inline void cpuid(unsigned op, unsigned count, unsigned *eax, unsigned *ebx, unsigned *ecx, unsigned *edx) {
+        #if defined(__i386__) && defined(__PIC__)
+            __asm__ __volatile__
+            ("mov %%ebx, %%edi;"
+             "cpuid;"
+             "xchgl %%ebx, %%edi;"
+             : "=a" (*eax), "=D" (*ebx), "=c" (*ecx), "=d" (*edx) : "0" (op), "2" (count) : "cc");
+        #else
+            __asm__ __volatile__
+            ("cpuid": "=a" (*eax), "=b" (*ebx), "=c" (*ecx), "=d" (*edx) : "0" (op), "2" (count) : "cc");
+        #endif
+    }
+    static inline ft_simd get_simd(void) {
+        unsigned eax, ebx, ecx, edx;
+        unsigned eax1, ebx1, ecx1, edx1;
+        cpuid(1, 0, &eax, &ebx, &ecx, &edx);
+        cpuid(7, 0, &eax1, &ebx1, &ecx1, &edx1);
+        #ifndef bit_AVX512F
+            return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_SSE3), !!(ecx & bit_SSSE3), !!(ecx & bit_SSE4_1), !!(ecx & bit_SSE4_2), !!(ecx & bit_AVX), !!(ebx1 & bit_AVX2), !!(ecx & bit_FMA), 0};
+        #else
+            return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_SSE3), !!(ecx & bit_SSSE3), !!(ecx & bit_SSE4_1), !!(ecx & bit_SSE4_2), !!(ecx & bit_AVX), !!(ebx1 & bit_AVX2), !!(ecx & bit_FMA), !!(ebx1 & bit_AVX512F)};
+        #endif
+    }
+#else
+    static inline ft_simd get_simd(void) {return (ft_simd) {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};}
+#endif
 
 #ifdef __AVX512F__
     #define VECTOR_SIZE_8 8

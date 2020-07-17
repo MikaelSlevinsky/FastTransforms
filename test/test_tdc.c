@@ -1,13 +1,15 @@
 #include "fasttransforms.h"
 #include "ftutilities.h"
 
-#define FLT quadruple
-#define X(name) FT_CONCAT(ft_, name, q)
-#define Y(name) FT_CONCAT(, name, q)
-#include "test_tdc_source.c"
-#undef FLT
-#undef X
-#undef Y
+#if defined(FT_QUADMATH)
+    #define FLT quadruple
+    #define X(name) FT_CONCAT(ft_, name, q)
+    #define Y(name) FT_CONCAT(, name, q)
+    #include "test_tdc_source.c"
+    #undef FLT
+    #undef X
+    #undef Y
+#endif
 
 #define FLT long double
 #define X(name) FT_CONCAT(ft_, name, l)
@@ -48,8 +50,10 @@ int main(void) {
     test_tdc(&checksum);
     printf("\n\tLong double precision.\n\n");
     test_tdcl(&checksum);
-    printf("\n\tQuadruple precision.\n\n");
-    test_tdcq(&checksum);
+    #if defined(FT_QUADMATH)
+        printf("\n\tQuadruple precision.\n\n");
+        test_tdcq(&checksum);
+    #endif
     printf("\n");
     printf("\nTesting methods for dropping the precision.\n");
     printf("\n\tDouble ↘  single precision.\n\n");

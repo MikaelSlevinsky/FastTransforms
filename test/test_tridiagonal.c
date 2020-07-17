@@ -25,13 +25,15 @@
 #undef X
 #undef Y
 
-#define FLT quadruple
-#define X(name) FT_CONCAT(ft_, name, q)
-#define Y(name) FT_CONCAT(, name, q)
-#include "test_tridiagonal_source.c"
-#undef FLT
-#undef X
-#undef Y
+#if defined(FT_QUADMATH)
+    #define FLT quadruple
+    #define X(name) FT_CONCAT(ft_, name, q)
+    #define Y(name) FT_CONCAT(, name, q)
+    #include "test_tridiagonal_source.c"
+    #undef FLT
+    #undef X
+    #undef Y
+#endif
 
 void symmetric_tridiagonal_printmat(char * MAT, char * FMT, ft_symmetric_tridiagonal * A);
 void bidiagonal_printmat(char * MAT, char * FMT, ft_bidiagonal * B);
@@ -45,8 +47,10 @@ int main(void) {
     test_tridiagonal(&checksum);
     printf("\n\tLong double precision.\n\n");
     test_tridiagonall(&checksum);
-    printf("\n\tQuadruple precision.\n\n");
-    test_tridiagonalq(&checksum);
+    #if defined(FT_QUADMATH)
+        printf("\n\tQuadruple precision.\n\n");
+        test_tridiagonalq(&checksum);
+    #endif
     printf("\n");
     return checksum;
 }

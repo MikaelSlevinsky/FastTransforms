@@ -130,7 +130,7 @@ void test_transforms_mpfr(int * checksum, int N, mpfr_prec_t prec, mpfr_rnd_t rn
                 }
             }
             printf("(n×n) = (%4ix%4i), (%+1.2f) → (%+1.2f): \t\t |%20.2e ", n, n, mpfr_get_d(lambda, rnd), mpfr_get_d(mu, rnd), mpfr_get_d(err, rnd));
-            ft_mpfr_checktest(&err, 4*pow(n, 2*fabs(mu-lambda)), checksum, prec, rnd);
+            ft_mpfr_checktest(&err, 4*pow(n, 0.5+fabs(mpfr_get_d(mu, rnd)-mpfr_get_d(lambda, rnd))), checksum, prec, rnd);
             ft_mpfr_destroy_plan(B, n);
         }
         ft_mpfr_destroy_plan(Id, n);
@@ -215,7 +215,7 @@ void test_transforms_mpfr(int * checksum, int N, mpfr_prec_t prec, mpfr_rnd_t rn
                 }
             }
             printf("(n×n) = (%4ix%4i), (%+1.2f, %+1.2f) → (%+1.2f, %+1.2f): \t |%20.2e ", n, n, mpfr_get_d(alpha, rnd), mpfr_get_d(beta, rnd), mpfr_get_d(gamma, rnd), mpfr_get_d(delta, rnd), mpfr_get_d(err, rnd));
-            ft_mpfr_checktest(&err, 32*pow(n, 2*(MAX(fabs(gamma-alpha), fabs(delta-beta)))), checksum, prec, rnd);
+            ft_mpfr_checktest(&err, 32*pow(n, 0.5+MAX(fabs(mpfr_get_d(gamma, rnd)-mpfr_get_d(alpha, rnd)), fabs(mpfr_get_d(delta, rnd)-mpfr_get_d(beta, rnd)))), checksum, prec, rnd);
             ft_mpfr_destroy_plan(B, n);
         }
         ft_mpfr_destroy_plan(Id, n);
@@ -262,7 +262,7 @@ void test_transforms_mpfr(int * checksum, int N, mpfr_prec_t prec, mpfr_rnd_t rn
                 }
             }
             printf("(n×n) = (%4ix%4i), (%+1.2f) → (%+1.2f): \t\t |%20.2e ", n, n, mpfr_get_d(alpha, rnd), mpfr_get_d(beta, rnd), mpfr_get_d(err, rnd));
-            ft_mpfr_checktest(&err, 4*pow(n, 2*fabs(alpha-beta)), checksum, prec, rnd);
+            ft_mpfr_checktest(&err, 4*pow(n, 2*fabs(mpfr_get_d(alpha, rnd)-mpfr_get_d(beta, rnd))), checksum, prec, rnd);
             ft_mpfr_destroy_plan(B, n);
         }
         ft_mpfr_destroy_plan(Id, n);

@@ -36,21 +36,21 @@ endif
 
 simd := $(shell $(CC) -march=native -E -v - </dev/null 2>&1 | grep cc1)
 
-ifneq (, $(findstring msse, $(simd)))
+ifneq (, $(filter -msse +sse, $(simd)))
     MSSE := -msse
 endif
-ifneq (, $(findstring msse2, $(simd)))
+ifneq (, $(filter -msse2 +sse2, $(simd)))
     MSSE2 := -msse2
 endif
-ifneq (, $(findstring mavx, $(simd)))
+ifneq (, $(filter -mavx +avx, $(simd)))
     MAVX := -mavx
 endif
-ifneq (, $(findstring mfma, $(simd)))
-    ifeq (, $(findstring mfma4, $(simd)))
+ifneq (, $(filter -mfma +fma, $(simd)))
+    ifeq (, $(filter -mfma4 +fma4, $(simd)))
         MFMA := -mfma
     endif
 endif
-ifneq (, $(findstring mavx512f, $(simd)))
+ifneq (, $(filter -mavx512f +avx512f, $(simd)))
     ifneq ($(UNAME), Windows)
         MAVX512F := -mavx512f
     endif
@@ -85,7 +85,7 @@ SRC = src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c 
 
 machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
 
-AFLAGS += -O3 -fPIC -std=gnu99 -I./src
+AFLAGS += -O3 -fPIC -std=gnu11 -I./src
 
 ifndef CFLAGS
     CFLAGS = -O3
@@ -93,7 +93,7 @@ ifndef CFLAGS
         CFLAGS += -march=native
     endif
 endif
-CFLAGS += -std=gnu99 -I./src
+CFLAGS += -std=gnu11 -I./src
 
 ifeq ($(FT_COVERAGE), 1)
     CFLAGS += -coverage
@@ -136,7 +136,12 @@ ifndef FT_BLAS
     FT_BLAS = blas
 endif
 
-LDLIBS += -fopenmp -lm -lquadmath -lmpfr -l$(FT_BLAS) -lfftw3
+LDLIBS += -Xpreprocessor -fopenmp -lomp -lm -lmpfr -l$(FT_BLAS) -lfftw3
+
+ifdef FT_QUADMATH
+    CFLAGS += -DFT_QUADMATH
+    LDLIBS += -lquadmath
+endif
 
 ifneq ($(FT_FFTW_WITH_COMBINED_THREADS), 1)
     LDLIBS += -lfftw3_threads
