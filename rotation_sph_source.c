@@ -454,8 +454,76 @@ FLT * X(J_eigen)(int l){
 	return Eigen_Jl;
 }
 
+// FIXME: __cospi function is different for long double and quadruple.
+FLT X(X_index)(int l, FLT alpha, int i, int j){
+	if(i == j && i == l)
+		return 1;
+	else if(i == j)
+		return __cospi((l-i)*alpha);
+	else if(j == 2*l-i)
+		return __sinpi((l-i)*alpha);
+
+	return 0;
+}
+
+FLT * X(X_test)(int l, FLT alpha){
+	FLT * Xl = X(sphzeros)(2*l+1, 2*l+1);
+
+	for(int j = 0; j < 2*l+1; ++j){
+		for(int i = 0; i < 2*l+1; ++i){
+			Xl[i + j*(2*l+1)] = X(X_index)(l, alpha, i, j);
+		}
+	}
+	return Xl;
+}
+
+FLT X(JXJX)(FLT * J, int l, int i, int j, FLT beta, FLT gamma){
+	FLT entry = 0;
+	for(int k = 0; k < 2*l+1; ++k){
+		if(j == l && k == l)
+			entry += J[i + k*(2*l+1)] * J[k + j*(2*l+1)];
+		else if(j != l && k == l)
+			entry += J[i + k*(2*l+1)] * (J[k + j*(2*l+1)]*X(X_index)(l, gamma, j, j) + J[k + (2*l-j)*(2*l+1)]*X(X_index)(l, gamma, 2*l-j, j));
+		else if(j == l && k != l)
+			entry += (J[i + k*(2*l+1)]*X(X_index)(l, beta, k, k) + J[i + (2*l-k)*(2*l+1)]*X(X_index)(l, beta, 2*l-k, k)) * J[k + j*(2*l+1)];
+		else 
+			entry += (J[i + k*(2*l+1)]*X(X_index)(l, beta, k, k) + J[i + (2*l-k)*(2*l+1)]*X(X_index)(l, beta, 2*l-k, k)) * 
+					 (J[k + j*(2*l+1)]*X(X_index)(l, gamma, j, j) + J[k + (2*l-j)*(2*l+1)]*X(X_index)(l, gamma, 2*l-j, j));
+	}	 
+
+	return entry;
+}
+
+FLT * X(rotation_matrix_J)(int l, FLT alpha, FLT beta, FLT gamma, FLT * J){
+	FLT * Delta = X(sphzeros)(2*l+1, 2*l+1);
+
+	for(int j = 0; j < 2*l+1; ++j){
+		for(int i = 0; i < 2*l+1; ++i){
+			FLT entry = 0;
+
+			entry = X(X_index)(l, alpha, i, i)*X(JXJX)(J, l, i, j, beta, gamma);
+			if(i != l)
+				entry += X(X_index)(l, alpha, i, 2*l-i)*X(JXJX)(J, l, 2*l-i, j, beta, gamma);
+
+			Delta[i + j*(2*l+1)] = entry;
+		}
+	}
+
+	return Delta;
+}
+
+FLT * X(rotation_matrix_direct)(int l, FLT alpha, FLT beta, FLT gamma){
+	FLT * J = X(J)(l);
+	return X(rotation_matrix_J)(l, alpha, beta, gamma, J);
+}
+
+FLT * X(rotation_matrix)(int l, FLT alpha, FLT beta, FLT gamma){
+	FLT * J = X(J_eigen)(l);
+	return X(rotation_matrix_J)(l, alpha, beta, gamma, J);
+}
+
 void X(do_a_test()){
-	int l = 5;
+	int l = 3;
 	
 	FLT * Eigen_Jl = X(J_eigen)(l);
 	FLT * Slow_Jl = X(J)(l);
@@ -463,13 +531,11 @@ void X(do_a_test()){
 	Y(printmat)("Slow_Jl", "%0.6f", Slow_Jl, 2*l+1, 2*l+1);
 	Y(printmat)("Eigen_Jl", "%0.6f", Eigen_Jl, 2*l+1, 2*l+1);
 
-	FLT * Gy = X(Gy)(l);
-	FLT * Gy_test = X(Gy_dense_test)(l);
-	//Y(printmat)("Gy", "%0.6f", Gy, 2*l+3, 2*l+1);
-	//Y(printmat)("Gy_test", "%0.6f", Gy_test, 2*l+3, 2*l+1);
-
-	FLT * Yl_test = X(Y_dense_test)(l);
-	//Y(printmat)("Y_test", "%0.6f", Yl_test, 2*l+1, 2*l+1);
+	FLT alpha = 0.123;
+	FLT beta = 0.456;
+	FLT gamma = 0.789;
+	FLT * delta = X(rotation_matrix_direct)(l, alpha, beta, gamma);
+	Y(printmat)("Delta", "%0.6f", delta, 2*l+1, 2*l+1);
 
 	free(Eigen_Jl);
 	free(Slow_Jl);
