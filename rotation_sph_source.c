@@ -1,5 +1,5 @@
 FLT * X(sphzeros)(int m, int n){
-	FLT * A = calloc(m * n, sizeof(FLT));
+	FLT * A = (FLT*)calloc(m * n,  sizeof(FLT));
 	for(int j = 0; j < n; ++j){
 		for(int i = 0; i < m; ++i){
 			A[i + j*m] = 0;
@@ -153,7 +153,7 @@ FLT * X(J)(int l){
 	
 	// Inverting Gzhat. Remember Gzhat is diagonal.
 	for(int i = 0; i < 2*l-1; ++i)
-	Gzhat[i + i*(2*l-1)] = 1/Gzhat[i + i*(2*l-1)];
+		Gzhat[i + i*(2*l-1)] = 1/Gzhat[i + i*(2*l-1)];
 
 	// Jlv = Gzlm1 * Jlm1
 	FLT * temp = X(sphzeros)(2*l+1, 2*l-1);
@@ -205,8 +205,8 @@ FLT * X(X_dense)(int l, FLT alpha){
 void X(eigen_symmetric_lapack)(const FLT * A, int LDA, int n, FLT * Lambda, FLT * V){
 	char JOBZ = 'V', UPLO = 'U';
 	int LWORK = 1 + 6 * n + 2 * n * n, LIWORK = 3 + 5*n, INFO = -1;
-	FLT * WORK = calloc(LWORK, sizeof(FLT));
-	int * IWORK = calloc(LIWORK, sizeof(int));
+	FLT * WORK = (FLT*)calloc(LWORK, sizeof(FLT));
+	int * IWORK = (int*)calloc(LIWORK, sizeof(int));
 	
 	for(int i = 0; i < LDA; ++i){
 		for(int j = i; j < n; ++j){
@@ -394,12 +394,12 @@ void X(correct_J_column_symmetry)(FLT * J, int l, int j){
 FLT * X(J_eigen)(int l){
 	int n1 = ceil((FLT)(2*l+1)/2); 
 	int n2 = 2*l+1 - n1;
-	X(symmetric_tridiagonal) * Y1st = malloc(sizeof(X(symmetric_tridiagonal)));
-	X(symmetric_tridiagonal) * Y2st = malloc(sizeof(X(symmetric_tridiagonal)));
-	FLT * a1 = malloc(n1*sizeof(FLT));
-	FLT * b1 = malloc((n1-1)*sizeof(FLT));
-	FLT * a2 = malloc(n2*sizeof(FLT));
-	FLT * b2 = malloc((n2-1)*sizeof(FLT));
+	X(symmetric_tridiagonal) * Y1st = (X(symmetric_tridiagonal)*)malloc(sizeof(X(symmetric_tridiagonal)));
+	X(symmetric_tridiagonal) * Y2st = (X(symmetric_tridiagonal)*)malloc(sizeof(X(symmetric_tridiagonal)));
+	FLT * a1 = (FLT*)calloc(n1, sizeof(FLT));
+	FLT * b1 = (FLT*)calloc((n1-1), sizeof(FLT));
+	FLT * a2 = (FLT*)calloc(n2, sizeof(FLT));
+	FLT * b2 = (FLT*)calloc((n2-1), sizeof(FLT));
 
 	for(int i = 0; i < n1; ++i)
 		a1[i] = X(Y_index)(l, 2*i, 2*i);
@@ -413,8 +413,8 @@ FLT * X(J_eigen)(int l){
 	Y1st->b = b1; Y2st->b = b2;
 	Y1st->n = n1; Y2st->n = n2;
 
-	FLT * Y1st_lambda = calloc(n1, sizeof(FLT));
-	FLT * Y2st_lambda = calloc(n2, sizeof(FLT));
+	FLT * Y1st_lambda = (FLT*)calloc(n1, sizeof(FLT));
+	FLT * Y2st_lambda = (FLT*)calloc(n2, sizeof(FLT));
 	FLT * Y1st_V = X(sphzeros)(n1, n1);
 	FLT * Y2st_V = X(sphzeros)(n2, n2);
 	for(int i = 0 ; i < n1; ++i)
@@ -440,9 +440,32 @@ FLT * X(J_eigen)(int l){
 	}
 
 	// Correcting symmetry.
-	for(int j = 0; j < 2*l-1; ++j){
-		X(correct_J_column_symmetry)(Eigen_Jl, l, j);
+	//for(int j = 0; j < 2*l-1; ++j){
+	//	X(correct_J_column_symmetry)(Eigen_Jl, l, j);
+	//}
+	
+	// Correcting signs. Evaluating the sign pattern.
+	int l_parity = l%2;
+	for(int j = l + l_parity; j < 2*l+1; j = j+2){ // Bottom right block.
+		if((Eigen_Jl[l + l_parity + j*(2*l+1)] < 0 ? 1 : 0) != (pow(-1, floor((FLT)l/2)) < 0 ? 1 : 0))
+			X(correct_J_column_signs)(Eigen_Jl, l, j);
 	}
+
+	for(int j = l + (1-l_parity); j < 2*l+1; j = j+2){ // Top right block.
+		if((Eigen_Jl[l-1-(1-l_parity) + j*(2*l+1)] < 0 ? 1 : 0) != (pow(-1, ceil((FLT)l/2)) < 0 ? 1 : 0))
+			X(correct_J_column_signs)(Eigen_Jl, l, j);
+	}
+
+	for(int j = 0; j < l; j = j+2){ // Bottom left block.
+		if((Eigen_Jl[l+(1-l_parity) + j*(2*l+1)] < 0 ? 1 : 0) != (pow(-1, ceil((FLT)l/2)) < 0 ? 1 : 0))
+			X(correct_J_column_signs)(Eigen_Jl, l, j);
+	}
+
+	for(int j = 1; j < l; j = j+2){ // Top left block.
+		if((Eigen_Jl[l-1-l_parity + j*(2*l+1)] < 0 ? 1 : 0) != (pow(-1, floor((FLT)l/2)+1) < 0 ? 1 : 0))
+			X(correct_J_column_signs)(Eigen_Jl, l, j);
+	}
+
 	X(threshold)(Eigen_Jl, 2*l+1, 2*l+1, Y(eps)());
 
 	free(Y1st_lambda);
@@ -523,22 +546,45 @@ FLT * X(rotation_matrix)(int l, FLT alpha, FLT beta, FLT gamma){
 }
 
 void X(do_a_test()){
-	int l = 3;
+	int l = 170;
 	
 	FLT * Eigen_Jl = X(J_eigen)(l);
 	FLT * Slow_Jl = X(J)(l);
 
-	Y(printmat)("Slow_Jl", "%0.6f", Slow_Jl, 2*l+1, 2*l+1);
-	Y(printmat)("Eigen_Jl", "%0.6f", Eigen_Jl, 2*l+1, 2*l+1);
+	//Y(printmat)("Slow_Jl", "%0.6f", Slow_Jl, 2*l+1, 2*l+1);
+	//Y(printmat)("Eigen_Jl", "%0.6f", Eigen_Jl, 2*l+1, 2*l+1);
+	printf("Test eigen = %0.30f\n", Eigen_Jl[167 + 57*(2*l+1)]);
+	printf("Test slow = %0.30f\n", Slow_Jl[167 + 57*(2*l+1)]);
 
 	FLT alpha = 0.123;
 	FLT beta = 0.456;
 	FLT gamma = 0.789;
 	FLT * delta = X(rotation_matrix_direct)(l, alpha, beta, gamma);
-	Y(printmat)("Delta", "%0.6f", delta, 2*l+1, 2*l+1);
+	//Y(printmat)("Delta", "%0.6f", delta, 2*l+1, 2*l+1);
 
 	free(Eigen_Jl);
 	free(Slow_Jl);
+
+	int number_of_tests = 170;
+	for(int k = 170; k <= number_of_tests; ++k){
+		FLT * _J_eigen = X(J_eigen)(k);
+		FLT * _J = X(J)(k);
+
+		printf("\rTest number k = %d", k);
+		for(int j = 0; j < 2*k+1; ++j){
+			for(int i = 0; i < 2*k+1; ++i){
+				if(abs(_J_eigen[i + j*(2*k+1)] - _J[i + j*(2*k+1)]) > 1e-14){
+					printf("\nERROR! Not identical entries for [%d, %d].\n", i, j);
+					printf("Eigen_Jl[i, j] = %.30f\n", _J_eigen[i + j*(2*k+1)]);
+					printf("J[i, j] = %.30f\n", _J[i + j*(2*k+1)]);
+					//return;
+				}
+			}
+		}
+		free(_J_eigen);
+		free(_J);
+	}
+	printf("\nTest done!\n");
 
 	//int number_of_tests = 10000;
 	//for(int k = 1; k <= number_of_tests; ++k){
