@@ -96,6 +96,48 @@ FLT X(Gy_index)(int l, int i, int j){
 	return 0;
 }
 
+FLT X(Gz_index)(int l, int i, int j){
+	if(i == j+1)
+		return sqrt((j+1)*(2*l+2-(j+1)))/sqrt((2*l+1)*(2*l+3));
+	return 0;
+}
+
+FLT X(Gzhat_index)(int l, int i, int j){
+	return X(Gz_index)(l, i+1, j);
+}
+
+FLT X(Gzhatinv_index)(int l, int i, int j){
+	if(i == j)
+		return 1/X(Gzhat_index)(l, i, j);
+	return 0;
+}
+
+FLT * X(Gz_dense_test)(int l, int option){
+	FLT * Gz = NULL;
+	int rows = 0;
+	if(option == 0){
+		Gz = X(sphzeros)(2*l+3, 2*l+1);
+		rows = 2*l+3;
+	}
+	else{
+		Gz = X(sphzeros)(2*l+1, 2*l+1);
+		rows = 2*l+1;
+	}
+
+	for(int j = 0; j < 2*l+1; ++j){
+		for(int i = 0; i < rows; ++i){
+			if(option == 0)
+				Gz[i + j*rows] = X(Gz_index)(l, i, j);
+			if(option == 1)
+				Gz[i + j*rows] = X(Gzhat_index)(l, i, j);
+			if(option == 2)
+				Gz[i + j*rows] = X(Gzhatinv_index)(l, i, j);
+		}
+	}
+
+	return Gz;
+}
+
 FLT * X(Gy_dense_test)(int l){
 	FLT * Gyl = calloc((2*l+3)*(2*l+1), sizeof(FLT));
 	
@@ -546,7 +588,7 @@ FLT * X(rotation_matrix)(int l, FLT alpha, FLT beta, FLT gamma){
 }
 
 void X(do_a_test()){
-	int l = 170;
+	int l = 5;
 	
 	FLT * Eigen_Jl = X(J_eigen)(l);
 	FLT * Slow_Jl = X(J)(l);
@@ -555,6 +597,14 @@ void X(do_a_test()){
 	//Y(printmat)("Eigen_Jl", "%0.6f", Eigen_Jl, 2*l+1, 2*l+1);
 	printf("Test eigen = %0.30f\n", Eigen_Jl[167 + 57*(2*l+1)]);
 	printf("Test slow = %0.30f\n", Slow_Jl[167 + 57*(2*l+1)]);
+
+	// Test Gz_index.
+	FLT * Gz = X(Gz_dense_test)(l, 0);
+	FLT * Gzhat = X(Gz_dense_test)(l, 1);
+	FLT * Gzhatinv = X(Gz_dense_test)(l, 2);
+	Y(printmat)("Gz", "%0.6f", Gz, 2*l+3, 2*l+1);
+	Y(printmat)("Gzhat", "%0.6f", Gzhat, 2*l+1, 2*l+1);
+	Y(printmat)("Gzhatinv", "%0.6f", Gzhatinv, 2*l+1, 2*l+1);
 
 	FLT alpha = 0.123;
 	FLT beta = 0.456;
@@ -565,26 +615,26 @@ void X(do_a_test()){
 	free(Eigen_Jl);
 	free(Slow_Jl);
 
-	int number_of_tests = 170;
-	for(int k = 170; k <= number_of_tests; ++k){
-		FLT * _J_eigen = X(J_eigen)(k);
-		FLT * _J = X(J)(k);
+	//int number_of_tests = 170;
+	//for(int k = 170; k <= number_of_tests; ++k){
+	//	FLT * _J_eigen = X(J_eigen)(k);
+	//	FLT * _J = X(J)(k);
 
-		printf("\rTest number k = %d", k);
-		for(int j = 0; j < 2*k+1; ++j){
-			for(int i = 0; i < 2*k+1; ++i){
-				if(abs(_J_eigen[i + j*(2*k+1)] - _J[i + j*(2*k+1)]) > 1e-14){
-					printf("\nERROR! Not identical entries for [%d, %d].\n", i, j);
-					printf("Eigen_Jl[i, j] = %.30f\n", _J_eigen[i + j*(2*k+1)]);
-					printf("J[i, j] = %.30f\n", _J[i + j*(2*k+1)]);
-					//return;
-				}
-			}
-		}
-		free(_J_eigen);
-		free(_J);
-	}
-	printf("\nTest done!\n");
+	//	printf("\rTest number k = %d", k);
+	//	for(int j = 0; j < 2*k+1; ++j){
+	//		for(int i = 0; i < 2*k+1; ++i){
+	//			if(abs(_J_eigen[i + j*(2*k+1)] - _J[i + j*(2*k+1)]) > 1e-14){
+	//				printf("\nERROR! Not identical entries for [%d, %d].\n", i, j);
+	//				printf("Eigen_Jl[i, j] = %.30f\n", _J_eigen[i + j*(2*k+1)]);
+	//				printf("J[i, j] = %.30f\n", _J[i + j*(2*k+1)]);
+	//				//return;
+	//			}
+	//		}
+	//	}
+	//	free(_J_eigen);
+	//	free(_J);
+	//}
+	//printf("\nTest done!\n");
 
 	//int number_of_tests = 10000;
 	//for(int k = 1; k <= number_of_tests; ++k){
