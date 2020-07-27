@@ -138,6 +138,8 @@ endif
 
 ifneq (, $(findstring Apple LLVM version, $(shell $(CC) --version)))
     FOPENMP := -Xpreprocessor -fopenmp -lomp
+else ifneq (, $(findstring Apple clang version, $(shell $(CC) --version)))
+    FOPENMP := -Xpreprocessor -fopenmp -lomp
 else
     FOPENMP := -fopenmp
 endif
