@@ -10,8 +10,8 @@ jobs:
       compiler: clang
       addons:
         homebrew:
-          packages: ['libomp', 'fftw', 'mpfr']
-      env: JOBS_EVAL="export FT_USE_APPLEBLAS=1"
+          packages: ['libomp', 'openblas', 'fftw', 'mpfr']
+      env: JOBS_EVAL=""
     - os: osx
       osx_image: xcode10
       compiler: gcc-4.9
