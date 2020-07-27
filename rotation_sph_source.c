@@ -1,5 +1,5 @@
 FLT * X(sphzeros)(int m, int n){
-	FLT * A = (FLT*)calloc(m * n,  sizeof(FLT));
+	FLT * A = (FLT*)malloc(m * n * sizeof(FLT));
 	for(int j = 0; j < n; ++j){
 		for(int i = 0; i < m; ++i){
 			A[i + j*m] = 0;
@@ -180,28 +180,22 @@ FLT * X(J)(int l){
 	}
 
 	FLT * Jlm1 = X(J)(l-1);
-	FLT * Gylm1 = X(Gy)(l-1);
-	FLT * Gzlm1 = X(Gz)(l-1);
-	FLT * Gzhat = X(sphzeros)(2*(l-1)+1, 2*(l-1)+1);
 	FLT * Jl = X(sphzeros)(2*l+1, 2*l+1);
 	FLT * Jlv = X(sphzeros)(2*l+1, 2*l-1);
 
-	// Initializing Gzhat.
-	for(int j = 0; j < 2*(l-1)+1; ++j){
-		for(int i = 0; i < 2*(l-1)+1; ++i){
-			Gzhat[i + j*(2*(l-1)+1)] = Gzlm1[(i+1) + j*(2*l+1)];
+	// Jlv = Gylm1 * Jlm1 * Gzhatinv_lm1
+	for(int j = 0; j < 2*l-1; ++j){
+		for(int i = 0; i < 2*l+1; ++i){
+			FLT entry = 0;
+
+			if(i < 2*l-1)
+				entry += X(Gy_index)(l-1, i, 2*(l-1)-i) * Jlm1[2*(l-1)-i + j*(2*l-1)] * X(Gzhatinv_index)(l-1, j, j);
+			if(i > 1)
+				entry += X(Gy_index)(l-1, i, 2*l-i) * Jlm1[2*l-i + j*(2*l-1)] * X(Gzhatinv_index)(l-1, j, j);
+
+			Jlv[i + j*(2*l+1)] = entry;
 		}
 	}
-	
-	// Inverting Gzhat. Remember Gzhat is diagonal.
-	for(int i = 0; i < 2*l-1; ++i)
-		Gzhat[i + i*(2*l-1)] = 1/Gzhat[i + i*(2*l-1)];
-
-	// Jlv = Gzlm1 * Jlm1
-	FLT * temp = X(sphzeros)(2*l+1, 2*l-1);
-	X(gemm)('N', 2*l+1, 2*l-1, 2*l-1, 1, Gylm1, 2*l+1, Jlm1, 2*l-1, 0, temp, 2*l+1);
-	// Jlv = (Gzlm1 * Jlm1) * Gzhat^{-1}
-	X(gemm)('N', 2*l+1, 2*l-1, 2*l-1, 1, temp, 2*l+1, Gzhat, 2*l-1, 0, Jlv, 2*l+1);
 
 	for(int j = 1; j < 2*l; ++j){
 		for(int i = 0; i < 2*l+1; ++i){
@@ -215,11 +209,7 @@ FLT * X(J)(int l){
 	}
 	Jl[2*l + 2*l*(2*l+1)] = pow(2, 1-l);
 
-	free(Gylm1);
-	free(Gzlm1);
-	free(Gzhat);
 	free(Jlv);
-	free(temp);
 	free(Jlm1);
 	return Jl;
 }
@@ -238,30 +228,6 @@ FLT * X(X_dense)(int l, FLT alpha){
 	}
 
 	return Xl;
-}
-
-// Consider upper portion of symmetric matrix.
-// Lambda must be of size n. V of dimension LDA x n.
-// V will return the eigenvectors.
-// TODO: macros for different precisions.
-void X(eigen_symmetric_lapack)(const FLT * A, int LDA, int n, FLT * Lambda, FLT * V){
-	char JOBZ = 'V', UPLO = 'U';
-	int LWORK = 1 + 6 * n + 2 * n * n, LIWORK = 3 + 5*n, INFO = -1;
-	FLT * WORK = (FLT*)calloc(LWORK, sizeof(FLT));
-	int * IWORK = (int*)calloc(LIWORK, sizeof(int));
-	
-	for(int i = 0; i < LDA; ++i){
-		for(int j = i; j < n; ++j){
-			V[i + j*n] = A[i + j*n];
-		}
-	}
-
-	dsyevd_(&JOBZ, &UPLO, &n, V, &LDA, Lambda, WORK, &LWORK, IWORK, &LIWORK, &INFO);
-	if(INFO != 0)
-		printf("ERROR: problem on computing eigenvalues or eigenvectors. INFO=%d\n", INFO);
-	
-	free(WORK);
-	free(IWORK);
 }
 
 void X(divide_Y)(FLT * Y, int l, FLT * Y1, int * n1, FLT * Y2, int * n2){
@@ -588,23 +554,23 @@ FLT * X(rotation_matrix)(int l, FLT alpha, FLT beta, FLT gamma){
 }
 
 void X(do_a_test()){
-	int l = 5;
+	int l = 3;
 	
 	FLT * Eigen_Jl = X(J_eigen)(l);
 	FLT * Slow_Jl = X(J)(l);
 
-	//Y(printmat)("Slow_Jl", "%0.6f", Slow_Jl, 2*l+1, 2*l+1);
-	//Y(printmat)("Eigen_Jl", "%0.6f", Eigen_Jl, 2*l+1, 2*l+1);
-	printf("Test eigen = %0.30f\n", Eigen_Jl[167 + 57*(2*l+1)]);
-	printf("Test slow = %0.30f\n", Slow_Jl[167 + 57*(2*l+1)]);
+	Y(printmat)("Slow_Jl", "%0.6f", Slow_Jl, 2*l+1, 2*l+1);
+	Y(printmat)("Eigen_Jl", "%0.6f", Eigen_Jl, 2*l+1, 2*l+1);
+	//printf("Test eigen = %0.30f\n", Eigen_Jl[167 + 57*(2*l+1)]);
+	//printf("Test slow = %0.30f\n", Slow_Jl[167 + 57*(2*l+1)]);
 
 	// Test Gz_index.
 	FLT * Gz = X(Gz_dense_test)(l, 0);
 	FLT * Gzhat = X(Gz_dense_test)(l, 1);
 	FLT * Gzhatinv = X(Gz_dense_test)(l, 2);
-	Y(printmat)("Gz", "%0.6f", Gz, 2*l+3, 2*l+1);
-	Y(printmat)("Gzhat", "%0.6f", Gzhat, 2*l+1, 2*l+1);
-	Y(printmat)("Gzhatinv", "%0.6f", Gzhatinv, 2*l+1, 2*l+1);
+	//Y(printmat)("Gz", "%0.6f", Gz, 2*l+3, 2*l+1);
+	//Y(printmat)("Gzhat", "%0.6f", Gzhat, 2*l+1, 2*l+1);
+	//Y(printmat)("Gzhatinv", "%0.6f", Gzhatinv, 2*l+1, 2*l+1);
 
 	FLT alpha = 0.123;
 	FLT beta = 0.456;

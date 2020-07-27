@@ -51,7 +51,7 @@ examples:
 	$(CC) src/ftutilities.c examples/spinweighted.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o spinweighted
 
 rotation_sph: rotation_sph.c rotation_sph_source.c
-	$(CC) src/ftutilities.c rotation_sph.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) -lopenblas $(LDFLAGS) $(LDLIBS) -o rotation_sph
+	$(CC) src/ftutilities.c rotation_sph.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o rotation_sph
 
 runtests:
 	./test_recurrence
