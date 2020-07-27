@@ -13,57 +13,57 @@ jobs:
           packages: ['libomp', 'openblas', 'fftw', 'mpfr']
       env: JOBS_EVAL=""
     - os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       compiler: gcc-4.9
       addons:
         homebrew:
-          packages: ['gcc@4.9', 'fftw', 'mpfr']
+          packages: ['gcc@4.9', 'openblas', 'fftw', 'mpfr']
           update: true
-      env: JOBS_EVAL="export CC=gcc-4.9 && export FT_QUADMATH=1 && export FT_USE_APPLEBLAS=1"
+      env: JOBS_EVAL="export CC=gcc-4.9 && export FT_QUADMATH=1"
     - os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       compiler: gcc-5
       addons:
         homebrew:
-          packages: ['gcc@5', 'fftw', 'mpfr']
+          packages: ['gcc@5', 'openblas', 'fftw', 'mpfr']
           update: true
-      env: JOBS_EVAL="export CC=gcc-5 && export FT_QUADMATH=1 && export FT_USE_APPLEBLAS=1"
+      env: JOBS_EVAL="export CC=gcc-5 && export FT_QUADMATH=1"
     - os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       compiler: gcc-6
       addons:
         homebrew:
-          packages: ['gcc@6', 'fftw', 'mpfr']
+          packages: ['gcc@6', 'openblas', 'fftw', 'mpfr']
           update: true
-      env: JOBS_EVAL="export CC=gcc-6 && export FT_QUADMATH=1 && export COV=gcov-6 && export FT_COVERAGE=1 && export FT_USE_APPLEBLAS=1"
+      env: JOBS_EVAL="export CC=gcc-6 && export FT_QUADMATH=1 && export COV=gcov-6 && export FT_COVERAGE=1"
       after_success:
         - make coverage
         - bash <(curl -s https://codecov.io/bash)
     # Recommended system requirements
     - os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       compiler: gcc-7
       addons:
         homebrew:
-          packages: ['gcc@7', 'fftw', 'mpfr']
+          packages: ['gcc@7', 'openblas', 'fftw', 'mpfr']
           update: true
-      env: JOBS_EVAL="export CC=gcc-7 && export FT_QUADMATH=1 && export FT_USE_APPLEBLAS=1"
+      env: JOBS_EVAL="export CC=gcc-7 && export FT_QUADMATH=1"
     - os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       compiler: gcc-8
       addons:
         homebrew:
-          packages: ['gcc@8', 'fftw', 'mpfr']
+          packages: ['gcc@8', 'openblas', 'fftw', 'mpfr']
           update: true
-      env: JOBS_EVAL="export CC=gcc-8 && export FT_QUADMATH=1 && export FT_USE_APPLEBLAS=1"
+      env: JOBS_EVAL="export CC=gcc-8 && export FT_QUADMATH=1"
     - os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       compiler: gcc-9
       addons:
         homebrew:
-          packages: ['gcc@9', 'fftw', 'mpfr']
+          packages: ['gcc@9', 'openblas', 'fftw', 'mpfr']
           update: true
-      env: JOBS_EVAL="export CC=gcc-9 && export FT_QUADMATH=1 && export FT_USE_APPLEBLAS=1"
+      env: JOBS_EVAL="export CC=gcc-9 && export FT_QUADMATH=1"
     # Minimum system requirements
     - os: linux
       compiler: gcc-4.9
