@@ -18,10 +18,7 @@ jobs:
       addons:
         homebrew:
           packages: ['libomp', 'openblas', 'fftw', 'mpfr']
-      env: JOBS_EVAL="export CC=gcc && export COV=gcov && export FT_COVERAGE=1"
-      after_success:
-        - make coverage
-        - bash <(curl -s https://codecov.io/bash)
+      env: JOBS_EVAL="export CC=gcc"
     # Minimum system requirements
     - os: linux
       compiler: gcc-4.9
