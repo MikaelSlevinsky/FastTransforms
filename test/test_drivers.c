@@ -344,7 +344,6 @@ int main(int argc, const char * argv[]) {
         free(B);
         ft_destroy_rotation_plan(RP);
     }
-    printf("];\n");
 
     printf("\nTiming spherical vector field drivers.\n\n");
     printf("t3 = [\n");
