@@ -25,6 +25,9 @@ jobs:
           sources: ubuntu-toolchain-r-test
           packages: ['libomp-dev', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
       env: JOBS_EVAL="export CC=clang && export COV=gcov && export FT_COVERAGE=1 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+      after_success:
+        - make coverage
+        - bash <(curl -s https://codecov.io/bash)
     - os: linux
       compiler: gcc
       addons:
