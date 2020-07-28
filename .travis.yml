@@ -4,7 +4,6 @@ language: c
 jobs:
   include:
     - stage: "Test"
-    # Minimum system requirements
       os: osx
       osx_image: xcode11
       compiler: clang
@@ -19,14 +18,13 @@ jobs:
         homebrew:
           packages: ['libomp', 'openblas', 'fftw', 'mpfr']
       env: JOBS_EVAL="export CC=gcc"
-    # Minimum system requirements
     - os: linux
       compiler: clang
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
           packages: ['libomp-dev', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
-      env: JOBS_EVAL="export CC=clang && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+      env: JOBS_EVAL="export CC=clang && export COV=gcov && export FT_COVERAGE=1 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     - os: linux
       compiler: gcc
       addons:
