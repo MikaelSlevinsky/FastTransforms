@@ -14,20 +14,20 @@ The library makes use of OpenBLAS, FFTW3, and MPFR, which are easily installed v
 
 ### macOS
 
-Apple's version of GCC does not support OpenMP. Sample installation:
+Sample installation:
 ```
-brew install gcc@8 fftw mpfr
-make CC=gcc-8 FT_USE_APPLEBLAS=1
+brew install libomp fftw mpfr
+make CC=clang FT_USE_APPLEBLAS=1
 ```
-On macOS, the OpenBLAS dependency is optional in light of the vecLib framework. In case the library is compiled with vecLib, then the environment variable `VECLIB_MAXIMUM_THREADS` partially controls the multithreading.
+On macOS, the OpenBLAS dependency is optional in light of the vecLib framework, though on macOS 10.14 and above, one must locate the headers in the software development kit. In case the library is compiled with vecLib, then the environment variable `VECLIB_MAXIMUM_THREADS` partially controls the multithreading.
 
 ### Linux
 
 To access functions from the library, you must ensure that you append the current library path to the default. Sample installation:
 ```
-apt-get install gcc-8 libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
+apt-get install libomp-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
-make CC=gcc-8
+make CC=gcc
 ```
 See the [Travis build](https://github.com/MikaelSlevinsky/FastTransforms/blob/master/.travis.yml) for further details.
 
