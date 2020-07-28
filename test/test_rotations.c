@@ -517,6 +517,7 @@ int main(void) {
             ft_destroy_spin_rotation_plan(SRP);
         }
     }
+    printf("\n");
     return checksum;
 }
 

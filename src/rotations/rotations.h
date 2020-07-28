@@ -15,7 +15,7 @@
 #define s2(l,j,m) s2[l+(j)*n+(m)*as*n]
 #define c2(l,j,m) c2[l+(j)*n+(m)*as*n]
 
-#define KERNEL_SPH_HI2LO(T, VT, VS, L, VLOAD, VSTORE, APPLY_GIVENS)            \
+#define KERNEL_SPH_HI2LO(T, VT, VS, L, VLOAD, VSTORE, VMULADD, VMULSUB, VALL, APPLY_GIVENS) \
 int n = RP->n, row, col;                                                       \
 T ts, tc;                                                                      \
 VT X[3*L], T1, T2;                                                             \
@@ -37,8 +37,8 @@ for (; j >= m1+2*L-2; j -= 2*L) {                                              \
                 T2 = X[L+1-lk+2*lj];                                           \
                 ts = RP->s(row, col);                                          \
                 tc = RP->c(row, col);                                          \
-                X[L-1-lk+2*lj] = tc*T1 + ts*T2;                                \
-                X[L+1-lk+2*lj] = tc*T2 - ts*T1;                                \
+                X[L-1-lk+2*lj] = VMULADD(VALL(tc), T1, ts*T2);                 \
+                X[L+1-lk+2*lj] = VMULSUB(VALL(tc), T2, ts*T1);                 \
             }                                                                  \
         }                                                                      \
         for (int l = 0; l < 3*L; l++)                                          \
@@ -58,7 +58,7 @@ for (; j >= m1; j -= 2) {                                                      \
     }                                                                          \
 }
 
-#define KERNEL_SPH_LO2HI(T, VT, VS, L, VLOAD, VSTORE, APPLY_GIVENS_T)          \
+#define KERNEL_SPH_LO2HI(T, VT, VS, L, VLOAD, VSTORE, VMULADD, VMULSUB, VALL, APPLY_GIVENS_T) \
 int n = RP->n, row, col;                                                       \
 T ts, tc;                                                                      \
 VT X[3*L], T1, T2;                                                             \
@@ -83,8 +83,8 @@ for (; j < m2-2*L-2*VS+4; j += 2*L) {                                          \
                 T2 = X[2*L+lk-2*lj];                                           \
                 ts = RP->s(row, col);                                          \
                 tc = RP->c(row, col);                                          \
-                X[2*L-2+lk-2*lj] = tc*T1 - ts*T2;                              \
-                X[2*L+lk-2*lj] = tc*T2 + ts*T1;                                \
+                X[2*L-2+lk-2*lj] = VMULSUB(VALL(tc), T1, ts*T2);               \
+                X[2*L+lk-2*lj] = VMULADD(VALL(tc), T2, ts*T1);                 \
             }                                                                  \
         }                                                                      \
         for (int l = 0; l < 3*L; l++)                                          \
@@ -101,7 +101,7 @@ for (int s = 1; s < VS/2; s++) {                                               \
     kernel_sph_lo2hi_default(RP, m2, m2+2*s, A+2*s+1, S);                      \
 }
 
-#define KERNEL_TRI_HI2LO(T, VT, VS, L, VLOAD, VSTORE, APPLY_GIVENS)            \
+#define KERNEL_TRI_HI2LO(T, VT, VS, L, VLOAD, VSTORE, VMULADD, VMULSUB, VALL, APPLY_GIVENS) \
 int n = RP->n, row, col;                                                       \
 T ts, tc;                                                                      \
 VT X[2*L], T1, T2;                                                             \
@@ -121,8 +121,8 @@ for (; j >= m1+L-1; j -= L) {                                                  \
                 T2 = X[L-lk+lj];                                               \
                 ts = RP->s(row, col);                                          \
                 tc = RP->c(row, col);                                          \
-                X[L-1-lk+lj] = tc*T1 + ts*T2;                                  \
-                X[L-lk+lj] = tc*T2 - ts*T1;                                    \
+                X[L-1-lk+lj] = VMULADD(VALL(tc), T1, ts*T2);                   \
+                X[L-lk+lj] = VMULSUB(VALL(tc), T2, ts*T1);                     \
             }                                                                  \
         }                                                                      \
         for (int l = 0; l < 2*L; l++)                                          \
@@ -142,7 +142,7 @@ for (; j >= m1; j--) {                                                         \
     }                                                                          \
 }
 
-#define KERNEL_TRI_LO2HI(T, VT, VS, L, VLOAD, VSTORE, APPLY_GIVENS_T)          \
+#define KERNEL_TRI_LO2HI(T, VT, VS, L, VLOAD, VSTORE, VMULADD, VMULSUB, VALL, APPLY_GIVENS_T) \
 int n = RP->n, row, col;                                                       \
 T ts, tc;                                                                      \
 VT X[2*L], T1, T2;                                                             \
@@ -167,8 +167,8 @@ for (; j < m2-L-VS+2; j += L) {                                                \
                 T2 = X[L+lk-lj];                                               \
                 ts = RP->s(row, col);                                          \
                 tc = RP->c(row, col);                                          \
-                X[L-1+lk-lj] = tc*T1 - ts*T2;                                  \
-                X[L+lk-lj] = tc*T2 + ts*T1;                                    \
+                X[L-1+lk-lj] = VMULSUB(VALL(tc), T1, ts*T2);                   \
+                X[L+lk-lj] = VMULADD(VALL(tc), T2, ts*T1);                     \
             }                                                                  \
         }                                                                      \
         for (int l = 0; l < 2*L; l++)                                          \
@@ -183,7 +183,7 @@ for (; j < m2; j++) {                                                          \
 for (int s = 1; s < VS; s++)                                                   \
     kernel_tri_lo2hi_default(RP, m2, m2+s, A+s, S);
 
-#define KERNEL_DISK_HI2LO(T, VT, VS, L, VLOAD, VSTORE, APPLY_GIVENS)           \
+#define KERNEL_DISK_HI2LO(T, VT, VS, L, VLOAD, VSTORE, VMULADD, VMULSUB, VALL, APPLY_GIVENS) \
 int n = RP->n, row, col;                                                       \
 T ts, tc;                                                                      \
 VT X[2*L], T1, T2;                                                             \
@@ -205,8 +205,8 @@ for (; j >= m1+2*L-1; j -= 2*L) {                                              \
                 T2 = X[L-lk+lj];                                               \
                 ts = RP->sd(row, col);                                         \
                 tc = RP->cd(row, col);                                         \
-                X[L-1-lk+lj] = tc*T1 + ts*T2;                                  \
-                X[L-lk+lj] = tc*T2 - ts*T1;                                    \
+                X[L-1-lk+lj] = VMULADD(VALL(tc), T1, ts*T2);                   \
+                X[L-lk+lj] = VMULSUB(VALL(tc), T2, ts*T1);                     \
             }                                                                  \
         }                                                                      \
         for (int l = 0; l < 2*L; l++)                                          \
@@ -226,7 +226,7 @@ for (; j >= m1; j -= 2) {                                                      \
     }                                                                          \
 }
 
-#define KERNEL_DISK_LO2HI(T, VT, VS, L, VLOAD, VSTORE, APPLY_GIVENS_T)         \
+#define KERNEL_DISK_LO2HI(T, VT, VS, L, VLOAD, VSTORE, VMULADD, VMULSUB, VALL, APPLY_GIVENS_T) \
 int n = RP->n, row, col;                                                       \
 T ts, tc;                                                                      \
 VT X[2*L], T1, T2;                                                             \
@@ -251,8 +251,8 @@ for (; j < m2-2*L-2*VS+4; j += 2*L) {                                          \
                 T2 = X[L+lk-lj];                                               \
                 ts = RP->sd(row, col);                                         \
                 tc = RP->cd(row, col);                                         \
-                X[L-1+lk-lj] = tc*T1 - ts*T2;                                  \
-                X[L+lk-lj] = tc*T2 + ts*T1;                                    \
+                X[L-1+lk-lj] = VMULSUB(VALL(tc), T1, ts*T2);                   \
+                X[L+lk-lj] = VMULADD(VALL(tc), T2, ts*T1);                     \
             }                                                                  \
         }                                                                      \
         for (int l = 0; l < 2*L; l++)                                          \

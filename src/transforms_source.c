@@ -299,7 +299,7 @@ X(tb_eigen_FMM) * X(plan_jacobi_to_chebyshev)(const int normjac, const int normc
     if (normcheb == 0) {
         FLT * sclrow = malloc(n*sizeof(FLT));
         FLT sqrt_1_pi = 1/Y2(tgamma)(0.5);
-        FLT sqrt_2_pi = Y2(sqrt)(2)*sqrt_1_pi;
+        FLT sqrt_2_pi = Y2(sqrt)(2)/Y2(tgamma)(0.5);
         if (n > 0)
             sclrow[0] = sqrt_1_pi;
         for (int i = 1; i < n; i++)
@@ -331,7 +331,7 @@ X(tb_eigen_FMM) * X(plan_ultraspherical_to_chebyshev)(const int normultra, const
     if (normcheb == 0) {
         FLT * sclrow = malloc(n*sizeof(FLT));
         FLT sqrt_1_pi = 1/Y2(tgamma)(0.5);
-        FLT sqrt_2_pi = Y2(sqrt)(2)*sqrt_1_pi;
+        FLT sqrt_2_pi = Y2(sqrt)(2)/Y2(tgamma)(0.5);
         if (n > 0)
             sclrow[0] = sqrt_1_pi;
         for (int i = 1; i < n; i++)

@@ -20,22 +20,22 @@
         apply_givens_t_SSE2(S, C, (double *) X, (double *) Y);
     }
     void kernel_sph_hi2lo_SSE2(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
-        KERNEL_SPH_HI2LO(double, double2, 2, 3, vloadu2, vstoreu2, apply_givens_SSE2)
+        KERNEL_SPH_HI2LO(double, double2, 2, 3, vloadu2, vstoreu2, vmuladd, vmulsub, vall2, apply_givens_SSE2)
     }
     void kernel_sph_lo2hi_SSE2(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
-        KERNEL_SPH_LO2HI(double, double2, 2, 3, vloadu2, vstoreu2, apply_givens_t_SSE2)
+        KERNEL_SPH_LO2HI(double, double2, 2, 3, vloadu2, vstoreu2, vmuladd, vmulsub, vall2, apply_givens_t_SSE2)
     }
     void kernel_tri_hi2lo_SSE2(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
-        KERNEL_TRI_HI2LO(double, double2, 2, 3, vloadu2, vstoreu2, apply_givens_SSE2)
+        KERNEL_TRI_HI2LO(double, double2, 2, 3, vloadu2, vstoreu2, vmuladd, vmulsub, vall2, apply_givens_SSE2)
     }
     void kernel_tri_lo2hi_SSE2(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
-        KERNEL_TRI_LO2HI(double, double2, 2, 3, vloadu2, vstoreu2, apply_givens_t_SSE2)
+        KERNEL_TRI_LO2HI(double, double2, 2, 3, vloadu2, vstoreu2, vmuladd, vmulsub, vall2, apply_givens_t_SSE2)
     }
     void kernel_disk_hi2lo_SSE2(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
-        KERNEL_DISK_HI2LO(double, double2, 2, 3, vloadu2, vstoreu2, apply_givens_SSE2)
+        KERNEL_DISK_HI2LO(double, double2, 2, 3, vloadu2, vstoreu2, vmuladd, vmulsub, vall2, apply_givens_SSE2)
     }
     void kernel_disk_lo2hi_SSE2(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
-        KERNEL_DISK_LO2HI(double, double2, 2, 3, vloadu2, vstoreu2, apply_givens_t_SSE2)
+        KERNEL_DISK_LO2HI(double, double2, 2, 3, vloadu2, vstoreu2, vmuladd, vmulsub, vall2, apply_givens_t_SSE2)
     }
     void kernel_spinsph_hi2lo_SSE2(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S) {
         int n = SRP->n, s = SRP->s;

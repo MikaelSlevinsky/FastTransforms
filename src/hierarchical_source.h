@@ -49,7 +49,7 @@ struct X(hmat) {
 
 FLT * X(chebyshev_points)(char KIND, int n);
 FLT * X(chebyshev_barycentric_weights)(char KIND, int n);
-void * X(barycentricmatrix)(FLT * A, FLT * x, int m, FLT * y, FLT * l, int n);
+void X(barycentricmatrix)(FLT * A, FLT * x, int m, FLT * y, FLT * l, int n);
 
 void X(destroy_densematrix)(X(densematrix) * A);
 void X(destroy_lowrankmatrix)(X(lowrankmatrix) * A);
