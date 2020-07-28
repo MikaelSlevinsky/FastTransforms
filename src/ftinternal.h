@@ -15,6 +15,9 @@
     #ifndef bit_AVX2
         #define bit_AVX2 0
     #endif
+    #ifndef bit_AVX512F
+        #define bit_AVX512F 0
+    #endif
 #endif
 
 #define RED(string) "\x1b[31m" string "\x1b[0m"
@@ -149,14 +152,10 @@ typedef struct {
         unsigned eax1, ebx1, ecx1, edx1;
         cpuid(1, 0, &eax, &ebx, &ecx, &edx);
         cpuid(7, 0, &eax1, &ebx1, &ecx1, &edx1);
-        #ifndef bit_AVX512F
-            return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_SSE3), !!(ecx & bit_SSSE3), !!(ecx & bit_SSE4_1), !!(ecx & bit_SSE4_2), !!(ecx & bit_AVX), !!(ebx1 & bit_AVX2), !!(ecx & bit_FMA), 0};
-        #else
-            return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_SSE3), !!(ecx & bit_SSSE3), !!(ecx & bit_SSE4_1), !!(ecx & bit_SSE4_2), !!(ecx & bit_AVX), !!(ebx1 & bit_AVX2), !!(ecx & bit_FMA), !!(ebx1 & bit_AVX512F)};
-        #endif
+        return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_SSE3), !!(ecx & bit_SSSE3), !!(ecx & bit_SSE4_1), !!(ecx & bit_SSE4_2), !!(ecx & bit_AVX), !!(ebx1 & bit_AVX2), !!(ecx & bit_FMA), !!(ebx1 & bit_AVX512F)};
     }
 #else
-    static inline ft_simd get_simd(void) {return (ft_simd) {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};}
+    static inline ft_simd get_simd(void) {return (ft_simd) {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};}
 #endif
 
 #ifdef __AVX512F__
