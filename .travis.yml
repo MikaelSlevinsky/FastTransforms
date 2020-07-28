@@ -25,7 +25,7 @@ jobs:
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
-          packages: ['libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+          packages: ['libomp-dev', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
       env: JOBS_EVAL="export CC=clang && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     - os: linux
       compiler: gcc
