@@ -29,7 +29,6 @@ void Y(print_mat)(FLT * A, char * FMT, int m, int n){
 	printf("]\n");
 }
 
-// TODO: Make these functions more general as most of the code is repeated.
 FLT * X(Gx)(int l){
 	FLT * Gx = X(sphzeros)(2*l + 3, 2*l + 1);
 
@@ -169,7 +168,43 @@ FLT * X(Y_dense_test)(int l){
 	return Yl;
 }
 
-// TODO: Check for memory leaks, specially here.
+int X(is_J_entry_nonzero)(int l, int i, int j){
+	if(j < l){ // Left blocks.
+		if(j%2 == 0){
+			if(i >= l && i%2 == 1)
+				return 1;
+		}
+		else{
+			if(i < l && i%2 == 1)
+				return 1;
+		}
+	}
+	else{ // Right blocks.
+		if(j%2 == 0){
+			if(i >= l && i%2 == 0)
+				return 1;
+		}
+		else{
+			if(i < l && i%2 == 0)
+				return 1;
+		}
+	}
+
+	return 0;
+}
+
+void X(test_J_nonzero_entry)(int l){
+	FLT * J = X(sphzeros)(2*l+1, 2*l+1);
+
+	for(int j = 0; j < 2*l+1; ++j){
+		for(int i = 0; i < 2*l+1; ++i){
+			J[i + j*(2*l+1)] = X(is_J_entry_nonzero)(l, i, j);
+		}
+	}
+
+	Y(printmat)("Test of nonzero entry", "%0.6f", J, 2*l+1, 2*l+1);
+}
+
 FLT * X(J)(int l){
 	if(l == 0){
 		FLT * A = X(sphzeros)(2*l+1, 2*l+1);
@@ -188,9 +223,9 @@ FLT * X(J)(int l){
 		for(int i = 0; i < 2*l+1; ++i){
 			FLT entry = 0;
 
-			if(i < 2*l-1)
+			if(X(is_J_entry_nonzero)(l-1, 2*(l-1)-i, j) == 1 && i < 2*l-1)
 				entry += X(Gy_index)(l-1, i, 2*(l-1)-i) * Jlm1[2*(l-1)-i + j*(2*l-1)] * X(Gzhatinv_index)(l-1, j, j);
-			if(i > 1)
+			if(X(is_J_entry_nonzero)(l-1, 2*l-i, j) == 1 && i > 1)
 				entry += X(Gy_index)(l-1, i, 2*l-i) * Jlm1[2*l-i + j*(2*l-1)] * X(Gzhatinv_index)(l-1, j, j);
 
 			Jlv[i + j*(2*l+1)] = entry;
@@ -208,6 +243,8 @@ FLT * X(J)(int l){
 		Jl[i + 2*l*(2*l+1)] = Jl[2*l + i*(2*l+1)];
 	}
 	Jl[2*l + 2*l*(2*l+1)] = pow(2, 1-l);
+
+	X(threshold)(Jl, 2*l+1, 2*l+1, 10*Y(eps)());
 
 	free(Jlv);
 	free(Jlm1);
@@ -474,7 +511,7 @@ FLT * X(J_eigen)(int l){
 			X(correct_J_column_signs)(Eigen_Jl, l, j);
 	}
 
-	X(threshold)(Eigen_Jl, 2*l+1, 2*l+1, Y(eps)());
+	X(threshold)(Eigen_Jl, 2*l+1, 2*l+1, 10*Y(eps)());
 
 	free(Y1st_lambda);
 	free(Y2st_lambda);
@@ -511,11 +548,11 @@ FLT * X(X_test)(int l, FLT alpha){
 FLT X(JXJX)(FLT * J, int l, int i, int j, FLT beta, FLT gamma){
 	FLT entry = 0;
 	for(int k = 0; k < 2*l+1; ++k){
-		if(j == l && k == l)
+		if(X(is_J_entry_nonzero)(l, i, k) == 1 && X(is_J_entry_nonzero)(l, k, j) == 1 && j == l && k == l)
 			entry += J[i + k*(2*l+1)] * J[k + j*(2*l+1)];
-		else if(j != l && k == l)
+		else if(X(is_J_entry_nonzero)(l, i, k) == 1 && j != l && k == l)
 			entry += J[i + k*(2*l+1)] * (J[k + j*(2*l+1)]*X(X_index)(l, gamma, j, j) + J[k + (2*l-j)*(2*l+1)]*X(X_index)(l, gamma, 2*l-j, j));
-		else if(j == l && k != l)
+		else if(X(is_J_entry_nonzero)(l, k, j) == 1 && j == l && k != l)
 			entry += (J[i + k*(2*l+1)]*X(X_index)(l, beta, k, k) + J[i + (2*l-k)*(2*l+1)]*X(X_index)(l, beta, 2*l-k, k)) * J[k + j*(2*l+1)];
 		else 
 			entry += (J[i + k*(2*l+1)]*X(X_index)(l, beta, k, k) + J[i + (2*l-k)*(2*l+1)]*X(X_index)(l, beta, 2*l-k, k)) * 
@@ -553,8 +590,8 @@ FLT * X(rotation_matrix)(int l, FLT alpha, FLT beta, FLT gamma){
 	return X(rotation_matrix_J)(l, alpha, beta, gamma, J);
 }
 
-void X(do_a_test()){
-	int l = 3;
+void X(do_a_test)(){
+	int l = 5;
 	
 	FLT * Eigen_Jl = X(J_eigen)(l);
 	FLT * Slow_Jl = X(J)(l);
@@ -563,26 +600,32 @@ void X(do_a_test()){
 	Y(printmat)("Eigen_Jl", "%0.6f", Eigen_Jl, 2*l+1, 2*l+1);
 	//printf("Test eigen = %0.30f\n", Eigen_Jl[167 + 57*(2*l+1)]);
 	//printf("Test slow = %0.30f\n", Slow_Jl[167 + 57*(2*l+1)]);
-
-	// Test Gz_index.
-	FLT * Gz = X(Gz_dense_test)(l, 0);
-	FLT * Gzhat = X(Gz_dense_test)(l, 1);
-	FLT * Gzhatinv = X(Gz_dense_test)(l, 2);
-	//Y(printmat)("Gz", "%0.6f", Gz, 2*l+3, 2*l+1);
-	//Y(printmat)("Gzhat", "%0.6f", Gzhat, 2*l+1, 2*l+1);
-	//Y(printmat)("Gzhatinv", "%0.6f", Gzhatinv, 2*l+1, 2*l+1);
-
+	
 	FLT alpha = 0.123;
 	FLT beta = 0.456;
 	FLT gamma = 0.789;
-	FLT * delta = X(rotation_matrix_direct)(l, alpha, beta, gamma);
-	//Y(printmat)("Delta", "%0.6f", delta, 2*l+1, 2*l+1);
-
+	FLT * delta_direct = X(rotation_matrix_direct)(l, alpha, beta, gamma);
+	FLT * delta = X(rotation_matrix)(l, alpha, beta, gamma);
+	Y(printmat)("Delta direct", "%0.6f", delta_direct, 2*l+1, 2*l+1);
+	Y(printmat)("Delta", "%0.6f", delta, 2*l+1, 2*l+1);
+	
+	FLT * difference = X(sphzeros)(2*l+1, 2*l+1);
+	for(int j = 0; j < 2*l+1; ++j){
+		for(int i = 0; i < 2*l+1; ++i){
+			difference[i + j*(2*l+1)] = delta[i + j*(2*l+1)] - delta_direct[i + j*(2*l+1)];
+		}
+	}
+	X(threshold)(difference, 2*l+1, 2*l+1, 10*Y(eps)());
+	Y(printmat)("Difference", "%0.6f", difference, 2*l+1, 2*l+1);
+	
+	free(difference);
+	free(delta);
+	free(delta_direct);
 	free(Eigen_Jl);
 	free(Slow_Jl);
 
-	//int number_of_tests = 170;
-	//for(int k = 170; k <= number_of_tests; ++k){
+	//int number_of_tests = 1000;
+	//for(int k = 1; k <= number_of_tests; ++k){
 	//	FLT * _J_eigen = X(J_eigen)(k);
 	//	FLT * _J = X(J)(k);
 
@@ -590,10 +633,10 @@ void X(do_a_test()){
 	//	for(int j = 0; j < 2*k+1; ++j){
 	//		for(int i = 0; i < 2*k+1; ++i){
 	//			if(abs(_J_eigen[i + j*(2*k+1)] - _J[i + j*(2*k+1)]) > 1e-14){
-	//				printf("\nERROR! Not identical entries for [%d, %d].\n", i, j);
+	//				printf("\nERROR! Not identical entries for [%d, %d]  k = %d.\n", i, j, k);
 	//				printf("Eigen_Jl[i, j] = %.30f\n", _J_eigen[i + j*(2*k+1)]);
 	//				printf("J[i, j] = %.30f\n", _J[i + j*(2*k+1)]);
-	//				//return;
+	//				return;
 	//			}
 	//		}
 	//	}
