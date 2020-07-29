@@ -136,15 +136,23 @@ ifndef FT_BLAS
     FT_BLAS = blas
 endif
 
-ifneq (, $(findstring Apple LLVM version, $(shell $(CC) --version)))
-    FOPENMP := -Xpreprocessor -fopenmp -lomp
-else ifneq (, $(findstring Apple clang version, $(shell $(CC) --version)))
-    FOPENMP := -Xpreprocessor -fopenmp -lomp
-else
-    FOPENMP := -fopenmp
+ifndef FT_OPENMP
+    ifneq (, $(findstring Apple LLVM version, $(shell $(CC) --version)))
+        FT_OPENMP := -Xpreprocessor -fopenmp -lomp
+    else ifneq (, $(findstring Apple clang version, $(shell $(CC) --version)))
+        FT_OPENMP := -Xpreprocessor -fopenmp -lomp
+    else ifeq ($(UNAME), FreeBSD)
+        ifneq (, $(findstring clang, $(shell $(CC) --version)))
+            FT_OPENMP := -fopenmp=libgomp
+        else
+            FT_OPENMP := -fopenmp
+        endif
+    else
+        FT_OPENMP := -fopenmp
+    endif
 endif
 
-LDLIBS += $(FOPENMP) -lm -lmpfr -l$(FT_BLAS) -lfftw3
+LDLIBS += $(FT_OPENMP) -lm -lmpfr -l$(FT_BLAS) -lfftw3
 
 ifdef FT_QUADMATH
     CFLAGS += -DFT_QUADMATH
