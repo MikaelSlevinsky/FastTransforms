@@ -108,4 +108,34 @@
         kernel_disk_lo2hi_SSE2(RP, m1, m2, A, S);
         kernel_disk_lo2hi_SSE2(RP, m1, m2+2, A+2, S);
     }
+    void kernel_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S) {
+        double t;
+        for (int i = 0; i < SRP->n; i++) {
+            t = A[i*S][1];
+            A[i*S][1] = A[i*S+1][0];
+            A[i*S+1][0] = t;
+        }
+        kernel_spinsph_hi2lo_SSE2(SRP, -m, A, S);
+        kernel_spinsph_hi2lo_SSE2(SRP, m, A+1, S);
+        for (int i = 0; i < SRP->n; i++) {
+            t = A[i*S][1];
+            A[i*S][1] = A[i*S+1][0];
+            A[i*S+1][0] = t;
+        }
+    }
+    void kernel_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S) {
+        double t;
+        for (int i = 0; i < SRP->n; i++) {
+            t = A[i*S][1];
+            A[i*S][1] = A[i*S+1][0];
+            A[i*S+1][0] = t;
+        }
+        kernel_spinsph_lo2hi_SSE2(SRP, -m, A, S);
+        kernel_spinsph_lo2hi_SSE2(SRP, m, A+1, S);
+        for (int i = 0; i < SRP->n; i++) {
+            t = A[i*S][1];
+            A[i*S][1] = A[i*S+1][0];
+            A[i*S+1][0] = t;
+        }
+    }
 #endif
