@@ -92,7 +92,13 @@ machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
 AFLAGS += -O3 -fPIC -std=gnu11 -I./src
 
 ifndef CFLAGS
-    CFLAGS = -O3 -march=native
+    CFLAGS = -O3
+    ifneq (, $(findstring 86, $(machine)))
+        CFLAGS += -march=native
+    endif
+    ifneq (, $(findstring aarch64, $(machine)))
+        CFLAGS += -mcpu=native
+    endif
 endif
 CFLAGS += -std=gnu11 -I./src
 
