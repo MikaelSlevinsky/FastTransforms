@@ -267,36 +267,42 @@ void horner_SSE2(const int n, const double * c, const int incc, const int m, dou
 void horner_AVX(const int n, const double * c, const int incc, const int m, double * x, double * f);
 void horner_AVX_FMA(const int n, const double * c, const int incc, const int m, double * x, double * f);
 void horner_AVX512F(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void horner_NEON(const int n, const double * c, const int incc, const int m, double * x, double * f);
 
 void horner_defaultf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void horner_SSEf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void horner_AVXf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void horner_AVX_FMAf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void horner_AVX512Ff(const int n, const float * c, const int incc, const int m, float * x, float * f);
+void horner_NEONf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 
 void clenshaw_default(const int n, const double * c, const int incc, const int m, double * x, double * f);
 void clenshaw_SSE2(const int n, const double * c, const int incc, const int m, double * x, double * f);
 void clenshaw_AVX(const int n, const double * c, const int incc, const int m, double * x, double * f);
 void clenshaw_AVX_FMA(const int n, const double * c, const int incc, const int m, double * x, double * f);
 void clenshaw_AVX512F(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void clenshaw_NEON(const int n, const double * c, const int incc, const int m, double * x, double * f);
 
 void clenshaw_defaultf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void clenshaw_SSEf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void clenshaw_AVXf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void clenshaw_AVX_FMAf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void clenshaw_AVX512Ff(const int n, const float * c, const int incc, const int m, float * x, float * f);
+void clenshaw_NEONf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 
 void orthogonal_polynomial_clenshaw_default(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
 void orthogonal_polynomial_clenshaw_SSE2(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
 void orthogonal_polynomial_clenshaw_AVX(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
 void orthogonal_polynomial_clenshaw_AVX_FMA(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
 void orthogonal_polynomial_clenshaw_AVX512F(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
+void orthogonal_polynomial_clenshaw_NEON(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
 
 void orthogonal_polynomial_clenshaw_defaultf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 void orthogonal_polynomial_clenshaw_SSEf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 void orthogonal_polynomial_clenshaw_AVXf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 void orthogonal_polynomial_clenshaw_AVX_FMAf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 void orthogonal_polynomial_clenshaw_AVX512Ff(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
+void orthogonal_polynomial_clenshaw_NEONf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 
 double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n);
 double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n);
