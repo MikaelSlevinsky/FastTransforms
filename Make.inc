@@ -56,7 +56,7 @@ ifneq (, $(filter -mavx512f +avx512f, $(simd)))
     endif
 endif
 ifneq (, $(filter -march=armv8-a%, $(simd)))
-    MNEON := -mfpu=neon -funsafe-math-optimizations
+    MNEON := -march=armv8-a+simd
 endif
 
 ifeq ($(UNAME), Darwin)
