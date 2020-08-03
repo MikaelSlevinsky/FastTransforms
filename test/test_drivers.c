@@ -1316,6 +1316,7 @@ int main(int argc, const char * argv[]) {
                 printf("  %.6f", elapsed(&start, &end, NTIMES));
             #endif
 
+            printf("\n");
             free(AC);
             free(BC);
             ft_destroy_spin_rotation_plan(SRP);
