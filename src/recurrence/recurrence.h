@@ -37,10 +37,11 @@ if (n < 1) {                                                                   \
 }                                                                              \
 int j = 0;                                                                     \
 for (; j < m+1-S*L; j += S*L) {                                                \
+    T TWO = (T) 2;                                                             \
     VT bk[3*L] = {0};                                                          \
     VT X[L];                                                                   \
     for (int l = 0; l < L; l++)                                                \
-        X[l] = VALL((T) 2)*VLOAD(x+j+S*l);                                     \
+        X[l] = VALL(TWO)*VLOAD(x+j+S*l);                                       \
     for (int k = n-1; k >= 1; k--) {                                           \
         for (int l = 0; l < L; l++) {                                          \
             bk[3*l] = VMULADD(X[l], bk[3*l+1], VALL(c[k*incc]) - bk[3*l+2]);   \
@@ -49,7 +50,7 @@ for (; j < m+1-S*L; j += S*L) {                                                \
         }                                                                      \
     }                                                                          \
     for (int l = 0; l < L; l++)                                                \
-        VSTORE(f+j+S*l, X[l]/VALL((T) 2)*bk[3*l+1] + VALL(c[0]) - bk[3*l+2]);  \
+        VSTORE(f+j+S*l, X[l]/VALL(TWO)*bk[3*l+1] + VALL(c[0]) - bk[3*l+2]);    \
 }                                                                              \
 for (; j < m; j++) {                                                           \
     T bk = 0;                                                                  \
