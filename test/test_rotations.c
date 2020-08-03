@@ -62,6 +62,18 @@ int main(void) {
             kernel_sph_lo2hi_default(RP, m%2, m, A, 1);
             kernel_sph_lo2hi_default(RP, m%2, m, A+n, 1);
             err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+            kernel_sph_hi2lo_default(RP, m%2, m, A, 1);
+            kernel_sph_hi2lo_default(RP, m%2, m, A+n, 1);
+            permute(A, Ac, n, 2, 2);
+            kernel_sph_lo2hi_NEON(RP, m%2, m, Ac, 2);
+            permute_t(A, Ac, n, 2, 2);
+            err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+            permute(A, Ac, n, 2, 2);
+            kernel_sph_hi2lo_NEON(RP, m%2, m, Ac, 2);
+            permute_t(A, Ac, n, 2, 2);
+            kernel_sph_lo2hi_default(RP, m%2, m, A, 1);
+            kernel_sph_lo2hi_default(RP, m%2, m, A+n, 1);
+            err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
         }
         err = sqrt(err);
         printf("Applying the rotations with two   columns at n = %3i: \t |%20.2e ", n, err);
@@ -213,10 +225,22 @@ int main(void) {
             kernel_tri_lo2hi_default(RP, 0, m, A, 1);
             kernel_tri_lo2hi_default(RP, 0, m+1, A+n, 1);
             err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+            kernel_tri_hi2lo_default(RP, 0, m, A, 1);
+            kernel_tri_hi2lo_default(RP, 0, m+1, A+n, 1);
+            permute(A, Ac, n, 2, 2);
+            kernel_tri_lo2hi_NEON(RP, 0, m, Ac, 2);
+            permute_t(A, Ac, n, 2, 2);
+            err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+            permute(A, Ac, n, 2, 2);
+            kernel_tri_hi2lo_NEON(RP, 0, m, Ac, 2);
+            permute_t(A, Ac, n, 2, 2);
+            kernel_tri_lo2hi_default(RP, 0, m, A, 1);
+            kernel_tri_lo2hi_default(RP, 0, m+1, A+n, 1);
+            err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
         }
         err = sqrt(err);
         printf("Applying the rotations with two   columns at n = %3i: \t |%20.2e ", n, err);
-        ft_checktest(err, 2*n, &checksum);
+        ft_checktest(err, 3*n, &checksum);
         free(A);
         VFREE(Ac);
         free(B);
@@ -361,10 +385,22 @@ int main(void) {
             kernel_disk_lo2hi_default(RP, m%2, m, A, 1);
             kernel_disk_lo2hi_default(RP, m%2, m, A+n, 1);
             err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+            kernel_disk_hi2lo_default(RP, m%2, m, A, 1);
+            kernel_disk_hi2lo_default(RP, m%2, m, A+n, 1);
+            permute(A, Ac, n, 2, 2);
+            kernel_disk_lo2hi_NEON(RP, m%2, m, Ac, 2);
+            permute_t(A, Ac, n, 2, 2);
+            err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+            permute(A, Ac, n, 2, 2);
+            kernel_disk_hi2lo_NEON(RP, m%2, m, Ac, 2);
+            permute_t(A, Ac, n, 2, 2);
+            kernel_disk_lo2hi_default(RP, m%2, m, A, 1);
+            kernel_disk_lo2hi_default(RP, m%2, m, A+n, 1);
+            err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
         }
         err = sqrt(err);
         printf("Applying the rotations with two   columns at n = %3i: \t |%20.2e ", n, err);
-        ft_checktest(err, 2*n, &checksum);
+        ft_checktest(err, 3*n, &checksum);
         free(A);
         VFREE(Ac);
         free(B);
@@ -488,10 +524,20 @@ int main(void) {
                 kernel_spinsph_hi2lo_SSE2(SRP, m, AC, 1);
                 kernel_spinsph_lo2hi_default(SRP, m, AC, 1);
                 err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+                kernel_spinsph_hi2lo_default(SRP, m, AC, 1);
+                kernel_spinsph_lo2hi_NEON(SRP, m, AC, 1);
+                err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+                kernel_spinsph_hi2lo_NEON(SRP, m, AC, 1);
+                kernel_spinsph_lo2hi_default(SRP, m, AC, 1);
+                err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
                 if (s == 0) {
                     kernel_spinsph_hi2lo_default(SRP, m, AC, 1);
                     kernel_sph_lo2hi_default(RP, am%2, am, A, 2);
                     kernel_sph_lo2hi_default(RP, am%2, am, A+1, 2);
+                    err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+                    kernel_sph_hi2lo_default(RP, am%2, am, A, 2);
+                    kernel_sph_hi2lo_default(RP, am%2, am, A+1, 2);
+                    kernel_spinsph_lo2hi_default(SRP, m, AC, 1);
                     err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
                     kernel_sph_hi2lo_default(RP, am%2, am, A, 2);
                     kernel_sph_hi2lo_default(RP, am%2, am, A+1, 2);
@@ -503,14 +549,18 @@ int main(void) {
                     err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
                     kernel_sph_hi2lo_default(RP, am%2, am, A, 2);
                     kernel_sph_hi2lo_default(RP, am%2, am, A+1, 2);
-                    kernel_spinsph_lo2hi_default(SRP, m, AC, 1);
+                    kernel_spinsph_lo2hi_NEON(SRP, m, AC, 1);
+                    err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
+                    kernel_spinsph_hi2lo_NEON(SRP, m, AC, 1);
+                    kernel_sph_lo2hi_default(RP, am%2, am, A, 2);
+                    kernel_sph_lo2hi_default(RP, am%2, am, A+1, 2);
                     err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
                 }
             }
-            if (s == 0) err /= 6.0;
+            if (s == 0) err /= 9.0;
             err = sqrt(err);
             printf("Applying the rotations with spin s = %2i at n = %3i: \t |%20.2e ", s, n, err);
-            ft_checktest(err, 2*n, &checksum);
+            ft_checktest(err, 3*n, &checksum);
             free(A);
             free(B);
             ft_destroy_rotation_plan(RP);

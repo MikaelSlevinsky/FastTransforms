@@ -19,6 +19,25 @@ jobs:
           packages: ['libomp', 'openblas', 'fftw', 'mpfr']
       env: JOBS_EVAL="export CC=gcc"
     - os: linux
+      arch: amd64
+      compiler: clang
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: ['libomp-dev', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=clang && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+    - os: linux
+      arch: amd64
+      compiler: gcc
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: ['libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=gcc && export FT_QUADMATH=1 && export COV=gcov && export FT_COVERAGE=1 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+      after_success:
+        - make coverage
+        - bash <(curl -s https://codecov.io/bash)
+    - os: linux
       arch: arm64
       compiler: clang
       addons:
@@ -33,7 +52,7 @@ jobs:
         apt:
           sources: ubuntu-toolchain-r-test
           packages: ['libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
-      env: JOBS_EVAL="export CC=gcc && export COV=gcov && export FT_COVERAGE=1 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+      env: JOBS_EVAL="export CC=gcc && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
       after_success:
         - make coverage
         - bash <(curl -s https://codecov.io/bash)
