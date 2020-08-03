@@ -55,6 +55,9 @@ ifneq (, $(filter -mavx512f +avx512f, $(simd)))
         MAVX512F := -mavx512f
     endif
 endif
+ifneq (, $(filter armv8-a, $(simd)))
+    MNEON := -mfpu=neon
+endif
 
 ifeq ($(UNAME), Darwin)
     SLIB = dylib
@@ -70,6 +73,7 @@ ASM = src/recurrence/recurrence_default.s \
       src/recurrence/recurrence_AVX.s \
       src/recurrence/recurrence_AVX_FMA.s \
       src/recurrence/recurrence_AVX512F.s \
+      src/recurrence/recurrence_NEON.s \
       src/permute/permute_default.s \
       src/permute/permute_SSE.s \
       src/permute/permute_SSE2.s \
@@ -88,10 +92,7 @@ machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
 AFLAGS += -O3 -fPIC -std=gnu11 -I./src
 
 ifndef CFLAGS
-    CFLAGS = -O3
-    ifneq (, $(findstring 86, $(machine)))
-        CFLAGS += -march=native
-    endif
+    CFLAGS = -O3 -march=native
 endif
 CFLAGS += -std=gnu11 -I./src
 

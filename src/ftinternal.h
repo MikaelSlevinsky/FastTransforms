@@ -19,6 +19,11 @@
         #define bit_AVX512F 0
     #endif
 #endif
+#if defined(__aarch64__)
+    #include <arm_neon.h>
+    #define vall_f32(x) vld1q_dup_f32(&(x))
+    #define vall_f64(x) vld1q_dup_f64(&(x))
+#endif
 
 #define RED(string) "\x1b[31m" string "\x1b[0m"
 #define GREEN(string) "\x1b[32m" string "\x1b[0m"
@@ -132,6 +137,7 @@ typedef struct {
     unsigned avx2    : 1;
     unsigned fma     : 1;
     unsigned avx512f : 1;
+    unsigned neon    : 1;
 } ft_simd;
 
 #if defined(__i386__) || defined(__x86_64__)
@@ -152,10 +158,12 @@ typedef struct {
         unsigned eax1, ebx1, ecx1, edx1;
         cpuid(1, 0, &eax, &ebx, &ecx, &edx);
         cpuid(7, 0, &eax1, &ebx1, &ecx1, &edx1);
-        return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_SSE3), !!(ecx & bit_SSSE3), !!(ecx & bit_SSE4_1), !!(ecx & bit_SSE4_2), !!(ecx & bit_AVX), !!(ebx1 & bit_AVX2), !!(ecx & bit_FMA), !!(ebx1 & bit_AVX512F)};
+        return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_SSE3), !!(ecx & bit_SSSE3), !!(ecx & bit_SSE4_1), !!(ecx & bit_SSE4_2), !!(ecx & bit_AVX), !!(ebx1 & bit_AVX2), !!(ecx & bit_FMA), !!(ebx1 & bit_AVX512F), 0};
     }
+#elif defined(__aarch64__)
+    static inline ft_simd get_simd(void) {return (ft_simd) {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};}
 #else
-    static inline ft_simd get_simd(void) {return (ft_simd) {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};}
+    static inline ft_simd get_simd(void) {return (ft_simd) {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};}
 #endif
 
 #ifdef __AVX512F__

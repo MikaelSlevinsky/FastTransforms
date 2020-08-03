@@ -14,6 +14,7 @@ assembly:
 	$(CC) -S $(AFLAGS) $(MAVX) src/recurrence/recurrence_AVX.c -o src/recurrence/recurrence_AVX.s
 	$(CC) -S $(AFLAGS) $(MAVX) $(MFMA) src/recurrence/recurrence_AVX_FMA.c -o src/recurrence/recurrence_AVX_FMA.s
 	$(CC) -S $(AFLAGS) $(MAVX512F) src/recurrence/recurrence_AVX512F.c -o src/recurrence/recurrence_AVX512F.s
+	$(CC) -S $(AFLAGS) $(MNEON) src/recurrence/recurrence_NEON.c -o src/recurrence/recurrence_NEON.s
 
 	$(CC) -S $(AFLAGS) src/permute/permute_default.c -o src/permute/permute_default.s
 	$(CC) -S $(AFLAGS) $(MSSE) src/permute/permute_SSE.c -o src/permute/permute_SSE.s
