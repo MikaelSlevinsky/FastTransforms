@@ -614,7 +614,7 @@ int main(void) {
                         kernel_sph_lo2hi_default(RP, am%2, am, A, 2);
                         kernel_sph_lo2hi_default(RP, am%2, am, A+1, 2);
                         err += pow(ft_norm_2arg(A, B, 2*n)/ft_norm_1arg(B, 2*n), 2);
-                    #elif defied(__aarch64__)
+                    #elif defined(__aarch64__)
                         kernel_sph_hi2lo_default(RP, am%2, am, A, 2);
                         kernel_sph_hi2lo_default(RP, am%2, am, A+1, 2);
                         kernel_spinsph_lo2hi_NEON(SRP, m, AC, 1);
