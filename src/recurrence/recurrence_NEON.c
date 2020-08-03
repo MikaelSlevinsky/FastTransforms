@@ -8,10 +8,10 @@
         HORNER_KERNEL(float, float32x4_t, 4, 16, vld1q_f32, vst1q_f32, vmuladd, vall_f32)
     }
     void clenshaw_NEON(const int n, const double * c, const int incc, const int m, double * x, double * f) {
-        CLENSHAW_KERNEL(double, float64x2_t, 2, 8, vld1q_f64, vst1q_f64, vmuladd)
+        CLENSHAW_KERNEL(double, float64x2_t, 2, 8, vld1q_f64, vst1q_f64, vmuladd, vall_f64)
     }
     void clenshaw_NEONf(const int n, const float * c, const int incc, const int m, float * x, float * f) {
-        CLENSHAW_KERNEL(float, float32x4_t, 4, 8, vld1q_f32, vst1q_f32, vmuladd)
+        CLENSHAW_KERNEL(float, float32x4_t, 4, 8, vld1q_f32, vst1q_f32, vmuladd, vall_f32)
     }
     void orthogonal_polynomial_clenshaw_NEON(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f) {
         ORTHOGONAL_POLYNOMIAL_CLENSHAW_KERNEL(double, float64x2_t, 2, 8, vld1q_f64, vst1q_f64, vmuladd, vmulsub, vall_f64)
