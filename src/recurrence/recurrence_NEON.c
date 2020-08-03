@@ -5,7 +5,7 @@
         HORNER_KERNEL(double, float64x2_t, 2, 16, vld1q_f64, vst1q_f64, vfmaq_f64, vall_f64)
     }
     void horner_NEONf(const int n, const float * c, const int incc, const int m, float * x, float * f) {
-        HORNER_KERNEL(float, float32x4_t, 4, 16, vld1q_f32, vst1q_f32, vfmaq_f32, vall_f32)
+        HORNER_KERNEL(float, float32x4_t, 4, 16, vld1q_f32, vst1q_f32, vmuladd, vall_f32)
     }
     void clenshaw_NEON(const int n, const double * c, const int incc, const int m, double * x, double * f) {clenshaw_default(n, c, incc, m, x, f);}
     void clenshaw_NEONf(const int n, const float * c, const int incc, const int m, float * x, float * f) {clenshaw_defaultf(n, c, incc, m, x, f);}
