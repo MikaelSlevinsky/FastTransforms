@@ -3,6 +3,7 @@ include Make.inc
 all:
 	@echo '$(simd)'
 	make assembly
+	cat src/recurrence/recurrence_NEON.s
 	make lib
 	make tests
 	make examples
