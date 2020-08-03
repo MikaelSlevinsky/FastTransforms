@@ -45,8 +45,7 @@ int main(void) {
                 err += powf(ft_norm_2argf(f, fd, m), 2);
                 horner_AVX512Ff(n, c, 1, m, x, f);
                 err += powf(ft_norm_2argf(f, fd, m), 2);
-            #endif
-            #if defined(__aarch64__)
+            #elif defined(__aarch64__)
                 horner_NEONf(n, c, 1, m, x, f);
                 err += powf(ft_norm_2argf(f, fd, m), 2);
             #endif
@@ -91,9 +90,7 @@ int main(void) {
 
                 FT_TIME(horner_AVX512Ff(n, c, 1, m, x, f), start, end, NTIMES)
                 printf("Time for horner_AVX512Ff \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
-            #endif
-
-            #if defined(__aarch64__)
+            #elif defined(__aarch64__)
                 FT_TIME(horner_NEONf(n, c, 1, m, x, f), start, end, NTIMES)
                 printf("Time for horner_NEONf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
             #endif
@@ -133,8 +130,7 @@ int main(void) {
                 err += pow(ft_norm_2arg(f, fd, m), 2);
                 horner_AVX512F(n, c, 1, m, x, f);
                 err += pow(ft_norm_2arg(f, fd, m), 2);
-            #endif
-            #if defined(__aarch64__)
+            #elif defined(__aarch64__)
                 horner_NEON(n, c, 1, m, x, f);
                 err += pow(ft_norm_2arg(f, fd, m), 2);
             #endif
@@ -179,9 +175,7 @@ int main(void) {
 
                 FT_TIME(horner_AVX512F(n, c, 1, m, x, f), start, end, NTIMES)
                 printf("Time for horner_AVX512F \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
-            #endif
-
-            #if defined(__aarch64__)
+            #elif defined(__aarch64__)
                 FT_TIME(horner_NEON(n, c, 1, m, x, f), start, end, NTIMES)
                 printf("Time for horner_NEON \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
             #endif
@@ -222,8 +216,7 @@ int main(void) {
                 err += powf(ft_norm_2argf(f, fd, m), 2);
                 clenshaw_AVX512Ff(n, c, 1, m, x, f);
                 err += powf(ft_norm_2argf(f, fd, m), 2);
-            #endif
-            #if defined(__aarch64__)
+            #elif defined(__aarch64__)
                 clenshaw_NEONf(n, c, 1, m, x, f);
                 err += powf(ft_norm_2argf(f, fd, m), 2);
             #endif
@@ -268,9 +261,7 @@ int main(void) {
 
                 FT_TIME(clenshaw_AVX512Ff(n, c, 1, m, x, f), start, end, NTIMES)
                 printf("Time for clenshaw_AVX512Ff \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
-            #endif
-
-            #if defined(__aarch64__)
+            #elif defined(__aarch64__)
                 FT_TIME(clenshaw_NEONf(n, c, 1, m, x, f), start, end, NTIMES)
                 printf("Time for clenshaw_NEONf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
             #endif
@@ -310,8 +301,7 @@ int main(void) {
                 err += pow(ft_norm_2arg(f, fd, m), 2);
                 clenshaw_AVX512F(n, c, 1, m, x, f);
                 err += pow(ft_norm_2arg(f, fd, m), 2);
-            #endif
-            #if defined(__aarch64__)
+            #elif defined(__aarch64__)
                 clenshaw_NEON(n, c, 1, m, x, f);
                 err += pow(ft_norm_2arg(f, fd, m), 2);
             #endif
@@ -356,9 +346,7 @@ int main(void) {
 
                 FT_TIME(clenshaw_AVX512F(n, c, 1, m, x, f), start, end, NTIMES)
                 printf("Time for clenshaw_AVX512F \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
-            #endif
-
-            #if defined(__aarch64__)
+            #elif defined(__aarch64__)
                 FT_TIME(clenshaw_NEON(n, c, 1, m, x, f), start, end, NTIMES)
                 printf("Time for clenshaw_NEON \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
             #endif
@@ -410,8 +398,7 @@ int main(void) {
                 err += powf(ft_norm_2argf(f, fd, m), 2);
                 orthogonal_polynomial_clenshaw_AVX512Ff(n, c, 1, A, B, C, m, x, phi0, f);
                 err += powf(ft_norm_2argf(f, fd, m), 2);
-            #endif
-            #if defined(__aarch64__)
+            #elif defined(__aarch64__)
                 orthogonal_polynomial_clenshaw_NEONf(n, c, 1, A, B, C, m, x, phi0, f);
                 err += powf(ft_norm_2argf(f, fd, m), 2);
             #endif
@@ -472,9 +459,7 @@ int main(void) {
 
                 FT_TIME(orthogonal_polynomial_clenshaw_AVX512Ff(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
                 printf("Time for OP clenshaw_AVX512Ff \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
-            #endif
-
-            #if defined(__aarch64__)
+            #elif defined(__aarch64__)
                 FT_TIME(orthogonal_polynomial_clenshaw_NEONf(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
                 printf("Time for OP clenshaw_NEONf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
             #endif
@@ -529,8 +514,7 @@ int main(void) {
                 err += pow(ft_norm_2arg(f, fd, m), 2);
                 orthogonal_polynomial_clenshaw_AVX512F(n, c, 1, A, B, C, m, x, phi0, f);
                 err += pow(ft_norm_2arg(f, fd, m), 2);
-            #endif
-            #if defined(__aarch64__)
+            #elif defined(__aarch64__)
                 orthogonal_polynomial_clenshaw_NEON(n, c, 1, A, B, C, m, x, phi0, f);
                 err += pow(ft_norm_2arg(f, fd, m), 2);
             #endif
@@ -591,9 +575,7 @@ int main(void) {
 
                 FT_TIME(orthogonal_polynomial_clenshaw_AVX512F(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
                 printf("Time for OP clenshaw_AVX512F \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
-            #endif
-
-            #if defined(__aarch64__)
+            #elif defined(__aarch64__)
                 FT_TIME(orthogonal_polynomial_clenshaw_NEON(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
                 printf("Time for OP clenshaw_NEON \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
             #endif
