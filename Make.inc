@@ -97,7 +97,9 @@ ifndef CFLAGS
         CFLAGS += -march=native
     endif
     ifneq (, $(findstring aarch64, $(machine)))
-        CFLAGS += -mcpu=native
+        ifeq (, $(findstring clang, $(shell $(CC) --version)))
+            CFLAGS += -mcpu=native
+        endif
     endif
 endif
 CFLAGS += -std=gnu11 -I./src
