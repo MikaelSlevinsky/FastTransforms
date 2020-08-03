@@ -37,7 +37,7 @@ if (n < 1) {                                                                   \
 }                                                                              \
 int j = 0;                                                                     \
 for (; j < m+1-S*L; j += S*L) {                                                \
-    T TWO = (T) 2;                                                             \
+    T TWO = 2;                                                                 \
     VT bk[3*L] = {0};                                                          \
     VT X[L];                                                                   \
     for (int l = 0; l < L; l++)                                                \
