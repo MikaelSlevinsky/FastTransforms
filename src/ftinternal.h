@@ -333,6 +333,8 @@ void kernel_sph_hi2lo_AVX_FMA(const ft_rotation_plan * RP, const int m1, const i
 void kernel_sph_lo2hi_AVX_FMA(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_sph_hi2lo_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_sph_lo2hi_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_sph_hi2lo_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_sph_lo2hi_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
 void kernel_tri_hi2lo_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_tri_lo2hi_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
@@ -344,6 +346,8 @@ void kernel_tri_hi2lo_AVX_FMA(const ft_rotation_plan * RP, const int m1, const i
 void kernel_tri_lo2hi_AVX_FMA(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_tri_hi2lo_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_tri_lo2hi_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_tri_hi2lo_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_tri_lo2hi_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
 void kernel_disk_hi2lo_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_disk_lo2hi_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
@@ -355,6 +359,8 @@ void kernel_disk_hi2lo_AVX_FMA(const ft_rotation_plan * RP, const int m1, const 
 void kernel_disk_lo2hi_AVX_FMA(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_disk_hi2lo_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_disk_lo2hi_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_disk_hi2lo_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_disk_lo2hi_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
 void kernel_tet_hi2lo_SSE2(const ft_rotation_plan * RP, const int L, const int m, double * A);
 void kernel_tet_lo2hi_SSE2(const ft_rotation_plan * RP, const int L, const int m, double * A);
@@ -380,6 +386,8 @@ void kernel_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, const int m, ft
 void kernel_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
 void kernel_spinsph_hi2lo_AVX_FMA(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
 void kernel_spinsph_lo2hi_AVX_FMA(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
+void kernel_spinsph_hi2lo_NEON(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
+void kernel_spinsph_lo2hi_NEON(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
 
 void execute_sph_hi2lo_default(const ft_rotation_plan * RP, double * A, const int M);
 void execute_sph_lo2hi_default(const ft_rotation_plan * RP, double * A, const int M);
@@ -462,12 +470,14 @@ void swap_warp_default(double * A, double * B, const int N);
 void swap_warp_SSE2(double * A, double * B, const int N);
 void swap_warp_AVX(double * A, double * B, const int N);
 void swap_warp_AVX512F(double * A, double * B, const int N);
+void swap_warp_NEON(double * A, double * B, const int N);
 
 void swap_warpf(float * A, float * B, const int N);
 void swap_warp_defaultf(float * A, float * B, const int N);
 void swap_warp_SSEf(float * A, float * B, const int N);
 void swap_warp_AVXf(float * A, float * B, const int N);
 void swap_warp_AVX512Ff(float * A, float * B, const int N);
+void swap_warp_NEONf(float * A, float * B, const int N);
 
 void warp(double * A, const int N, const int M, const int L);
 void warp_t(double * A, const int N, const int M, const int L);

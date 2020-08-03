@@ -79,11 +79,13 @@ ASM = src/recurrence/recurrence_default.s \
       src/permute/permute_SSE2.s \
       src/permute/permute_AVX.s \
       src/permute/permute_AVX512F.s \
+      src/permute/permute_NEON.s \
       src/rotations/rotations_default.s \
       src/rotations/rotations_SSE2.s \
       src/rotations/rotations_AVX.s \
       src/rotations/rotations_AVX_FMA.s \
-      src/rotations/rotations_AVX512F.s
+      src/rotations/rotations_AVX512F.s \
+      src/rotations/rotations_NEON.s
 
 SRC = src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
 
