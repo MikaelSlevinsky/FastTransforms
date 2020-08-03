@@ -88,7 +88,7 @@ int main(void) {
             printf("Time for horner_AVX512Ff \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
             FT_TIME(horner_NEONf(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for horner_NEONf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            printf("Time for horner_NEONf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
             FT_TIME(ft_hornerf(n, c, 1, m, x, f), start, end, NTIMES)
             printf("Time for ft_hornerf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
@@ -168,7 +168,7 @@ int main(void) {
             printf("Time for horner_AVX512F \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
             FT_TIME(horner_NEON(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for horner_NEON \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            printf("Time for horner_NEON \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
             FT_TIME(ft_horner(n, c, 1, m, x, f), start, end, NTIMES)
             printf("Time for ft_horner \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
@@ -329,7 +329,7 @@ int main(void) {
             printf("Time for clenshaw_AVX512F \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
             FT_TIME(clenshaw_NEON(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for clenshaw_NEON \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            printf("Time for clenshaw_NEON \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
             FT_TIME(ft_clenshaw(n, c, 1, m, x, f), start, end, NTIMES)
             printf("Time for ft_clenshaw \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
