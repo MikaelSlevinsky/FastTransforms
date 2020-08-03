@@ -399,6 +399,8 @@ void execute_sph_hi2lo_AVX_FMA(const ft_rotation_plan * RP, double * A, double *
 void execute_sph_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_sph_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_sph_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_sph_hi2lo_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_sph_lo2hi_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
 void execute_sphv_hi2lo_default(const ft_rotation_plan * RP, double * A, const int M);
 void execute_sphv_lo2hi_default(const ft_rotation_plan * RP, double * A, const int M);
@@ -410,6 +412,8 @@ void execute_sphv_hi2lo_AVX_FMA(const ft_rotation_plan * RP, double * A, double 
 void execute_sphv_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_sphv_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_sphv_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_sphv_hi2lo_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_sphv_lo2hi_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
 void execute_tri_hi2lo_default(const ft_rotation_plan * RP, double * A, const int M);
 void execute_tri_lo2hi_default(const ft_rotation_plan * RP, double * A, const int M);
@@ -421,6 +425,8 @@ void execute_tri_hi2lo_AVX_FMA(const ft_rotation_plan * RP, double * A, double *
 void execute_tri_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_tri_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_tri_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_tri_hi2lo_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_tri_lo2hi_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
 void execute_disk_hi2lo_default(const ft_rotation_plan * RP, double * A, const int M);
 void execute_disk_lo2hi_default(const ft_rotation_plan * RP, double * A, const int M);
@@ -432,6 +438,8 @@ void execute_disk_hi2lo_AVX_FMA(const ft_rotation_plan * RP, double * A, double 
 void execute_disk_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_disk_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_disk_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_disk_hi2lo_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_disk_lo2hi_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
 void execute_tet_hi2lo_SSE2(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
 void execute_tet_lo2hi_SSE2(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
@@ -448,6 +456,8 @@ void execute_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, ft_complex * A
 void execute_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
 void execute_spinsph_hi2lo_AVX_FMA(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
 void execute_spinsph_lo2hi_AVX_FMA(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
+void execute_spinsph_hi2lo_NEON(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
+void execute_spinsph_lo2hi_NEON(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
 
 
 void permute(const double * A, double * B, const int N, const int M, const int L);

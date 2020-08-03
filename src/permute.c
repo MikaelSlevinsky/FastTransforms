@@ -80,6 +80,8 @@ void swap_warp(double * A, double * B, const int N) {
         return swap_warp_AVX(A, B, N);
     else if (simd.sse2)
         return swap_warp_SSE2(A, B, N);
+    else if (simd.neon)
+        return swap_warp_NEON(A, B, N);
     else
         return swap_warp_default(A, B, N);
 }
@@ -92,6 +94,8 @@ void swap_warpf(float * A, float * B, const int N) {
         return swap_warp_AVXf(A, B, N);
     else if (simd.sse)
         return swap_warp_SSEf(A, B, N);
+    else if (simd.neon)
+        return swap_warp_NEONf(A, B, N);
     else
         return swap_warp_defaultf(A, B, N);
 }

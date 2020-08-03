@@ -85,6 +85,8 @@ void ft_execute_sph_hi2lo(const ft_rotation_plan * RP, double * A, double * B, c
     }
     else if (simd.sse2)
         return execute_sph_hi2lo_SSE2(RP, A, B, M);
+    else if (simd.neon)
+        return execute_sph_hi2lo_NEON(RP, A, B, M);
     else
         return execute_sph_hi2lo_default(RP, A, M);
 }
@@ -101,6 +103,8 @@ void ft_execute_sph_lo2hi(const ft_rotation_plan * RP, double * A, double * B, c
     }
     else if (simd.sse2)
         return execute_sph_lo2hi_SSE2(RP, A, B, M);
+    else if (simd.neon)
+        return execute_sph_lo2hi_NEON(RP, A, B, M);
     else
         return execute_sph_lo2hi_default(RP, A, M);
 }
@@ -171,6 +175,13 @@ void execute_sph_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double *
     EXECUTE_SPH(8, kernel_sph_lo2hi_default, kernel_sph_lo2hi_AVX512F)
 }
 
+void execute_sph_hi2lo_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    EXECUTE_SPH(2, kernel_sph_hi2lo_default, kernel_sph_hi2lo_NEON)
+}
+
+void execute_sph_lo2hi_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    EXECUTE_SPH(2, kernel_sph_lo2hi_default, kernel_sph_lo2hi_NEON)
+}
 
 void ft_execute_sphv_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     ft_simd simd = get_simd();
@@ -184,6 +195,8 @@ void ft_execute_sphv_hi2lo(const ft_rotation_plan * RP, double * A, double * B, 
     }
     else if (simd.sse2)
         return execute_sphv_hi2lo_SSE2(RP, A, B, M);
+    else if (simd.neon)
+        return execute_sphv_hi2lo_NEON(RP, A, B, M);
     else
         return execute_sphv_hi2lo_default(RP, A, M);
 }
@@ -200,6 +213,8 @@ void ft_execute_sphv_lo2hi(const ft_rotation_plan * RP, double * A, double * B, 
     }
     else if (simd.sse2)
         return execute_sphv_lo2hi_SSE2(RP, A, B, M);
+    else if (simd.neon)
+        return execute_sphv_lo2hi_NEON(RP, A, B, M);
     else
         return execute_sphv_lo2hi_default(RP, A, M);
 }
@@ -270,6 +285,13 @@ void execute_sphv_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double 
     EXECUTE_SPHV(8, kernel_sph_lo2hi_default, kernel_sph_lo2hi_AVX512F)
 }
 
+void execute_sphv_hi2lo_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    EXECUTE_SPHV(2, kernel_sph_hi2lo_default, kernel_sph_hi2lo_NEON)
+}
+
+void execute_sphv_lo2hi_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    EXECUTE_SPHV(2, kernel_sph_lo2hi_default, kernel_sph_lo2hi_NEON)
+}
 
 void ft_execute_tri_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     ft_simd simd = get_simd();
@@ -283,6 +305,8 @@ void ft_execute_tri_hi2lo(const ft_rotation_plan * RP, double * A, double * B, c
     }
     else if (simd.sse2)
         return execute_tri_hi2lo_SSE2(RP, A, B, M);
+    else if (simd.neon)
+        return execute_tri_hi2lo_NEON(RP, A, B, M);
     else
         return execute_tri_hi2lo_default(RP, A, M);
 }
@@ -299,6 +323,8 @@ void ft_execute_tri_lo2hi(const ft_rotation_plan * RP, double * A, double * B, c
     }
     else if (simd.sse2)
         return execute_tri_lo2hi_SSE2(RP, A, B, M);
+    else if (simd.neon)
+        return execute_tri_lo2hi_NEON(RP, A, B, M);
     else
         return execute_tri_lo2hi_default(RP, A, M);
 }
@@ -359,6 +385,13 @@ void execute_tri_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double *
     EXECUTE_TRI(8, kernel_tri_lo2hi_default, kernel_tri_lo2hi_AVX512F)
 }
 
+void execute_tri_hi2lo_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    EXECUTE_TRI(2, kernel_tri_hi2lo_default, kernel_tri_hi2lo_NEON)
+}
+
+void execute_tri_lo2hi_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    EXECUTE_TRI(2, kernel_tri_lo2hi_default, kernel_tri_lo2hi_NEON)
+}
 
 void ft_execute_disk_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M) {
     ft_simd simd = get_simd();
@@ -372,6 +405,8 @@ void ft_execute_disk_hi2lo(const ft_rotation_plan * RP, double * A, double * B, 
     }
     else if (simd.sse2)
         return execute_disk_hi2lo_SSE2(RP, A, B, M);
+    else if (simd.neon)
+        return execute_disk_hi2lo_NEON(RP, A, B, M);
     else
         return execute_disk_hi2lo_default(RP, A, M);
 }
@@ -388,6 +423,8 @@ void ft_execute_disk_lo2hi(const ft_rotation_plan * RP, double * A, double * B, 
     }
     else if (simd.sse2)
         return execute_disk_lo2hi_SSE2(RP, A, B, M);
+    else if (simd.neon)
+        return execute_disk_lo2hi_NEON(RP, A, B, M);
     else
         return execute_disk_lo2hi_default(RP, A, M);
 }
@@ -458,6 +495,13 @@ void execute_disk_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double 
     EXECUTE_DISK(8, kernel_disk_lo2hi_default, kernel_disk_lo2hi_AVX512F)
 }
 
+void execute_disk_hi2lo_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    EXECUTE_DISK(2, kernel_disk_hi2lo_default, kernel_disk_hi2lo_NEON)
+}
+
+void execute_disk_lo2hi_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    EXECUTE_DISK(2, kernel_disk_lo2hi_default, kernel_disk_lo2hi_NEON)
+}
 
 void ft_execute_tet_hi2lo(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M) {
     int N = RP1->n;
@@ -604,6 +648,8 @@ void ft_execute_spinsph_hi2lo(const ft_spin_rotation_plan * SRP, ft_complex * A,
     }
     else if (simd.sse2)
         return execute_spinsph_hi2lo_SSE2(SRP, A, M);
+    else if (simd.neon)
+        return execute_spinsph_hi2lo_NEON(SRP, A, M);
     else
         return execute_spinsph_hi2lo_default(SRP, A, M);
 }
@@ -618,6 +664,8 @@ void ft_execute_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, ft_complex * A,
     }
     else if (simd.sse2)
         return execute_spinsph_lo2hi_SSE2(SRP, A, M);
+    else if (simd.neon)
+        return execute_spinsph_lo2hi_NEON(SRP, A, M);
     else
         return execute_spinsph_lo2hi_default(SRP, A, M);
 }
@@ -718,6 +766,25 @@ void execute_spinsph_lo2hi_AVX_FMA(const ft_spin_rotation_plan * SRP, ft_complex
     permute_t_sph(AD, BD, 2*N, M, 2);
 }
 
+void execute_spinsph_hi2lo_NEON(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M) {
+    int N = SRP->n;
+    kernel_spinsph_hi2lo_NEON(SRP, 0, A, 1);
+    #pragma omp parallel
+    for (int m = 1+FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS()) {
+        kernel_spinsph_hi2lo_NEON(SRP, -m, A + N*(2*m-1), 1);
+        kernel_spinsph_hi2lo_NEON(SRP,  m, A + N*(2*m), 1);
+    }
+}
+
+void execute_spinsph_lo2hi_NEON(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M) {
+    int N = SRP->n;
+    kernel_spinsph_lo2hi_NEON(SRP, 0, A, 1);
+    #pragma omp parallel
+    for (int m = 1+FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS()) {
+        kernel_spinsph_lo2hi_NEON(SRP, -m, A + N*(2*m-1), 1);
+        kernel_spinsph_lo2hi_NEON(SRP,  m, A + N*(2*m), 1);
+    }
+}
 
 void ft_destroy_harmonic_plan(ft_harmonic_plan * P) {
     ft_destroy_rotation_plan(P->RP);

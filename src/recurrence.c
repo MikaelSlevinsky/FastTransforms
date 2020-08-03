@@ -13,6 +13,8 @@ void ft_horner(const int n, const double * c, const int incc, const int m, doubl
     }
     else if (simd.sse2)
         return horner_SSE2(n, c, incc, m, x, f);
+    else if (simd.neon)
+        return horner_NEON(n, c, incc, m, x, f);
     else
         return horner_default(n, c, incc, m, x, f);
 }
@@ -29,6 +31,8 @@ void ft_hornerf(const int n, const float * c, const int incc, const int m, float
     }
     else if (simd.sse)
         return horner_SSEf(n, c, incc, m, x, f);
+    else if (simd.neon)
+        return horner_NEONf(n, c, incc, m, x, f);
     else
         return horner_defaultf(n, c, incc, m, x, f);
 }
@@ -45,6 +49,8 @@ void ft_clenshaw(const int n, const double * c, const int incc, const int m, dou
     }
     else if (simd.sse2)
         return clenshaw_SSE2(n, c, incc, m, x, f);
+    else if (simd.neon)
+        return clenshaw_NEON(n, c, incc, m, x, f);
     else
         return clenshaw_default(n, c, incc, m, x, f);
 }
@@ -61,6 +67,8 @@ void ft_clenshawf(const int n, const float * c, const int incc, const int m, flo
     }
     else if (simd.sse)
         return clenshaw_SSEf(n, c, incc, m, x, f);
+    else if (simd.neon)
+        return clenshaw_NEONf(n, c, incc, m, x, f);
     else
         return clenshaw_defaultf(n, c, incc, m, x, f);
 }
@@ -77,6 +85,8 @@ void ft_orthogonal_polynomial_clenshaw(const int n, const double * c, const int 
     }
     else if (simd.sse2)
         return orthogonal_polynomial_clenshaw_SSE2(n, c, incc, A, B, C, m, x, phi0, f);
+    else if (simd.neon)
+        return orthogonal_polynomial_clenshaw_NEON(n, c, incc, A, B, C, m, x, phi0, f);
     else
         return orthogonal_polynomial_clenshaw_default(n, c, incc, A, B, C, m, x, phi0, f);
 }
@@ -93,6 +103,8 @@ void ft_orthogonal_polynomial_clenshawf(const int n, const float * c, const int 
     }
     else if (simd.sse)
         return orthogonal_polynomial_clenshaw_SSEf(n, c, incc, A, B, C, m, x, phi0, f);
+    else if (simd.neon)
+        return orthogonal_polynomial_clenshaw_NEONf(n, c, incc, A, B, C, m, x, phi0, f);
     else
         return orthogonal_polynomial_clenshaw_defaultf(n, c, incc, A, B, C, m, x, phi0, f);
 }
