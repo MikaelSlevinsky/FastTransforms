@@ -1,7 +1,6 @@
 include Make.inc
 
 all:
-	@echo '$(simd)'
 	make assembly
 	make lib
 	make tests
