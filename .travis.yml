@@ -76,7 +76,7 @@ before_install: eval "${JOBS_EVAL}"
 
 script:
   - make
-  - make runtests FT_NUM_THREADS=4
+  - make runtests FT_NUM_THREADS=1
   - make runexamples
 
 notifications:
