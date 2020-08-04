@@ -21,8 +21,14 @@
 #endif
 #if defined(__aarch64__)
     #include <arm_neon.h>
-    #define vall_f32(x) vld1q_dup_f32(&(x))
-    #define vall_f64(x) vld1q_dup_f64(&(x))
+    #define vall1_f32(x) vld1q_dup_f32(&(x))
+    #define vall2_f32(x) vld2q_dup_f32(&(x))
+    #define vall3_f32(x) vld3q_dup_f32(&(x))
+    #define vall4_f32(x) vld4q_dup_f32(&(x))
+    #define vall1_f64(x) vld1q_dup_f64(&(x))
+    #define vall2_f64(x) vld2q_dup_f64(&(x))
+    #define vall3_f64(x) vld3q_dup_f64(&(x))
+    #define vall4_f64(x) vld4q_dup_f64(&(x))
 #endif
 
 #define RED(string) "\x1b[31m" string "\x1b[0m"
