@@ -55,9 +55,6 @@ ifneq (, $(filter -mavx512f +avx512f, $(simd)))
         MAVX512F := -mavx512f
     endif
 endif
-ifneq (, $(filter -march=armv8-a%, $(simd)))
-    MNEON := -march=armv8-a+simd
-endif
 
 ifeq ($(UNAME), Darwin)
     SLIB = dylib
