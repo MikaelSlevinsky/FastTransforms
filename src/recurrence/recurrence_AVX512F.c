@@ -8,10 +8,10 @@
         HORNER_KERNEL(float, float16, 16, 8, vloadu16f, vstoreu16f, vfma16f, vall16f)
     }
     void clenshaw_AVX512F(const int n, const double * c, const int incc, const int m, double * x, double * f) {
-        CLENSHAW_KERNEL(double, double8, 8, 4, vloadu8, vstoreu8, vfma8)
+        CLENSHAW_KERNEL(double, double8, 8, 4, vloadu8, vstoreu8, vfma8, vall8)
     }
     void clenshaw_AVX512Ff(const int n, const float * c, const int incc, const int m, float * x, float * f) {
-        CLENSHAW_KERNEL(float, float16, 16, 4, vloadu16f, vstoreu16f, vfma16f)
+        CLENSHAW_KERNEL(float, float16, 16, 4, vloadu16f, vstoreu16f, vfma16f, vall16f)
     }
     void orthogonal_polynomial_clenshaw_AVX512F(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f) {
         ORTHOGONAL_POLYNOMIAL_CLENSHAW_KERNEL(double, double8, 8, 4, vloadu8, vstoreu8, vfma8, vfms8, vall8)

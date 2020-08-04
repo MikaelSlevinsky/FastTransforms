@@ -70,16 +70,19 @@ ASM = src/recurrence/recurrence_default.s \
       src/recurrence/recurrence_AVX.s \
       src/recurrence/recurrence_AVX_FMA.s \
       src/recurrence/recurrence_AVX512F.s \
+      src/recurrence/recurrence_NEON.s \
       src/permute/permute_default.s \
       src/permute/permute_SSE.s \
       src/permute/permute_SSE2.s \
       src/permute/permute_AVX.s \
       src/permute/permute_AVX512F.s \
+      src/permute/permute_NEON.s \
       src/rotations/rotations_default.s \
       src/rotations/rotations_SSE2.s \
       src/rotations/rotations_AVX.s \
       src/rotations/rotations_AVX_FMA.s \
-      src/rotations/rotations_AVX512F.s
+      src/rotations/rotations_AVX512F.s \
+      src/rotations/rotations_NEON.s
 
 SRC = src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
 
@@ -91,6 +94,11 @@ ifndef CFLAGS
     CFLAGS = -O3
     ifneq (, $(findstring 86, $(machine)))
         CFLAGS += -march=native
+    endif
+    ifneq (, $(findstring aarch64, $(machine)))
+        ifeq (, $(findstring clang, $(shell $(CC) --version)))
+            CFLAGS += -mcpu=native
+        endif
     endif
 endif
 CFLAGS += -std=gnu11 -I./src

@@ -19,6 +19,15 @@
         #define bit_AVX512F 0
     #endif
 #endif
+#if defined(__aarch64__)
+    #include <arm_neon.h>
+    #define vall_f32(x) vld1q_dup_f32(&(x))
+    #define vall_f64(x) vld1q_dup_f64(&(x))
+    #define vmuladd_f32(a, b, c) vfmaq_f32(c, a, b)
+    #define vmuladd_f64(a, b, c) vfmaq_f64(c, a, b)
+    #define vmulsub_f32(a, b, c) (-vfmsq_f32(c, a, b))
+    #define vmulsub_f64(a, b, c) (-vfmsq_f64(c, a, b))
+#endif
 
 #define RED(string) "\x1b[31m" string "\x1b[0m"
 #define GREEN(string) "\x1b[32m" string "\x1b[0m"
@@ -132,6 +141,7 @@ typedef struct {
     unsigned avx2    : 1;
     unsigned fma     : 1;
     unsigned avx512f : 1;
+    unsigned neon    : 1;
 } ft_simd;
 
 #if defined(__i386__) || defined(__x86_64__)
@@ -152,10 +162,12 @@ typedef struct {
         unsigned eax1, ebx1, ecx1, edx1;
         cpuid(1, 0, &eax, &ebx, &ecx, &edx);
         cpuid(7, 0, &eax1, &ebx1, &ecx1, &edx1);
-        return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_SSE3), !!(ecx & bit_SSSE3), !!(ecx & bit_SSE4_1), !!(ecx & bit_SSE4_2), !!(ecx & bit_AVX), !!(ebx1 & bit_AVX2), !!(ecx & bit_FMA), !!(ebx1 & bit_AVX512F)};
+        return (ft_simd) {!!(edx & bit_SSE), !!(edx & bit_SSE2), !!(ecx & bit_SSE3), !!(ecx & bit_SSSE3), !!(ecx & bit_SSE4_1), !!(ecx & bit_SSE4_2), !!(ecx & bit_AVX), !!(ebx1 & bit_AVX2), !!(ecx & bit_FMA), !!(ebx1 & bit_AVX512F), 0};
     }
+#elif defined(__aarch64__)
+    static inline ft_simd get_simd(void) {return (ft_simd) {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};}
 #else
-    static inline ft_simd get_simd(void) {return (ft_simd) {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};}
+    static inline ft_simd get_simd(void) {return (ft_simd) {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};}
 #endif
 
 #ifdef __AVX512F__
@@ -259,36 +271,42 @@ void horner_SSE2(const int n, const double * c, const int incc, const int m, dou
 void horner_AVX(const int n, const double * c, const int incc, const int m, double * x, double * f);
 void horner_AVX_FMA(const int n, const double * c, const int incc, const int m, double * x, double * f);
 void horner_AVX512F(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void horner_NEON(const int n, const double * c, const int incc, const int m, double * x, double * f);
 
 void horner_defaultf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void horner_SSEf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void horner_AVXf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void horner_AVX_FMAf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void horner_AVX512Ff(const int n, const float * c, const int incc, const int m, float * x, float * f);
+void horner_NEONf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 
 void clenshaw_default(const int n, const double * c, const int incc, const int m, double * x, double * f);
 void clenshaw_SSE2(const int n, const double * c, const int incc, const int m, double * x, double * f);
 void clenshaw_AVX(const int n, const double * c, const int incc, const int m, double * x, double * f);
 void clenshaw_AVX_FMA(const int n, const double * c, const int incc, const int m, double * x, double * f);
 void clenshaw_AVX512F(const int n, const double * c, const int incc, const int m, double * x, double * f);
+void clenshaw_NEON(const int n, const double * c, const int incc, const int m, double * x, double * f);
 
 void clenshaw_defaultf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void clenshaw_SSEf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void clenshaw_AVXf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void clenshaw_AVX_FMAf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 void clenshaw_AVX512Ff(const int n, const float * c, const int incc, const int m, float * x, float * f);
+void clenshaw_NEONf(const int n, const float * c, const int incc, const int m, float * x, float * f);
 
 void orthogonal_polynomial_clenshaw_default(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
 void orthogonal_polynomial_clenshaw_SSE2(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
 void orthogonal_polynomial_clenshaw_AVX(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
 void orthogonal_polynomial_clenshaw_AVX_FMA(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
 void orthogonal_polynomial_clenshaw_AVX512F(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
+void orthogonal_polynomial_clenshaw_NEON(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
 
 void orthogonal_polynomial_clenshaw_defaultf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 void orthogonal_polynomial_clenshaw_SSEf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 void orthogonal_polynomial_clenshaw_AVXf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 void orthogonal_polynomial_clenshaw_AVX_FMAf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 void orthogonal_polynomial_clenshaw_AVX512Ff(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
+void orthogonal_polynomial_clenshaw_NEONf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 
 double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n);
 double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n);
@@ -319,6 +337,8 @@ void kernel_sph_hi2lo_AVX_FMA(const ft_rotation_plan * RP, const int m1, const i
 void kernel_sph_lo2hi_AVX_FMA(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_sph_hi2lo_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_sph_lo2hi_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_sph_hi2lo_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_sph_lo2hi_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
 void kernel_tri_hi2lo_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_tri_lo2hi_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
@@ -330,6 +350,8 @@ void kernel_tri_hi2lo_AVX_FMA(const ft_rotation_plan * RP, const int m1, const i
 void kernel_tri_lo2hi_AVX_FMA(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_tri_hi2lo_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_tri_lo2hi_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_tri_hi2lo_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_tri_lo2hi_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
 void kernel_disk_hi2lo_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_disk_lo2hi_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
@@ -341,6 +363,8 @@ void kernel_disk_hi2lo_AVX_FMA(const ft_rotation_plan * RP, const int m1, const 
 void kernel_disk_lo2hi_AVX_FMA(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_disk_hi2lo_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_disk_lo2hi_AVX512F(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_disk_hi2lo_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+void kernel_disk_lo2hi_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
 void kernel_tet_hi2lo_SSE2(const ft_rotation_plan * RP, const int L, const int m, double * A);
 void kernel_tet_lo2hi_SSE2(const ft_rotation_plan * RP, const int L, const int m, double * A);
@@ -366,6 +390,8 @@ void kernel_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, const int m, ft
 void kernel_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
 void kernel_spinsph_hi2lo_AVX_FMA(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
 void kernel_spinsph_lo2hi_AVX_FMA(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
+void kernel_spinsph_hi2lo_NEON(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
+void kernel_spinsph_lo2hi_NEON(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S);
 
 void execute_sph_hi2lo_default(const ft_rotation_plan * RP, double * A, const int M);
 void execute_sph_lo2hi_default(const ft_rotation_plan * RP, double * A, const int M);
@@ -377,6 +403,8 @@ void execute_sph_hi2lo_AVX_FMA(const ft_rotation_plan * RP, double * A, double *
 void execute_sph_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_sph_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_sph_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_sph_hi2lo_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_sph_lo2hi_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
 void execute_sphv_hi2lo_default(const ft_rotation_plan * RP, double * A, const int M);
 void execute_sphv_lo2hi_default(const ft_rotation_plan * RP, double * A, const int M);
@@ -388,6 +416,8 @@ void execute_sphv_hi2lo_AVX_FMA(const ft_rotation_plan * RP, double * A, double 
 void execute_sphv_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_sphv_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_sphv_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_sphv_hi2lo_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_sphv_lo2hi_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
 void execute_tri_hi2lo_default(const ft_rotation_plan * RP, double * A, const int M);
 void execute_tri_lo2hi_default(const ft_rotation_plan * RP, double * A, const int M);
@@ -399,6 +429,8 @@ void execute_tri_hi2lo_AVX_FMA(const ft_rotation_plan * RP, double * A, double *
 void execute_tri_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_tri_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_tri_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_tri_hi2lo_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_tri_lo2hi_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
 void execute_disk_hi2lo_default(const ft_rotation_plan * RP, double * A, const int M);
 void execute_disk_lo2hi_default(const ft_rotation_plan * RP, double * A, const int M);
@@ -410,6 +442,8 @@ void execute_disk_hi2lo_AVX_FMA(const ft_rotation_plan * RP, double * A, double 
 void execute_disk_lo2hi_AVX_FMA(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_disk_hi2lo_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void execute_disk_lo2hi_AVX512F(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_disk_hi2lo_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void execute_disk_lo2hi_NEON(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
 void execute_tet_hi2lo_SSE2(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
 void execute_tet_lo2hi_SSE2(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, double * B, const int L, const int M);
@@ -426,6 +460,8 @@ void execute_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, ft_complex * A
 void execute_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
 void execute_spinsph_hi2lo_AVX_FMA(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
 void execute_spinsph_lo2hi_AVX_FMA(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
+void execute_spinsph_hi2lo_NEON(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);
+void execute_spinsph_lo2hi_NEON(const ft_spin_rotation_plan * SRP, ft_complex * A, const int M);
 
 
 void permute(const double * A, double * B, const int N, const int M, const int L);
@@ -448,12 +484,14 @@ void swap_warp_default(double * A, double * B, const int N);
 void swap_warp_SSE2(double * A, double * B, const int N);
 void swap_warp_AVX(double * A, double * B, const int N);
 void swap_warp_AVX512F(double * A, double * B, const int N);
+void swap_warp_NEON(double * A, double * B, const int N);
 
 void swap_warpf(float * A, float * B, const int N);
 void swap_warp_defaultf(float * A, float * B, const int N);
 void swap_warp_SSEf(float * A, float * B, const int N);
 void swap_warp_AVXf(float * A, float * B, const int N);
 void swap_warp_AVX512Ff(float * A, float * B, const int N);
+void swap_warp_NEONf(float * A, float * B, const int N);
 
 void warp(double * A, const int N, const int M, const int L);
 void warp_t(double * A, const int N, const int M, const int L);
