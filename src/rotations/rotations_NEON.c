@@ -4,14 +4,14 @@
     static inline void apply_givens_NEON(const double S, const double C, double * X, double * Y) {
         float64x2_t x = vld1q_f64(X);
         float64x2_t y = vld1q_f64(Y);
-        vst1q_f64(X, vall_f64(C)*x + vall_f64(S)*y);
-        vst1q_f64(Y, vall_f64(C)*y - vall_f64(S)*x);
+        vst1q_f64(X, vmuladd_f64(vall_f64(C), x, vall_f64(S)*y));
+        vst1q_f64(Y, vmulsub_f64(vall_f64(C), y, vall_f64(S)*x));
     }
     static inline void apply_givens_t_NEON(const double S, const double C, double * X, double * Y) {
         float64x2_t x = vld1q_f64(X);
         float64x2_t y = vld1q_f64(Y);
-        vst1q_f64(X, vall_f64(C)*x - vall_f64(S)*y);
-        vst1q_f64(Y, vall_f64(C)*y + vall_f64(S)*x);
+        vst1q_f64(X, vmulsub_f64(vall_f64(C), x, vall_f64(S)*y));
+        vst1q_f64(Y, vmuladd_f64(vall_f64(C), y, vall_f64(S)*x));
     }
     static inline void apply_givens_NEONc(const double S, const double C, ft_complex * X, ft_complex * Y) {
         apply_givens_NEON(S, C, (double *) X, (double *) Y);
@@ -20,22 +20,22 @@
         apply_givens_t_NEON(S, C, (double *) X, (double *) Y);
     }
     void kernel_sph_hi2lo_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
-        KERNEL_SPH_HI2LO(double, float64x2_t, 2, 3, vld1q_f64, vst1q_f64, vmuladd, vmulsub, vall_f64, apply_givens_NEON)
+        KERNEL_SPH_HI2LO(double, float64x2_t, 2, 3, vld1q_f64, vst1q_f64, vmuladd_f64, vmulsub_f64, vall_f64, apply_givens_NEON)
     }
     void kernel_sph_lo2hi_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
-        KERNEL_SPH_LO2HI(double, float64x2_t, 2, 3, vld1q_f64, vst1q_f64, vmuladd, vmulsub, vall_f64, apply_givens_t_NEON)
+        KERNEL_SPH_LO2HI(double, float64x2_t, 2, 3, vld1q_f64, vst1q_f64, vmuladd_f64, vmulsub_f64, vall_f64, apply_givens_t_NEON)
     }
     void kernel_tri_hi2lo_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
-        KERNEL_TRI_HI2LO(double, float64x2_t, 2, 3, vld1q_f64, vst1q_f64, vmuladd, vmulsub, vall_f64, apply_givens_NEON)
+        KERNEL_TRI_HI2LO(double, float64x2_t, 2, 3, vld1q_f64, vst1q_f64, vmuladd_f64, vmulsub_f64, vall_f64, apply_givens_NEON)
     }
     void kernel_tri_lo2hi_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
-        KERNEL_TRI_LO2HI(double, float64x2_t, 2, 3, vld1q_f64, vst1q_f64, vmuladd, vmulsub, vall_f64, apply_givens_t_NEON)
+        KERNEL_TRI_LO2HI(double, float64x2_t, 2, 3, vld1q_f64, vst1q_f64, vmuladd_f64, vmulsub_f64, vall_f64, apply_givens_t_NEON)
     }
     void kernel_disk_hi2lo_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
-        KERNEL_DISK_HI2LO(double, float64x2_t, 2, 3, vld1q_f64, vst1q_f64, vmuladd, vmulsub, vall_f64, apply_givens_NEON)
+        KERNEL_DISK_HI2LO(double, float64x2_t, 2, 3, vld1q_f64, vst1q_f64, vmuladd_f64, vmulsub_f64, vall_f64, apply_givens_NEON)
     }
     void kernel_disk_lo2hi_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
-        KERNEL_DISK_LO2HI(double, float64x2_t, 2, 3, vld1q_f64, vst1q_f64, vmuladd, vmulsub, vall_f64, apply_givens_t_NEON)
+        KERNEL_DISK_LO2HI(double, float64x2_t, 2, 3, vld1q_f64, vst1q_f64, vmuladd_f64, vmulsub_f64, vall_f64, apply_givens_t_NEON)
     }
     void kernel_spinsph_hi2lo_NEON(const ft_spin_rotation_plan * SRP, const int m, ft_complex * A, const int S) {
         int n = SRP->n, s = SRP->s;
