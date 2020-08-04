@@ -23,6 +23,8 @@
     #include <arm_neon.h>
     #define vall_f32(x) vld1q_dup_f32(&(x))
     #define vall_f64(x) vld1q_dup_f64(&(x))
+    #define vmuladd_f32(a, b, c) vfmaq_f32(c, a, b)
+    #define vmuladd_f64(a, b, c) vfmaq_f64(c, a, b)
 #endif
 
 #define RED(string) "\x1b[31m" string "\x1b[0m"
