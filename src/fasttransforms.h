@@ -34,6 +34,13 @@ void ft_clenshawf(const int n, const float * c, const int incc, const int m, flo
 void ft_orthogonal_polynomial_clenshaw(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
 void ft_orthogonal_polynomial_clenshawf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 
+void ft_orthogonal_polynomial_clenshawl(const int n, const long double * c, const int incc, const long double * A, const long double * B, const long double * C, const int m, long double * x, long double * phi0, long double * f);
+#if defined(FT_QUADMATH)
+    #include <quadmath.h>
+    typedef __float128 quadruple;
+    void ft_orthogonal_polynomial_clenshawq(const int n, const quadruple * c, const int incc, const quadruple * A, const quadruple * B, const quadruple * C, const int m, quadruple * x, quadruple * phi0, quadruple * f);
+#endif
+
 #include "tdc.h"
 
 /*!

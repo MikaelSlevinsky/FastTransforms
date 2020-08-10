@@ -163,6 +163,8 @@ endif
 LDLIBS += $(FT_OPENMP) -lm -lmpfr -l$(FT_BLAS) -lfftw3
 
 ifdef FT_QUADMATH
+    AFLAGS += -DFT_QUADMATH
+    AFLAGS += -lquadmath
     CFLAGS += -DFT_QUADMATH
     LDLIBS += -lquadmath
 endif

@@ -137,6 +137,18 @@ void Y(test_tridiagonal)(int * checksum) {
     printf("Numerical RRᵀ-orthogonality of gen. eigenvectors \t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
+    for (int i = 0; i < n; i++)
+        lambda[i] = Y(pow)(2*Y(__sinpi)((i+ONE(FLT))/(2*n+2)), 2);
+    X(symmetric_tridiagonal_symmetric_eigen) * F = X(symmetric_tridiagonal_symmetric_eig)(A, lambda, 1);
+    for (int j = 0; j < n; j++)
+        X(semv)(F, Id+j*n, 1, V+j*n);
+    FLT * V2 = calloc(n*n, sizeof(FLT));
+    for (int j = 0; j < n; j++)
+        X(semv)(F, V+j*n, 1, V2+j*n);
+    err = X(norm_2arg)(V2, Id, n*n)/X(norm_1arg)(Id, n*n);
+    printf("Numerical symmetric orthogonality w/ known eigenvalues \t |%20.2e ", (double) err);
+    X(checktest)(err, n*n, checksum);
+
     X(destroy_symmetric_tridiagonal)(A);
     X(destroy_symmetric_tridiagonal)(C);
     X(destroy_symmetric_tridiagonal)(D);
@@ -147,7 +159,9 @@ void Y(test_tridiagonal)(int * checksum) {
     free(x);
     free(y);
     free(z);
+    free(F);
     free(V);
+    free(V2);
     free(BV);
     free(VtBV);
     free(Id);

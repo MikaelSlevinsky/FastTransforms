@@ -109,3 +109,45 @@ void orthogonal_polynomial_clenshaw_defaultf(const int n, const float * c, const
         f[j] = phi0[j]*bk;
     }
 }
+
+void orthogonal_polynomial_clenshaw_defaultl(const int n, const long double * c, const int incc, const long double * A, const long double * B, const long double * C, const int m, long double * x, long double * phi0, long double * f) {
+    if (n < 1) {
+        for (int j = 0; j < m; j++)
+            f[j] = 0.0l;
+        return;
+    }
+    for (int j = 0; j < m; j++) {
+        long double bk = 0.0l;
+        long double bk1 = 0.0l;
+        long double bk2 = 0.0l;
+        long double X = x[j];
+        for (int k = n-1; k >= 0; k--) {
+            bk = (A[k]*X+B[k])*bk1 - C[k+1]*bk2 + c[k*incc];
+            bk2 = bk1;
+            bk1 = bk;
+        }
+        f[j] = phi0[j]*bk;
+    }
+}
+
+#if defined(FT_QUADMATH)
+    void orthogonal_polynomial_clenshaw_defaultq(const int n, const quadruple * c, const int incc, const quadruple * A, const quadruple * B, const quadruple * C, const int m, quadruple * x, quadruple * phi0, quadruple * f) {
+        if (n < 1) {
+            for (int j = 0; j < m; j++)
+                f[j] = 0.0q;
+            return;
+        }
+        for (int j = 0; j < m; j++) {
+            quadruple bk = 0.0q;
+            quadruple bk1 = 0.0q;
+            quadruple bk2 = 0.0q;
+            quadruple X = x[j];
+            for (int k = n-1; k >= 0; k--) {
+                bk = (A[k]*X+B[k])*bk1 - C[k+1]*bk2 + c[k*incc];
+                bk2 = bk1;
+                bk1 = bk;
+            }
+            f[j] = phi0[j]*bk;
+        }
+    }
+#endif

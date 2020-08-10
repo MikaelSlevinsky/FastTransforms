@@ -108,3 +108,13 @@ void ft_orthogonal_polynomial_clenshawf(const int n, const float * c, const int 
     else
         return orthogonal_polynomial_clenshaw_defaultf(n, c, incc, A, B, C, m, x, phi0, f);
 }
+
+void ft_orthogonal_polynomial_clenshawl(const int n, const long double * c, const int incc, const long double * A, const long double * B, const long double * C, const int m, long double * x, long double * phi0, long double * f) {
+    return orthogonal_polynomial_clenshaw_defaultl(n, c, incc, A, B, C, m, x, phi0, f);
+}
+
+#if defined(FT_QUADMATH)
+    void ft_orthogonal_polynomial_clenshawq(const int n, const quadruple * c, const int incc, const quadruple * A, const quadruple * B, const quadruple * C, const int m, quadruple * x, quadruple * phi0, quadruple * f) {
+        return orthogonal_polynomial_clenshaw_defaultq(n, c, incc, A, B, C, m, x, phi0, f);
+    }
+#endif
