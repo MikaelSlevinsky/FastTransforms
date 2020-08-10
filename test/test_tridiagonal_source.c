@@ -156,10 +156,10 @@ void Y(test_tridiagonal)(int * checksum) {
     X(destroy_symmetric_tridiagonal)(S);
     X(destroy_bidiagonal)(B);
     X(destroy_bidiagonal)(R);
+    X(destroy_symmetric_tridiagonal_symmetric_eigen)(F);
     free(x);
     free(y);
     free(z);
-    free(F);
     free(V);
     free(V2);
     free(BV);
