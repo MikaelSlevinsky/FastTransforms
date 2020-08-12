@@ -16,32 +16,49 @@ typedef struct {
 #define densematrices(m,n) densematrices[(m)+(n)*M]
 #define lowrankmatrices(m,n) lowrankmatrices[(m)+(n)*M]
 
-#define FLT __float128
-#define X(name) FT_CONCAT(ft_, name, q)
-#define Y(name) FT_CONCAT(, name, q)
-#include "tridiagonal_source.h"
-#include "hierarchical_source.h"
-#include "banded_source.h"
-#include "dprk_source.h"
-#include "tdc_source.h"
-#undef FLT
-#undef X
-#undef Y
+#if defined(FT_QUADMATH)
+    #define FLT __float128
+    #define X(name) FT_CONCAT(ft_, name, q)
+    #define Y(name) FT_CONCAT(, name, q)
+    #include "tridiagonal_source.h"
+    #include "hierarchical_source.h"
+    #include "banded_source.h"
+    #include "dprk_source.h"
+    #include "tdc_source.h"
+    #undef FLT
+    #undef X
+    #undef Y
 
-#define FLT long double
-#define X(name) FT_CONCAT(ft_, name, l)
-#define X2(name) FT_CONCAT(ft_, name, q)
-#define Y(name) FT_CONCAT(, name, l)
-#include "tridiagonal_source.h"
-#include "hierarchical_source.h"
-#include "banded_source.h"
-#include "dprk_source.h"
-#include "tdc_source.h"
-#include "drop_precision.h"
-#undef FLT
-#undef X
-#undef X2
-#undef Y
+    #define FLT long double
+    #define X(name) FT_CONCAT(ft_, name, l)
+    #define X2(name) FT_CONCAT(ft_, name, q)
+    #define Y(name) FT_CONCAT(, name, l)
+    #include "tridiagonal_source.h"
+    #include "hierarchical_source.h"
+    #include "banded_source.h"
+    #include "dprk_source.h"
+    #include "tdc_source.h"
+    #include "drop_precision.h"
+    #undef FLT
+    #undef X
+    #undef X2
+    #undef Y
+#else
+    #define FLT long double
+    #define X(name) FT_CONCAT(ft_, name, l)
+    #define X2(name) FT_CONCAT(ft_, name, l)
+    #define Y(name) FT_CONCAT(, name, l)
+    #include "tridiagonal_source.h"
+    #include "hierarchical_source.h"
+    #include "banded_source.h"
+    #include "dprk_source.h"
+    #include "tdc_source.h"
+    #include "drop_precision.h"
+    #undef FLT
+    #undef X
+    #undef X2
+    #undef Y
+#endif
 
 #define FLT double
 #define X(name) FT_CONCAT(ft_, name, )

@@ -15,6 +15,7 @@ int main(void) {
     simd.avx2 ? printf("AVX2 detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("AVX2 not detected.\t\t\t\t\t\t\t       "RED("✗")"\n");
     simd.fma ? printf("FMA detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("FMA not detected.\t\t\t\t\t\t\t       "RED("✗")"\n");
     simd.avx512f ? printf("AVX512F detected.\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("AVX512F not detected.\t\t\t\t\t\t\t       "RED("✗")"\n");
+    simd.neon ? printf("NEON detected.\t\t\t\t\t\t\t\t       "GREEN("✓")"\n") : printf("NEON not detected.\t\t\t\t\t\t\t       "RED("✗")"\n");
     printf("The "CYAN("sizeof(ft_simd)")" is \t\t\t\t\t\t\t       %li\n", sizeof(ft_simd));
 
     printf("\nTesting methods for Horner summation.\n");
@@ -35,14 +36,19 @@ int main(void) {
                 x[j] = (-1.0f+2.0f*j/(m-1.0f));
 
             horner_defaultf(n, c, 1, m, x, fd);
-            horner_SSEf(n, c, 1, m, x, f);
-            err = powf(ft_norm_2argf(f, fd, m), 2);
-            horner_AVXf(n, c, 1, m, x, f);
-            err += powf(ft_norm_2argf(f, fd, m), 2);
-            horner_AVX_FMAf(n, c, 1, m, x, f);
-            err += powf(ft_norm_2argf(f, fd, m), 2);
-            horner_AVX512Ff(n, c, 1, m, x, f);
-            err += powf(ft_norm_2argf(f, fd, m), 2);
+            #if defined(__i386__) || defined(__x86_64__)
+                horner_SSEf(n, c, 1, m, x, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+                horner_AVXf(n, c, 1, m, x, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+                horner_AVX_FMAf(n, c, 1, m, x, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+                horner_AVX512Ff(n, c, 1, m, x, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+            #elif defined(__aarch64__)
+                horner_NEONf(n, c, 1, m, x, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+            #endif
             ft_hornerf(n, c, 1, m, x, f);
             err += powf(ft_norm_2argf(f, fd, m), 2);
             err = sqrtf(err);
@@ -72,17 +78,22 @@ int main(void) {
             //for (int i = 0; i < n; i++)
             //    printf("c[%i] = %3.5f, x[%i] = %3.5f, f[%i] = %3.8f\n", i, c[i], i, x[i], i, f[i]);
 
-            FT_TIME(horner_SSEf(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for horner_SSEf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #if defined(__i386__) || defined(__x86_64__)
+                FT_TIME(horner_SSEf(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for horner_SSEf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(horner_AVXf(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for horner_AVXf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(horner_AVXf(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for horner_AVXf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(horner_AVX_FMAf(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for horner_AVX_FMAf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(horner_AVX_FMAf(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for horner_AVX_FMAf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(horner_AVX512Ff(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for horner_AVX512Ff \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(horner_AVX512Ff(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for horner_AVX512Ff \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #elif defined(__aarch64__)
+                FT_TIME(horner_NEONf(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for horner_NEONf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #endif
 
             FT_TIME(ft_hornerf(n, c, 1, m, x, f), start, end, NTIMES)
             printf("Time for ft_hornerf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
@@ -110,14 +121,19 @@ int main(void) {
                 x[j] = (-1.0+2.0*j/(m-1.0));
 
             horner_default(n, c, 1, m, x, fd);
-            horner_SSE2(n, c, 1, m, x, f);
-            err = pow(ft_norm_2arg(f, fd, m), 2);
-            horner_AVX(n, c, 1, m, x, f);
-            err += pow(ft_norm_2arg(f, fd, m), 2);
-            horner_AVX_FMA(n, c, 1, m, x, f);
-            err += pow(ft_norm_2arg(f, fd, m), 2);
-            horner_AVX512F(n, c, 1, m, x, f);
-            err += pow(ft_norm_2arg(f, fd, m), 2);
+            #if defined(__i386__) || defined(__x86_64__)
+                horner_SSE2(n, c, 1, m, x, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+                horner_AVX(n, c, 1, m, x, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+                horner_AVX_FMA(n, c, 1, m, x, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+                horner_AVX512F(n, c, 1, m, x, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+            #elif defined(__aarch64__)
+                horner_NEON(n, c, 1, m, x, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+            #endif
             ft_horner(n, c, 1, m, x, f);
             err += pow(ft_norm_2arg(f, fd, m), 2);
             err = sqrt(err);
@@ -147,17 +163,22 @@ int main(void) {
             //for (int i = 0; i < n; i++)
             //    printf("c[%i] = %3.5f, x[%i] = %3.5f, f[%i] = %3.8f\n", i, c[i], i, x[i], i, f[i]);
 
-            FT_TIME(horner_SSE2(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for horner_SSE2 \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #if defined(__i386__) || defined(__x86_64__)
+                FT_TIME(horner_SSE2(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for horner_SSE2 \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(horner_AVX(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for horner_AVX \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(horner_AVX(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for horner_AVX \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(horner_AVX_FMA(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for horner_AVX_FMA \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(horner_AVX_FMA(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for horner_AVX_FMA \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(horner_AVX512F(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for horner_AVX512F \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(horner_AVX512F(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for horner_AVX512F \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #elif defined(__aarch64__)
+                FT_TIME(horner_NEON(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for horner_NEON \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #endif
 
             FT_TIME(ft_horner(n, c, 1, m, x, f), start, end, NTIMES)
             printf("Time for ft_horner \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
@@ -186,14 +207,19 @@ int main(void) {
                 x[j] = (-1.0f+2.0f*j/(m-1.0f));
 
             clenshaw_defaultf(n, c, 1, m, x, fd);
-            clenshaw_SSEf(n, c, 1, m, x, f);
-            err = powf(ft_norm_2argf(f, fd, m), 2);
-            clenshaw_AVXf(n, c, 1, m, x, f);
-            err += powf(ft_norm_2argf(f, fd, m), 2);
-            clenshaw_AVX_FMAf(n, c, 1, m, x, f);
-            err += powf(ft_norm_2argf(f, fd, m), 2);
-            clenshaw_AVX512Ff(n, c, 1, m, x, f);
-            err += powf(ft_norm_2argf(f, fd, m), 2);
+            #if defined(__i386__) || defined(__x86_64__)
+                clenshaw_SSEf(n, c, 1, m, x, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+                clenshaw_AVXf(n, c, 1, m, x, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+                clenshaw_AVX_FMAf(n, c, 1, m, x, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+                clenshaw_AVX512Ff(n, c, 1, m, x, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+            #elif defined(__aarch64__)
+                clenshaw_NEONf(n, c, 1, m, x, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+            #endif
             ft_clenshawf(n, c, 1, m, x, f);
             err += powf(ft_norm_2argf(f, fd, m), 2);
             err = sqrtf(err);
@@ -223,17 +249,22 @@ int main(void) {
             //for (int i = 0; i < n; i++)
             //    printf("c[%i] = %3.5f, x[%i] = %3.5f, f[%i] = %3.8f\n", i, c[i], i, x[i], i, f[i]);
 
-            FT_TIME(clenshaw_SSEf(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for clenshaw_SSEf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #if defined(__i386__) || defined(__x86_64__)
+                FT_TIME(clenshaw_SSEf(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for clenshaw_SSEf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(clenshaw_AVXf(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for clenshaw_AVXf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(clenshaw_AVXf(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for clenshaw_AVXf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(clenshaw_AVX_FMAf(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for clenshaw_AVX_FMAf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(clenshaw_AVX_FMAf(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for clenshaw_AVX_FMAf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(clenshaw_AVX512Ff(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for clenshaw_AVX512Ff \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(clenshaw_AVX512Ff(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for clenshaw_AVX512Ff \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #elif defined(__aarch64__)
+                FT_TIME(clenshaw_NEONf(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for clenshaw_NEONf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #endif
 
             FT_TIME(ft_clenshawf(n, c, 1, m, x, f), start, end, NTIMES)
             printf("Time for ft_clenshawf \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
@@ -261,14 +292,19 @@ int main(void) {
                 x[j] = (-1.0+2.0*j/(m-1.0));
 
             clenshaw_default(n, c, 1, m, x, fd);
-            clenshaw_SSE2(n, c, 1, m, x, f);
-            err = pow(ft_norm_2arg(f, fd, m), 2);
-            clenshaw_AVX(n, c, 1, m, x, f);
-            err += pow(ft_norm_2arg(f, fd, m), 2);
-            clenshaw_AVX_FMA(n, c, 1, m, x, f);
-            err += pow(ft_norm_2arg(f, fd, m), 2);
-            clenshaw_AVX512F(n, c, 1, m, x, f);
-            err += pow(ft_norm_2arg(f, fd, m), 2);
+            #if defined(__i386__) || defined(__x86_64__)
+                clenshaw_SSE2(n, c, 1, m, x, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+                clenshaw_AVX(n, c, 1, m, x, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+                clenshaw_AVX_FMA(n, c, 1, m, x, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+                clenshaw_AVX512F(n, c, 1, m, x, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+            #elif defined(__aarch64__)
+                clenshaw_NEON(n, c, 1, m, x, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+            #endif
             ft_clenshaw(n, c, 1, m, x, f);
             err += pow(ft_norm_2arg(f, fd, m), 2);
             err = sqrt(err);
@@ -298,17 +334,22 @@ int main(void) {
             //for (int i = 0; i < n; i++)
             //    printf("c[%i] = %3.5f, x[%i] = %3.5f, f[%i] = %3.8f\n", i, c[i], i, x[i], i, f[i]);
 
-            FT_TIME(clenshaw_SSE2(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for clenshaw_SSE2 \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #if defined(__i386__) || defined(__x86_64__)
+                FT_TIME(clenshaw_SSE2(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for clenshaw_SSE2 \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(clenshaw_AVX(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for clenshaw_AVX \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(clenshaw_AVX(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for clenshaw_AVX \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(clenshaw_AVX_FMA(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for clenshaw_AVX_FMA \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(clenshaw_AVX_FMA(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for clenshaw_AVX_FMA \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(clenshaw_AVX512F(n, c, 1, m, x, f), start, end, NTIMES)
-            printf("Time for clenshaw_AVX512F \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(clenshaw_AVX512F(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for clenshaw_AVX512F \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #elif defined(__aarch64__)
+                FT_TIME(clenshaw_NEON(n, c, 1, m, x, f), start, end, NTIMES)
+                printf("Time for clenshaw_NEON \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #endif
 
             FT_TIME(ft_clenshaw(n, c, 1, m, x, f), start, end, NTIMES)
             printf("Time for ft_clenshaw \t\t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
@@ -348,14 +389,19 @@ int main(void) {
             }
 
             orthogonal_polynomial_clenshaw_defaultf(n, c, 1, A, B, C, m, x, phi0, fd);
-            orthogonal_polynomial_clenshaw_SSEf(n, c, 1, A, B, C, m, x, phi0, f);
-            err = powf(ft_norm_2argf(f, fd, m), 2);
-            orthogonal_polynomial_clenshaw_AVXf(n, c, 1, A, B, C, m, x, phi0, f);
-            err += powf(ft_norm_2argf(f, fd, m), 2);
-            orthogonal_polynomial_clenshaw_AVX_FMAf(n, c, 1, A, B, C, m, x, phi0, f);
-            err += powf(ft_norm_2argf(f, fd, m), 2);
-            orthogonal_polynomial_clenshaw_AVX512Ff(n, c, 1, A, B, C, m, x, phi0, f);
-            err += powf(ft_norm_2argf(f, fd, m), 2);
+            #if defined(__i386__) || defined(__x86_64__)
+                orthogonal_polynomial_clenshaw_SSEf(n, c, 1, A, B, C, m, x, phi0, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+                orthogonal_polynomial_clenshaw_AVXf(n, c, 1, A, B, C, m, x, phi0, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+                orthogonal_polynomial_clenshaw_AVX_FMAf(n, c, 1, A, B, C, m, x, phi0, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+                orthogonal_polynomial_clenshaw_AVX512Ff(n, c, 1, A, B, C, m, x, phi0, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+            #elif defined(__aarch64__)
+                orthogonal_polynomial_clenshaw_NEONf(n, c, 1, A, B, C, m, x, phi0, f);
+                err += powf(ft_norm_2argf(f, fd, m), 2);
+            #endif
             ft_orthogonal_polynomial_clenshawf(n, c, 1, A, B, C, m, x, phi0, f);
             err += powf(ft_norm_2argf(f, fd, m), 2);
             err = sqrtf(err);
@@ -401,17 +447,22 @@ int main(void) {
             //for (int i = 0; i < n; i++)
             //    printf("c[%i] = %3.5f, x[%i] = %3.5f, f[%i] = %3.8f\n", i, c[i], i, x[i], i, f[i]);
 
-            FT_TIME(orthogonal_polynomial_clenshaw_SSEf(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
-            printf("Time for OP clenshaw_SSEf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #if defined(__i386__) || defined(__x86_64__)
+                FT_TIME(orthogonal_polynomial_clenshaw_SSEf(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
+                printf("Time for OP clenshaw_SSEf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(orthogonal_polynomial_clenshaw_AVXf(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
-            printf("Time for OP clenshaw_AVXf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(orthogonal_polynomial_clenshaw_AVXf(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
+                printf("Time for OP clenshaw_AVXf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(orthogonal_polynomial_clenshaw_AVX_FMAf(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
-            printf("Time for OP clenshaw_AVX_FMAf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(orthogonal_polynomial_clenshaw_AVX_FMAf(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
+                printf("Time for OP clenshaw_AVX_FMAf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(orthogonal_polynomial_clenshaw_AVX512Ff(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
-            printf("Time for OP clenshaw_AVX512Ff \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(orthogonal_polynomial_clenshaw_AVX512Ff(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
+                printf("Time for OP clenshaw_AVX512Ff \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #elif defined(__aarch64__)
+                FT_TIME(orthogonal_polynomial_clenshaw_NEONf(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
+                printf("Time for OP clenshaw_NEONf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #endif
 
             FT_TIME(ft_orthogonal_polynomial_clenshawf(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
             printf("Time for OP ft_clenshawf \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
@@ -454,14 +505,19 @@ int main(void) {
             }
 
             orthogonal_polynomial_clenshaw_default(n, c, 1, A, B, C, m, x, phi0, fd);
-            orthogonal_polynomial_clenshaw_SSE2(n, c, 1, A, B, C, m, x, phi0, f);
-            err = pow(ft_norm_2arg(f, fd, m), 2);
-            orthogonal_polynomial_clenshaw_AVX(n, c, 1, A, B, C, m, x, phi0, f);
-            err += pow(ft_norm_2arg(f, fd, m), 2);
-            orthogonal_polynomial_clenshaw_AVX_FMA(n, c, 1, A, B, C, m, x, phi0, f);
-            err += pow(ft_norm_2arg(f, fd, m), 2);
-            orthogonal_polynomial_clenshaw_AVX512F(n, c, 1, A, B, C, m, x, phi0, f);
-            err += pow(ft_norm_2arg(f, fd, m), 2);
+            #if defined(__i386__) || defined(__x86_64__)
+                orthogonal_polynomial_clenshaw_SSE2(n, c, 1, A, B, C, m, x, phi0, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+                orthogonal_polynomial_clenshaw_AVX(n, c, 1, A, B, C, m, x, phi0, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+                orthogonal_polynomial_clenshaw_AVX_FMA(n, c, 1, A, B, C, m, x, phi0, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+                orthogonal_polynomial_clenshaw_AVX512F(n, c, 1, A, B, C, m, x, phi0, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+            #elif defined(__aarch64__)
+                orthogonal_polynomial_clenshaw_NEON(n, c, 1, A, B, C, m, x, phi0, f);
+                err += pow(ft_norm_2arg(f, fd, m), 2);
+            #endif
             ft_orthogonal_polynomial_clenshaw(n, c, 1, A, B, C, m, x, phi0, f);
             err += pow(ft_norm_2arg(f, fd, m), 2);
             err = sqrt(err);
@@ -507,17 +563,22 @@ int main(void) {
             //for (int i = 0; i < n; i++)
             //    printf("c[%i] = %3.5f, x[%i] = %3.5f, f[%i] = %3.8f\n", i, c[i], i, x[i], i, f[i]);
 
-            FT_TIME(orthogonal_polynomial_clenshaw_SSE2(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
-            printf("Time for OP clenshaw_SSE2 \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #if defined(__i386__) || defined(__x86_64__)
+                FT_TIME(orthogonal_polynomial_clenshaw_SSE2(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
+                printf("Time for OP clenshaw_SSE2 \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(orthogonal_polynomial_clenshaw_AVX(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
-            printf("Time for OP clenshaw_AVX \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(orthogonal_polynomial_clenshaw_AVX(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
+                printf("Time for OP clenshaw_AVX \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(orthogonal_polynomial_clenshaw_AVX_FMA(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
-            printf("Time for OP clenshaw_AVX_FMA \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(orthogonal_polynomial_clenshaw_AVX_FMA(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
+                printf("Time for OP clenshaw_AVX_FMA \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(orthogonal_polynomial_clenshaw_AVX512F(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
-            printf("Time for OP clenshaw_AVX512F \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+                FT_TIME(orthogonal_polynomial_clenshaw_AVX512F(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
+                printf("Time for OP clenshaw_AVX512F \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #elif defined(__aarch64__)
+                FT_TIME(orthogonal_polynomial_clenshaw_NEON(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
+                printf("Time for OP clenshaw_NEON \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));
+            #endif
 
             FT_TIME(ft_orthogonal_polynomial_clenshaw(n, c, 1, A, B, C, m, x, phi0, f), start, end, NTIMES)
             printf("Time for OP ft_clenshaw \t\t (%5i×%5i) \t |%20.6f s\n", m, n, elapsed(&start, &end, NTIMES));

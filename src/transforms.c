@@ -3,17 +3,19 @@
 #include "fasttransforms.h"
 #include "ftinternal.h"
 
-#define FLT long double
-#define FLT2 quadruple
-#define X(name) FT_CONCAT(ft_, name, l)
-#define X2(name) FT_CONCAT(ft_, name, q)
-#define Y2(name) FT_CONCAT(, name, q)
-#include "transforms_source.c"
-#undef FLT
-#undef FLT2
-#undef X
-#undef X2
-#undef Y2
+#if defined(FT_QUADMATH)
+    #define FLT long double
+    #define FLT2 quadruple
+    #define X(name) FT_CONCAT(ft_, name, l)
+    #define X2(name) FT_CONCAT(ft_, name, q)
+    #define Y2(name) FT_CONCAT(, name, q)
+    #include "transforms_source.c"
+    #undef FLT
+    #undef FLT2
+    #undef X
+    #undef X2
+    #undef Y2
+#endif
 
 #define FLT double
 #define FLT2 long double

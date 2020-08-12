@@ -25,13 +25,15 @@
 #undef X
 #undef Y
 
-#define FLT quadruple
-#define X(name) FT_CONCAT(ft_, name, q)
-#define Y(name) FT_CONCAT(, name, q)
-#include "test_hierarchical_source.c"
-#undef FLT
-#undef X
-#undef Y
+#if defined(FT_QUADMATH)
+    #define FLT quadruple
+    #define X(name) FT_CONCAT(ft_, name, q)
+    #define Y(name) FT_CONCAT(, name, q)
+    #include "test_hierarchical_source.c"
+    #undef FLT
+    #undef X
+    #undef Y
+#endif
 
 int main(void) {
     int checksum = 0;
@@ -42,8 +44,10 @@ int main(void) {
     test_hierarchical(&checksum);
     printf("\n\tLong double precision.\n\n");
     test_hierarchicall(&checksum);
-    printf("\n\tQuadruple precision.\n\n");
-    test_hierarchicalq(&checksum);
+    #if defined(FT_QUADMATH)
+        printf("\n\tQuadruple precision.\n\n");
+        test_hierarchicalq(&checksum);
+    #endif
     printf("\n");
     return checksum;
 }

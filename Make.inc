@@ -36,21 +36,21 @@ endif
 
 simd := $(shell $(CC) -march=native -E -v - </dev/null 2>&1 | grep cc1)
 
-ifneq (, $(findstring msse, $(simd)))
+ifneq (, $(filter -msse +sse, $(simd)))
     MSSE := -msse
 endif
-ifneq (, $(findstring msse2, $(simd)))
+ifneq (, $(filter -msse2 +sse2, $(simd)))
     MSSE2 := -msse2
 endif
-ifneq (, $(findstring mavx, $(simd)))
+ifneq (, $(filter -mavx +avx, $(simd)))
     MAVX := -mavx
 endif
-ifneq (, $(findstring mfma, $(simd)))
-    ifeq (, $(findstring mfma4, $(simd)))
+ifneq (, $(filter -mfma +fma, $(simd)))
+    ifeq (, $(filter -mfma4 +fma4, $(simd)))
         MFMA := -mfma
     endif
 endif
-ifneq (, $(findstring mavx512f, $(simd)))
+ifneq (, $(filter -mavx512f +avx512f, $(simd)))
     ifneq ($(UNAME), Windows)
         MAVX512F := -mavx512f
     endif
@@ -70,30 +70,38 @@ ASM = src/recurrence/recurrence_default.s \
       src/recurrence/recurrence_AVX.s \
       src/recurrence/recurrence_AVX_FMA.s \
       src/recurrence/recurrence_AVX512F.s \
+      src/recurrence/recurrence_NEON.s \
       src/permute/permute_default.s \
       src/permute/permute_SSE.s \
       src/permute/permute_SSE2.s \
       src/permute/permute_AVX.s \
       src/permute/permute_AVX512F.s \
+      src/permute/permute_NEON.s \
       src/rotations/rotations_default.s \
       src/rotations/rotations_SSE2.s \
       src/rotations/rotations_AVX.s \
       src/rotations/rotations_AVX_FMA.s \
-      src/rotations/rotations_AVX512F.s
+      src/rotations/rotations_AVX512F.s \
+      src/rotations/rotations_NEON.s
 
 SRC = src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
 
 machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
 
-AFLAGS += -O3 -fPIC -std=gnu99 -I./src
+AFLAGS += -O3 -fPIC -std=gnu11 -I./src
 
 ifndef CFLAGS
     CFLAGS = -O3
     ifneq (, $(findstring 86, $(machine)))
         CFLAGS += -march=native
     endif
+    ifneq (, $(findstring aarch64, $(machine)))
+        ifeq (, $(findstring clang, $(shell $(CC) --version)))
+            CFLAGS += -mcpu=native
+        endif
+    endif
 endif
-CFLAGS += -std=gnu99 -I./src
+CFLAGS += -std=gnu11 -I./src
 
 ifeq ($(FT_COVERAGE), 1)
     CFLAGS += -coverage
@@ -136,7 +144,30 @@ ifndef FT_BLAS
     FT_BLAS = blas
 endif
 
-LDLIBS += -fopenmp -lm -lquadmath -lmpfr -l$(FT_BLAS) -lfftw3
+ifndef FT_OPENMP
+    ifneq (, $(findstring Apple LLVM version, $(shell $(CC) --version)))
+        FT_OPENMP := -Xpreprocessor -fopenmp -lomp
+    else ifneq (, $(findstring Apple clang version, $(shell $(CC) --version)))
+        FT_OPENMP := -Xpreprocessor -fopenmp -lomp
+    else ifeq ($(UNAME), FreeBSD)
+        ifneq (, $(findstring clang, $(shell $(CC) --version)))
+            FT_OPENMP := -fopenmp=libgomp
+        else
+            FT_OPENMP := -fopenmp
+        endif
+    else
+        FT_OPENMP := -fopenmp
+    endif
+endif
+
+LDLIBS += $(FT_OPENMP) -lm -lmpfr -l$(FT_BLAS) -lfftw3
+
+ifdef FT_QUADMATH
+    AFLAGS += -DFT_QUADMATH
+    AFLAGS += -lquadmath
+    CFLAGS += -DFT_QUADMATH
+    LDLIBS += -lquadmath
+endif
 
 ifneq ($(FT_FFTW_WITH_COMBINED_THREADS), 1)
     LDLIBS += -lfftw3_threads

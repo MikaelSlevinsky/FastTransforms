@@ -14,18 +14,21 @@ assembly:
 	$(CC) -S $(AFLAGS) $(MAVX) src/recurrence/recurrence_AVX.c -o src/recurrence/recurrence_AVX.s
 	$(CC) -S $(AFLAGS) $(MAVX) $(MFMA) src/recurrence/recurrence_AVX_FMA.c -o src/recurrence/recurrence_AVX_FMA.s
 	$(CC) -S $(AFLAGS) $(MAVX512F) src/recurrence/recurrence_AVX512F.c -o src/recurrence/recurrence_AVX512F.s
+	$(CC) -S $(AFLAGS) src/recurrence/recurrence_NEON.c -o src/recurrence/recurrence_NEON.s
 
 	$(CC) -S $(AFLAGS) src/permute/permute_default.c -o src/permute/permute_default.s
 	$(CC) -S $(AFLAGS) $(MSSE) src/permute/permute_SSE.c -o src/permute/permute_SSE.s
 	$(CC) -S $(AFLAGS) $(MSSE2) src/permute/permute_SSE2.c -o src/permute/permute_SSE2.s
 	$(CC) -S $(AFLAGS) $(MAVX) src/permute/permute_AVX.c -o src/permute/permute_AVX.s
 	$(CC) -S $(AFLAGS) $(MAVX512F) src/permute/permute_AVX512F.c -o src/permute/permute_AVX512F.s
+	$(CC) -S $(AFLAGS) src/permute/permute_NEON.c -o src/permute/permute_NEON.s
 
 	$(CC) -S $(AFLAGS) src/rotations/rotations_default.c -o src/rotations/rotations_default.s
 	$(CC) -S $(AFLAGS) $(MSSE2) src/rotations/rotations_SSE2.c -o src/rotations/rotations_SSE2.s
 	$(CC) -S $(AFLAGS) $(MAVX) src/rotations/rotations_AVX.c -o src/rotations/rotations_AVX.s
 	$(CC) -S $(AFLAGS) $(MAVX) $(MFMA) src/rotations/rotations_AVX_FMA.c -o src/rotations/rotations_AVX_FMA.s
 	$(CC) -S $(AFLAGS) $(MAVX512F) src/rotations/rotations_AVX512F.c -o src/rotations/rotations_AVX512F.s
+	$(CC) -S $(AFLAGS) src/rotations/rotations_NEON.c -o src/rotations/rotations_NEON.s
 
 lib:
 	$(CC) $(CFLAGS) $(LIBFLAGS) $(ASM) $(SRC) $(LDFLAGS) $(LDLIBS) -o lib$(LIB).$(SLIB)

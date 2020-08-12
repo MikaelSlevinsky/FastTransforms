@@ -4,113 +4,64 @@ language: c
 jobs:
   include:
     - stage: "Test"
-    # Minimum system requirements
       os: osx
-      osx_image: xcode10
-      compiler: gcc-4.9
+      osx_image: xcode11
+      compiler: clang
       addons:
         homebrew:
-          packages: ['gcc@4.9', 'fftw', 'mpfr']
-          update: true
-      env: JOBS_EVAL="export CC=gcc-4.9 && export FT_USE_APPLEBLAS=1"
+          packages: ['libomp', 'openblas', 'fftw', 'mpfr']
+      env: JOBS_EVAL="export CC=clang"
     - os: osx
-      osx_image: xcode10
-      compiler: gcc-5
+      osx_image: xcode11
+      compiler: gcc
       addons:
         homebrew:
-          packages: ['gcc@5', 'fftw', 'mpfr']
-          update: true
-      env: JOBS_EVAL="export CC=gcc-5 && export FT_USE_APPLEBLAS=1"
-    - os: osx
-      osx_image: xcode10
-      compiler: gcc-6
+          packages: ['libomp', 'openblas', 'fftw', 'mpfr']
+      env: JOBS_EVAL="export CC=gcc"
+    - os: linux
+      arch: amd64
+      compiler: clang
       addons:
-        homebrew:
-          packages: ['gcc@6', 'fftw', 'mpfr']
-          update: true
-      env: JOBS_EVAL="export CC=gcc-6 && export COV=gcov-6 && export FT_COVERAGE=1 && export FT_USE_APPLEBLAS=1"
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: ['libomp-dev', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=clang && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+    - os: linux
+      arch: amd64
+      compiler: gcc
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: ['libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=gcc && export FT_QUADMATH=1 && export COV=gcov && export FT_COVERAGE=1 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
       after_success:
         - make coverage
         - bash <(curl -s https://codecov.io/bash)
-    # Recommended system requirements
-    - os: osx
-      osx_image: xcode10
-      compiler: gcc-7
-      addons:
-        homebrew:
-          packages: ['gcc@7', 'fftw', 'mpfr']
-          update: true
-      env: JOBS_EVAL="export CC=gcc-7 && export FT_USE_APPLEBLAS=1"
-    - os: osx
-      osx_image: xcode10
-      compiler: gcc-8
-      addons:
-        homebrew:
-          packages: ['gcc@8', 'fftw', 'mpfr']
-          update: true
-      env: JOBS_EVAL="export CC=gcc-8 && export FT_USE_APPLEBLAS=1"
-    - os: osx
-      osx_image: xcode10
-      compiler: gcc-9
-      addons:
-        homebrew:
-          packages: ['gcc@9', 'fftw', 'mpfr']
-          update: true
-      env: JOBS_EVAL="export CC=gcc-9 && export FT_USE_APPLEBLAS=1"
-    # Minimum system requirements
     - os: linux
-      compiler: gcc-4.9
+      arch: arm64
+      compiler: clang
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
-          packages: ['gcc-4.9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
-      env: JOBS_EVAL="export CC=gcc-4.9 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+          packages: ['libomp-dev', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=clang && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     - os: linux
-      compiler: gcc-5
+      compiler: gcc
+      arch: arm64
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
-          packages: ['gcc-5', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
-      env: JOBS_EVAL="export CC=gcc-5 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
-    - os: linux
-      compiler: gcc-6
-      addons:
-        apt:
-          sources: ubuntu-toolchain-r-test
-          packages: ['gcc-6', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
-      env: JOBS_EVAL="export CC=gcc-6 && export COV=gcov-6 && export FT_COVERAGE=1 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
+          packages: ['libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
+      env: JOBS_EVAL="export CC=gcc && export COV=gcov && export FT_COVERAGE=1 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
       after_success:
         - make coverage
         - bash <(curl -s https://codecov.io/bash)
-    # Recommended system requirements
-    - os: linux
-      compiler: gcc-7
-      addons:
-        apt:
-          sources: ubuntu-toolchain-r-test
-          packages: ['gcc-7', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
-      env: JOBS_EVAL="export CC=gcc-7 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
-    - os: linux
-      compiler: gcc-8
-      addons:
-        apt:
-          sources: ubuntu-toolchain-r-test
-          packages: ['gcc-8', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
-      env: JOBS_EVAL="export CC=gcc-8 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
-    - os: linux
-      compiler: gcc-9
-      addons:
-        apt:
-          sources: ubuntu-toolchain-r-test
-          packages: ['gcc-9', 'libblas-dev', 'libopenblas-base', 'libfftw3-dev', 'libmpfr-dev']
-      env: JOBS_EVAL="export CC=gcc-9 && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
     - stage: "Documentation"
       os: osx
-      osx_image: xcode10
+      osx_image: xcode11
       addons:
         homebrew:
           packages: doxygen
-          update: true
       script: doxygen Doxyfile
       deploy:
         - provider: pages

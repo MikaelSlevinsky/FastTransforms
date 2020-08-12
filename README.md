@@ -14,20 +14,20 @@ The library makes use of OpenBLAS, FFTW3, and MPFR, which are easily installed v
 
 ### macOS
 
-Apple's version of GCC does not support OpenMP. Sample installation:
+Sample installation:
 ```
-brew install gcc@8 fftw mpfr
-make CC=gcc-8 FT_USE_APPLEBLAS=1
+brew install libomp fftw mpfr
+make CC=clang FT_USE_APPLEBLAS=1
 ```
-On macOS, the OpenBLAS dependency is optional in light of the vecLib framework. In case the library is compiled with vecLib, then the environment variable `VECLIB_MAXIMUM_THREADS` partially controls the multithreading.
+On macOS, the OpenBLAS dependency is optional in light of the vecLib framework, though on macOS 10.14 and above, one must locate the headers in the software development kit. In case the library is compiled with vecLib, then the environment variable `VECLIB_MAXIMUM_THREADS` partially controls the multithreading.
 
 ### Linux
 
 To access functions from the library, you must ensure that you append the current library path to the default. Sample installation:
 ```
-apt-get install gcc-8 libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
+apt-get install libomp-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
-make CC=gcc-8
+make CC=gcc
 ```
 See the [Travis build](https://github.com/MikaelSlevinsky/FastTransforms/blob/master/.travis.yml) for further details.
 
@@ -44,14 +44,14 @@ See the [AppVeyor build](https://github.com/MikaelSlevinsky/FastTransforms/blob/
 
 The tables below shows the current timings and accuracies for the transforms with pseudorandom coefficients drawn from U(-1,1) and converted back. The timings are reported in seconds and the error is measured in the relative 2- and ∞-norms.
 
-The library is compiled by GNU GCC 8.3.0 as above with the compiler optimization flags `-O3 -march=native`, and executed on an iMac Pro (Early 2018) with a 2.3 GHz Intel Xeon W-2191B processor with 18 threads on 18 logical cores.
+The library is compiled by Apple LLVM version 10.0.1 as above with the compiler optimization flags `-O3 -march=native`, and executed on an iMac Pro (Early 2018) with a 2.3 GHz Intel Xeon W-2191B processor with 18 threads on 18 logical cores.
 
 ### Spherical harmonic series to bivariate Fourier series (`sph2fourier`)
 
 | Degree            | 63       | 127      | 255      | 511      | 1023     | 2047     | 4095     | 8191     |
 | ----------------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: |
-| **Forward**       | 0.000159 | 0.000540 | 0.001852 | 0.005510 | 0.022874 | 0.120082 | 0.786019 | 4.902573 |
-| **Backward**      | 0.000159 | 0.000555 | 0.001852 | 0.005501 | 0.023940 | 0.119339 | 0.778569 | 4.939324 |
+| **Forward**       | 0.000101 | 0.000446 | 0.001952 | 0.006277 | 0.026590 | 0.141962 | 0.775724 | 4.870621 |
+| **Backward**      | 0.000101 | 0.000448 | 0.001918 | 0.006357 | 0.027123 | 0.145149 | 0.815881 | 5.040577 |
 | **ϵ<sub>2</sub>** | 5.42e-16 | 7.79e-16 | 9.23e-16 | 1.27e-15 | 1.80e-15 | 2.52e-15 | 3.54e-15 | 4.98e-15 |
 | **ϵ<sub>∞</sub>** | 1.33e-15 | 2.55e-15 | 4.55e-15 | 5.22e-15 | 9.33e-15 | 1.11e-14 | 1.81e-14 | 3.80e-14 |
 
@@ -59,8 +59,8 @@ The library is compiled by GNU GCC 8.3.0 as above with the compiler optimization
 
 | Degree            | 63       | 127      | 255      | 511      | 1023     | 2047     | 4095     | 8191     |
 | ----------------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: |
-| **Forward**       | 0.000128 | 0.000313 | 0.000969 | 0.003482 | 0.015711 | 0.093525 | 0.638155 | 4.591086 |
-| **Backward**      | 0.000125 | 0.000302 | 0.000948 | 0.003543 | 0.016041 | 0.094016 | 0.670728 | 4.420676 |
+| **Forward**       | 0.000063 | 0.000300 | 0.001048 | 0.003886 | 0.019123 | 0.113299 | 0.699465 | 4.555086 |
+| **Backward**      | 0.000065 | 0.000289 | 0.000987 | 0.003837 | 0.019529 | 0.114718 | 0.699051 | 4.697958 |
 | **ϵ<sub>2</sub>** | 2.30e-15 | 3.94e-15 | 8.14e-15 | 1.68e-14 | 3.55e-14 | 7.30e-14 | 1.44e-13 | 2.97e-13 |
 | **ϵ<sub>∞</sub>** | 1.09e-14 | 1.84e-14 | 5.49e-14 | 1.49e-13 | 9.06e-13 | 1.95e-12 | 3.73e-12 | 1.05e-11 |
 
@@ -70,8 +70,8 @@ The error growth rate is significantly reduced if (α, β, γ) = (-0.5, -0.5, -0
 
 | Degree            | 63       | 127      | 255      | 511      | 1023     | 2047     | 4095     | 8191     |
 | ----------------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: |
-| **Forward**       | 0.000275 | 0.001069 | 0.003448 | 0.011251 | 0.053583 | 0.329135 | 2.157533 | 15.33666 |
-| **Backward**      | 0.000280 | 0.001031 | 0.003435 | 0.011320 | 0.053093 | 0.317026 | 2.203625 | 15.42320 |
+| **Forward**       | 0.000209 | 0.001077 | 0.003618 | 0.013243 | 0.064321 | 0.369272 | 2.182001 | 16.15872 |
+| **Backward**      | 0.000208 | 0.001027 | 0.003487 | 0.012903 | 0.064544 | 0.372493 | 2.191747 | 16.43340 |
 | **ϵ<sub>2</sub>** | 7.60e-16 | 9.35e-16 | 1.31e-15 | 1.84e-15 | 2.56e-15 | 3.59e-15 | 5.05e-15 | 7.15e-15 |
 | **ϵ<sub>∞</sub>** | 1.78e-15 | 2.66e-15 | 5.33e-15 | 7.11e-15 | 1.27e-14 | 1.79e-14 | 2.91e-14 | 1.66e-13 |
 

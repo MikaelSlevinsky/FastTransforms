@@ -59,12 +59,14 @@ double elapsed(struct timeval * start, struct timeval * end, int N);
 #undef X
 #undef Y
 
-#define FLT quadruple
-#define X(name) FT_CONCAT(ft_, name, q)
-#define Y(name) FT_CONCAT(, name, q)
-#include "ftutilities_source.h"
-#undef FLT
-#undef X
-#undef Y
+#if defined(FT_QUADMATH)
+    #define FLT quadruple
+    #define X(name) FT_CONCAT(ft_, name, q)
+    #define Y(name) FT_CONCAT(, name, q)
+    #include "ftutilities_source.h"
+    #undef FLT
+    #undef X
+    #undef Y
+#endif
 
 #endif //FTUTILITIES_H

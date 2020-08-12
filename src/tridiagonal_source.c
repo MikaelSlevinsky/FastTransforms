@@ -10,6 +10,15 @@ void X(destroy_bidiagonal)(X(bidiagonal) * B) {
     free(B);
 }
 
+void X(destroy_symmetric_tridiagonal_symmetric_eigen)(X(symmetric_tridiagonal_symmetric_eigen) * F) {
+    free(F->A);
+    free(F->B);
+    free(F->C);
+    free(F->lambda);
+    free(F->phi0);
+    free(F);
+}
+
 X(bidiagonal) * X(symmetric_tridiagonal_cholesky)(X(symmetric_tridiagonal) * A) {
     int n = A->n;
     FLT * a = A->a;
@@ -305,6 +314,47 @@ X(symmetric_tridiagonal) * X(symmetric_tridiagonal_congruence)(X(symmetric_tridi
 
 #undef V
 
+X(symmetric_tridiagonal_symmetric_eigen) * X(symmetric_tridiagonal_symmetric_eig)(X(symmetric_tridiagonal) * T, FLT * lambda, const int sign) {
+    int n = T->n;
+    FLT * A = calloc(n, sizeof(FLT));
+    FLT * B = calloc(n, sizeof(FLT));
+    FLT * C = calloc(n+1, sizeof(FLT));
+    A[0] = 1/T->b[0];
+    B[0] = -T->a[0]/T->b[0];
+    for (int i = 1; i < n-1; i++) {
+        A[i] = 1/T->b[i];
+        B[i] = -T->a[i]/T->b[i];
+        C[i] = T->b[i-1]/T->b[i];
+    }
+    FLT * phi0 = malloc(n*sizeof(FLT));
+    FLT nrm = phi0[0] = 1;
+    if (n > 1) {
+        phi0[1] = A[0]*lambda[0]+B[0];
+        nrm += phi0[1]*phi0[1];
+    }
+    for (int i = 1; i < n-1; i++) {
+        phi0[i+1] = (A[i]*lambda[0]+B[i])*phi0[i] - C[i]*phi0[i-1];
+        nrm += phi0[i+1]*phi0[i+1];
+    }
+    nrm = (sign > 0) ? 1/Y(sqrt)(nrm) : -1/Y(sqrt)(nrm);
+    for (int i = 0; i < n; i++)
+        phi0[i] *= nrm;
+    X(symmetric_tridiagonal_symmetric_eigen) * F = malloc(sizeof(X(symmetric_tridiagonal_symmetric_eigen)));
+    F->A = A;
+    F->B = B;
+    F->C = C;
+    F->lambda = malloc(n*sizeof(FLT));
+    for (int i = 0; i < n; i++)
+        F->lambda[i] = lambda[i];
+    F->phi0 = phi0;
+    F->n = n;
+    return F;
+}
+
+// y = V*x == Vᵀx
+void X(semv)(X(symmetric_tridiagonal_symmetric_eigen) * F, FLT * x, int incx, FLT * y) {
+    X(orthogonal_polynomial_clenshaw)(F->n, x, incx, F->A, F->B, F->C, F->n, F->lambda, F->phi0, y);
+}
 
 X(symmetric_tridiagonal) * X(create_A_shtsdtev)(const int n, const int mu, const int m, char PARITY) {
     X(symmetric_tridiagonal) * A = malloc(sizeof(X(symmetric_tridiagonal)));
