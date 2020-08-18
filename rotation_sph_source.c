@@ -1,5 +1,5 @@
 FLT * X(sphzeros)(int m, int n){
-	FLT * A = (FLT*)malloc(m * n * sizeof(FLT));
+	FLT * A = (FLT*)calloc(m * n, sizeof(FLT));
 	for(int j = 0; j < n; ++j){
 		for(int i = 0; i < m; ++i){
 			A[i + j*m] = 0;
@@ -166,6 +166,21 @@ FLT * X(Y_dense_test)(int l){
 	}
 
 	return Yl;
+}
+
+FLT X(Z_index)(int l, int i, int j){
+	if(i != j)
+		return 0;
+
+	return pow(X(Gzhat_index)(l, i, i), 2);
+}
+
+FLT * X(Z_diagonal)(int l){
+	FLT * diagonal = calloc(2*l+1, sizeof(FLT));
+	for(int i = 0; i < 2*l+1; ++i)
+		diagonal[i] = X(Z_index)(l, i, i);
+
+	return diagonal;
 }
 
 int X(is_J_entry_nonzero)(int l, int i, int j){
@@ -436,90 +451,149 @@ void X(correct_J_column_symmetry)(FLT * J, int l, int j){
 	X(correct_J_column_sign)(J, l, j, 1);
 }
 
-FLT * X(J_eigen)(int l){
-	int n1 = ceil((FLT)(2*l+1)/2); 
-	int n2 = 2*l+1 - n1;
-	X(symmetric_tridiagonal) * Y1st = (X(symmetric_tridiagonal)*)malloc(sizeof(X(symmetric_tridiagonal)));
-	X(symmetric_tridiagonal) * Y2st = (X(symmetric_tridiagonal)*)malloc(sizeof(X(symmetric_tridiagonal)));
-	FLT * a1 = (FLT*)calloc(n1, sizeof(FLT));
-	FLT * b1 = (FLT*)calloc((n1-1), sizeof(FLT));
-	FLT * a2 = (FLT*)calloc(n2, sizeof(FLT));
-	FLT * b2 = (FLT*)calloc((n2-1), sizeof(FLT));
+void Y(printvector)(char* name, char* precision, FLT* v, int n){
+	printf(name); printf(" =\n[");
+	for(int i = 0; i < n; ++i){
+		printf(precision, v[i]);
+		if(i < n-1)
+			printf("   ");
+	}
+	printf("]\n");
+}
 
+FLT * X(symmetric_tridiagonal_symmetric_eigenvectors)(X(symmetric_tridiagonal_symmetric_eigen) * F){
+	FLT * V = calloc(F->n * F->n, sizeof(FLT));
+	FLT * Id = calloc(F->n * F->n, sizeof(FLT));
+
+	if(F->n > 1){
+		for(int j = 0; j < F->n; ++j){
+			Id[j + j*F->n] = 1;
+			V[j + j*F->n] = 1;
+		}
+		for(int j = 0; j < F->n; ++j)
+			X(semv)(F, Id+j*F->n, 1, V+j*F->n);
+	}
+	else // If matrix is one by one.
+		V[0] = 1;
+
+	free(Id);
+	return V;
+}
+
+void X(scale_matrix_column)(FLT * A, int m, int n, FLT alpha, int j){
+	if(j >= 0 && j < n);
+		for(int i = 0; i < m; ++i)
+			A[i + j*m] *= alpha;
+}
+
+FLT * X(J_eigen)(int l){
+	int n1 = floor((FLT)(l+1)/2); int n2 = l+1 - n1;
+	int n3 = floor((FLT)l/2); int n4 = l - n3;
+	X(symmetric_tridiagonal) * Y1 = (X(symmetric_tridiagonal)*)malloc(sizeof(X(symmetric_tridiagonal)));
+	X(symmetric_tridiagonal) * Y2 = (X(symmetric_tridiagonal)*)malloc(sizeof(X(symmetric_tridiagonal)));
+	X(symmetric_tridiagonal) * Y3 = (X(symmetric_tridiagonal)*)malloc(sizeof(X(symmetric_tridiagonal)));
+	X(symmetric_tridiagonal) * Y4 = (X(symmetric_tridiagonal)*)malloc(sizeof(X(symmetric_tridiagonal)));
+	FLT * a1 = (FLT*)malloc(n1 * sizeof(FLT)); FLT * b1 = (FLT*)malloc((n1-1) * sizeof(FLT));
+	FLT * a2 = (FLT*)malloc(n2 * sizeof(FLT)); FLT * b2 = (FLT*)malloc((n2-1) * sizeof(FLT));
+	FLT * a3 = (FLT*)malloc(n3 * sizeof(FLT)); FLT * b3 = (FLT*)malloc((n3-1) * sizeof(FLT));
+	FLT * a4 = (FLT*)malloc(n4 * sizeof(FLT)); FLT * b4 = (FLT*)malloc((n4-1) * sizeof(FLT));
+
+	// Populating vectors.
 	for(int i = 0; i < n1; ++i)
 		a1[i] = X(Y_index)(l, 2*i, 2*i);
 	for(int i = 0; i < n1-1; ++i)
-		b1[i] = X(Y_index)(l, 2*i, 2*(i+1));
+		b1[i] = X(Y_index)(l, 2*(i+1), 2*i);
+	for(int i = n1; i < n1+n2; ++i)
+		a2[n2-1-(i-n1)] = X(Y_index)(l, 2*i, 2*i);
+	for(int i = n1; i < n1+n2-1; ++i)
+		b2[n2-2-(i-n1)] = X(Y_index)(l, 2*(i+1), 2*i);
+	for(int i = 0; i < n3; ++i)
+		a3[i] = X(Y_index)(l, 2*i+1, 2*i+1);
+	for(int i = 0; i < n3-1; ++i)
+		b3[i] = X(Y_index)(l, 2*(i+1)+1, 2*i+1);
+	for(int i = n3; i < n3+n4; ++i)
+		a4[n4-1-(i-n3)] = X(Y_index)(l, 2*i+1, 2*i+1);
+	for(int i = n3; i < n3+n4-1; ++i)
+		b4[n4-2-(i-n3)] = X(Y_index)(l, 2*(i+1)+1, 2*i+1);
+
+	Y1->a = a1; Y3->a = a3;
+	Y1->b = b1; Y3->b = b3;
+	Y1->n = n1; Y3->n = n3;
+	Y2->a = a2; Y4->a = a4;
+	Y2->b = b2; Y4->b = b4;
+	Y2->n = n2; Y4->n = n4;
+
+	// Known eigenvalues.
+	FLT * lambda1 = (FLT*)calloc(n1, sizeof(FLT));
+	FLT * lambda2 = (FLT*)calloc(n2, sizeof(FLT));
+	FLT * lambda3 = (FLT*)calloc(n3, sizeof(FLT));
+	FLT * lambda4 = (FLT*)calloc(n4, sizeof(FLT));
+
+	for(int i = 0; i < n1; ++i)
+		lambda1[i] = X(Z_index)(l, 2*i+1, 2*i+1);
 	for(int i = 0; i < n2; ++i)
-		a2[i] = X(Y_index)(l, 2*i+1, 2*i+1);
-	for(int i = 0; i < n2-1; ++i)
-		b2[i] = X(Y_index)(l, 2*i+1, 2*(i+1)+1);
-	Y1st->a = a1; Y2st->a = a2; 
-	Y1st->b = b1; Y2st->b = b2;
-	Y1st->n = n1; Y2st->n = n2;
+		lambda2[i] = X(Z_index)(l, 2*i, 2*i);
+	for(int i = 0; i < n3; ++i)
+		lambda3[i] = X(Z_index)(l, 2*l-1 - 2*i, 2*l-1 - 2*i);
+	for(int i = 0; i < n4; ++i)
+		lambda4[i] = X(Z_index)(l, 2*l - 2*i, 2*l - 2*i);
 
-	FLT * Y1st_lambda = (FLT*)calloc(n1, sizeof(FLT));
-	FLT * Y2st_lambda = (FLT*)calloc(n2, sizeof(FLT));
-	FLT * Y1st_V = X(sphzeros)(n1, n1);
-	FLT * Y2st_V = X(sphzeros)(n2, n2);
-	for(int i = 0 ; i < n1; ++i)
-		Y1st_V[i + i*n1] = 1;
-	for(int i = 0; i < n2; ++i)
-		Y2st_V[i + i*n2] = 1;
-	
-	// Eigenvalues and eigenvectors.
-	X(symmetric_tridiagonal_eig)(Y1st, Y1st_V, Y1st_lambda);
-	X(symmetric_tridiagonal_eig)(Y2st, Y2st_V, Y2st_lambda);
+	X(symmetric_tridiagonal_symmetric_eigen) * Y1stse = X(symmetric_tridiagonal_symmetric_eig)(Y1, lambda1, 1);
+	X(symmetric_tridiagonal_symmetric_eigen) * Y2stse = X(symmetric_tridiagonal_symmetric_eig)(Y2, lambda2, 1);
+	X(symmetric_tridiagonal_symmetric_eigen) * Y3stse = X(symmetric_tridiagonal_symmetric_eig)(Y3, lambda3, 1);
+	X(symmetric_tridiagonal_symmetric_eigen) * Y4stse = X(symmetric_tridiagonal_symmetric_eig)(Y4, lambda4, 1);
 
-	// Jl from Eigenvectors of Y1 and Y2.
-	FLT * Eigen_Jl = X(sphzeros)(2*l+1, 2*l+1);
-	for(int j = 0; j < n2; ++j){
-		for(int i = 0; i < n2; ++i){
-			Eigen_Jl[2*i+1 + j*(2*l+1)] = Y2st_V[i + j*n2];
-		}
-	}
-	for(int j = 0; j < n1; ++j){
-		for(int i = 0; i < n1; ++i){
-			Eigen_Jl[2*i + (j+n2)*(2*l+1)] = Y1st_V[i + (n1-1-j)*n1];
-		}
-	}
+	FLT * temp = Y1stse->phi0;
+	Y1stse->phi0 = Y4stse->phi0;
+	Y4stse->phi0 = temp;
 
-	// Correcting symmetry.
-	//for(int j = 0; j < 2*l-1; ++j){
-	//	X(correct_J_column_symmetry)(Eigen_Jl, l, j);
-	//}
-	
-	// Correcting signs. Evaluating the sign pattern.
-	int l_parity = l%2;
-	for(int j = l + l_parity; j < 2*l+1; j = j+2){ // Bottom right block.
-		if((Eigen_Jl[l + l_parity + j*(2*l+1)] < 0 ? 1 : 0) != (pow(-1, floor((FLT)l/2)) < 0 ? 1 : 0))
-			X(correct_J_column_signs)(Eigen_Jl, l, j);
-	}
+	FLT * V1 = X(symmetric_tridiagonal_symmetric_eigenvectors)(Y1stse);
+	FLT * V2 = X(symmetric_tridiagonal_symmetric_eigenvectors)(Y2stse);
+	FLT * V3 = X(symmetric_tridiagonal_symmetric_eigenvectors)(Y3stse);
+	FLT * V4 = X(symmetric_tridiagonal_symmetric_eigenvectors)(Y4stse);
 
-	for(int j = l + (1-l_parity); j < 2*l+1; j = j+2){ // Top right block.
-		if((Eigen_Jl[l-1-(1-l_parity) + j*(2*l+1)] < 0 ? 1 : 0) != (pow(-1, ceil((FLT)l/2)) < 0 ? 1 : 0))
-			X(correct_J_column_signs)(Eigen_Jl, l, j);
-	}
+	// Sign correction.
+	for(int j = 0; j < n1; ++j)
+		if((V1[(n1-1) + j*n1] < 0 ? 1 : 0) != (pow(-1, ceil((FLT)l/2)) < 0 ? 1 : 0))
+			X(scale_matrix_column)(V1, n1, n1, -1, j);
+	for(int j = 0; j < n2; ++j)
+		if((V2[n2-1 + j*n2] < 0 ? 1 : 0) != (pow(-1, floor((FLT)l/2)) < 0 ? 1 : 0))
+			X(scale_matrix_column)(V2, n2, n2, -1, j);
+	for(int j = 0; j < n3; ++j)
+		if((V3[(n3-1) + j*n3] < 0 ? 1 : 0) != (pow(-1, floor((FLT)l/2)+1) < 0 ? 1 : 0))
+			X(scale_matrix_column)(V3, n3, n3, -1, j);
+	for(int j = 0; j < n4; ++j)
+		if((V4[n4-1 + j*n4] < 0 ? 1 : 0) != (pow(-1, ceil((FLT)l/2)) < 0 ? 1 : 0))
+			X(scale_matrix_column)(V4, n4, n4, -1, j);
 
-	for(int j = 0; j < l; j = j+2){ // Bottom left block.
-		if((Eigen_Jl[l+(1-l_parity) + j*(2*l+1)] < 0 ? 1 : 0) != (pow(-1, ceil((FLT)l/2)) < 0 ? 1 : 0))
-			X(correct_J_column_signs)(Eigen_Jl, l, j);
-	}
+	// Building Jl.
+	FLT * Jl = X(sphzeros)(2*l+1, 2*l+1);
+	for(int j = 0; j < n1; ++j)
+		for(int i = 0; i < n1; ++i)
+			Jl[2*l-1-2*i + 2*j*(2*l+1)] = V1[i + j*n1];
+	for(int j = 0; j < n2; ++j)
+		for(int i = 0; i < n2; ++i)
+			Jl[2*l-2*i + (2*l-2*j)*(2*l+1)] = V2[i + j*n2];
+	for(int j = 0; j < n3; ++j)
+		for(int i = 0; i < n3; ++i)
+			Jl[2*i+1 + (2*j+1)*(2*l+1)] = V3[i + j*n3];
+	for(int j = 0; j < n4; ++j)
+		for(int i = 0; i < n4; ++i)
+			Jl[2*i + (2*l-1-2*j)*(2*l+1)] = V4[i + j*n4];
 
-	for(int j = 1; j < l; j = j+2){ // Top left block.
-		if((Eigen_Jl[l-1-l_parity + j*(2*l+1)] < 0 ? 1 : 0) != (pow(-1, floor((FLT)l/2)+1) < 0 ? 1 : 0))
-			X(correct_J_column_signs)(Eigen_Jl, l, j);
-	}
-
-	//X(threshold)(Eigen_Jl, 2*l+1, 2*l+1, 10*Y(eps)());
-
-	free(Y1st_lambda);
-	free(Y2st_lambda);
-	free(Y1st_V);
-	free(Y2st_V);
-	X(destroy_symmetric_tridiagonal)(Y1st);
-	X(destroy_symmetric_tridiagonal)(Y2st);
-	return Eigen_Jl;
+	free(V1); free(V3);
+	free(V2); free(V4);
+	free(lambda1); free(lambda3);
+	free(lambda2); free(lambda4);
+	X(destroy_symmetric_tridiagonal)(Y1);
+	X(destroy_symmetric_tridiagonal)(Y2);
+	X(destroy_symmetric_tridiagonal)(Y3);
+	X(destroy_symmetric_tridiagonal)(Y4);
+	X(destroy_symmetric_tridiagonal_symmetric_eigen)(Y1stse);
+	X(destroy_symmetric_tridiagonal_symmetric_eigen)(Y2stse);
+	X(destroy_symmetric_tridiagonal_symmetric_eigen)(Y3stse);
+	X(destroy_symmetric_tridiagonal_symmetric_eigen)(Y4stse);
+	return Jl;
 }
 
 // FIXME: __cospi function is different for long double and quadruple.
@@ -592,58 +666,58 @@ FLT * X(rotation_matrix)(int l, FLT alpha, FLT beta, FLT gamma){
 
 void X(do_a_test)(){
 	int l = 5;
-	
+
 	FLT * Eigen_Jl = X(J_eigen)(l);
 	FLT * Slow_Jl = X(J)(l);
 
-	//Y(printmat)("Slow_Jl", "%0.6f", Slow_Jl, 2*l+1, 2*l+1);
-	//Y(printmat)("Eigen_Jl", "%0.6f", Eigen_Jl, 2*l+1, 2*l+1);
+	Y(printmat)("Slow_Jl", "%0.6f", Slow_Jl, 2*l+1, 2*l+1);
+	Y(printmat)("Eigen_Jl", "%0.6f", Eigen_Jl, 2*l+1, 2*l+1);
 	//printf("Test eigen = %0.30f\n", Eigen_Jl[167 + 57*(2*l+1)]);
 	//printf("Test slow = %0.30f\n", Slow_Jl[167 + 57*(2*l+1)]);
 	
 	FLT alpha = 0.123;
 	FLT beta = 0.456;
 	FLT gamma = 0.789;
-	FLT * delta_direct = X(rotation_matrix_direct)(l, alpha, beta, gamma);
-	FLT * delta = X(rotation_matrix)(l, alpha, beta, gamma);
+	//FLT * delta_direct = X(rotation_matrix_direct)(l, alpha, beta, gamma);
+	//FLT * delta = X(rotation_matrix)(l, alpha, beta, gamma);
 	//Y(printmat)("Delta direct", "%0.6f", delta_direct, 2*l+1, 2*l+1);
 	//Y(printmat)("Delta", "%0.6f", delta, 2*l+1, 2*l+1);
 	
-	FLT * difference = X(sphzeros)(2*l+1, 2*l+1);
-	for(int j = 0; j < 2*l+1; ++j){
-		for(int i = 0; i < 2*l+1; ++i){
-			difference[i + j*(2*l+1)] = delta[i + j*(2*l+1)] - delta_direct[i + j*(2*l+1)];
-		}
-	}
-	X(threshold)(difference, 2*l+1, 2*l+1, 10*Y(eps)());
+	//FLT * difference = X(sphzeros)(2*l+1, 2*l+1);
+	//for(int j = 0; j < 2*l+1; ++j){
+	//	for(int i = 0; i < 2*l+1; ++i){
+	//		difference[i + j*(2*l+1)] = delta[i + j*(2*l+1)] - delta_direct[i + j*(2*l+1)];
+	//	}
+	//}
+	//X(threshold)(difference, 2*l+1, 2*l+1, 10*Y(eps)());
 	//Y(printmat)("Difference", "%0.6f", difference, 2*l+1, 2*l+1);
 	
-	free(difference);
-	free(delta);
-	free(delta_direct);
+	//free(difference);
+	//free(delta);
+	//free(delta_direct);
 	free(Eigen_Jl);
 	free(Slow_Jl);
 
-	int number_of_tests = 1000;
-	for(int k = 1; k <= number_of_tests; ++k){
-		FLT * _J_eigen = X(J_eigen)(k);
-		FLT * _J = X(J)(k);
+	//int number_of_tests = 1000;
+	//for(int k = 1; k <= number_of_tests; ++k){
+	//	FLT * _J_eigen = X(J_eigen)(k);
+	//	FLT * _J = X(J)(k);
 
-		printf("\rTest number k = %d", k);
-		for(int j = 0; j < 2*k+1; ++j){
-			for(int i = 0; i < 2*k+1; ++i){
-				if(abs(_J_eigen[i + j*(2*k+1)] - _J[i + j*(2*k+1)]) > 1e-14){
-					printf("\nERROR! Not identical entries for [%d, %d]  k = %d.\n", i, j, k);
-					printf("Eigen_Jl[i, j] = %.30f\n", _J_eigen[i + j*(2*k+1)]);
-					printf("J[i, j] = %.30f\n", _J[i + j*(2*k+1)]);
-					return;
-				}
-			}
-		}
-		free(_J_eigen);
-		free(_J);
-	}
-	printf("\nTest done!\n");
+	//	printf("\rTest number k = %d", k);
+	//	for(int j = 0; j < 2*k+1; ++j){
+	//		for(int i = 0; i < 2*k+1; ++i){
+	//			if(abs(_J_eigen[i + j*(2*k+1)] - _J[i + j*(2*k+1)]) > 1e-14){
+	//				printf("\nERROR! Not identical entries for [%d, %d]  k = %d.\n", i, j, k);
+	//				printf("Eigen_Jl[i, j] = %.30f\n", _J_eigen[i + j*(2*k+1)]);
+	//				printf("J[i, j] = %.30f\n", _J[i + j*(2*k+1)]);
+	//				return;
+	//			}
+	//		}
+	//	}
+	//	free(_J_eigen);
+	//	free(_J);
+	//}
+	//printf("\nTest done!\n");
 
 	//int number_of_tests = 10000;
 	//for(int k = 1; k <= number_of_tests; ++k){
