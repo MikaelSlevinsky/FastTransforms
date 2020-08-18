@@ -84,7 +84,7 @@ ASM = src/recurrence/recurrence_default.s \
       src/rotations/rotations_AVX512F.s \
       src/rotations/rotations_NEON.s
 
-SRC = src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c
+SRC = src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c src/isometries.c
 
 machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
 

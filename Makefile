@@ -5,7 +5,6 @@ all:
 	make lib
 	make tests
 	make examples
-	make rotation_sph
 
 assembly:
 	$(CC) -S $(AFLAGS) src/recurrence/recurrence_default.c -o src/recurrence/recurrence_default.s
@@ -45,6 +44,7 @@ tests:
 	$(CC) src/ftutilities.c test/test_tdc.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_tdc
 	$(CC) src/ftutilities.c test/test_drivers.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_drivers
 	$(CC) src/ftutilities.c test/test_fftw.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_fftw
+	$(CC) src/ftutilities.c test/test_isometries.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_isometries
 
 examples:
 	$(CC) src/ftutilities.c examples/additiontheorem.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o additiontheorem
@@ -52,9 +52,6 @@ examples:
 	$(CC) src/ftutilities.c examples/holomorphic.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o holomorphic
 	$(CC) src/ftutilities.c examples/nonlocaldiffusion.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o nonlocaldiffusion
 	$(CC) src/ftutilities.c examples/spinweighted.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o spinweighted
-
-rotation_sph: rotation_sph.c rotation_sph_source.c
-	$(CC) src/ftutilities.c rotation_sph.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o rotation_sph
 
 runtests:
 	./test_recurrence
@@ -66,6 +63,7 @@ runtests:
 	./test_banded
 	./test_dprk
 	./test_tdc
+	./test_isometries
 	OMP_NUM_THREADS=$(FT_NUM_THREADS) ./test_drivers 1 3 0
 	OMP_NUM_THREADS=$(FT_NUM_THREADS) ./test_fftw 1 3 0
 

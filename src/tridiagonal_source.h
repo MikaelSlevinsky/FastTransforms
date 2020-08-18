@@ -33,6 +33,7 @@ void X(symmetric_definite_tridiagonal_eig)(X(symmetric_tridiagonal) * A, X(symme
 X(symmetric_tridiagonal) * X(symmetric_tridiagonal_congruence)(X(symmetric_tridiagonal) * A, X(symmetric_tridiagonal) * B, FLT * V);
 
 X(symmetric_tridiagonal_symmetric_eigen) * X(symmetric_tridiagonal_symmetric_eig)(X(symmetric_tridiagonal) * T, FLT * lambda, const int sign);
+FLT * X(symmetric_tridiagonal_symmetric_eigenvectors)(X(symmetric_tridiagonal_symmetric_eigen) * F);
 void X(semv)(X(symmetric_tridiagonal_symmetric_eigen) * F, FLT * x, int incx, FLT * y);
 
 X(symmetric_tridiagonal) * X(create_A_shtsdtev)(const int n, const int mu, const int m, char PARITY);

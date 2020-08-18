@@ -351,6 +351,26 @@ X(symmetric_tridiagonal_symmetric_eigen) * X(symmetric_tridiagonal_symmetric_eig
     return F;
 }
 
+// Eigenvectors from symmetric_tridiagonal_symmetric_eigen struct.
+FLT * X(symmetric_tridiagonal_symmetric_eigenvectors)(X(symmetric_tridiagonal_symmetric_eigen) * F){
+	FLT * V = calloc(F->n * F->n, sizeof(FLT));
+	FLT * Id = calloc(F->n * F->n, sizeof(FLT));
+
+	if(F->n > 1){
+		for(int j = 0; j < F->n; ++j){
+			Id[j + j*F->n] = 1;
+			V[j + j*F->n] = 1;
+		}
+		for(int j = 0; j < F->n; ++j)
+			X(semv)(F, Id+j*F->n, 1, V+j*F->n);
+	}
+	else // If matrix is one by one.
+		V[0] = 1;
+
+	free(Id);
+	return V;
+}
+
 // y = V*x == Vᵀx
 void X(semv)(X(symmetric_tridiagonal_symmetric_eigen) * F, FLT * x, int incx, FLT * y) {
     X(orthogonal_polynomial_clenshaw)(F->n, x, incx, F->A, F->B, F->C, F->n, F->lambda, F->phi0, y);
