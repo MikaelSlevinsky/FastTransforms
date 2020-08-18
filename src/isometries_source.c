@@ -2,17 +2,17 @@ FLT * X(Gx)(int l){
 	FLT * Gx = (FLT*)calloc((2*l + 3)*(2*l + 1), sizeof(FLT));
 
 	for(int k = 0; k < l-1; ++k){
-		Gx[k+2 + (2*l+3)*k] = sqrt((k+1)*(k+1+1)) / (2*sqrt((2*l+1)*(2*l+3)));
+		Gx[k+2 + (2*l+3)*k] = Y(sqrt)((k+1)*(k+1+1)) / (2*Y(sqrt)((2*l+1)*(2*l+3)));
 		Gx[2*l-k + (2*l+3)*(2*l-k)] = Gx[k+2 + (2*l+3)*k];
 	}
 
 	for(int k = 0; k < l; ++k){
-		Gx[k + (2*l+3)*k] = -1 * sqrt((2*l+2-(k+1))*(2*l+3-(k+1))) / (2 * sqrt((2*l+1)*(2*l+3)));
+		Gx[k + (2*l+3)*k] = -1 * Y(sqrt)((2*l+2-(k+1))*(2*l+3-(k+1))) / (2 * Y(sqrt)((2*l+1)*(2*l+3)));
 		Gx[2*l+2-k + (2*l+3)*(2*l-k)] = Gx[k + (2*l+3)*k] ;
 	}
 
-	Gx[(l-1)+2 + (2*l+3)*((l-1)+2)] = sqrt(2*l*(l+1)) / (2*sqrt((2*l+1)*(2*l+3)));
-	Gx[(l-1)+3 + (2*l+3)*l] = -1 * sqrt(2*(l+1)*(l+2)) / (2*sqrt((2*l+1)*(2*l+3)));
+	Gx[(l-1)+2 + (2*l+3)*((l-1)+2)] = Y(sqrt)(2*l*(l+1)) / (2*Y(sqrt)((2*l+1)*(2*l+3)));
+	Gx[(l-1)+3 + (2*l+3)*l] = -1 * Y(sqrt)(2*(l+1)*(l+2)) / (2*Y(sqrt)((2*l+1)*(2*l+3)));
 
 	return Gx;
 }
@@ -21,17 +21,17 @@ FLT * X(Gy)(int l){
 	FLT * Gy = (FLT*)calloc((2*l + 3)*(2*l + 1), sizeof(FLT));
 	
 	for(int k = 0; k < l-1; ++k){
-		Gy[2*l-k + (2*l+3)*k] = sqrt((k+1)*(k+1+1)) / (2*sqrt((2*l+1)*(2*l+3)));
+		Gy[2*l-k + (2*l+3)*k] = Y(sqrt)((k+1)*(k+1+1)) / (2*Y(sqrt)((2*l+1)*(2*l+3)));
 		Gy[2+k + (2*l+3)*(2*l-k)] = -1 * Gy[2*l-k + (2*l+3)*k];
 	}
 
 	for(int k = 0; k < l; ++k){
-		Gy[k + (2*l+3)*(2*l-k)] = -1 * sqrt((2*l+2-(k+1))*(2*l+3-(k+1))) / (2 * sqrt((2*l+1)*(2*l+3)));
+		Gy[k + (2*l+3)*(2*l-k)] = -1 * Y(sqrt)((2*l+2-(k+1))*(2*l+3-(k+1))) / (2 * Y(sqrt)((2*l+1)*(2*l+3)));
 		Gy[2*l+2-k + (2*l+3)*k] = -1 * Gy[k + (2*l+3)*(2*l-k)];
 	}
 
-	Gy[(l-1)+2 + (2*l+3)*(l-1)] = sqrt(2*l*(l+1)) / (2*sqrt((2*l+1)*(2*l+3)));
-	Gy[l + (2*l+3)*l] = -1 * sqrt(2*(l+1)*(l+2)) / (2*sqrt((2*l+1)*(2*l+3)));
+	Gy[(l-1)+2 + (2*l+3)*(l-1)] = Y(sqrt)(2*l*(l+1)) / (2*Y(sqrt)((2*l+1)*(2*l+3)));
+	Gy[l + (2*l+3)*l] = -1 * Y(sqrt)(2*(l+1)*(l+2)) / (2*Y(sqrt)((2*l+1)*(2*l+3)));
 
 	return Gy;
 }
@@ -40,7 +40,7 @@ FLT * X(Gz)(int l){
 	FLT * Gz = (FLT*)calloc((2*l + 3)*(2*l + 1), sizeof(FLT));
 
 	for(int k = 0; k < 2*l+1; ++k){
-		Gz[k*(2*l+3) + k+1] = sqrt(((FLT)(k+1)*(2*l+2-(k+1))) / ((FLT)(2*l+1)*(2*l+3)));
+		Gz[k*(2*l+3) + k+1] = Y(sqrt)(((FLT)(k+1)*(2*l+2-(k+1))) / ((FLT)(2*l+1)*(2*l+3)));
 	}
 
 	return Gz;
@@ -49,24 +49,24 @@ FLT * X(Gz)(int l){
 // Gy has size 2l+3 by 2l+1. Then, 0 <= i <= 2l+2 and 0 <= j <= 2l.
 FLT X(Gy_index)(int l, int i, int j){
 	if(l+2 <= i && i <= 2*l && j == 2*l-i)
-		return sqrt((FLT)(j+1)*(j+2))/(2*sqrt((FLT)(2*l+1)*(2*l+3)));
+		return Y(sqrt)((FLT)(j+1)*(j+2))/(2*Y(sqrt)((FLT)(2*l+1)*(2*l+3)));
 	else if(2 <= i && i <= l && j == 2*l+2-i)
-		return -1 * sqrt((FLT)(i-1)*i)/(2*sqrt((FLT)(2*l+1)*(2*l+3)));
+		return -1 * Y(sqrt)((FLT)(i-1)*i)/(2*Y(sqrt)((FLT)(2*l+1)*(2*l+3)));
 	else if(0 <= i && i <= l-1 && j == 2*l-i)
-		return -1 * sqrt((FLT)(2*l+2-(i+1))*(2*l+3-(i+1)))/(2*sqrt((FLT)(2*l+1)*(2*l+3)));
+		return -1 * Y(sqrt)((FLT)(2*l+2-(i+1))*(2*l+3-(i+1)))/(2*Y(sqrt)((FLT)(2*l+1)*(2*l+3)));
 	else if(l+3 <= i && i <= 2*l+2 && j == 2*l+2-i)
-		return sqrt((FLT)(2*l+2-(j+1))*(2*l+3-(j+1)))/(2*sqrt((FLT)(2*l+1)*(2*l+3)));
+		return Y(sqrt)((FLT)(2*l+2-(j+1))*(2*l+3-(j+1)))/(2*Y(sqrt)((FLT)(2*l+1)*(2*l+3)));
 	else if(i == l+1 && j == l-1)
-		return sqrt((FLT)2*l*(l+1))/(2*sqrt((FLT)(2*l+1)*(2*l+3)));
+		return Y(sqrt)((FLT)2*l*(l+1))/(2*Y(sqrt)((FLT)(2*l+1)*(2*l+3)));
 	else if(i == l && j == l)
-		return -1 * sqrt((FLT)2*(l+1)*(l+2))/(2*sqrt((FLT)(2*l+1)*(2*l+3)));
+		return -1 * Y(sqrt)((FLT)2*(l+1)*(l+2))/(2*Y(sqrt)((FLT)(2*l+1)*(2*l+3)));
 
 	return 0;
 }
 
 FLT X(Gz_index)(int l, int i, int j){
 	if(i == j+1)
-		return sqrt((j+1)*(2*l+2-(j+1)))/sqrt((2*l+1)*(2*l+3));
+		return Y(sqrt)((j+1)*(2*l+2-(j+1)))/Y(sqrt)((2*l+1)*(2*l+3));
 	return 0;
 }
 
@@ -76,24 +76,23 @@ FLT X(Gzhat_index)(int l, int i, int j){
 
 FLT X(Gzhatinv_index)(int l, int i, int j){
 	if(i == j)
-		return 1/X(Gzhat_index)(l, i, j);
+		return ONE(FLT)/X(Gzhat_index)(l, i, j);
 	return 0;
 }
 
-// FIXME: __cospi function is different for long double and quadruple.
 FLT X(X_index)(int l, FLT alpha, int i, int j){
 	if(i == j && i == l)
 		return 1;
 	else if(i == j)
-		return __cospi((l-i)*alpha);
+		return Y(__cospi)((l-i)*alpha);
 	else if(j == 2*l-i)
-		return __sinpi((l-i)*alpha);
+		return Y(__sinpi)((l-i)*alpha);
 
 	return 0;
 }
 
 FLT X(Y_index)(int l, int i, int j){
-	FLT Yij = 0;
+	FLT Yij = ZERO(FLT);
 	for(int k = 0; k <= 2; ++k)
 		Yij += X(Gy_index)(l, 2*l-i+k, i) * X(Gy_index)(l, 2*l-i+k, j);
 
@@ -113,9 +112,9 @@ FLT * X(Y_dense_test)(int l){
 
 FLT X(Z_index)(int l, int i, int j){
 	if(i != j)
-		return 0;
+		return ZERO(FLT);
 
-	return pow(X(Gzhat_index)(l, i, i), 2);
+	return Y(pow)(X(Gzhat_index)(l, i, i), 2);
 }
 
 FLT * X(Z_diagonal)(int l){
@@ -155,7 +154,7 @@ FLT * X(J)(int l){
 	if(l == 0){
 		FLT * A = (FLT*)calloc((2*l+1)*(2*l+1), sizeof(FLT));
 		for(int i = 0; i < 2*l+1; ++i){
-			A[i + i*(2*l+1)] = 1;
+			A[i + i*(2*l+1)] = ONE(FLT);
 		}
 		return A;
 	}
@@ -167,7 +166,7 @@ FLT * X(J)(int l){
 	// Jlv = Gylm1 * Jlm1 * Gzhatinv_lm1
 	for(int j = 0; j < 2*l-1; ++j){
 		for(int i = 0; i < 2*l+1; ++i){
-			FLT entry = 0;
+			FLT entry = ZERO(FLT);
 
 			if(X(is_J_entry_nonzero)(l-1, 2*(l-1)-i, j) == 1 && i < 2*l-1)
 				entry += X(Gy_index)(l-1, i, 2*(l-1)-i) * Jlm1[2*(l-1)-i + j*(2*l-1)] * X(Gzhatinv_index)(l-1, j, j);
@@ -188,7 +187,7 @@ FLT * X(J)(int l){
 		Jl[i] = Jl[i*(2*l+1)];
 		Jl[i + 2*l*(2*l+1)] = Jl[2*l + i*(2*l+1)];
 	}
-	Jl[2*l + 2*l*(2*l+1)] = pow(2, 1-l);
+	Jl[2*l + 2*l*(2*l+1)] = Y(pow)(2, 1-l);
 
 	free(Jlv);
 	free(Jlm1);
@@ -273,7 +272,7 @@ FLT * X(J_eigen)(int l){
 	// Sign correction.
 	FLT * x = (FLT*)calloc(n1, sizeof(FLT));
 	for(int i = 0; i < n1; ++i)
-		x[i] = 1;
+		x[i] = ONE(FLT);
 	for(int j = 0; j < n1; ++j)
 		if((V1->A[(n1-1) + j*n1] < 0 ? 1 : 0) != (pow(-1, ceil((FLT)l/2)) < 0 ? 1 : 0))
 			X(scale_columns_densematrix)(-1, x, V1);
@@ -320,7 +319,7 @@ FLT * X(J_eigen)(int l){
 }
 
 FLT X(JXJX)(FLT * J, int l, int i, int j, FLT beta, FLT gamma){
-	FLT entry = 0;
+	FLT entry = ZERO(FLT);
 	for(int k = 0; k < 2*l+1; ++k){
 		if(X(is_J_entry_nonzero)(l, i, k) == 1 && X(is_J_entry_nonzero)(l, k, j) == 1 && j == l && k == l)
 			entry += J[i + k*(2*l+1)] * J[k + j*(2*l+1)];
@@ -339,11 +338,11 @@ FLT X(JXJX)(FLT * J, int l, int i, int j, FLT beta, FLT gamma){
 FLT * X(rotation_matrix_J)(int l, FLT alpha, FLT beta, FLT gamma, FLT * J){
 	FLT * Delta = (FLT*)calloc((2*l+1)*(2*l+1), sizeof(FLT));
 	// Fasttransforms uses Condon-Shortley phase convention.
-	beta *= -1;
+	beta *= -ONE(FLT);
 
 	for(int j = 0; j < 2*l+1; ++j){
 		for(int i = 0; i < 2*l+1; ++i){
-			FLT entry = 0;
+			FLT entry = ZERO(FLT);
 
 			entry = X(X_index)(l, alpha, i, i)*X(JXJX)(J, l, i, j, beta, gamma);
 			if(i != l)

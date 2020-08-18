@@ -9,11 +9,11 @@ void Y(test_isometries)(int * checksum){
 	FLT * Mult = (FLT*)calloc(n*n, sizeof(FLT));
 	FLT * Id = (FLT*)calloc(n*n, sizeof(FLT));
 	for(int i = 0; i < n; ++i)
-		Id[i + i*n] = 1;
+		Id[i + i*n] = ONE(FLT);
 
 	for(int j = 0; j < n; ++j){
 		for(int i = 0; i < n; ++i){
-			FLT entry = 0;
+			FLT entry = ZERO(FLT);
 			for(int k = 0; k < n; ++k){
 				entry += Jl[i + k*n] * Jl[k + j*n];
 			}
@@ -35,7 +35,7 @@ void Y(test_isometries)(int * checksum){
 	
 	for(int j = 0; j < n; ++j){
 		for(int i = 0; i < n; ++i){
-			FLT entry = 0;
+			FLT entry = ZERO(FLT);
 			for(int k = 0; k < n; ++k){
 				entry += rot[i + k*n] * rot_back[k + j*n];
 			}
@@ -45,9 +45,4 @@ void Y(test_isometries)(int * checksum){
 	err = X(norm_2arg)(Mult, Id, n*n)/X(norm_1arg)(Id, n);
     printf("Rotate by (alpha, beta, gamma), then rotate back. \t |%20.2e ", (double) err);
     X(checktest)(err, n*n, checksum);
-
-	//printf("\n");
-	//Y(printmat)("Jl", "%0.6f", Jl, n, n);
-	//Y(printmat)("rot", "%0.6f", rot, n, n);
-	//Y(printmat)("rot_back", "%0.6f", rot_back, n, n);
 }
