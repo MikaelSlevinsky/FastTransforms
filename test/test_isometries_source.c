@@ -1,9 +1,26 @@
 void Y(test_isometries)(int * checksum){
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
+    printf("\t\t\t\t\t\t\t |   or Calculation Time\n");
     printf("---------------------------------------------------------|----------------------\n");
 
 	int l = 50;
 	int n = 2*l+1;
+	int NTIMES = 3;
+	struct timeval start, end;
+
+	FLT alpha = 0.123;
+	FLT beta = 0.456;
+	FLT gamma = 0.789;
+
+	FT_TIME({FLT * A = X(J)(l); free(A);}, start, end, NTIMES)
+	printf("Time to build and free J using direct method \t\t |%20.6f s\n", elapsed(&start, &end, NTIMES));
+	FT_TIME({FLT * A = X(J_eigen)(l); free(A);}, start, end, NTIMES)
+	printf("Time to build and free J using eigenproblem \t\t |%20.6f s\n", elapsed(&start, &end, NTIMES));
+
+	FT_TIME({FLT * A = X(rotation_matrix_direct)(l, alpha, beta, gamma); free(A);}, start, end, NTIMES)
+	printf("Time to build and free rotation matrix, direct method \t |%20.6f s\n", elapsed(&start, &end, NTIMES));
+	FT_TIME({FLT * A = X(rotation_matrix)(l, alpha, beta, gamma); free(A);}, start, end, NTIMES)
+	printf("Time to build and free rotation matrix, eigenproblem \t |%20.6f s\n", elapsed(&start, &end, NTIMES));
 
 	FLT * Jl = X(J_eigen)(l);
 	FLT * Mult = (FLT*)calloc(n*n, sizeof(FLT));
@@ -25,9 +42,6 @@ void Y(test_isometries)(int * checksum){
     X(checktest)(err, n*n, checksum);
 	free(Mult);
 
-	FLT alpha = 0.123;
-	FLT beta = 0.456;
-	FLT gamma = 0.789;
 	Mult = (FLT*)calloc(n*n, sizeof(FLT));
 
 	FLT * rot = X(rotation_matrix)(l, alpha, beta, gamma);
