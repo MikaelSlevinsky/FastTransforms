@@ -34,11 +34,13 @@ void ft_clenshawf(const int n, const float * c, const int incc, const int m, flo
 void ft_orthogonal_polynomial_clenshaw(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, double * phi0, double * f);
 void ft_orthogonal_polynomial_clenshawf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 
-void ft_orthogonal_polynomial_clenshawl(const int n, const long double * c, const int incc, const long double * A, const long double * B, const long double * C, const int m, long double * x, long double * phi0, long double * f);
+void ft_eigen_eval(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, const int sign, double * f);
+void ft_eigen_evalf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, const int sign, float * f);
+void ft_eigen_evall(const int n, const long double * c, const int incc, const long double * A, const long double * B, const long double * C, const int m, long double * x, const int sign, long double * f);
 #if defined(FT_QUADMATH)
     #include <quadmath.h>
     typedef __float128 quadruple;
-    void ft_orthogonal_polynomial_clenshawq(const int n, const quadruple * c, const int incc, const quadruple * A, const quadruple * B, const quadruple * C, const int m, quadruple * x, quadruple * phi0, quadruple * f);
+    void ft_eigen_evalq(const int n, const quadruple * c, const int incc, const quadruple * A, const quadruple * B, const quadruple * C, const int m, quadruple * x, const int sign, quadruple * f);
 #endif
 
 #include "tdc.h"
@@ -497,5 +499,86 @@ ft_spinsphere_fftw_plan * ft_plan_spinsph_analysis(const int N, const int M, con
 void ft_execute_spinsph_synthesis(const ft_spinsphere_fftw_plan * P, ft_complex * X, const int N, const int M);
 /// Execute FFTW analysis on the sphere with spin.
 void ft_execute_spinsph_analysis(const ft_spinsphere_fftw_plan * P, ft_complex * X, const int N, const int M);
+
+/*!
+  \brief A static struct to store an orthogonal matrix \f$Q \in \mathbb{R}^{3\times3}\f$, such that \f$Q^\top Q = I\f$.
+  \f$Q\f$ has column-major storage.
+*/
+typedef struct {
+    double Q[9];
+} ft_orthogonal_transformation;
+
+/*!
+  \brief Every orthogonal matrix \f$Q \in \mathbb{R}^{3\times3}\f$ can be decomposed as a product of \f$ZYZ\f$ Euler angles and, if necessary, a reflection \f$R\f$ about the \f$xy\f$-plane.
+  \f[
+  Q = ZYZR,
+  \f]
+  where the \f$z\f$-axis rotations are:
+  \f[
+  Z = \begin{pmatrix} c & -s & 0\\ s & c & 0\\ 0 & 0 & 1\end{pmatrix},
+  \f]
+  the \f$y\f$-axis rotation is:
+  \f[
+  Y = \begin{pmatrix} c & 0 & -s\\ 0 & 1 & 0\\ s & 0 & c\end{pmatrix},
+  \f]
+  and the potential reflection is:
+  \f[
+  R = \begin{pmatrix} 1 & 0 & 0\\ 0 & 1 & 0\\ 0 & 0 & \pm 1\end{pmatrix}.
+  \f]
+  The reflection is stored as an integer `sign` corresponding to the bottom right entry.
+*/
+typedef struct {
+    double s[3];
+    double c[3];
+    int sign;
+} ft_ZYZR;
+
+/*!
+  \brief A static struct to store a reflection about the plane \f$w\cdot x = 0\f$ in \f$\mathbb{R}^3\f$.
+*/
+typedef struct {
+    double w[3];
+} ft_reflection;
+
+ft_ZYZR ft_create_ZYZR(ft_orthogonal_transformation Q);
+
+void ft_apply_ZYZR(ft_ZYZR Q, ft_orthogonal_transformation * U);
+
+void ft_apply_reflection(ft_reflection Q, ft_orthogonal_transformation * U);
+
+void ft_execute_sph_polar_rotation(double * A, const int N, const int M, double s, double c);
+
+void ft_execute_sph_polar_reflection(double * A, const int N, const int M);
+
+typedef struct {
+    ft_symmetric_tridiagonal_symmetric_eigen * F11;
+    ft_symmetric_tridiagonal_symmetric_eigen * F21;
+    ft_symmetric_tridiagonal_symmetric_eigen * F12;
+    ft_symmetric_tridiagonal_symmetric_eigen * F22;
+    int l;
+} ft_partial_ZY_axis_exchange_factorization;
+
+typedef struct {
+    ft_partial_ZY_axis_exchange_factorization ** F;
+    int n;
+} ft_ZY_axis_exchange_factorization;
+
+void ft_destroy_partial_ZY_axis_exchange_factorization(ft_partial_ZY_axis_exchange_factorization * F);
+
+void ft_destroy_ZY_axis_exchange_factorization(ft_ZY_axis_exchange_factorization * F);
+
+ft_partial_ZY_axis_exchange_factorization * ft_create_partial_ZY_axis_exchange_factorization(const int l);
+
+ft_ZY_axis_exchange_factorization * ft_create_ZY_axis_exchange_factorization(const int n);
+
+void ft_execute_sph_ZY_axis_exchange(ft_ZY_axis_exchange_factorization * J, double * A, const int N, const int M);
+
+void ft_execute_sph_isometry(ft_ZY_axis_exchange_factorization * J, ft_ZYZR Q, double * A, const int N, const int M);
+
+void ft_execute_sph_rotation(ft_ZY_axis_exchange_factorization * J, const double alpha, const double beta, const double gamma, double * A, const int N, const int M);
+
+void ft_execute_sph_reflection(ft_ZY_axis_exchange_factorization * J, ft_reflection W, double * A, const int N, const int M);
+
+void ft_execute_sph_orthogonal_transformation(ft_ZY_axis_exchange_factorization * J, ft_orthogonal_transformation Q, double * A, const int N, const int M);
 
 #endif // FASTTRANSFORMS_H
