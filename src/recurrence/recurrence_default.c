@@ -205,8 +205,6 @@ void eigen_eval_defaultl(const int n, const long double * c, const int incc, con
             }
         }
         nrm = (sign*vkm1 < 0) ? -1.0l/sqrtl(nrm) : 1.0l/sqrtl(nrm);
-        if (isnanl(nrm))
-            printf("AT THE END: The nrm is a nan\n");
         f[j] *= nrm;
     }
 }

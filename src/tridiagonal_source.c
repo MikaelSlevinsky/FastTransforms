@@ -326,16 +326,14 @@ X(symmetric_tridiagonal_symmetric_eigen) * X(symmetric_tridiagonal_symmetric_eig
     FLT * A = calloc(n, sizeof(FLT));
     FLT * B = calloc(n, sizeof(FLT));
     FLT * C = calloc(n, sizeof(FLT));
-    for (int i = n-1; i > 0; i--) {
+    if (n > 1) {
+        A[n-1] = 1/T->b[n-2];
+        B[n-1] = -T->a[n-1]/T->b[n-2];
+    }
+    for (int i = n-2; i > 0; i--) {
         A[i] = 1/T->b[i-1];
-        if (Y(isnan)(A[i]))
-            printf("IN CONSTRUCTION: A[%i] is a nan\n", i);
         B[i] = -T->a[i]/T->b[i-1];
-        if (Y(isnan)(B[i]))
-            printf("IN CONSTRUCTION: B[%i] is a nan\n", i);
         C[i] = T->b[i]/T->b[i-1];
-        if (Y(isnan)(C[i]))
-            printf("IN CONSTRUCTION: C[%i] is a nan\n", i);
     }
     X(symmetric_tridiagonal_symmetric_eigen) * F = malloc(sizeof(X(symmetric_tridiagonal_symmetric_eigen)));
     F->A = A;
