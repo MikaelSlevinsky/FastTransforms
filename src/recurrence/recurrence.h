@@ -100,4 +100,79 @@ for (; j < m; j++) {                                                           \
     f[j] = phi0[j]*bk;                                                         \
 }
 
+#define EIGEN_EVAL_KERNEL(T, VT, S, L, VLOAD, VSTORE, VMULADD, VMULSUB, VALL, VSQRT, VMOVEMASK, HUGE, SSQRT)  \
+if (n < 1) {                                                                   \
+    for (int j = 0; j < m; j++)                                                \
+        f[j] = 0;                                                              \
+    return;                                                                    \
+}                                                                              \
+int j = 0;                                                                     \
+for (; j < m+1-S*L; j += S*L) {                                                \
+    T ONE = 1;                                                                 \
+    VT vkm1[L];                                                                \
+    VT vk[L];                                                                  \
+    VT vkp1[L] = {0};                                                          \
+    VT nrm[L];                                                                 \
+    VT sum[L];                                                                 \
+    VT X[L];                                                                   \
+    for (int l = 0; l < L; l++) {                                              \
+        vkm1[l] = VALL(ONE);                                                   \
+        vk[l] = VALL(ONE);                                                     \
+        nrm[l] = VALL(ONE);                                                    \
+        sum[l] = VALL(c[(n-1)*incc]);                                          \
+        X[l] = VLOAD(x+j+S*l);                                                 \
+    }                                                                          \
+    for (int k = n-1; k > 0; k--) {                                            \
+        for (int l = 0; l < L; l++) {                                          \
+            vkm1[l] = VMULSUB(VMULADD(VALL(A[k]), X[l], VALL(B[k])), vk[l], VALL(C[k])*vkp1[l]); \
+            vkp1[l] = vk[l];                                                   \
+            vk[l] = vkm1[l];                                                   \
+            nrm[l] = VMULADD(vkm1[l], vkm1[l], nrm[l]);                        \
+            sum[l] = VMULADD(vkm1[l], VALL(c[(k-1)*incc]), sum[l]);            \
+            if (VMOVEMASK(nrm[l] > VALL(HUGE)) != 0) {                         \
+                nrm[l] = VALL(ONE)/VSQRT(nrm[l]);                              \
+                vkp1[l] = nrm[l]*vkp1[l];                                      \
+                vk[l] = nrm[l]*vk[l];                                          \
+                vkm1[l] = nrm[l]*vkm1[l];                                      \
+                sum[l] = nrm[l]*sum[l];                                        \
+                nrm[l] = VALL(ONE);                                            \
+            }                                                                  \
+        }                                                                      \
+    }                                                                          \
+    for (int l = 0; l < L; l++) {                                              \
+        nrm[l] = VALL(ONE)/VSQRT(nrm[l]);                                      \
+        VSTORE(f+j+S*l, nrm[l]*sum[l]);                                        \
+    }                                                                          \
+    T svkm1[S*L];                                                              \
+    for (int l = 0; l < L; l++)                                                \
+        VSTORE(&svkm1[0]+S*l, vkm1[l]);                                        \
+    for (int ll = 0; ll < S*L; ll++)                                           \
+        f[j+ll] = (sign*svkm1[ll] < 0) ? -f[j+ll] : f[j+ll];                   \
+}                                                                              \
+for (; j < m; j++) {                                                           \
+    T vkm1 = 1;                                                                \
+    T vk = 1;                                                                  \
+    T vkp1 = 0;                                                                \
+    T nrm = 1;                                                                 \
+    T X = x[j];                                                                \
+    T sum = c[(n-1)*incc];                                                     \
+    for (int k = n-1; k > 0; k--) {                                            \
+        vkm1 = (A[k]*X+B[k])*vk - C[k]*vkp1;                                   \
+        vkp1 = vk;                                                             \
+        vk = vkm1;                                                             \
+        nrm += vkm1*vkm1;                                                      \
+        sum += vkm1*c[(k-1)*incc];                                             \
+        if (nrm > HUGE) {                                                      \
+            nrm = 1/SSQRT(nrm);                                                \
+            vkp1 *= nrm;                                                       \
+            vk *= nrm;                                                         \
+            vkm1 *= nrm;                                                       \
+            sum *= nrm;                                                        \
+            nrm = 1;                                                           \
+        }                                                                      \
+    }                                                                          \
+    nrm = (sign*vkm1 < 0) ? -1/SSQRT(nrm) : 1/SSQRT(nrm);                      \
+    f[j] = nrm*sum;                                                            \
+}
+
 #endif // FTRECURRENCE_H

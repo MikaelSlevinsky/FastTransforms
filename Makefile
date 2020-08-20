@@ -44,6 +44,7 @@ tests:
 	$(CC) src/ftutilities.c test/test_tdc.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_tdc
 	$(CC) src/ftutilities.c test/test_drivers.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_drivers
 	$(CC) src/ftutilities.c test/test_fftw.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_fftw
+	$(CC) src/ftutilities.c test/test_isometries.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_isometries
 
 examples:
 	$(CC) src/ftutilities.c examples/additiontheorem.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o additiontheorem
@@ -64,6 +65,7 @@ runtests:
 	./test_tdc
 	OMP_NUM_THREADS=$(FT_NUM_THREADS) ./test_drivers 1 3 0
 	OMP_NUM_THREADS=$(FT_NUM_THREADS) ./test_fftw 1 3 0
+	OMP_NUM_THREADS=$(FT_NUM_THREADS) ./test_isometries 1 3
 
 runexamples:
 	./additiontheorem
