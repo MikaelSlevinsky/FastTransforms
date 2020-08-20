@@ -52,11 +52,11 @@
 #define M_EPSl         0x1p-64l               /* powl(2.0l, -64)    */
 #define M_FLT_MINf     0x1p-126f              /* powf(2.0f, -126)   */
 #define M_FLT_MIN      0x1p-1022              /* pow(2.0, -1022)    */
-#if defined(__i386__) || defined(__x86_64__)
-#define M_FLT_MINl     0x1p-16382l            /* powl(2.0l, -16382) */
-#else // #elif defined(__POWERPC__)
+//#if defined(__i386__) || defined(__x86_64__)
+//#define M_FLT_MINl     0x1p-16382l            /* powl(2.0l, -16382) */
+//#else // #elif defined(__POWERPC__)
 #define M_FLT_MINl     0x1p-1022l            /* powl(2.0l, -1022) */
-#endif
+//#endif
 
 #define M_PIf          0xc.90fdaap-2f         // 3.1415927f0
 #ifndef M_PIl
