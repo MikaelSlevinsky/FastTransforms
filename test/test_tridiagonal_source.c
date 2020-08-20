@@ -149,7 +149,7 @@ void Y(test_tridiagonal)(int * checksum) {
         X(semv)(F, V+j*n, 1, V2+j*n);
     err = X(norm_2arg)(V2, Id, n*n)/X(norm_1arg)(Id, n*n);
     printf("Numerical symmetric orthogonality w/ known eigenvalues \t |%20.2e ", (double) err);
-    X(checktest)(err, n*n, checksum);
+    X(checktest)(err, 4*n*n, checksum);
 
     X(destroy_symmetric_tridiagonal)(A);
     X(destroy_symmetric_tridiagonal)(C);
