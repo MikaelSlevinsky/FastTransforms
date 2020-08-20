@@ -136,8 +136,11 @@ int main(int argc, const char * argv[]) {
 
         A = sphrand(N, M);
         J = ft_plan_sph_isometry(N);
+        alpha = 0.1;
+        beta = 0.2;
+        gamma = 0.3;
 
-        FT_TIME(ft_execute_sph_ZY_axis_exchange(J, A, N, M), start, end, NTIMES)
+        FT_TIME(ft_execute_sph_rotation(J, alpha, beta, gamma, A, N, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
         printf("\n");
