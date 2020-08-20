@@ -3,7 +3,7 @@
 
 static inline void compute_givens(double x, double y, double * c, double * s, double * r) {
     * r = hypot(x, y);
-    if (* r <= M_FLT_MIN || * r >= MAXFLOAT) {
+    if (* r <= M_FLT_MIN) {
         * c = 1.0;
         * s = 0.0;
     }
