@@ -75,6 +75,14 @@ The error growth rate is significantly reduced if (α, β, γ) = (-0.5, -0.5, -0
 | **ϵ<sub>2</sub>** | 7.60e-16 | 9.35e-16 | 1.31e-15 | 1.84e-15 | 2.56e-15 | 3.59e-15 | 5.05e-15 | 7.15e-15 |
 | **ϵ<sub>∞</sub>** | 1.78e-15 | 2.66e-15 | 5.33e-15 | 7.11e-15 | 1.27e-14 | 1.79e-14 | 2.91e-14 | 1.66e-13 |
 
+### Rotation of a spherical harmonic series (`sph_rotation`) with ZYZ Euler angles (α, β, γ) = (0.1, 0.2, 0.3)
+
+| Degree            | 63       | 127      | 255      | 511      | 1023     | 2047     | 4095     | 8191     |
+| ----------------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: |
+| **Time**          | 0.000138 | 0.000382 | 0.001290 | 0.005414 | 0.026758 | 0.156653 | 1.105567 | 9.460644 |
+| **ϵ<sub>2</sub>** | 3.34e-14 | 8.22e-14 | 2.24e-13 | 5.56e-13 | 1.50e-12 | 4.23e-12 | 1.18e-11 | 3.30e-11 |
+| **ϵ<sub>∞</sub>** | 2.41e-13 | 1.51e-12 | 5.86e-12 | 2.29e-11 | 8.04e-11 | 3.02e-10 | 1.38e-09 | 5.67e-09 |
+
 # References:
 
    [1]  R. M. Slevinsky. <a href="https://doi.org/10.1016/j.acha.2017.11.001">Fast and backward stable transforms between spherical harmonic expansions and bivariate Fourier series</a>, *Appl. Comput. Harmon. Anal.*, **47**:585—606, 2019.
