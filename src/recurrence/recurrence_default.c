@@ -122,7 +122,7 @@ void eigen_eval_default(const int n, const double * c, const int incc, const dou
         double vkp1 = 0.0;
         double nrm = 1.0;
         double X = x[j];
-        f[j] = vk*c[(n-1)*incc];
+        f[j] = c[(n-1)*incc];
         for (int k = n-1; k > 0; k--) {
             vkm1 = (A[k]*X+B[k])*vk - C[k]*vkp1;
             vkp1 = vk;
@@ -155,7 +155,7 @@ void eigen_eval_defaultf(const int n, const float * c, const int incc, const flo
         float vkp1 = 0.0f;
         float nrm = 1.0f;
         float X = x[j];
-        f[j] = vk*c[(n-1)*incc];
+        f[j] = c[(n-1)*incc];
         for (int k = n-1; k > 0; k--) {
             vkm1 = (A[k]*X+B[k])*vk - C[k]*vkp1;
             vkp1 = vk;
@@ -188,14 +188,14 @@ void eigen_eval_defaultl(const int n, const long double * c, const int incc, con
         long double vkp1 = 0.0l;
         long double nrm = 1.0l;
         long double X = x[j];
-        f[j] = vk*c[(n-1)*incc];
+        f[j] = c[(n-1)*incc];
         for (int k = n-1; k > 0; k--) {
             vkm1 = (A[k]*X+B[k])*vk - C[k]*vkp1;
             vkp1 = vk;
             vk = vkm1;
             nrm += vkm1*vkm1;
             f[j] += vkm1*c[(k-1)*incc];
-            if (nrm > epsl()/floatminl()) {
+            if ((double) nrm > eps()/floatmin()) {
                 nrm = 1.0l/sqrtl(nrm);
                 vkp1 *= nrm;
                 vk *= nrm;
@@ -222,7 +222,7 @@ void eigen_eval_defaultl(const int n, const long double * c, const int incc, con
             quadruple vkp1 = 0.0q;
             quadruple nrm = 1.0q;
             quadruple X = x[j];
-            f[j] = vk*c[(n-1)*incc];
+            f[j] = c[(n-1)*incc];
             for (int k = n-1; k > 0; k--) {
                 vkm1 = (A[k]*X+B[k])*vk - C[k]*vkp1;
                 vkp1 = vk;
