@@ -176,6 +176,8 @@ void eigen_eval_defaultf(const int n, const float * c, const int incc, const flo
     }
 }
 
+#include <stdio.h>
+
 void eigen_eval_defaultl(const int n, const long double * c, const int incc, const long double * A, const long double * B, const long double * C, const int m, long double * x, const int sign, long double * f) {
     if (n < 1) {
         for (int j = 0; j < m; j++)
@@ -195,8 +197,12 @@ void eigen_eval_defaultl(const int n, const long double * c, const int incc, con
             vk = vkm1;
             nrm += vkm1*vkm1;
             f[j] += vkm1*c[(k-1)*incc];
-            if ((double) nrm > eps()/floatmin()) {
+            if (isnanl(nrm))
+                printf("IN LOOP: The nrm is a nan\n");
+            if (nrm > epsl()/floatminl()) {
                 nrm = 1.0l/sqrtl(nrm);
+                if (isnanl(nrm))
+                    printf("IN CONDITIONAL: The nrm is a nan\n");
                 vkp1 *= nrm;
                 vk *= nrm;
                 vkm1 *= nrm;
@@ -205,6 +211,8 @@ void eigen_eval_defaultl(const int n, const long double * c, const int incc, con
             }
         }
         nrm = (sign*vkm1 < 0) ? -1.0l/sqrtl(nrm) : 1.0l/sqrtl(nrm);
+        if (isnanl(nrm))
+            printf("AT THE END: The nrm is a nan\n");
         f[j] *= nrm;
     }
 }
