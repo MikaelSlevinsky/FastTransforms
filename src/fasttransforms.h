@@ -556,29 +556,29 @@ typedef struct {
     ft_symmetric_tridiagonal_symmetric_eigen * F12;
     ft_symmetric_tridiagonal_symmetric_eigen * F22;
     int l;
-} ft_partial_ZY_axis_exchange_factorization;
+} ft_partial_sph_isometry_plan;
 
 typedef struct {
-    ft_partial_ZY_axis_exchange_factorization ** F;
+    ft_partial_sph_isometry_plan ** F;
     int n;
-} ft_ZY_axis_exchange_factorization;
+} ft_sph_isometry_plan;
 
-void ft_destroy_partial_ZY_axis_exchange_factorization(ft_partial_ZY_axis_exchange_factorization * F);
+void ft_destroy_partial_sph_isometry_plan(ft_partial_sph_isometry_plan * F);
 
-void ft_destroy_ZY_axis_exchange_factorization(ft_ZY_axis_exchange_factorization * F);
+void ft_destroy_sph_isometry_plan(ft_sph_isometry_plan * F);
 
-ft_partial_ZY_axis_exchange_factorization * ft_create_partial_ZY_axis_exchange_factorization(const int l);
+ft_partial_sph_isometry_plan * ft_plan_partial_sph_isometry(const int l);
 
-ft_ZY_axis_exchange_factorization * ft_create_ZY_axis_exchange_factorization(const int n);
+ft_sph_isometry_plan * ft_plan_sph_isometry(const int n);
 
-void ft_execute_sph_ZY_axis_exchange(ft_ZY_axis_exchange_factorization * J, double * A, const int N, const int M);
+void ft_execute_sph_ZY_axis_exchange(ft_sph_isometry_plan * J, double * A, const int N, const int M);
 
-void ft_execute_sph_isometry(ft_ZY_axis_exchange_factorization * J, ft_ZYZR Q, double * A, const int N, const int M);
+void ft_execute_sph_isometry(ft_sph_isometry_plan * J, ft_ZYZR Q, double * A, const int N, const int M);
 
-void ft_execute_sph_rotation(ft_ZY_axis_exchange_factorization * J, const double alpha, const double beta, const double gamma, double * A, const int N, const int M);
+void ft_execute_sph_rotation(ft_sph_isometry_plan * J, const double alpha, const double beta, const double gamma, double * A, const int N, const int M);
 
-void ft_execute_sph_reflection(ft_ZY_axis_exchange_factorization * J, ft_reflection W, double * A, const int N, const int M);
+void ft_execute_sph_reflection(ft_sph_isometry_plan * J, ft_reflection W, double * A, const int N, const int M);
 
-void ft_execute_sph_orthogonal_transformation(ft_ZY_axis_exchange_factorization * J, ft_orthogonal_transformation Q, double * A, const int N, const int M);
+void ft_execute_sph_orthogonal_transformation(ft_sph_isometry_plan * J, ft_orthogonal_transformation Q, double * A, const int N, const int M);
 
 #endif // FASTTRANSFORMS_H

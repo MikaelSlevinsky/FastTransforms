@@ -215,7 +215,7 @@ static inline double Z_index(int l, int i, int j) {
         return 0.0;
 }
 
-void ft_destroy_partial_ZY_axis_exchange_factorization(ft_partial_ZY_axis_exchange_factorization * F) {
+void ft_destroy_partial_sph_isometry_plan(ft_partial_sph_isometry_plan * F) {
     ft_destroy_symmetric_tridiagonal_symmetric_eigen(F->F11);
     ft_destroy_symmetric_tridiagonal_symmetric_eigen(F->F21);
     ft_destroy_symmetric_tridiagonal_symmetric_eigen(F->F12);
@@ -223,13 +223,13 @@ void ft_destroy_partial_ZY_axis_exchange_factorization(ft_partial_ZY_axis_exchan
     free(F);
 }
 
-void ft_destroy_ZY_axis_exchange_factorization(ft_ZY_axis_exchange_factorization * F) {
+void ft_destroy_sph_isometry_plan(ft_sph_isometry_plan * F) {
     for (int l = 2; l < F->n; l++)
-        ft_destroy_partial_ZY_axis_exchange_factorization(F->F[l-2]);
+        ft_destroy_partial_sph_isometry_plan(F->F[l-2]);
     free(F);
 }
 
-ft_partial_ZY_axis_exchange_factorization * ft_create_partial_ZY_axis_exchange_factorization(const int l) {
+ft_partial_sph_isometry_plan * ft_plan_partial_sph_isometry(const int l) {
     int sign;
 
     int n11 = l/2;
@@ -327,7 +327,7 @@ ft_partial_ZY_axis_exchange_factorization * ft_create_partial_ZY_axis_exchange_f
     ft_destroy_symmetric_tridiagonal(Y12);
     ft_destroy_symmetric_tridiagonal(Y22);
 
-    ft_partial_ZY_axis_exchange_factorization * F = malloc(sizeof(ft_partial_ZY_axis_exchange_factorization));
+    ft_partial_sph_isometry_plan * F = malloc(sizeof(ft_partial_sph_isometry_plan));
     F->F11 = F11;
     F->F21 = F21;
     F->F12 = F12;
@@ -337,16 +337,16 @@ ft_partial_ZY_axis_exchange_factorization * ft_create_partial_ZY_axis_exchange_f
     return F;
 }
 
-ft_ZY_axis_exchange_factorization * ft_create_ZY_axis_exchange_factorization(const int n) {
-    ft_ZY_axis_exchange_factorization * F = malloc(sizeof(ft_ZY_axis_exchange_factorization));
-    F->F = malloc((n-2)*sizeof(ft_partial_ZY_axis_exchange_factorization *));
+ft_sph_isometry_plan * ft_plan_sph_isometry(const int n) {
+    ft_sph_isometry_plan * F = malloc(sizeof(ft_sph_isometry_plan));
+    F->F = malloc((n-2)*sizeof(ft_partial_sph_isometry_plan *));
     for (int l = 2; l < n; l++)
-        F->F[l-2] = ft_create_partial_ZY_axis_exchange_factorization(l);
+        F->F[l-2] = ft_plan_partial_sph_isometry(l);
     F->n = n;
     return F;
 }
 
-void ft_execute_sph_ZY_axis_exchange(ft_ZY_axis_exchange_factorization * J, double * A, const int N, const int M) {
+void ft_execute_sph_ZY_axis_exchange(ft_sph_isometry_plan * J, double * A, const int N, const int M) {
     if (J->n > 0) {
         double t = -A[1];
         A[1] = -A[N];
@@ -354,7 +354,7 @@ void ft_execute_sph_ZY_axis_exchange(ft_ZY_axis_exchange_factorization * J, doub
     }
     #pragma omp parallel
     for (int l = 2 + FT_GET_THREAD_NUM(); l < J->n; l += FT_GET_NUM_THREADS()) {
-        ft_partial_ZY_axis_exchange_factorization * F = J->F[l-2];
+        ft_partial_sph_isometry_plan * F = J->F[l-2];
         int stride = 4*N-2;
         int outshifta = N*(2*l-1)+N-l;
         int outshiftb = N*(2*l)+N-l;
@@ -383,7 +383,7 @@ void ft_execute_sph_ZY_axis_exchange(ft_ZY_axis_exchange_factorization * J, doub
     }
 }
 
-void ft_execute_sph_isometry(ft_ZY_axis_exchange_factorization * J, ft_ZYZR Q, double * A, const int N, const int M) {
+void ft_execute_sph_isometry(ft_sph_isometry_plan * J, ft_ZYZR Q, double * A, const int N, const int M) {
     if (Q.sign < 0)
         ft_execute_sph_polar_reflection(A, N, M);
     ft_execute_sph_polar_rotation(A, N, M, Q.s[0], Q.c[0]);
@@ -393,17 +393,17 @@ void ft_execute_sph_isometry(ft_ZY_axis_exchange_factorization * J, ft_ZYZR Q, d
     ft_execute_sph_polar_rotation(A, N, M, Q.s[2], Q.c[2]);
 }
 
-void ft_execute_sph_rotation(ft_ZY_axis_exchange_factorization * J, const double alpha, const double beta, const double gamma, double * A, const int N, const int M) {
+void ft_execute_sph_rotation(ft_sph_isometry_plan * J, const double alpha, const double beta, const double gamma, double * A, const int N, const int M) {
     ft_ZYZR F = {{sin(alpha), sin(beta), sin(gamma)}, {cos(alpha), cos(beta), cos(gamma)}, 1};
     ft_execute_sph_isometry(J, F, A, N, M);
 }
 
-void ft_execute_sph_reflection(ft_ZY_axis_exchange_factorization * J, ft_reflection W, double * A, const int N, const int M) {
+void ft_execute_sph_reflection(ft_sph_isometry_plan * J, ft_reflection W, double * A, const int N, const int M) {
     ft_orthogonal_transformation U = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
     ft_apply_reflection(W, &U);
     ft_execute_sph_orthogonal_transformation(J, U, A, N, M);
 }
 
-void ft_execute_sph_orthogonal_transformation(ft_ZY_axis_exchange_factorization * J, ft_orthogonal_transformation Q, double * A, const int N, const int M) {
+void ft_execute_sph_orthogonal_transformation(ft_sph_isometry_plan * J, ft_orthogonal_transformation Q, double * A, const int N, const int M) {
     ft_execute_sph_isometry(J, ft_create_ZYZR(Q), A, N, M);
 }

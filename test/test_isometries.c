@@ -13,7 +13,7 @@ int main(int argc, const char * argv[]) {
     ft_orthogonal_transformation Q, U;
     ft_reflection W;
     ft_ZYZR F;
-    ft_ZY_axis_exchange_factorization * J;
+    ft_sph_isometry_plan * J;
     double alpha, beta, gamma;
 
     int IERR, ITIME, N, L, M, NTIMES;
@@ -86,7 +86,7 @@ int main(int argc, const char * argv[]) {
 
         A = sphrand(N, M);
         B = copymat(A, N, M);
-        J = ft_create_ZY_axis_exchange_factorization(N);
+        J = ft_plan_sph_isometry(N);
         alpha = 0.1;
         beta = 0.2;
         gamma = 0.3;
@@ -124,7 +124,7 @@ int main(int argc, const char * argv[]) {
 
         free(A);
         free(B);
-        ft_destroy_ZY_axis_exchange_factorization(J);
+        ft_destroy_sph_isometry_plan(J);
     }
 
     printf("\nTiming spherical isometries.\n\n");
@@ -135,14 +135,14 @@ int main(int argc, const char * argv[]) {
         NTIMES = 1 + pow(2048/N, 2);
 
         A = sphrand(N, M);
-        J = ft_create_ZY_axis_exchange_factorization(N);
+        J = ft_plan_sph_isometry(N);
 
         FT_TIME(ft_execute_sph_ZY_axis_exchange(J, A, N, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
         printf("\n");
         free(A);
-        ft_destroy_ZY_axis_exchange_factorization(J);
+        ft_destroy_sph_isometry_plan(J);
     }
     printf("];\n");
 
