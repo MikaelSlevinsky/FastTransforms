@@ -386,11 +386,11 @@ void ft_execute_sph_ZY_axis_exchange(ft_sph_isometry_plan * J, double * A, const
 void ft_execute_sph_isometry(ft_sph_isometry_plan * J, ft_ZYZR Q, double * A, const int N, const int M) {
     if (Q.sign < 0)
         ft_execute_sph_polar_reflection(A, N, M);
-    ft_execute_sph_polar_rotation(A, N, M, Q.s[0], Q.c[0]);
+    ft_execute_sph_polar_rotation(A, N, M, Q.s[2], Q.c[2]);
     ft_execute_sph_ZY_axis_exchange(J, A, N, M);
     ft_execute_sph_polar_rotation(A, N, M, -Q.s[1], Q.c[1]);
     ft_execute_sph_ZY_axis_exchange(J, A, N, M);
-    ft_execute_sph_polar_rotation(A, N, M, Q.s[2], Q.c[2]);
+    ft_execute_sph_polar_rotation(A, N, M, Q.s[0], Q.c[0]);
 }
 
 void ft_execute_sph_rotation(ft_sph_isometry_plan * J, const double alpha, const double beta, const double gamma, double * A, const int N, const int M) {
