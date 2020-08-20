@@ -313,8 +313,6 @@ X(symmetric_tridiagonal) * X(symmetric_tridiagonal_congruence)(X(symmetric_tridi
 
 #undef V
 
-#include <stdio.h>
-
 /*
 Assumptions:
  - The recurrence relation is stable in the **backward** (downward) direction.

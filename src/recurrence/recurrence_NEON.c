@@ -23,7 +23,7 @@
     void eigen_eval_NEON(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, const int sign, double * f) {
         EIGEN_EVAL_KERNEL(double, float64x2_t, 2, 8, vld1q_f64, vst1q_f64, vmuladd_f64, vmulsub_f64, vall_f64, vsqrtq_f64, vmovemask2, eps()/floatmin(), sqrt)
     }
-    void eigen_eval_SSEf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, const int sign, float * f) {
+    void eigen_eval_NEONf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, const int sign, float * f) {
         EIGEN_EVAL_KERNEL(float, float32x4_t, 4, 8, vld1q_f32, vst1q_f32, vmuladd_f32, vmulsub_f32, vall_f32, vsqrtq_f32, vmovemask4f, epsf()/floatminf(), sqrtf)
     }
     */
