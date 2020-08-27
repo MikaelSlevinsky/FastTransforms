@@ -1,51 +1,3 @@
-FLT * X(Gx)(int l){
-	FLT * Gx = (FLT*)calloc((2*l + 3)*(2*l + 1), sizeof(FLT));
-
-	for(int k = 0; k < l-1; ++k){
-		Gx[k+2 + (2*l+3)*k] = Y(sqrt)((k+1)*(k+1+1)) / (2*Y(sqrt)((2*l+1)*(2*l+3)));
-		Gx[2*l-k + (2*l+3)*(2*l-k)] = Gx[k+2 + (2*l+3)*k];
-	}
-
-	for(int k = 0; k < l; ++k){
-		Gx[k + (2*l+3)*k] = -1 * Y(sqrt)((2*l+2-(k+1))*(2*l+3-(k+1))) / (2 * Y(sqrt)((2*l+1)*(2*l+3)));
-		Gx[2*l+2-k + (2*l+3)*(2*l-k)] = Gx[k + (2*l+3)*k] ;
-	}
-
-	Gx[(l-1)+2 + (2*l+3)*((l-1)+2)] = Y(sqrt)(2*l*(l+1)) / (2*Y(sqrt)((2*l+1)*(2*l+3)));
-	Gx[(l-1)+3 + (2*l+3)*l] = -1 * Y(sqrt)(2*(l+1)*(l+2)) / (2*Y(sqrt)((2*l+1)*(2*l+3)));
-
-	return Gx;
-}
-
-FLT * X(Gy)(int l){
-	FLT * Gy = (FLT*)calloc((2*l + 3)*(2*l + 1), sizeof(FLT));
-	
-	for(int k = 0; k < l-1; ++k){
-		Gy[2*l-k + (2*l+3)*k] = Y(sqrt)((k+1)*(k+1+1)) / (2*Y(sqrt)((2*l+1)*(2*l+3)));
-		Gy[2+k + (2*l+3)*(2*l-k)] = -1 * Gy[2*l-k + (2*l+3)*k];
-	}
-
-	for(int k = 0; k < l; ++k){
-		Gy[k + (2*l+3)*(2*l-k)] = -1 * Y(sqrt)((2*l+2-(k+1))*(2*l+3-(k+1))) / (2 * Y(sqrt)((2*l+1)*(2*l+3)));
-		Gy[2*l+2-k + (2*l+3)*k] = -1 * Gy[k + (2*l+3)*(2*l-k)];
-	}
-
-	Gy[(l-1)+2 + (2*l+3)*(l-1)] = Y(sqrt)(2*l*(l+1)) / (2*Y(sqrt)((2*l+1)*(2*l+3)));
-	Gy[l + (2*l+3)*l] = -1 * Y(sqrt)(2*(l+1)*(l+2)) / (2*Y(sqrt)((2*l+1)*(2*l+3)));
-
-	return Gy;
-}
-
-FLT * X(Gz)(int l){
-	FLT * Gz = (FLT*)calloc((2*l + 3)*(2*l + 1), sizeof(FLT));
-
-	for(int k = 0; k < 2*l+1; ++k){
-		Gz[k*(2*l+3) + k+1] = Y(sqrt)(((FLT)(k+1)*(2*l+2-(k+1))) / ((FLT)(2*l+1)*(2*l+3)));
-	}
-
-	return Gz;
-}
-
 // Gy has size 2l+3 by 2l+1. Then, 0 <= i <= 2l+2 and 0 <= j <= 2l.
 FLT X(Gy_index)(int l, int i, int j){
 	if(l+2 <= i && i <= 2*l && j == 2*l-i)
@@ -97,17 +49,6 @@ FLT X(Y_index)(int l, int i, int j){
 		Yij += X(Gy_index)(l, 2*l-i+k, i) * X(Gy_index)(l, 2*l-i+k, j);
 
 	return Yij;
-}
-
-FLT * X(Y_dense_test)(int l){
-	FLT * Yl = calloc((2*l+1)*(2*l+1), sizeof(FLT));
-	for(int j = 0; j < 2*l+1; ++j){
-		for(int i = 0; i < 2*l+1; ++i){
-			Yl[i + j*(2*l+1)] = X(Y_index)(l, i, j);
-		}
-	}
-
-	return Yl;
 }
 
 FLT X(Z_index)(int l, int i, int j){

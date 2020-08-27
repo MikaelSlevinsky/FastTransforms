@@ -1,3 +1,11 @@
+typedef struct{
+	X(symmetric_tridiagonal_symmetric_eigen) * F11;
+	X(symmetric_tridiagonal_symmetric_eigen) * F12;
+	X(symmetric_tridiagonal_symmetric_eigen) * F21;
+	X(symmetric_tridiagonal_symmetric_eigen) * F22;
+	int l;
+} X(partial_sph_isometry_plan);
+
 FLT * X(Gx)(int l);
 FLT * X(Gy)(int l);
 FLT * X(Gz)(int l);
