@@ -37,8 +37,7 @@
 
 int main(void) {
     int checksum = 0;
-    printf("\nTesting methods for complete elliptic integrals\n");
-    printf("and Jacobian elliptic functions.\n");
+    printf("\nTesting methods for complete elliptic integrals and Jacobian elliptic functions.\n");
     printf("\n\tSingle precision.\n\n");
     test_ellipticf(&checksum);
     printf("\n\tDouble precision.\n\n");

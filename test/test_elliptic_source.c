@@ -16,24 +16,32 @@ void Y(test_elliptic)(int * checksum) {
     printf("Complete elliptic integrals, first and second kinds \t |%20.2e ", (double) err);
     X(checktest)(err, 2, checksum);
 
-    FLT sn, cn, dn;
     k = ((FLT) 3)/5;
     kp = Y(sqrt)((1-k)*(1+k));
+    K = X(complete_elliptic_integral)('1', k);
+    E = X(complete_elliptic_integral)('2', k);
+    FLT KP = X(complete_elliptic_integral)('1', kp);
+    FLT EP = X(complete_elliptic_integral)('2', kp);
+    err = Y(fabs)(E*KP+EP*K-K*KP-2*Y(atan)(1))/(2*Y(atan)(1));
+    printf("Legendre relation EK'+E'K-KK' = π/2,          k = %3.1f \t |%20.2e ", (double) k, (double) err);
+    X(checktest)(err, 2, checksum);
+
+    FLT sn, cn, dn;
     K = X(complete_elliptic_integral)('1', k);
     X(jacobian_elliptic_functions)(0*K, k, &sn, &cn, &dn, FT_SN | FT_CN | FT_DN);
     err = Y(fabs)(sn-0) + Y(fabs)(cn-1) + Y(fabs)(dn-1);
     printf("Jacobian elliptic functions at x = %3.1fK(%3.1f), k = %3.1f \t |%20.2e ", 0.0, (double) k, (double) k, (double) err);
-    X(checktest)(err, 1, checksum);
+    X(checktest)(err, 2, checksum);
 
     X(jacobian_elliptic_functions)(K/2, k, &sn, &cn, &dn, FT_SN | FT_CN | FT_DN);
     err = Y(fabs)(sn-1/Y(sqrt)(1+kp)) + Y(fabs)(cn-Y(sqrt)(kp/(1+kp))) + Y(fabs)(dn-Y(sqrt)(kp));
     printf("Jacobian elliptic functions at x = %3.1fK(%3.1f), k = %3.1f \t |%20.2e ", 0.5, (double) k, (double) k, (double) err);
-    X(checktest)(err, 1, checksum);
+    X(checktest)(err, 2, checksum);
 
     X(jacobian_elliptic_functions)(1*K, k, &sn, &cn, &dn, FT_SN | FT_CN | FT_DN);
     err = Y(fabs)(sn-1) + Y(fabs)(cn-0) + Y(fabs)(dn-kp);
     printf("Jacobian elliptic functions at x = %3.1fK(%3.1f), k = %3.1f \t |%20.2e ", 1.0, (double) k, (double) k, (double) err);
-    X(checktest)(err, 1, checksum);
+    X(checktest)(err, 2, checksum);
 
     X(jacobian_elliptic_functions)(3*K/2, k, &sn, &cn, &dn, FT_SN | FT_CN | FT_DN);
     err = Y(fabs)(sn-1/Y(sqrt)(1+kp)) + Y(fabs)(cn+Y(sqrt)(kp/(1+kp))) + Y(fabs)(dn-Y(sqrt)(kp));
