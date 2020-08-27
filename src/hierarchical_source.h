@@ -49,7 +49,7 @@ struct X(hmat) {
 
 FLT * X(chebyshev_points)(char KIND, int n);
 FLT * X(chebyshev_barycentric_weights)(char KIND, int n);
-void X(barycentricmatrix)(FLT * A, FLT * x, int m, FLT * y, FLT * l, int n);
+void * X(barycentricmatrix)(FLT * A, FLT * x, int m, FLT * y, FLT * l, int n);
 
 void X(destroy_densematrix)(X(densematrix) * A);
 void X(destroy_lowrankmatrix)(X(lowrankmatrix) * A);
@@ -59,6 +59,9 @@ X(densematrix) * X(calloc_densematrix)(int m, int n);
 X(densematrix) * X(malloc_densematrix)(int m, int n);
 X(densematrix) * X(sample_densematrix)(FLT (*f)(FLT x, FLT y), FLT * x, FLT * y, unitrange i, unitrange j);
 X(densematrix) * X(sample_accurately_densematrix)(FLT (*f)(FLT x, FLT ylo, FLT yhi), FLT * x, FLT * ylo, FLT * yhi, unitrange i, unitrange j);
+
+void X(set_densematrix_index)(X(densematrix)* A, const FLT v, const int i, const int j);
+FLT X(get_densematrix_index)(const X(densematrix)* A, const int i, const int j);
 
 X(lowrankmatrix) * X(calloc_lowrankmatrix)(char N, int m, int n, int r);
 X(lowrankmatrix) * X(malloc_lowrankmatrix)(char N, int m, int n, int r);
