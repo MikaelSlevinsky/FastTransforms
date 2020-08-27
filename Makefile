@@ -66,6 +66,7 @@ runtests:
 	./test_isometries
 	OMP_NUM_THREADS=$(FT_NUM_THREADS) ./test_drivers 1 3 0
 	OMP_NUM_THREADS=$(FT_NUM_THREADS) ./test_fftw 1 3 0
+	OMP_NUM_THREADS=$(FT_NUM_THREADS) ./test_isometries 1 3
 
 runexamples:
 	./additiontheorem

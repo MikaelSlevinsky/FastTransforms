@@ -179,6 +179,8 @@ typedef struct {
     #define vloadu8(v) ((double8) _mm512_loadu_pd(v))
     #define vstore8(u, v) (_mm512_store_pd(u, v))
     #define vstoreu8(u, v) (_mm512_storeu_pd(u, v))
+    #define vsqrt8(x) ((double8) _mm512_sqrt_pd(x))
+    #define vmovemask8(x) (((int) _mm256_movemask_pd(_mm512_extractf64x4_pd(x, 0))) | ((int) _mm256_movemask_pd(_mm512_extractf64x4_pd(x, 1))))
     #define vfma8(a, b, c) ((double8) _mm512_fmadd_pd(a, b, c))
     #define vfms8(a, b, c) ((double8) _mm512_fmsub_pd(a, b, c))
     #define vfmas8(a, b, c) ((double8) _mm512_fmaddsub_pd(a, b, c))
@@ -188,6 +190,8 @@ typedef struct {
     #define vloadu16f(v) ((float16) _mm512_loadu_ps(v))
     #define vstore16f(u, v) (_mm512_store_ps(u, v))
     #define vstoreu16f(u, v) (_mm512_storeu_ps(u, v))
+    #define vsqrt16f(x) ((float16) _mm512_sqrt_ps(x))
+    #define vmovemask16f(x) (((int) _mm_movemask_ps(_mm512_extractf32x4_ps(x, 0))) | ((int) _mm_movemask_ps(_mm512_extractf32x4_ps(x, 1))) | ((int) _mm_movemask_ps(_mm512_extractf32x4_ps(x, 2))) | ((int) _mm_movemask_ps(_mm512_extractf32x4_ps(x, 3))))
     #define vfma16f(a, b, c) ((float16) _mm512_fmadd_ps(a, b, c))
     #define vfms16f(a, b, c) ((float16) _mm512_fmsub_ps(a, b, c))
     #define vfmas16f(a, b, c) ((float16) _mm512_fmaddsub_ps(a, b, c))
@@ -203,13 +207,17 @@ typedef struct {
     #define vloadu4(v) ((double4) _mm256_loadu_pd(v))
     #define vstore4(u, v) (_mm256_store_pd(u, v))
     #define vstoreu4(u, v) (_mm256_storeu_pd(u, v))
+    #define vas4(a, b) ((double4) _mm256_addsub_pd(a, b))
+    #define vsqrt4(x) ((double4) _mm256_sqrt_pd(x))
+    #define vmovemask4(x) ((int) _mm256_movemask_pd(x))
     typedef float float8 __attribute__ ((vector_size (VECTOR_SIZE_4*8)));
     #define vall8f(x) ((float8) _mm256_set1_ps(x))
     #define vload8f(v) ((float8) _mm256_load_ps(v))
     #define vloadu8f(v) ((float8) _mm256_loadu_ps(v))
     #define vstore8f(u, v) (_mm256_store_ps(u, v))
     #define vstoreu8f(u, v) (_mm256_storeu_ps(u, v))
-    #define vas4(a, b) ((double4) _mm256_addsub_pd(a, b))
+    #define vsqrt8f(x) ((float8) _mm256_sqrt_ps(x))
+    #define vmovemask8f(x) ((int) _mm256_movemask_ps(x))
     #define vas8f(a, b) ((float8) _mm256_addsub_ps(a, b))
     #ifdef __FMA__
         #define vfma4(a, b, c) ((double4) _mm256_fmadd_pd(a, b, c))
@@ -231,6 +239,8 @@ typedef struct {
     #define vloadu2(v) ((double2) _mm_loadu_pd(v))
     #define vstore2(u, v) (_mm_store_pd(u, v))
     #define vstoreu2(u, v) (_mm_storeu_pd(u, v))
+    #define vsqrt2(x) ((double2) _mm_sqrt_pd(x))
+    #define vmovemask2(x) ((int) _mm_movemask_pd(x))
     #ifdef __FMA__
         #define vfma2(a, b, c) ((double2) _mm_fmadd_pd(a, b, c))
         #define vfms2(a, b, c) ((double2) _mm_fmsub_pd(a, b, c))
@@ -248,6 +258,8 @@ typedef struct {
     #define vloadu4f(v) ((float4) _mm_loadu_ps(v))
     #define vstore4f(u, v) (_mm_store_ps(u, v))
     #define vstoreu4f(u, v) (_mm_storeu_ps(u, v))
+    #define vsqrt4f(x) ((float4) _mm_sqrt_ps(x))
+    #define vmovemask4f(x) ((int) _mm_movemask_ps(x))
     #ifdef __FMA__
         #define vfma4f(a, b, c) ((float4) _mm_fmadd_ps(a, b, c))
         #define vfms4f(a, b, c) ((float4) _mm_fmsub_ps(a, b, c))
@@ -308,9 +320,21 @@ void orthogonal_polynomial_clenshaw_AVX_FMAf(const int n, const float * c, const
 void orthogonal_polynomial_clenshaw_AVX512Ff(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 void orthogonal_polynomial_clenshaw_NEONf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, float * phi0, float * f);
 
-void orthogonal_polynomial_clenshaw_defaultl(const int n, const long double * c, const int incc, const long double * A, const long double * B, const long double * C, const int m, long double * x, long double * phi0, long double * f);
+void eigen_eval_default(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, const int sign, double * f);
+void eigen_eval_SSE2(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, const int sign, double * f);
+void eigen_eval_AVX(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, const int sign, double * f);
+void eigen_eval_AVX_FMA(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, const int sign, double * f);
+void eigen_eval_AVX512F(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, const int sign, double * f);
+
+void eigen_eval_defaultf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, const int sign, float * f);
+void eigen_eval_SSEf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, const int sign, float * f);
+void eigen_eval_AVXf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, const int sign, float * f);
+void eigen_eval_AVX_FMAf(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, const int sign, float * f);
+void eigen_eval_AVX512Ff(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, const int sign, float * f);
+
+void eigen_eval_defaultl(const int n, const long double * c, const int incc, const long double * A, const long double * B, const long double * C, const int m, long double * x, const int sign, long double * f);
 #if defined(FT_QUADMATH)
-    void orthogonal_polynomial_clenshaw_defaultq(const int n, const quadruple * c, const int incc, const quadruple * A, const quadruple * B, const quadruple * C, const int m, quadruple * x, quadruple * phi0, quadruple * f);
+    void eigen_eval_defaultq(const int n, const quadruple * c, const int incc, const quadruple * A, const quadruple * B, const quadruple * C, const int m, quadruple * x, const int sign, quadruple * f);
 #endif
 
 double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n);

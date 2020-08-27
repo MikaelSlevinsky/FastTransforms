@@ -15,7 +15,7 @@ typedef struct {
     FLT * B;
     FLT * C;
     FLT * lambda;
-    FLT * phi0;
+    int sign;
     int n;
 } X(symmetric_tridiagonal_symmetric_eigen);
 
@@ -28,7 +28,7 @@ void X(stmv)(char TRANS, FLT alpha, X(symmetric_tridiagonal) * A, FLT * x, FLT b
 void X(bdmv)(char TRANS, X(bidiagonal) * B, FLT * x);
 void X(bdsv)(char TRANS, X(bidiagonal) * B, FLT * x);
 
-void X(symmetric_tridiagonal_eig)(X(symmetric_tridiagonal) * A, FLT * Z, FLT * lambda);
+void X(symmetric_tridiagonal_eig)(X(symmetric_tridiagonal) * A, FLT * V, FLT * lambda);
 void X(symmetric_definite_tridiagonal_eig)(X(symmetric_tridiagonal) * A, X(symmetric_tridiagonal) * B, FLT * V, FLT * lambda);
 X(symmetric_tridiagonal) * X(symmetric_tridiagonal_congruence)(X(symmetric_tridiagonal) * A, X(symmetric_tridiagonal) * B, FLT * V);
 

@@ -138,7 +138,9 @@ void Y(test_tridiagonal)(int * checksum) {
     X(checktest)(err, n, checksum);
 
     for (int i = 0; i < n; i++)
-        lambda[i] = Y(pow)(2*Y(__sinpi)((i+ONE(FLT))/(2*n+2)), 2);
+        lambda[n-1-i] = Y(pow)(2*Y(__sinpi)((i+ONE(FLT))/(2*n+2)), 2);
+    for (int i = 0; i < n-1; i++)
+        A->b[i] = 1;
     X(symmetric_tridiagonal_symmetric_eigen) * F = X(symmetric_tridiagonal_symmetric_eig)(A, lambda, 1);
     for (int j = 0; j < n; j++)
         X(semv)(F, Id+j*n, 1, V+j*n);
