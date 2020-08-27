@@ -87,10 +87,12 @@ X(banded) * X(create_jacobi_lowering)(const int m, const int n, const FLT alpha,
 X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta);
 X(triangular_banded) * X(create_B_associated_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta);
 X(triangular_banded) * X(create_C_associated_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta);
+
+/*
 X(triangular_banded) * X(pre_ADI_Chebyshev_Legendre)(const int n, const FLT epsilon);
 
 X(triangular_banded) * X(ADI_Chebyshev_Legendre)(const int n, const X(triangular_banded) * A, const X(triangular_banded) * B, const X(triangular_banded) * lambda, const X(triangular_banded) * V, const FLT epsilon);
-                                                  
+
 X(triangular_banded) * X(pre_ADI_Legendre_Legendre_first_associated)(const int n, const FLT epsilon);
 
 X(triangular_banded) * X(ADI_Legendre_Legendre_first_associated)(const int n, X(triangular_banded)* A, X(triangular_banded)* B, X(triangular_banded)* W, X(triangular_banded)* lambda, const FLT epsilon);
@@ -136,3 +138,5 @@ X(triangular_banded) * X(triangular_banded_multiply_triangular_banded)(const X(t
 X(triangular_banded) * X(transpose_triangular_banded)(const X(triangular_banded) * A);
 
 X(densematrix) * X(transpose_densematrix)(const X(densematrix) * A);
+
+*/

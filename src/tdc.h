@@ -20,6 +20,7 @@ typedef struct {
     #define FLT __float128
     #define X(name) FT_CONCAT(ft_, name, q)
     #define Y(name) FT_CONCAT(, name, q)
+    #include "elliptic_source.h"
     #include "tridiagonal_source.h"
     #include "hierarchical_source.h"
     #include "banded_source.h"
@@ -33,6 +34,7 @@ typedef struct {
     #define X(name) FT_CONCAT(ft_, name, l)
     #define X2(name) FT_CONCAT(ft_, name, q)
     #define Y(name) FT_CONCAT(, name, l)
+    #include "elliptic_source.h"
     #include "tridiagonal_source.h"
     #include "hierarchical_source.h"
     #include "banded_source.h"
@@ -48,6 +50,7 @@ typedef struct {
     #define X(name) FT_CONCAT(ft_, name, l)
     #define X2(name) FT_CONCAT(ft_, name, l)
     #define Y(name) FT_CONCAT(, name, l)
+    #include "elliptic_source.h"
     #include "tridiagonal_source.h"
     #include "hierarchical_source.h"
     #include "banded_source.h"
@@ -64,6 +67,7 @@ typedef struct {
 #define X(name) FT_CONCAT(ft_, name, )
 #define X2(name) FT_CONCAT(ft_, name, l)
 #define Y(name) FT_CONCAT(, name, )
+#include "elliptic_source.h"
 #include "tridiagonal_source.h"
 #include "hierarchical_source.h"
 #include "banded_source.h"
@@ -79,6 +83,7 @@ typedef struct {
 #define X(name) FT_CONCAT(ft_, name, f)
 #define X2(name) FT_CONCAT(ft_, name, )
 #define Y(name) FT_CONCAT(, name, f)
+#include "elliptic_source.h"
 #include "tridiagonal_source.h"
 #include "hierarchical_source.h"
 #include "banded_source.h"
