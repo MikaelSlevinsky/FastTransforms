@@ -43,6 +43,10 @@ void ft_eigen_evall(const int n, const long double * c, const int incc, const lo
     void ft_eigen_evalq(const int n, const quadruple * c, const int incc, const quadruple * A, const quadruple * B, const quadruple * C, const int m, quadruple * x, const int sign, quadruple * f);
 #endif
 
+#define FT_SN (1U << 0)
+#define FT_CN (1U << 1)
+#define FT_DN (1U << 2)
+
 #include "tdc.h"
 
 /*!
