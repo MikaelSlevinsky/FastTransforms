@@ -789,3 +789,795 @@ X(triangular_banded) * X(create_C_associated_jacobi_to_jacobi)(const int n, cons
     free(C);
     return TC;
 }
+
+X(triangular_banded) * X(pre_ADI_Chebyshev_Legendre)(const int n, const FLT epsilon){
+    
+    X(triangular_banded) * A = X(calloc_triangular_banded)(n, 2);
+    if (n > 1)
+        X(set_triangular_banded_index)(A, 2, 1, 1);
+    for (int i = 2; i < n; i++) {
+        X(set_triangular_banded_index)(A, -i*(i-ONE(FLT)), i-2, i);
+        X(set_triangular_banded_index)(A, i*(i+ONE(FLT)), i, i);
+    }
+    
+    X(triangular_banded) * B = X(calloc_triangular_banded)(n, 2);
+    if (n > 0)
+        X(set_triangular_banded_index)(B, 2, 0, 0);
+    if (n > 1)
+        X(set_triangular_banded_index)(B, 1, 1, 1);
+    for (int i = 2; i < n; i++) {
+        X(set_triangular_banded_index)(B, -1, i-2, i);
+        X(set_triangular_banded_index)(B, 1, i, i);
+    }
+    
+    X(triangular_banded)* lambda = X(calloc_triangular_banded)(n, 0);
+    for (int i = 0; i < n; i++){
+        X(set_triangular_banded_index)(lambda, (FLT)(i)*(i+1), i, i);
+    }
+
+    FLT A_n, D_n;
+    X(triangular_banded)* V = X(calloc_triangular_banded)(n, n);
+    X(set_triangular_banded_index)(V, 1.0, 0, 0);
+    
+    if (n > 0){
+        A_n = 1.0;
+        D_n = 1.0;
+        X(set_triangular_banded_index)(V, X(get_triangular_banded_index)(V, 0, 0)*D_n/A_n, 1, 1);
+        
+    }
+
+    
+    
+    for (int i = 2; i < n; i++){
+        A_n = 2.0;
+        D_n = ((FLT)2*i-1)/((FLT)i);
+        X(set_triangular_banded_index)(V, X(get_triangular_banded_index)(V, i-1, i-1)*D_n/A_n, i, i);
+    }
+    
+    V = X(ADI_Chebyshev_Legendre)(n, A, B, lambda, V, epsilon);
+    
+    printf("\nresult\n--------------\n");
+    for (int i = 0; i < n; i++){
+        for (int j = 0; j < n; j++){
+            printf("%.3f ",X(get_triangular_banded_index)(V,i,j));
+        }
+        printf("\n");
+    }
+    printf("\n-------_________\nend of final\n");
+    
+    return X(ADI_Chebyshev_Legendre)(n, A, B, lambda, V, epsilon);
+    
+}
+
+X(triangular_banded) * X(ADI_Chebyshev_Legendre)(const int n, const X(triangular_banded) * A, const X(triangular_banded) * B, const X(triangular_banded) * lambda, const X(triangular_banded) * V, const FLT epsilon){
+    
+    int s = n/2;
+    
+    X(triangular_banded) *A_11, *A_22, *B_11, *B_22, *lambda_11, *lambda_22, *V_11, *V_22;
+    X(densematrix) *A_12, *B_12;
+    
+    X(triangular_banded) **A_blocks, **B_blocks, **lambda_blocks, **V_blocks;
+    
+    A_blocks = X(block_divide)(A, n, s);
+    B_blocks = X(block_divide)(B, n, s);
+    lambda_blocks = X(block_divide)(lambda, n, s);
+    V_blocks = X(block_divide)(V, n, s);
+
+    
+    A_11 = A_blocks[0];
+    A_22 = A_blocks[1];
+    B_11 = B_blocks[0];
+    B_22 = B_blocks[1];
+    lambda_11 = lambda_blocks[0];
+    lambda_22 = lambda_blocks[1];
+    V_11 = V_blocks[0];
+    V_22 = V_blocks[1];
+    
+    A_12 = X(get_A_12)(A, n, s);
+    B_12 = X(get_A_12)(B, n, s);
+    
+    X(densematrix) * V_12;
+    
+    FLT value;
+    
+    if (s > 1){
+        V_11 = X(ADI_Chebyshev_Legendre)(s, A_11, B_11, lambda_11, V_11, epsilon/3.0);
+    }
+    
+    if (n-s > 1){
+        V_22 = X(ADI_Chebyshev_Legendre)(n-s, A_22, B_22, lambda_22, V_22, epsilon/3.0);
+    }
+    
+    X(triangular_banded) * F_1;
+    X(densematrix) * F_2, * F_3, * F;
+    
+    F_1 = X(triangular_banded_inverse)(X(triangular_banded_multiply_triangular_banded)(B_11, V_11));
+    F_2 = X(densematrix_multiply_triangular_banded)(A_12, V_22);
+    F_3 = X(densematrix_multiply_triangular_banded)(B_12, V_22);
+    F_3 = X(densematrix_multiply_triangular_banded)(F_3, lambda_22);
+    F = X(triangular_banded_multiply_densematrix)(F_1, X(add_densematrix)(F_2, F_3, 'M'));
+    
+    V_12 = X(ADI)(lambda_11, lambda_22, F, epsilon/3.0);
+
+    return X(block_attach)(V_11, V_12, V_22);
+    
+}
+
+X(triangular_banded) * X(pre_ADI_Legendre_Legendre_first_associated)(const int n, const FLT epsilon){
+    X(triangular_banded)* A = X(calloc_triangular_banded)(n, 2);
+    for (int i = 0; i < n-2; i++){
+        X(set_triangular_banded_index)(A, ((FLT)i*(i+1)*(i+2))/((FLT)(2*(2*i+1))), i, i);
+        X(set_triangular_banded_index)(A, -((FLT)(i+2)*(i+2)*(i+3))/((FLT)(2*(2*i+5))), i, i+2);
+        
+    }
+    if (n > 0){
+        X(set_triangular_banded_index)(A, ((FLT)(n-1)*(n)*(n+1))/((FLT)(2*(2*n-1))), n-1, n-1);
+        if (n > 1){
+            X(set_triangular_banded_index)(A, ((FLT)(n-2)*(n-1)*(n))/((FLT)(2*(2*n-3))), n-2, n-2);
+        }
+    }
+
+    X(triangular_banded)* B = X(calloc_triangular_banded)(n, 2);
+    for (int i = 0; i < n-2; i++){
+        X(set_triangular_banded_index)(B, ((FLT)(i+2))/((FLT)(2*(2*i+1))), i, i);
+        X(set_triangular_banded_index)(B, ((FLT)-(i+2))/((FLT)(2*(2*i+5))), i, i+2);
+        
+    }
+    if (n > 0){
+        X(set_triangular_banded_index)(B, ((FLT)(n+1))/((FLT)(2*(2*n-1))), n-1, n-1);
+        if (n > 1){
+            X(set_triangular_banded_index)(B, ((FLT)n)/((FLT)(2*(2*n-3))), n-2, n-2);
+        }
+    }
+    
+    X(triangular_banded)* lambda = X(calloc_triangular_banded)(n, 0);
+    for (int i = 0; i < n; i++){
+        X(set_triangular_banded_index)(lambda, (FLT)(i+1)*(i+2), i, i);
+        
+    }
+    
+    X(triangular_banded)* W = X(calloc_triangular_banded)(n, 0);
+    for (int i = 0; i < n; i++){
+        X(set_triangular_banded_index)(W, (FLT)-(i+2), i, i);
+        
+    }
+
+    X(triangular_banded) * V;
+    V = X(ADI_Legendre_Legendre_first_associated)(n, A, B, W, lambda, epsilon);
+    
+    printf("\nfinal result:\n________-------\n");
+    for (int i = 0; i < n; i++){
+        for (int j = 0; j < n; j++){
+            printf("%.3f ",X(get_triangular_banded_index)(V,i,j));
+        }
+        printf("\n");
+    }
+    printf("\n-------_________\nend of final\n");
+    return X(ADI_Legendre_Legendre_first_associated)(n, A, B, W, lambda, epsilon);
+    //return X(calloc_triangular_banded)(1,1);
+}
+
+X(triangular_banded) * X(ADI_Legendre_Legendre_first_associated)(const int n, X(triangular_banded)* A, X(triangular_banded)* B, X(triangular_banded)* W, X(triangular_banded)* lambda, const FLT epsilon){
+    
+    int s = n/2;
+    
+    X(triangular_banded) *A_11, *A_22, *B_11, *B_22, *W_11, *W_22, *lambda_11, *lambda_22;
+    X(densematrix) *A_12, *B_12;
+    
+    X(triangular_banded) **A_blocks, **B_blocks, **W_blocks, **lambda_blocks;
+    
+    A_blocks = X(block_divide)(A, n, s);
+    B_blocks = X(block_divide)(B, n, s);
+    W_blocks = X(block_divide)(W, n, s);
+    lambda_blocks = X(block_divide)(lambda, n, s);
+
+    
+    A_11 = A_blocks[0];
+    A_22 = A_blocks[1];
+    B_11 = B_blocks[0];
+    B_22 = B_blocks[1];
+    W_11 = W_blocks[0];
+    W_22 = W_blocks[1];
+    lambda_11 = lambda_blocks[0];
+    lambda_22 = lambda_blocks[1];
+    
+    A_12 = X(get_A_12)(A, n, s);
+    B_12 = X(get_A_12)(B, n, s);
+    
+    X(triangular_banded) * V_11, * V_22;
+
+
+    
+    X(densematrix) * V_12;
+    
+    FLT value;
+    
+    if (s == 1){
+        V_11 = X(calloc_triangular_banded)(s, s);
+        value = X(get_triangular_banded_index)(W_11, 0, 0)/(X(get_triangular_banded_index)(A_11, 0, 0) - X(get_triangular_banded_index)(B_11, 0, 0)*X(get_triangular_banded_index)(lambda_11, 0, 0));
+        X(set_triangular_banded_index)(V_11, value, 0, 0);
+    } else{
+        V_11 = X(ADI_Legendre_Legendre_first_associated)(s, A_11, B_11, W_11, lambda_11, epsilon/3.0);
+    }
+    
+    if (n-s == 1){
+        V_22 = X(calloc_triangular_banded)(n-s, n-s);
+        value = X(get_triangular_banded_index)(W_22, 0, 0)/(X(get_triangular_banded_index)(A_22, 0, 0) - X(get_triangular_banded_index)(B_22, 0, 0)*X(get_triangular_banded_index)(lambda_22, 0, 0));
+        X(set_triangular_banded_index)(V_22, value, 0, 0);
+    } else{
+        V_22 = X(ADI_Legendre_Legendre_first_associated)(n-s, A_22, B_22, W_22, lambda_22, epsilon/3.0);
+    }
+    
+    V_12 = X(calloc_densematrix)(s,n-s);
+    //V_12 = X(ADI)(A_11, B_11, W_11, epsilon/3.0);
+    
+    return X(block_attach)(V_11, V_12, V_22);
+}
+
+X(densematrix) * X(ADI)(const X(triangular_banded) * A, const X(triangular_banded) * B, const X(densematrix) * F, const FLT epsilon){
+    
+    FLT ** shifts = X(ADI_shifts)(A, B, epsilon);
+    
+    int n = (int)shifts[2][0];
+    
+    FLT * alphas, * betas;
+    alphas = shifts[0];
+    betas = shifts[1];
+    
+    X(triangular_banded) * C, * D;
+    
+    X(densematrix) * G, * V;
+    
+    V = X(calloc_densematrix)(A->n, B->n);
+    
+    for (int j = 0; j < n; j++){
+        
+        C = X(shift_triangular_banded)(B, alphas[j]);
+        D = X(shift_triangular_banded)(A, alphas[j]);
+        G = X(triangular_banded_multiply_densematrix)(D, V);
+        G = X(add_densematrix)(F, G, 'M');
+        C = X(triangular_banded_inverse)(C);
+        V = X(densematrix_multiply_triangular_banded)(G, C);
+        
+        
+        C = X(shift_triangular_banded)(A, betas[j]);
+        D = X(shift_triangular_banded)(B, betas[j]);
+        G = X(densematrix_multiply_triangular_banded)(V, D);
+        G = X(add_densematrix)(F, G, 'M');
+        C = X(triangular_banded_inverse)(C);
+        V = X(triangular_banded_multiply_densematrix)(C, G);
+        
+    }
+    
+    for (int i = 0; i < V->n; i++){
+        for (int j = 0; j < V->m; j++){
+            X(set_densematrix_index)(V, -X(get_densematrix_index)(V,i,j),i,j);
+        }
+    }
+    
+    return V;
+    
+}
+
+X(densematrix) * X(tb_eigen_FMM_to_densematrix)(const X(tb_eigen_FMM) * F){
+    return X(calloc_densematrix)(1,1);
+}
+
+X(triangular_banded) * X(add_triangular_banded)(const X(triangular_banded) * A, const X(triangular_banded) * B, char pm){
+    X(triangular_banded) * C;
+    C = X(calloc_triangular_banded)(A->n, MAX(A->b, B->b));
+    
+    if (pm == 'A'){
+        for (int i = 0; i < C->n; i++){
+            for (int j = 0; j < C->n; j++){
+                X(set_triangular_banded_index)(C, X(get_triangular_banded_index)(A, i, j)+X(get_triangular_banded_index)(B, i, j), i, j);
+            }
+        }
+            
+    } else if(pm == 'M'){
+        for (int i = 0; i < C->n; i++){
+            for (int j = 0; j < C->n; j++){
+                X(set_triangular_banded_index)(C, X(get_triangular_banded_index)(A, i, j)-X(get_triangular_banded_index)(B, i, j), i, j);
+            }
+        }
+        
+    }
+    
+    return C;
+}
+                                                  
+X(densematrix) * X(add_densematrix)(const X(densematrix) * A, const X(densematrix) * B, char pm){
+    X(densematrix) * C;
+    C = X(calloc_densematrix)(A->m, A->n);
+    
+    if (pm == 'A'){
+        for (int i = 0; i < C->m; i++){
+            for (int j = 0; j < C->n; j++){
+                X(set_densematrix_index)(C, X(get_densematrix_index)(A, i, j)+X(get_densematrix_index)(B, i, j), i, j);
+            }
+        }
+            
+    } else if(pm == 'M'){
+        for (int i = 0; i < C->m; i++){
+            for (int j = 0; j < C->n; j++){
+                X(set_densematrix_index)(C, X(get_densematrix_index)(A, i, j)-X(get_densematrix_index)(B, i, j), i, j);
+            }
+        }
+        
+    }
+    
+    return C;
+}
+
+                                                  
+X(triangular_banded) * X(shift_triangular_banded)(const X(triangular_banded) * A, const FLT alpha){
+            
+    X(triangular_banded) * C;
+    C = X(calloc_triangular_banded)(A->n, A->b);
+            
+    for (int k = 0; k < A->n; k++){
+        X(set_triangular_banded_index)(C, X(get_triangular_banded_index)(A, k, k)-alpha, k, k);
+    }
+    
+    return C;
+}
+
+FLT * X(eigenvalue_intervals)(const X(triangular_banded) * A, const X(triangular_banded) * B){
+    
+    FLT min_lambda_a, max_lambda_a;
+    min_lambda_a = X(get_triangular_banded_index)(A, 0, 0);
+    max_lambda_a = X(get_triangular_banded_index)(A, 0, 0);
+    FLT min_lambda_b, max_lambda_b;
+    min_lambda_b = X(get_triangular_banded_index)(B, 0, 0);
+    max_lambda_b = X(get_triangular_banded_index)(B, 0, 0);
+    
+    for (int k = 1; k < A->n; k ++){
+        if (X(get_triangular_banded_index)(A, k, k) < min_lambda_a){
+            min_lambda_a = X(get_triangular_banded_index)(A, k, k);
+        }
+        if (X(get_triangular_banded_index)(A, k, k) > max_lambda_a){
+            max_lambda_a = X(get_triangular_banded_index)(A, k, k);
+        }
+    }
+    
+    for (int k = 1; k < B->n; k ++){
+        if (X(get_triangular_banded_index)(B, k, k) < min_lambda_b){
+            min_lambda_b = X(get_triangular_banded_index)(B, k, k);
+        }
+        if (X(get_triangular_banded_index)(B, k, k) > max_lambda_b){
+            max_lambda_b = X(get_triangular_banded_index)(B, k, k);
+        }
+    }
+    
+    if (max_lambda_a - min_lambda_a < 1/10.0){
+        max_lambda_a = max_lambda_a + 0.1;
+        min_lambda_a = min_lambda_a - 0.1;
+    }
+    
+    if (max_lambda_b - min_lambda_b < 1/10.0){
+        max_lambda_b = max_lambda_b + 0.1;
+        min_lambda_b = min_lambda_b - 0.1;
+    }
+    
+    
+    FLT * values;
+    values = malloc(4*sizeof(FLT));
+    values[0] = min_lambda_a;
+    values[1] = max_lambda_a;
+    values[2] = min_lambda_b;
+    values[3] = max_lambda_b;
+    
+    return values;
+    
+}
+
+int X(number_of_shifts)(const FLT gamma, const FLT epsilon){
+    return (int)(log(16*gamma)*log(4/epsilon)/(M_PI*M_PI)+1);
+}
+
+FLT X(determinant)(const int n, const FLT A[][n]){
+    if (n == 1){
+        return A[0][0];
+    }
+    
+    //printf("\nin determinant\n");
+    
+    FLT result = 0;
+    int i,j;
+    
+    for (int k = 0; k < n; k++){
+        FLT Asub[n-1][n-1];
+//        Asub = malloc((n-1)*sizeof(FLT*));
+
+        i = 1;
+        while (i < n){
+//            Asub[i-1] = calloc(n-1, sizeof(FLT));
+            j = 0;
+            while (j < n){
+                if (j > k){
+                    Asub[i-1][j-1] = A[i][j];
+                }
+                if (j < k){
+                    Asub[i-1][j] = A[i][j];
+                }
+                j += 1;
+            }
+            i += 1;
+        }
+        if (k%2 == 0){
+            result += A[0][k]*X(determinant)(n-1, Asub);
+        }
+        else{
+            result -= A[0][k]*X(determinant)(n-1, Asub);
+        }
+    }
+    
+    return result;
+            
+}
+
+X(triangular_banded) * X(triangular_banded_inverse)(const X(triangular_banded) * A){
+    
+    int n = A->n;
+    
+    X(triangular_banded) * Ainverse;
+    Ainverse = X(calloc_triangular_banded)(n, n);
+    
+    if (n == 1){
+        X(set_triangular_banded_index)(Ainverse, 1/X(get_triangular_banded_index)(A, 0, 0), 0, 0);
+        return Ainverse;
+    }
+    
+    //printf("\n1\n");
+    
+    
+    FLT data[n][n];
+    for (int i = 0; i < n; i++){
+        for (int j = 0; j < n; j++){
+            data[i][j] = X(get_triangular_banded_index)(A, i, j);
+        }
+    }
+    
+    //printf("\n2\n");
+    
+    FLT determinant = X(determinant)(n, data);
+    
+    int u, v;
+    
+    //printf("\n3\n");
+    
+    for (int i = 0; i < A->n; i++){
+        for (int j = 0; j < A->n; j++){
+            FLT Asub[n-1][n-1];
+
+            u = 0;
+            while (u < n){
+                v = 0;
+                while (v < n){
+                    if (u > i){
+                        if (v > j){
+                            Asub[u-1][v-1] = data[u][v];
+                        }
+                        if (v < j){
+                            Asub[u-1][v] = data[u][v];
+                        }
+                    } if (u < i){
+                        if (v > j){
+                            Asub[u][v-1] = data[u][v];
+                        }
+                        if (v < j){
+                            Asub[u][v] = data[u][v];
+                        }
+                        
+                    }
+                    v += 1;
+                }
+                u += 1;
+            }
+            
+            if ((i+j)%2 == 0){
+                X(set_triangular_banded_index)(Ainverse, X(determinant)(n-1, Asub)/determinant, j, i);
+            } else{
+                X(set_triangular_banded_index)(Ainverse, -X(determinant)(n-1, Asub)/determinant, j, i);
+                
+            }
+            
+        }
+    }
+    
+    return Ainverse;
+}
+
+FLT X(mobius)(const FLT z, const FLT a, const FLT b, const FLT c, const FLT d){
+    return (a*z+b)/(c*z+d);
+}
+
+FLT X(geometric_arithmetic_mean)(const FLT a, const FLT b){
+    FLT am = (a + b)/2.0;
+    FLT gm = (FLT)sqrt((double)(a*b));
+    FLT am_previous = am;
+    while (abs(am - gm) > 1/10000.0){
+
+        am = (am + gm)/2.0;
+        gm = (FLT)sqrt((double)(am_previous*gm));
+        am_previous = am;
+    }
+    
+    return gm;
+}
+
+void X(Jacobi_elliptic_functions)(const FLT x, const FLT k, FLT * sn , FLT * cn, FLT * dn, FLT * dn1, const int n){
+    int nmax = MIN(40, n);
+    
+    FLT k1 = Y(sqrt)((1-k)*(1+k));
+    
+    FLT * a, * b, * c, * phi;
+    a = malloc((nmax+1)*sizeof(FLT));
+    b = malloc((nmax+1)*sizeof(FLT));
+    c = malloc((nmax+1)*sizeof(FLT));
+    
+    a[0] = 1;
+    b[0] = k1;
+    c[0] = k;
+    
+    int new_nmax = -1;
+    
+    for (int i = 0; i < nmax-1; i++){
+        a[i+1] = (a[i]+b[i])/2.0;
+        b[i+1] = Y(sqrt)(a[i]*b[i]);
+        c[i+1] = (a[i]-b[i])/2;
+        
+        if (abs(c[i+1]) < Y(eps)()){
+   
+            new_nmax = i;
+            
+            break;
+        }
+    }
+    
+    if (new_nmax != -1){
+        nmax = new_nmax;
+    }
+    
+    phi = malloc((nmax+1)*sizeof(FLT));
+    phi[nmax] = Y(pow)(2, nmax)*a[nmax]*x;
+    
+    for (int i = nmax-1; i >= 0; i--){
+        phi[i] = (phi[i+1] + Y(asin)(c[i+1]/a[i+1]*Y(sin)(phi[i+1])))/2;
+    }
+    
+    sn[0] = Y(sin)(phi[0]);
+    cn[0] = Y(cos)(phi[0]);
+/*
+    printf("\nk=%.2f\n",k);
+    printf("\nsn=%.2f\n",sn);
+    printf("\n1-(k*sn)^2=%.2f\n",1.0-k*k*sn*sn);
+    printf("\n|1-(k*sn)^2|=%.2f\n",(FLT)abs((double)(1.0-k*k*sn*sn)));
+    printf("\nsqrt(|1-(k*sn)^2|)=%.2f\n\n\n",(FLT)sqrt(abs((double)(1.0-k*k*sn*sn))));
+*/
+    dn[0] = Y(sqrt)((1-k*sn[0])*(1+k*sn[0]));
+    dn1[0] = Y(cos)(phi[0])/Y(cos)(phi[1]-phi[0]);
+    
+    
+    
+}
+
+FLT ** X(ADI_shifts)(const X(triangular_banded) * A, const X(triangular_banded) * B, const FLT epsilon){
+    
+    FLT * eigenvalue_intervals = X(eigenvalue_intervals)(A, B);
+    FLT a, b, c, d;
+    a = eigenvalue_intervals[0];
+    b = eigenvalue_intervals[1];
+    c = eigenvalue_intervals[2];
+    d = eigenvalue_intervals[3];
+
+    FLT gamma = (c-a)*(d-b)/((c-b)*(d-a));
+    
+    FLT alpha = -1 + 2*gamma + 2.0*(FLT)sqrt((double)(abs(gamma*gamma-gamma)));
+    FLT kappa = (FLT)sqrt((double)(abs(1-1/(alpha*alpha))));
+    
+    int n = X(number_of_shifts)(gamma, epsilon);
+
+/*
+    FLT ** Amatrix, ** Bmatrix, ** Cmatrix, ** Dmatrix;
+    Amatrix = {{-a*alpha, a, 1}, {-b, b, 1}, {c, c, 1}};
+    Bmatrix = {{-a*alpha, -alpha, a}, {-b, -1, b}, {c, 1, c}};
+    Cmatrix = {{-alpha, a, 1}, {-1, b, 1}, {1, c, 1}};
+    Dmatrix = {{-a*alpha, -alpha, 1}, {-b, -1, 1}, {c, 1, 1}};
+*/
+
+    FLT Amatrix[3][3] = {{-a*alpha, a, 1}, {-b, b, 1}, {c, c, 1}};
+    FLT Bmatrix[3][3] = {{-a*alpha, -alpha, a}, {-b, -1, b}, {c, 1, c}};
+    FLT Cmatrix[3][3] = {{-alpha, a, 1}, {-1, b, 1}, {1, c, 1}};
+    FLT Dmatrix[3][3] = {{-a*alpha, -alpha, 1}, {-b, -1, 1}, {c, 1, 1}};
+
+
+    FLT Amobius = X(determinant)(3, Amatrix);
+    FLT Bmobius = X(determinant)(3, Bmatrix);
+    FLT Cmobius = X(determinant)(3, Cmatrix);
+    FLT Dmobius = X(determinant)(3, Dmatrix);
+
+    FLT * alphas, * betas;
+    alphas = malloc(n*sizeof(FLT));
+    betas = malloc(n*sizeof(FLT));
+
+    FLT K = M_PI/(2.0*X(geometric_arithmetic_mean)(1.0, (FLT)sqrt((double)(abs(1-kappa*kappa*kappa*kappa)))));
+    
+    FLT * dn;
+    dn = malloc(sizeof(FLT));
+
+    for (int j = 0; j < n; j++){
+        X(Jacobi_elliptic_functions)(((FLT)j-1.0/2.0)*K/((FLT)n), 1.0-1.0/alpha/alpha, malloc(sizeof(FLT)), malloc(sizeof(FLT)), dn, malloc(sizeof(FLT)), 40);
+        alphas[j] = X(mobius)(-alpha*dn[0], Amobius, Bmobius, Cmobius, Dmobius);
+        betas[j] = X(mobius)(alpha*dn[0], Amobius, Bmobius, Cmobius, Dmobius);
+    }
+
+    FLT ** shifts;
+    shifts = malloc(3*sizeof(FLT*));
+    shifts[0] = alphas;
+    shifts[1] = betas;
+    shifts[2] = malloc(sizeof(FLT));
+    shifts[2][0] = (FLT)n;
+
+    return shifts;
+}
+
+X(triangular_banded) ** X(block_divide)(const X(triangular_banded)* A, const int n, const int s){
+    
+    X(triangular_banded) * A_11 = X(calloc_triangular_banded)(s, MIN(A->b,s));
+    X(triangular_banded) * A_22 = X(calloc_triangular_banded)(n - s, MIN(A->b,n-s));
+    for (int i = 0; i < s; i++){
+        for (int j = 0; j < s; j++){
+            X(set_triangular_banded_index)(A_11, X(get_triangular_banded_index)(A, i, j), i, j);
+            
+        }
+    }
+    
+    for (int i = 0; i < (n-s); i++){
+        for (int j = 0; j < (n-s); j++){
+            X(set_triangular_banded_index)(A_22, X(get_triangular_banded_index)(A, i+s, j+s), i, j);
+        }
+    }
+    
+    X(triangular_banded) ** blocks;
+    blocks = malloc(2*sizeof(X(triangular_banded)*));
+    blocks[0] = A_11;
+    blocks[1] = A_22;
+    
+    return blocks;
+}
+
+X(densematrix) * X(get_A_12)(const X(triangular_banded)* A, const int n, const int s){
+    
+    X(densematrix) * A_12 = X(calloc_densematrix)(s, n-s);
+    
+    for (int i = 0; i < s; i++){
+        for (int j = 0; j < (n-s); j++){
+            X(set_densematrix_index)(A_12, X(get_triangular_banded_index)(A, i, s+j), i, j);
+        }
+    }
+    
+    return A_12;
+    
+}
+
+X(triangular_banded) * X(block_attach)(const X(triangular_banded) * A_11, const X(densematrix) * A_12, const X(triangular_banded) * A_22){
+
+    X(triangular_banded) * A;
+    A = X(calloc_triangular_banded)(A_11->n+A_12->n, A_11->n+A_12->n);
+    
+    for (int i = 0; i < A_11->n; i++){
+        for (int j = 0; j < A_11->n; j++){
+            X(set_triangular_banded_index)(A, X(get_triangular_banded_index)(A_11, i, j), i, j);
+        }
+    }
+
+    for (int i = A_11->n; i < A_11->n+A_22->n; i++){
+        for (int j = A_11->n; j < A->n; j++){
+            X(set_triangular_banded_index)(A, X(get_triangular_banded_index)(A_22, i-A_11->n, j-A_11->n), i, j);
+            
+        }
+    }
+
+    A_12 = X(triangular_banded_multiply_densematrix)(A_11, A_12);
+    
+    
+    for (int i = 0; i < A_11->n; i++){
+        for (int j = A_11->n; j < A->n; j++){
+            X(set_triangular_banded_index)(A, X(get_densematrix_index)(A_12, i, j-A_11->n), i, j);
+            
+        }
+    }
+
+    return A;
+}
+
+X(densematrix) * X(triangular_banded_multiply_densematrix)(const X(triangular_banded) * A, const X(densematrix) * B){
+    
+    X(densematrix) * C = X(calloc_densematrix)(A->n, B->n);
+    
+    FLT total;
+
+    for (int i = 0; i < A->n; i++){
+        for (int j = 0; j < B->n; j++){
+            total = 0.0;
+            for (int k = 0; k < A->n; k++){
+                total += X(get_triangular_banded_index)(A, i, k)*X(get_densematrix_index)(B, k, j);
+            }
+            X(set_densematrix_index)(C, total, i, j);
+            
+        }
+
+    }
+    return C;
+}
+
+X(densematrix) * X(densematrix_multiply_triangular_banded)(const X(densematrix) * A, const X(triangular_banded) * B){
+    
+    X(densematrix) * C = X(calloc_densematrix)(A->m, B->n);
+    
+    FLT total;
+    
+    for (int i = 0; i < C->m; i++){
+        for (int j = 0; j < C->n; j++){
+            total = 0.0;
+            for (int k = 0; k < A->n; k++){
+                total += X(get_densematrix_index)(A, i, k)*X(get_triangular_banded_index)(B, k, j);
+            }
+            X(set_densematrix_index)(C, total, i, j);
+            
+        }
+
+    }
+    return C;
+    
+}
+
+X(triangular_banded) * X(triangular_banded_multiply_triangular_banded)(const X(triangular_banded) * A, const X(triangular_banded) * B){
+    
+    X(triangular_banded) * C = X(calloc_triangular_banded)(A->n, MIN(A->b + B->b, A->n));
+    
+    FLT total;
+    
+    for (int i = 0; i < A->n; i++){
+        for (int j = 0; j < B->n; j++){
+            total = 0.0;
+            for (int k = 0; k < A->n; k++){
+                total +=
+                X(get_triangular_banded_index)(A, i, k)*
+                X(get_triangular_banded_index)(B, k, j);
+            }
+            X(set_triangular_banded_index)(C, total, i, j);
+            
+        }
+    }
+    
+    return C;
+}
+
+X(triangular_banded) * X(transpose_triangular_banded)(const X(triangular_banded) * A){
+    X(triangular_banded) * B;
+    B = X(calloc_triangular_banded)(A -> n, A -> b);
+    
+    for (int i = 0; i < A -> n; i++){
+        for (int j = 0; j < A -> n; j++){
+            X(set_triangular_banded_index)(B, X(get_triangular_banded_index)(A, i, j), j, i);
+        }
+    }
+    
+    return B;
+}
+
+X(densematrix) * X(transpose_densematrix)(const X(densematrix) * A){
+    X(densematrix) * B;
+    B = X(calloc_densematrix)(A -> m, A -> n);
+    
+    for (int i = 0; i < A -> m; i++){
+        for (int j = 0; j < A -> n; j++){
+            X(set_densematrix_index)(B, X(get_densematrix_index)(A, i, j), j, i);
+        }
+    }
+    
+    return B;
+}
+
