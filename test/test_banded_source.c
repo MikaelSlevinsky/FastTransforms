@@ -181,7 +181,7 @@ void X(inner_test_banded)(int * checksum, int n) {
     free(z);
 }
 
-void X(inner_timing_test_banded)(int * checksum, int n) {
+void X(inner_timing_test_banded_FMM)(int * checksum, int n) {
     int NTIMES = 10;
     struct timeval start, end;
 
@@ -195,7 +195,7 @@ void X(inner_timing_test_banded)(int * checksum, int n) {
     X(tb_eigen_FMM) * F = X(tb_eig_FMM)(A, B);
     gettimeofday(&end, NULL);
 
-    printf("Size of the triangular banded eigendecomposition \t |");
+    printf("Size of the triangular banded eigendecomposition (FMM) \t |");
     print_summary_size(X(summary_size_tb_eigen_FMM)(F));
 
     printf("Time for factorization \t\t (%7i×%7i) \t |%20.6f s\n", n, n, elapsed(&start, &end, 1));
@@ -218,6 +218,44 @@ void X(inner_timing_test_banded)(int * checksum, int n) {
     free(y);
 }
 
+void X(inner_timing_test_banded_ADI)(int * checksum, int n) {
+    int NTIMES = 10;
+    struct timeval start, end;
+
+    X(triangular_banded) * A = X(create_A_test)(n);
+    X(triangular_banded) * B = X(create_B_test)(n);
+
+    printf("Size of a dense matrix \t\t (%7i×%7i) \t |", n, n);
+    print_summary_size(sizeof(FLT)*n*n);
+
+    gettimeofday(&start, NULL);
+    X(tb_eigen_ADI) * F = X(tb_eig_ADI)(A, B);
+    gettimeofday(&end, NULL);
+
+    printf("Size of the triangular banded eigendecomposition (ADI) \t |");
+    print_summary_size(X(summary_size_tb_eigen_ADI)(F));
+
+    printf("Time for factorization \t\t (%7i×%7i) \t |%20.6f s\n", n, n, elapsed(&start, &end, 1));
+
+    FLT * x = malloc(n*sizeof(FLT));
+    FLT * y = malloc(n*sizeof(FLT));
+    for (int i = 0; i < n; i++)
+        y[i] = x[i] = ONE(FLT)/(i+1);
+    FT_TIME({X(bfmv_ADI)('N', F, x); X(bfsv_ADI)('N', F, x);}, start, end, NTIMES)
+    printf("Time for fwd-bckwd solves \t (%7i×%7i) \t |%20.6f s\n", n, n, elapsed(&start, &end, NTIMES));
+
+    FLT err = X(norm_2arg)(x, y, n)/X(norm_1arg)(y, n);
+    printf("Error of fwd-bckwd solves \t (%7i×%7i) \t |%20.2e ", n, n, (double) err);
+    X(checktest)(err, n, checksum);
+
+    X(destroy_triangular_banded)(A);
+    X(destroy_triangular_banded)(B);
+    X(destroy_tb_eigen_ADI)(F);
+    free(x);
+    free(y);
+}
+
+
 void Y(test_banded)(int * checksum) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
@@ -228,7 +266,9 @@ void Y(test_banded)(int * checksum) {
         X(inner_test_banded)(checksum, n);
     if (sizeof(FLT) == sizeof(double)) {
         printf("\n\n");
-        for (int n = 1024; n < 131072; n *= 2)
-            X(inner_timing_test_banded)(checksum, n);
+        for (int n = 1024; n < 131072; n *= 2) {
+            X(inner_timing_test_banded_FMM)(checksum, n);
+            X(inner_timing_test_banded_ADI)(checksum, n);
+        }
     }
 }

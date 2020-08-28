@@ -28,11 +28,25 @@ struct X(tbstruct_FMM) {
     int b;
 };
 
+typedef struct X(tbstruct_ADI) X(tb_eigen_ADI);
+
+struct X(tbstruct_ADI) {
+    X(lowrankmatrix) * F0;
+    X(tb_eigen_ADI) * F1;
+    X(tb_eigen_ADI) * F2;
+    FLT * V;
+    FLT * lambda;
+    int n;
+    int b;
+};
+
 void X(destroy_banded)(X(banded) * A);
 void X(destroy_triangular_banded)(X(triangular_banded) * A);
 void X(destroy_tb_eigen_FMM)(X(tb_eigen_FMM) * F);
+void X(destroy_tb_eigen_ADI)(X(tb_eigen_ADI) * F);
 
 size_t X(summary_size_tb_eigen_FMM)(X(tb_eigen_FMM) * F);
+size_t X(summary_size_tb_eigen_ADI)(X(tb_eigen_ADI) * F);
 
 X(banded) * X(malloc_banded)(const int m, const int n, const int l, const int u);
 X(banded) * X(calloc_banded)(const int m, const int n, const int l, const int u);
@@ -60,9 +74,12 @@ void X(triangular_banded_eigenvalues_3arg)(X(triangular_banded) * A, X(triangula
 void X(triangular_banded_eigenvectors_3arg)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * lambda, X(triangular_banded) * C, FLT * V);
 
 X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) * B);
+X(tb_eigen_ADI) * X(tb_eig_ADI)(X(triangular_banded) * A, X(triangular_banded) * B);
 
 void X(scale_rows_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F);
+void X(scale_rows_tb_eigen_ADI)(FLT alpha, FLT * x, X(tb_eigen_ADI) * F);
 void X(scale_columns_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F);
+void X(scale_columns_tb_eigen_ADI)(FLT alpha, FLT * x, X(tb_eigen_ADI) * F);
 
 void X(trmv)(char TRANS, int n, FLT * A, int LDA, FLT * x);
 void X(trsv)(char TRANS, int n, FLT * A, int LDA, FLT * x);
@@ -71,10 +88,14 @@ void X(trmm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N);
 void X(trsm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N);
 
 void X(bfmv)(char TRANS, X(tb_eigen_FMM) * A, FLT * x);
+void X(bfmv_ADI)(char TRANS, X(tb_eigen_ADI) * A, FLT * x);
 void X(bfsv)(char TRANS, X(tb_eigen_FMM) * A, FLT * x);
+void X(bfsv_ADI)(char TRANS, X(tb_eigen_ADI) * A, FLT * x);
 
 void X(bfmm)(char TRANS, X(tb_eigen_FMM) * F, FLT * X, int LDX, int N);
+void X(bfmm_ADI)(char TRANS, X(tb_eigen_ADI) * F, FLT * X, int LDX, int N);
 void X(bfsm)(char TRANS, X(tb_eigen_FMM) * F, FLT * X, int LDX, int N);
+void X(bfsm_ADI)(char TRANS, X(tb_eigen_ADI) * F, FLT * X, int LDX, int N);
 
 X(triangular_banded) * X(create_A_konoplev_to_jacobi)(const int n, const FLT alpha, const FLT beta);
 X(triangular_banded) * X(create_B_konoplev_to_jacobi)(const int n, const FLT alpha);
@@ -87,6 +108,8 @@ X(banded) * X(create_jacobi_lowering)(const int m, const int n, const FLT alpha,
 X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta);
 X(triangular_banded) * X(create_B_associated_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta);
 X(triangular_banded) * X(create_C_associated_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta);
+
+X(lowrankmatrix) * X(ddfadi)(const int m, const FLT * A, const int n, const FLT * B, const int b, const FLT * X, const FLT * Y);
 
 /*
 X(triangular_banded) * X(pre_ADI_Chebyshev_Legendre)(const int n, const FLT epsilon);

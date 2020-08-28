@@ -26,6 +26,20 @@ void X(destroy_tb_eigen_FMM)(X(tb_eigen_FMM) * F) {
     free(F);
 }
 
+void X(destroy_tb_eigen_ADI)(X(tb_eigen_ADI) * F) {
+    if (F->n < TB_EIGEN_BLOCKSIZE) {
+        free(F->V);
+        free(F->lambda);
+    }
+    else {
+        X(destroy_lowrankmatrix)(F->F0);
+        X(destroy_tb_eigen_ADI)(F->F1);
+        X(destroy_tb_eigen_ADI)(F->F2);
+        free(F->lambda);
+    }
+    free(F);
+}
+
 size_t X(summary_size_tb_eigen_FMM)(X(tb_eigen_FMM) * F) {
     size_t S = 0;
     if (F->n < TB_EIGEN_BLOCKSIZE)
@@ -35,6 +49,19 @@ size_t X(summary_size_tb_eigen_FMM)(X(tb_eigen_FMM) * F) {
         S += X(summary_size_tb_eigen_FMM)(F->F1);
         S += X(summary_size_tb_eigen_FMM)(F->F2);
         S += sizeof(FLT)*F->n*(2*F->b+1);
+    }
+    return S;
+}
+
+size_t X(summary_size_tb_eigen_ADI)(X(tb_eigen_ADI) * F) {
+    size_t S = 0;
+    if (F->n < TB_EIGEN_BLOCKSIZE)
+        S += sizeof(FLT)*F->n*(F->n+1);
+    else {
+        S += X(summary_size_lowrankmatrix)(F->F0);
+        S += X(summary_size_tb_eigen_ADI)(F->F1);
+        S += X(summary_size_tb_eigen_ADI)(F->F2);
+        S += sizeof(FLT)*F->n;
     }
     return S;
 }
@@ -344,6 +371,94 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
     return F;
 }
 
+X(tb_eigen_ADI) * X(tb_eig_ADI)(X(triangular_banded) * A, X(triangular_banded) * B) {
+    int n = A->n, b1 = A->b, b2 = B->b;
+    int b = MAX(b1, b2);
+    X(tb_eigen_ADI) * F = malloc(sizeof(X(tb_eigen_ADI)));
+    if (n < TB_EIGEN_BLOCKSIZE) {
+        FLT * V = calloc(n*n, sizeof(FLT));
+        for (int i = 0; i < n; i++)
+            V[i+i*n] = 1;
+        F->lambda = malloc(n*sizeof(FLT));
+        X(triangular_banded_eigenvalues)(A, B, F->lambda);
+        X(triangular_banded_eigenvectors)(A, B, V);
+        F->V = V;
+        F->n = n;
+        F->b = b;
+    }
+    else {
+        F->lambda = malloc(n*sizeof(FLT));
+        X(triangular_banded_eigenvalues)(A, B, F->lambda);
+        int s = n>>1;
+        X(triangular_banded) * A1 = X(calloc_triangular_banded)(s, b1);
+        X(triangular_banded) * B1 = X(calloc_triangular_banded)(s, b2);
+        for (int j = 0; j < s; j++)
+            for (int k = 0; k < b1+1; k++)
+                A1->data[k+j*(b1+1)] = A->data[k+j*(b1+1)];
+        for (int j = 0; j < s; j++)
+            for (int k = 0; k < b2+1; k++)
+                B1->data[k+j*(b2+1)] = B->data[k+j*(b2+1)];
+        A1->n = B1->n = s;
+        A1->b = b1;
+        B1->b = b2;
+
+        X(triangular_banded) * A2 = X(calloc_triangular_banded)(n-s, b1);
+        X(triangular_banded) * B2 = X(calloc_triangular_banded)(n-s, b2);
+        for (int j = 0; j < n-s; j++)
+            for (int k = 0; k < b1+1; k++)
+                A2->data[k+j*(b1+1)] = A->data[k+(j+s)*(b1+1)];
+        for (int j = 0; j < n-s; j++)
+            for (int k = 0; k < b2+1; k++)
+                B2->data[k+j*(b2+1)] = B->data[k+(j+s)*(b2+1)];
+        A2->n = B2->n = n-s;
+        A2->b = b1;
+        B2->b = b2;
+
+        F->F1 = X(tb_eig_ADI)(A1, B1);
+        F->F2 = X(tb_eig_ADI)(A2, B2);
+
+        FLT * lambda1 = F->F1->lambda;
+        FLT * lambda2 = F->F2->lambda;
+
+        FLT * X = calloc(s*b, sizeof(FLT));
+        for (int j = 0; j < b; j++) {
+            X[s-b+j+j*s] = -1;
+            X(tbsv)('N', B1, X+j*s);
+            X(bfsv_ADI)('N', F->F1, X+j*s);
+        }
+
+        FLT * Y = calloc((n-s)*b, sizeof(FLT));
+        for (int j = 0; j < b1; j++)
+            for (int k = 0; k < b1-j; k++)
+                Y[j+(k+j)*(n-s)] = A2->data[k+j*(b1+1)];
+        FLT * Y2 = calloc((n-s)*b2, sizeof(FLT));
+        for (int j = 0; j < b2; j++)
+            for (int k = 0; k < b2-j; k++)
+                Y2[j+(k+j)*(n-s)] = B2->data[k+j*(b2+1)];
+
+        for (int j = 0; j < b1; j++)
+            X(bfmv_ADI)('T', F->F2, Y+j*(n-s));
+        for (int j = 0; j < b2; j++)
+            X(bfmv_ADI)('T', F->F2, Y2+j*(n-s));
+        for (int j = 0; j < b2; j++)
+            for (int i = 0; i < n-s; i++)
+                Y2[i+j*(n-s)] *= lambda2[i];
+        for (int j = 0; j < b2; j++)
+            for (int i = 0; i < n-s; i++)
+                Y[i+j*(n-s)] = Y[i+j*(n-s)]-Y2[i+j*(n-s)];
+
+        F->F0 = X(ddfadi)(s, lambda1, n-s, lambda2, b, X, Y);
+        F->n = n;
+        F->b = b;
+        X(destroy_triangular_banded)(A1);
+        X(destroy_triangular_banded)(B1);
+        X(destroy_triangular_banded)(A2);
+        X(destroy_triangular_banded)(B2);
+        free(Y2);
+    }
+    return F;
+}
+
 void X(scale_rows_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F) {
     int n = F->n;
     if (n < TB_EIGEN_BLOCKSIZE) {
@@ -356,6 +471,21 @@ void X(scale_rows_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F) {
         int s = n>>1;
         X(scale_rows_tb_eigen_FMM)(alpha, x, F->F1);
         X(scale_rows_tb_eigen_FMM)(alpha, x+s, F->F2);
+    }
+}
+
+void X(scale_rows_tb_eigen_ADI)(FLT alpha, FLT * x, X(tb_eigen_ADI) * F) {
+    int n = F->n;
+    if (n < TB_EIGEN_BLOCKSIZE) {
+        FLT * V = F->V;
+        for (int j = 0; j < n; j++)
+            for (int i = 0; i <= j; i++)
+                V[i+j*n] *= alpha*x[i];
+    }
+    else {
+        int s = n>>1;
+        X(scale_rows_tb_eigen_ADI)(alpha, x, F->F1);
+        X(scale_rows_tb_eigen_ADI)(alpha, x+s, F->F2);
     }
 }
 
@@ -379,6 +509,29 @@ void X(scale_columns_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F) {
         }
         X(scale_columns_tb_eigen_FMM)(alpha, x, F->F1);
         X(scale_columns_tb_eigen_FMM)(alpha, x+s, F->F2);
+    }
+}
+
+void X(scale_columns_tb_eigen_ADI)(FLT alpha, FLT * x, X(tb_eigen_ADI) * F) {
+    int n = F->n;
+    if (n < TB_EIGEN_BLOCKSIZE) {
+        FLT scl, * V = F->V;
+        for (int j = 0; j < n; j++) {
+            scl = alpha*x[j];
+            for (int i = 0; i <= j; i++)
+                V[i+j*n] *= scl;
+        }
+    }
+    else {
+        int s = n>>1, b = F->b;
+        X(scale_columns_lowrankmatrix)(1, x+s, F->F0);
+        FLT * t = malloc(s*sizeof(FLT));
+        for (int i = 0; i < s; i++)
+            t[i] = 1/x[i];
+        X(scale_rows_lowrankmatrix)(1, t, F->F0);
+        free(t);
+        X(scale_columns_tb_eigen_ADI)(alpha, x, F->F1);
+        X(scale_columns_tb_eigen_ADI)(alpha, x+s, F->F2);
     }
 }
 
@@ -499,6 +652,26 @@ void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
     }
 }
 
+// x ← A*x, x ← Aᵀ*x
+void X(bfmv_ADI)(char TRANS, X(tb_eigen_ADI) * F, FLT * x) {
+    int n = F->n;
+    if (n < TB_EIGEN_BLOCKSIZE)
+        X(trmv)(TRANS, n, F->V, n, x);
+    else {
+        int s = n>>1, b = F->b;
+        if (TRANS == 'N') {
+            X(lrmv)(TRANS, 1, F->F0, x+s, 1, x);
+            X(bfmv_ADI)(TRANS, F->F1, x);
+            X(bfmv_ADI)(TRANS, F->F2, x+s);
+        }
+        else if (TRANS == 'T') {
+            X(bfmv_ADI)(TRANS, F->F1, x);
+            X(bfmv_ADI)(TRANS, F->F2, x+s);
+            X(lrmv)(TRANS, 1, F->F0, x, 1, x+s);
+        }
+    }
+}
+
 // x ← A⁻¹*x, x ← A⁻ᵀ*x
 void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
     int n = F->n;
@@ -534,6 +707,26 @@ void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
     }
 }
 
+// x ← A*x, x ← Aᵀ*x
+void X(bfsv_ADI)(char TRANS, X(tb_eigen_ADI) * F, FLT * x) {
+    int n = F->n;
+    if (n < TB_EIGEN_BLOCKSIZE)
+        X(trsv)(TRANS, n, F->V, n, x);
+    else {
+        int s = n>>1, b = F->b;
+        if (TRANS == 'N') {
+            X(bfsv_ADI)(TRANS, F->F1, x);
+            X(bfsv_ADI)(TRANS, F->F2, x+s);
+            X(lrmv)(TRANS, -1, F->F0, x+s, 1, x);
+        }
+        else if (TRANS == 'T') {
+            X(lrmv)(TRANS, -1, F->F0, x, 1, x+s);
+            X(bfsv_ADI)(TRANS, F->F1, x);
+            X(bfsv_ADI)(TRANS, F->F2, x+s);
+        }
+    }
+}
+
 void X(bfmm)(char TRANS, X(tb_eigen_FMM) * F, FLT * B, int LDB, int N) {
     #pragma omp parallel for
     for (int j = 0; j < N; j++)
@@ -544,6 +737,18 @@ void X(bfsm)(char TRANS, X(tb_eigen_FMM) * F, FLT * B, int LDB, int N) {
     #pragma omp parallel for
     for (int j = 0; j < N; j++)
         X(bfsv)(TRANS, F, B+j*LDB);
+}
+
+void X(bfmm_ADI)(char TRANS, X(tb_eigen_ADI) * F, FLT * B, int LDB, int N) {
+    #pragma omp parallel for
+    for (int j = 0; j < N; j++)
+        X(bfmv_ADI)(TRANS, F, B+j*LDB);
+}
+
+void X(bfsm_ADI)(char TRANS, X(tb_eigen_ADI) * F, FLT * B, int LDB, int N) {
+    #pragma omp parallel for
+    for (int j = 0; j < N; j++)
+        X(bfsv_ADI)(TRANS, F, B+j*LDB);
 }
 
 
@@ -789,6 +994,146 @@ X(triangular_banded) * X(create_C_associated_jacobi_to_jacobi)(const int n, cons
     free(C);
     return TC;
 }
+
+// a ≤ σ(A) ≤ b and c ≤ σ(B) ≤ d.
+static inline void X(compute_spectral_enclosing_sets)(const int m, const FLT * A, const int n, const FLT * B, FLT * a, FLT * b, FLT * c, FLT * d) {
+    if (m > 0)
+        a[0] = b[0] = A[0];
+    if (n > 0)
+        c[0] = d[0] = B[0];
+    for (int i = 0; i < m; i++) {
+        if (A[i] < a[0]) a[0] = A[i];
+        if (A[i] > b[0]) b[0] = A[i];
+    }
+    for (int i = 0; i < n; i++) {
+        if (B[i] < c[0]) c[0] = B[i];
+        if (B[i] > d[0]) d[0] = B[i];
+    }
+}
+
+static inline int X(adi_number_of_shifts)(const FLT gamma, const FLT epsilon) {
+    return (int) (log(16*gamma)*log(4/epsilon)/(M_PI*M_PI)+1);
+}
+
+static inline FLT X(det_3x3)(const FLT M[9]) {
+    return M[0]*(M[4]*M[8]-M[5]*M[7]) - M[1]*(M[3]*M[8]-M[5]*M[6]) + M[2]*(M[3]*M[7]-M[4]*M[6]);
+}
+
+static inline void X(adi_compute_shifts)(const FLT a, const FLT b, const FLT c, const FLT d, const FLT gamma, const int J, FLT * p, FLT * q) {
+    FLT alpha = -1 + 2*gamma + 2*Y(sqrt)(gamma*(gamma-1));
+    FLT kappa = Y(sqrt)((1-1/alpha)*(1+1/alpha));
+    if (kappa != 1) {
+        FLT K = X(complete_elliptic_integral)('1', kappa);
+        for (int j = 0; j < J; j++) {
+            FLT dn;
+            X(jacobian_elliptic_functions)((2*j+1)*K/(2*J), kappa, NULL, NULL, &dn, FT_DN);
+            p[j] = -alpha*dn;
+        }
+    }
+    else {
+        FLT K = (2*Y(log)(2)+Y(log)(alpha)) + (-1+2*Y(log)(2)+Y(log)(alpha))/(4*alpha*alpha);
+        FLT m1 = 1/(4*alpha*alpha);
+        for (int j = 0; j < J; j++) {
+            FLT u = (2*j+1)*K/(2*J);
+            FLT dn = (1 + m1*(Y(sinh)(u)*Y(cosh)(u)+u)*Y(tanh)(u))/Y(cosh)(u);
+            p[j] = -alpha*dn;
+        }
+    }
+    FLT MA[9] = {-a*alpha, -b, c, a, b, c, 1, 1, 1};
+    FLT A = X(det_3x3)(MA);
+    FLT MB[9] = {-a*alpha, -b, c, -alpha, -1, 1, a, b, c};
+    FLT B = X(det_3x3)(MB);
+    FLT MC[9] = {-alpha, -1, 1, a, b, c, 1, 1, 1};
+    FLT C = X(det_3x3)(MC);
+    FLT MD[9] = {-a*alpha, -b, c, -alpha, -1, 1, 1, 1, 1};
+    FLT D = X(det_3x3)(MD);
+    for (int j = 0; j < J; j++) {
+        q[j] = (B-A*p[j])/(D-C*p[j]);
+        p[j] = (A*p[j]+B)/(C*p[j]+D);
+    }
+}
+
+/*
+static inline X(lowrankmatrix) * X(ddfadi_computational)(const int m, const FLT * A, const int n, const FLT * B, const int b, const FLT * X, const FLT * Y, const int J, const FLT * p, const FLT * q) {
+    int r = b*J;
+    X(lowrankmatrix) * Z = X(malloc_lowrankmatrix)('3', m, n, r);
+    FLT * U = Z->U;
+    FLT * S = Z->S;
+    FLT * V = Z->V;
+    for (int k = 0; k < b; k++)
+        for (int i = 0; i < m; i++)
+            U[i+k*m] = X[i+k*m]/(A[i]-q[0]);
+    for (int j = 1; j < J; j++)
+        for (int k = 0; k < b; k++)
+            for (int i = 0; i < m; i++)
+                U[i+(k+j*b)*m] = U[i+(k+(j-1)*b)*m] + (q[j]-p[j-1])*U[i+(k+(j-1)*b)*m]/(A[i]-q[j]);
+    for (int k = 0; k < r*r; k++)
+        S[k] = 0;
+    for (int j = 0; j < J; j++)
+        for (int k = 0; k < b; k++)
+            S[(k+j*b)*(r+1)] = q[j]-p[j];
+    for (int k = 0; k < b; k++)
+        for (int i = 0; i < n; i++)
+            V[i+k*n] = Y[i+k*n]/(B[i]-p[0]);
+    for (int j = 1; j < J; j++)
+        for (int k = 0; k < b; k++)
+            for (int i = 0; i < n; i++)
+                V[i+(k+j*b)*n] = V[i+(k+(j-1)*b)*n] + (p[j]-q[j-1])*V[i+(k+(j-1)*b)*n]/(B[i]-p[j]);
+    return Z;
+}
+*/
+
+static inline X(lowrankmatrix) * X(ddfadi_computational)(const int m, const FLT * A, const int n, const FLT * B, const int b, const FLT * X, const FLT * Y, const int J, const FLT * p, const FLT * q) {
+    int r = b*J;
+    X(lowrankmatrix) * Z = X(malloc_lowrankmatrix)('2', m, n, r);
+    FLT * U = Z->U;
+    FLT * V = Z->V;
+    for (int k = 0; k < b; k++)
+        for (int i = 0; i < m; i++)
+            U[i+k*m] = X[i+k*m]/(A[i]-q[0]);
+    for (int j = 1; j < J; j++)
+        for (int k = 0; k < b; k++)
+            for (int i = 0; i < m; i++)
+                U[i+(k+j*b)*m] = U[i+(k+(j-1)*b)*m] + (q[j]-p[j-1])*U[i+(k+(j-1)*b)*m]/(A[i]-q[j]);
+    for (int j = 0; j < J; j++)
+        for (int k = 0; k < b; k++)
+            for (int i = 0; i < m; i++)
+                U[i+(k+j*b)*m] *= q[j]-p[j];
+    for (int k = 0; k < b; k++)
+        for (int i = 0; i < n; i++)
+            V[i+k*n] = Y[i+k*n]/(B[i]-p[0]);
+    for (int j = 1; j < J; j++)
+        for (int k = 0; k < b; k++)
+            for (int i = 0; i < n; i++)
+                V[i+(k+j*b)*n] = V[i+(k+(j-1)*b)*n] + (p[j]-q[j-1])*V[i+(k+(j-1)*b)*n]/(B[i]-p[j]);
+    return Z;
+}
+
+/*
+Assumptions to solve AZ-ZB = XYᵀ.
+ - A is a diagonal m × m matrix,
+ - B is a diagonal n × n matrix,
+ - rank(XYᵀ) ≤ b,
+ - we use J shifts of factored ADI stored in p and q.
+*/
+X(lowrankmatrix) * X(ddfadi)(const int m, const FLT * A, const int n, const FLT * B, const int r, const FLT * X, const FLT * Y) {
+    // Compute sets enclosing the spectra of diagonal A and B.
+    FLT a, b, c, d;
+    X(compute_spectral_enclosing_sets)(m, A, n, B, &a, &b, &c, &d);
+    // Compute shifts
+    FLT gamma = Y(fabs)((c-a)*(d-b)/((c-b)*(d-a)));
+    int J = X(adi_number_of_shifts)(gamma, Y(eps)());
+    FLT * p = malloc(J*sizeof(FLT));
+    FLT * q = malloc(J*sizeof(FLT));
+    X(adi_compute_shifts)(a, b, c, d, gamma, J, p, q);
+    // Call computational routine
+    X(lowrankmatrix) * Z = X(ddfadi_computational)(m, A, n, B, r, X, Y, J, p, q);
+    free(p);
+    free(q);
+    return Z;
+}
+
+
 
 /*
 
