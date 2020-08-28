@@ -2,8 +2,19 @@ void Y(test_elliptic)(int * checksum) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
 
-    FLT k = 1/Y(sqrt)(2);
+    FLT k = 1;
     FLT K = X(complete_elliptic_integral)('1', k);
+    printf("Complete elliptic integral, first kind,       k = %3.1f \t |%20.2e ", (double) k, (double) K);
+    X(checktest)(Y(isinf)(K) ? 0 : 1, 1, checksum);
+    FLT E = X(complete_elliptic_integral)('2', k);
+    printf("Complete elliptic integral, second kind,      k = %3.1f \t |%20.2e ", (double) k, (double) E-1);
+    X(checktest)(Y(fabs)(E-1), 1, checksum);
+    FLT Pi = X(complete_elliptic_integral)('3', k);
+    printf("Complete elliptic integral, third kind, N/A   k = %3.1f \t |%20.2e ", (double) k, (double) Pi);
+    X(checktest)(Y(isinf)(Pi) ? 0 : 1, 1, checksum);
+
+    k = 1/Y(sqrt)(2);
+    K = X(complete_elliptic_integral)('1', k);
     FLT err = Y(fabs)(K - Y(pow)(Y(tgamma)(0.25), 2)/(4*Y(tgamma)(0.5)))/Y(fabs)(Y(pow)(Y(tgamma)(0.25), 2)/(4*Y(tgamma)(0.5)));
     printf("Complete elliptic integral, lemniscatic case, k²= %3.1f \t |%20.2e ", (double) (k*k), (double) err);
     X(checktest)(err, 2, checksum);
@@ -11,7 +22,7 @@ void Y(test_elliptic)(int * checksum) {
     k = Y(__sinpi)(ONE(FLT)/12);
     FLT kp = Y(sqrt)((1-k)*(1+k));
     K = X(complete_elliptic_integral)('1', k);
-    FLT E = X(complete_elliptic_integral)('2', k);
+    E = X(complete_elliptic_integral)('2', k);
     err = Y(fabs)(E - Y(atan)(1)/(Y(sqrt)(3)*K) - Y(sqrt)(TWO(FLT)/3)*kp*K)/Y(fabs)(E);
     printf("Complete elliptic integrals, first and second kinds \t |%20.2e ", (double) err);
     X(checktest)(err, 2, checksum);
