@@ -66,6 +66,7 @@ void X(banded_add)(FLT alpha, X(banded) * A, FLT beta, X(banded) * B, X(banded) 
 
 void X(tbmv)(char TRANS, X(triangular_banded) * A, FLT * x);
 void X(tbsv)(char TRANS, X(triangular_banded) * A, FLT * x);
+void X(tssv)(char TRANS, X(triangular_banded) * A, X(triangular_banded) * B, FLT gamma, FLT * x);
 
 void X(triangular_banded_eigenvalues)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * lambda);
 void X(triangular_banded_eigenvectors)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * V);

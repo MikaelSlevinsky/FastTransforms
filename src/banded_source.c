@@ -232,6 +232,28 @@ void X(tbsv)(char TRANS, X(triangular_banded) * A, FLT * x) {
     }
 }
 
+// x ← (A-γB)⁻¹*x, x ← (A-γB)⁻ᵀ*x
+void X(tssv)(char TRANS, X(triangular_banded) * A, X(triangular_banded) * B, FLT gamma, FLT * x) {
+    int n = A->n, b = MAX(A->b, B->b);
+    FLT t;
+    if (TRANS == 'N') {
+        for (int i = n-1; i >= 0; i--) {
+            t = 0;
+            for (int k = i+1; k < MIN(i+b+1, n); k++)
+                t += (X(get_triangular_banded_index)(A, i, k)-gamma*X(get_triangular_banded_index)(B, i, k))*x[k];
+            x[i] = (x[i] - t)/(X(get_triangular_banded_index)(A, i, i)-gamma*X(get_triangular_banded_index)(B, i, i));
+        }
+    }
+    else if (TRANS == 'T') {
+        for (int i = 0; i < n; i++) {
+            t = 0;
+            for (int k = MAX(i-b, 0); k < i; k++)
+                t += (X(get_triangular_banded_index)(A, k, i)-gamma*X(get_triangular_banded_index)(B, k, i))*x[k];
+            x[i] = (x[i] - t)/(X(get_triangular_banded_index)(A, i, i)-gamma*X(get_triangular_banded_index)(B, i, i));
+        }
+    }
+}
+
 // AV = BVΛ
 
 void X(triangular_banded_eigenvalues)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * lambda) {
@@ -241,8 +263,7 @@ void X(triangular_banded_eigenvalues)(X(triangular_banded) * A, X(triangular_ban
 
 // Assumes eigenvectors are initialized by V[i,j] = 0 for i > j and V[j,j] ≠ 0.
 void X(triangular_banded_eigenvectors)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * V) {
-    int n = A->n, b1 = A->b, b2 = B->b;
-    int b = MAX(b1, b2);
+    int n = A->n, b = MAX(A->b, B->b);
     FLT t, lam;
     for (int j = 1; j < n; j++) {
         lam = X(get_triangular_banded_index)(A, j, j)/X(get_triangular_banded_index)(B, j, j);
@@ -264,8 +285,7 @@ void X(triangular_banded_eigenvalues_3arg)(X(triangular_banded) * A, X(triangula
 
 // Assumes eigenvectors are initialized by V[i,j] = 0 for i > j and V[j,j] ≠ 0.
 void X(triangular_banded_eigenvectors_3arg)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * lambda, X(triangular_banded) * C, FLT * V) {
-    int n = A->n, b1 = A->b, b2 = B->b, b3 = C->b;
-    int b = MAX(MAX(b1, b2), b3);
+    int n = A->n, b = MAX(MAX(A->b, B->b), C->b);
     FLT t, lam, omeg;
     for (int j = 1; j < n; j++) {
         lam = lambda[j];
@@ -295,8 +315,6 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
         F->b = b;
     }
     else {
-        F->lambda = malloc(n*sizeof(FLT));
-        X(triangular_banded_eigenvalues)(A, B, F->lambda);
         int s = n>>1;
         X(triangular_banded) * A1 = X(calloc_triangular_banded)(s, b1);
         X(triangular_banded) * B1 = X(calloc_triangular_banded)(s, b2);
@@ -325,8 +343,13 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
         F->F1 = X(tb_eig_FMM)(A1, B1);
         F->F2 = X(tb_eig_FMM)(A2, B2);
 
+        FLT * lambda = malloc(n*sizeof(FLT));
         FLT * lambda1 = F->F1->lambda;
         FLT * lambda2 = F->F2->lambda;
+        for (int i = 0; i < s; i++)
+            lambda[i] = lambda1[i];
+        for (int i = 0; i < n-s; i++)
+            lambda[i+s] = lambda2[i];
 
         FLT * X = calloc(s*b, sizeof(FLT));
         for (int j = 0; j < b; j++) {
@@ -360,6 +383,7 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
         F->Y = Y;
         F->t1 = calloc(s*FT_GET_MAX_THREADS(), sizeof(FLT));
         F->t2 = calloc((n-s)*FT_GET_MAX_THREADS(), sizeof(FLT));
+        F->lambda = lambda;
         F->n = n;
         F->b = b;
         X(destroy_triangular_banded)(A1);
@@ -387,8 +411,6 @@ X(tb_eigen_ADI) * X(tb_eig_ADI)(X(triangular_banded) * A, X(triangular_banded) *
         F->b = b;
     }
     else {
-        F->lambda = malloc(n*sizeof(FLT));
-        X(triangular_banded_eigenvalues)(A, B, F->lambda);
         int s = n>>1;
         X(triangular_banded) * A1 = X(calloc_triangular_banded)(s, b1);
         X(triangular_banded) * B1 = X(calloc_triangular_banded)(s, b2);
@@ -417,8 +439,13 @@ X(tb_eigen_ADI) * X(tb_eig_ADI)(X(triangular_banded) * A, X(triangular_banded) *
         F->F1 = X(tb_eig_ADI)(A1, B1);
         F->F2 = X(tb_eig_ADI)(A2, B2);
 
+        FLT * lambda = malloc(n*sizeof(FLT));
         FLT * lambda1 = F->F1->lambda;
         FLT * lambda2 = F->F2->lambda;
+        for (int i = 0; i < s; i++)
+            lambda[i] = lambda1[i];
+        for (int i = 0; i < n-s; i++)
+            lambda[i+s] = lambda2[i];
 
         FLT * X = calloc(s*b, sizeof(FLT));
         for (int j = 0; j < b; j++) {
@@ -448,6 +475,7 @@ X(tb_eigen_ADI) * X(tb_eig_ADI)(X(triangular_banded) * A, X(triangular_banded) *
                 Y[i+j*(n-s)] = Y[i+j*(n-s)]-Y2[i+j*(n-s)];
 
         F->F0 = X(ddfadi)(s, lambda1, n-s, lambda2, b, X, Y);
+        F->lambda = lambda;
         F->n = n;
         F->b = b;
         X(destroy_triangular_banded)(A1);
