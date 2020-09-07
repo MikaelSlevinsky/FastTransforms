@@ -112,7 +112,7 @@ int main(void) {
     printf("derive simple expressions for the representation of this component\n");
     printf("using a Proriol-"MAGENTA("(α+1,β,γ+1)")" series. For the partial derivative with respect\n");
     printf("to "MAGENTA("y")", the analogous formulae result in a Proriol-"MAGENTA("(α,β+1,γ+1)")" series.\n");
-    printf("These expressions are adapted from "CYAN("https://arxiv.org/abs/1902.04863")"\n");
+    printf("These expressions are adapted from "CYAN("https://doi.org/10.1137/19M1245888")"\n");
 
     ft_execute_tri_analysis(PA, Fx, N, M);
     ft_execute_cheb2tri(Px, Fx, N, M);
