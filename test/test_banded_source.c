@@ -235,6 +235,8 @@ void X(inner_timing_test_banded_ADI)(int * checksum, int n) {
     printf("Size of the triangular banded eigendecomposition (ADI) \t |");
     print_summary_size(X(summary_size_tb_eigen_ADI)(F));
 
+    printf("2-norm estimate of triangular banded eigenvectors \t |%20.6f \n", (double) X(normest_tb_eigen_ADI)(F));
+
     printf("Time for factorization \t\t (%7i×%7i) \t |%20.6f s\n", n, n, elapsed(&start, &end, 1));
 
     FLT * x = malloc(n*sizeof(FLT));

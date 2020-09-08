@@ -288,13 +288,10 @@ double * plan_chebyshev_to_ultraspherical(const int normcheb, const int normultr
 }
 
 double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta) {
-    ft_triangular_bandedl * A = ft_create_A_associated_jacobi_to_jacobil(n, alpha, beta, gamma, delta);
+    ft_triangular_bandedl * A = ft_create_A_associated_jacobi_to_jacobil(n, c, alpha, beta, gamma, delta);
     ft_triangular_bandedl * B = ft_create_B_associated_jacobi_to_jacobil(n, gamma, delta);
     ft_triangular_bandedl * C = ft_create_C_associated_jacobi_to_jacobil(n, gamma, delta);
     long double alphal = alpha, betal = beta, gammal = gamma, deltal = delta;
-    long double * lambdal = malloc(n*sizeof(long double));
-    for (int j = 0; j < n; j++)
-        lambdal[j] = (j+alphal+betal+2*c-1)*(j+alphal+betal+2*c+1) + (j+3)*(j-1.0L);
     long double * Vl = calloc(n*n, sizeof(long double));
     if (n > 0)
         Vl[0] = 1;
@@ -302,7 +299,7 @@ double * plan_associated_jacobi_to_jacobi(const int norm2, const int n, const in
         Vl[1+n] = (2*c+alphal+betal+1)/(c+alphal+betal+1)*(2*c+alphal+betal+2)/(1+c)/(gammal+deltal+2);
     for (int i = 2; i < n; i++)
         Vl[i+i*n] = (2*(i+c)+alphal+betal-1)/(i+c+alphal+betal)*(2*(i+c)+alphal+betal)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*i/(i+c)*Vl[i-1+(i-1)*n];
-    ft_triangular_banded_eigenvectors_3argl(A, B, lambdal, C, Vl);
+    ft_triangular_banded_quadratic_eigenvectorsl(A, B, C, Vl);
     double * V = calloc(n*n, sizeof(double));
     long double * sclrow = calloc(n, sizeof(long double));
     if (n > 0)
