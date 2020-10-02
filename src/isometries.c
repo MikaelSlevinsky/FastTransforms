@@ -346,7 +346,7 @@ ft_sph_isometry_plan * ft_plan_sph_isometry(const int n) {
     return F;
 }
 
-void ft_execute_sph_ZY_axis_exchange(ft_sph_isometry_plan * J, double * A, const int N, const int M) {
+void ft_execute_sph_yz_axis_exchange(ft_sph_isometry_plan * J, double * A, const int N, const int M) {
     if (J->n > 0) {
         double t = -A[1];
         A[1] = -A[N];
@@ -387,9 +387,9 @@ void ft_execute_sph_isometry(ft_sph_isometry_plan * J, ft_ZYZR Q, double * A, co
     if (Q.sign < 0)
         ft_execute_sph_polar_reflection(A, N, M);
     ft_execute_sph_polar_rotation(A, N, M, Q.s[2], Q.c[2]);
-    ft_execute_sph_ZY_axis_exchange(J, A, N, M);
+    ft_execute_sph_yz_axis_exchange(J, A, N, M);
     ft_execute_sph_polar_rotation(A, N, M, -Q.s[1], Q.c[1]);
-    ft_execute_sph_ZY_axis_exchange(J, A, N, M);
+    ft_execute_sph_yz_axis_exchange(J, A, N, M);
     ft_execute_sph_polar_rotation(A, N, M, Q.s[0], Q.c[0]);
 }
 

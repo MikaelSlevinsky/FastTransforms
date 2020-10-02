@@ -575,7 +575,7 @@ ft_partial_sph_isometry_plan * ft_plan_partial_sph_isometry(const int l);
 
 ft_sph_isometry_plan * ft_plan_sph_isometry(const int n);
 
-void ft_execute_sph_ZY_axis_exchange(ft_sph_isometry_plan * J, double * A, const int N, const int M);
+void ft_execute_sph_yz_axis_exchange(ft_sph_isometry_plan * J, double * A, const int N, const int M);
 
 void ft_execute_sph_isometry(ft_sph_isometry_plan * J, ft_ZYZR Q, double * A, const int N, const int M);
 

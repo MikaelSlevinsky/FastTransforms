@@ -92,8 +92,8 @@ int main(int argc, const char * argv[]) {
         gamma = 0.3;
         W = (ft_reflection) {0.123, 0.456, 0.789}; // {0.0, 0.0, 1.0}; //
 
-        ft_execute_sph_ZY_axis_exchange(J, A, N, M);
-        ft_execute_sph_ZY_axis_exchange(J, A, N, M);
+        ft_execute_sph_yz_axis_exchange(J, A, N, M);
+        ft_execute_sph_yz_axis_exchange(J, A, N, M);
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 J^2 \t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
