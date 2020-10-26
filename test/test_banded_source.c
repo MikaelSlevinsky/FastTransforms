@@ -167,6 +167,47 @@ void X(inner_test_banded)(int * checksum, int n) {
     printf("Check row/column scalings \t\t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
     X(checktest)(err, n, checksum);
 
+    err = 0;
+    FLT alpha = 0.123, beta = 0.456;
+    for (int norm = 0; norm < 2; norm++) {
+        X(banded) * M1 = X(create_jacobi_multiplication)(norm, n, n+1, alpha, beta);
+        X(banded) * M2 = X(create_jacobi_multiplication)(norm, n+1, n, alpha, beta);
+        X(banded) * ImM2 = X(calloc_banded)(n, n, 2, 2);
+        for (int j = 0; j < n; j++)
+            X(set_banded_index)(ImM2, 1, j, j);
+        X(gbmm)(-1, M1, M2, 1, ImM2);
+        X(banded) * L = X(create_jacobi_lowering)(norm, n, n, alpha, beta);
+        X(banded) * R = X(create_jacobi_raising)(norm, n, n, alpha, beta);
+        X(banded) * LR = X(calloc_banded)(n, n, 2, 2);
+        X(gbmm)(1, L, R, 0, LR);
+        err += X(norm_2arg)(ImM2->data, LR->data, 5*n)/X(norm_1arg)(LR->data, 5*n);
+        X(destroy_banded)(M1);
+        X(destroy_banded)(M2);
+        X(destroy_banded)(ImM2);
+        X(destroy_banded)(L);
+        X(destroy_banded)(R);
+        X(destroy_banded)(LR);
+    }
+    printf("Jacobi lowering*raising vs. 1-x^2 \t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
+    X(checktest)(err, 8, checksum);
+
+    err = 0;
+    alpha = 0.123;
+    for (int norm = 0; norm < 2; norm++) {
+        X(banded) * M = X(create_laguerre_multiplication)(norm, n, n, alpha);
+        X(banded) * L = X(create_laguerre_lowering)(norm, n, n, alpha);
+        X(banded) * R = X(create_laguerre_raising)(norm, n, n, alpha);
+        X(banded) * LR = X(calloc_banded)(n, n, 1, 1);
+        X(gbmm)(1, L, R, 0, LR);
+        err += X(norm_2arg)(M->data, LR->data, 3*n)/X(norm_1arg)(LR->data, 3*n);
+        X(destroy_banded)(M);
+        X(destroy_banded)(L);
+        X(destroy_banded)(R);
+        X(destroy_banded)(LR);
+    }
+    printf("Laguerre lowering*raising vs. x \t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
+    X(checktest)(err, 1, checksum);
+
     X(destroy_triangular_banded)(A);
     X(destroy_triangular_banded)(B);
     X(destroy_tb_eigen_FMM)(F);

@@ -103,13 +103,33 @@ FLT X(normest_tb_eigen_ADI)(X(tb_eigen_ADI) * F);
 X(triangular_banded) * X(create_A_konoplev_to_jacobi)(const int n, const FLT alpha, const FLT beta);
 X(triangular_banded) * X(create_B_konoplev_to_jacobi)(const int n, const FLT alpha);
 
-X(banded) * X(create_jacobi_derivative)(const int m, const int n, const int order, const FLT alpha, const FLT beta);
-X(banded) * X(create_jacobi_multiplication)(const int m, const int n, const FLT alpha, const FLT beta);
-X(banded) * X(create_jacobi_raising)(const int m, const int n, const FLT alpha, const FLT beta);
-X(banded) * X(create_jacobi_lowering)(const int m, const int n, const FLT alpha, const FLT beta);
+X(banded) * X(create_jacobi_derivative)(const int norm, const int m, const int n, const int order, const FLT alpha, const FLT beta);
+X(banded) * X(create_jacobi_multiplication)(const int norm, const int m, const int n, const FLT alpha, const FLT beta);
+X(banded) * X(create_jacobi_raising)(const int norm, const int m, const int n, const FLT alpha, const FLT beta);
+X(banded) * X(create_jacobi_lowering)(const int norm, const int m, const int n, const FLT alpha, const FLT beta);
 
-X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int n, const int c, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta);
-X(triangular_banded) * X(create_B_associated_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta);
-X(triangular_banded) * X(create_C_associated_jacobi_to_jacobi)(const int n, const FLT gamma, const FLT delta);
+X(banded) * X(create_laguerre_derivative)(const int norm, const int m, const int n, const int order, const FLT alpha);
+X(banded) * X(create_laguerre_multiplication)(const int norm, const int m, const int n, const FLT alpha);
+X(banded) * X(create_laguerre_raising)(const int norm, const int m, const int n, const FLT alpha);
+X(banded) * X(create_laguerre_lowering)(const int norm, const int m, const int n, const FLT alpha);
+
+X(banded) * X(create_hermite_derivative)(const int norm, const int m, const int n, const int order);
+X(banded) * X(create_hermite_multiplication)(const int norm, const int m, const int n);
+
+void X(create_associated_jacobi_to_jacobi_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT c, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta, FLT * D, const int INCD);
+void X(create_associated_laguerre_to_laguerre_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT c, const FLT alpha, const FLT beta, FLT * D, const int INCD);
+void X(create_associated_hermite_to_hermite_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT c, FLT * D, const int INCD);
+
+X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int norm, const int n, const int c, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta);
+X(triangular_banded) * X(create_B_associated_jacobi_to_jacobi)(const int norm, const int n, const FLT gamma, const FLT delta);
+X(triangular_banded) * X(create_C_associated_jacobi_to_jacobi)(const int norm, const int n, const FLT gamma, const FLT delta);
+
+X(triangular_banded) * X(create_A_associated_laguerre_to_laguerre)(const int norm, const int n, const int c, const FLT alpha, const FLT beta);
+X(triangular_banded) * X(create_B_associated_laguerre_to_laguerre)(const int norm, const int n, const FLT beta);
+X(triangular_banded) * X(create_C_associated_laguerre_to_laguerre)(const int norm, const int n, const FLT beta);
+
+X(triangular_banded) * X(create_A_associated_hermite_to_hermite)(const int norm, const int n, const int c);
+X(triangular_banded) * X(create_B_associated_hermite_to_hermite)(const int norm, const int n);
+X(triangular_banded) * X(create_C_associated_hermite_to_hermite)(const int n);
 
 X(lowrankmatrix) * X(ddfadi)(const int m, const FLT * A, const int n, const FLT * B, const int b, const FLT * X, const FLT * Y);
