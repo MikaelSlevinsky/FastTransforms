@@ -1258,8 +1258,8 @@ X(symmetric_dpr1_eigen_FMM) * X(symmetric_definite_dpr1_eig_FMM)(X(symmetric_dpr
 }
 
 
-// No transpose: y[:] = x[p]; x[:] = y[:].
-// Transpose:    y[p] = x[:]; x[:] = y[:].
+// No transpose: x .= x[p], or x .= P*x where P = Id[p, :].
+// Transpose:    x[p] .= x, or x .= P'x where P = Id[p, :].
 void X(perm)(char TRANS, FLT * x, int * p, int n) {
     for (int i = 0; i < n; i++)
         p[i] = p[i]-n;
@@ -1295,28 +1295,7 @@ These versions of quicksort sort `a` in-place according to the `by` ordering on
 `FLT` types. They also return the permutation `p`.
 */
 
-void X(quicksort_1arg)(FLT * a, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
-    if (lo < hi) {
-        int mid = X(partition_1arg)(a, p, lo, hi, by);
-        X(quicksort_1arg)(a, p, lo, mid, by);
-        X(quicksort_1arg)(a, p, mid + 1, hi, by);
-    }
-}
-
-int X(partition_1arg)(FLT * a, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
-    int i = lo-1, j = hi+1;
-    FLT pivot = X(selectpivot_1arg)(a, p, lo, hi, by);
-    while (1) {
-        do i += 1; while (by(a[i], pivot));
-        do j -= 1; while (by(pivot, a[j]));
-        if (i >= j) break;
-        X(swap)(a, i, j);
-        X(swapi)(p, i, j);
-    }
-    return j;
-}
-
-FLT X(selectpivot_1arg)(FLT * a, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
+static FLT X(selectpivot_1arg)(FLT * a, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
     int mid = (lo+hi)/2;
     if (by(a[mid], a[lo])) {
         X(swap)(a, lo, mid);
@@ -1333,35 +1312,34 @@ FLT X(selectpivot_1arg)(FLT * a, int * p, int lo, int hi, int (*by)(FLT x, FLT y
     return a[hi];
 }
 
+static int X(partition_1arg)(FLT * a, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
+    int i = lo-1, j = hi+1;
+    FLT pivot = X(selectpivot_1arg)(a, p, lo, hi, by);
+    while (1) {
+        do i += 1; while (by(a[i], pivot));
+        do j -= 1; while (by(pivot, a[j]));
+        if (i >= j) break;
+        X(swap)(a, i, j);
+        X(swapi)(p, i, j);
+    }
+    return j;
+}
+
+void X(quicksort_1arg)(FLT * a, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
+    if (lo < hi) {
+        int mid = X(partition_1arg)(a, p, lo, hi, by);
+        X(quicksort_1arg)(a, p, lo, mid, by);
+        X(quicksort_1arg)(a, p, mid + 1, hi, by);
+    }
+}
+
 /*
 These versions of quicksort sort `a` in-place according to the `by` ordering on
 `FLT` types. They also permute `b` according to the permutation required to sort
 `a`, and they return the permutation `p`.
 */
 
-void X(quicksort_2arg)(FLT * a, FLT * b, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
-    if (lo < hi) {
-        int mid = X(partition_2arg)(a, b, p, lo, hi, by);
-        X(quicksort_2arg)(a, b, p, lo, mid, by);
-        X(quicksort_2arg)(a, b, p, mid + 1, hi, by);
-    }
-}
-
-int X(partition_2arg)(FLT * a, FLT * b, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
-    int i = lo-1, j = hi+1;
-    FLT pivot = X(selectpivot_2arg)(a, b, p, lo, hi, by);
-    while (1) {
-        do i += 1; while (by(a[i], pivot));
-        do j -= 1; while (by(pivot, a[j]));
-        if (i >= j) break;
-        X(swap)(a, i, j);
-        X(swap)(b, i, j);
-        X(swapi)(p, i, j);
-    }
-    return j;
-}
-
-FLT X(selectpivot_2arg)(FLT * a, FLT * b, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
+static FLT X(selectpivot_2arg)(FLT * a, FLT * b, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
     int mid = (lo+hi)/2;
     if (by(a[mid], a[lo])) {
         X(swap)(a, lo, mid);
@@ -1381,30 +1359,29 @@ FLT X(selectpivot_2arg)(FLT * a, FLT * b, int * p, int lo, int hi, int (*by)(FLT
     return a[hi];
 }
 
-void X(quicksort_3arg)(FLT * a, FLT * b, FLT * c, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
-    if (lo < hi) {
-        int mid = X(partition_3arg)(a, b, c, p, lo, hi, by);
-        X(quicksort_3arg)(a, b, c, p, lo, mid, by);
-        X(quicksort_3arg)(a, b, c, p, mid + 1, hi, by);
-    }
-}
-
-int X(partition_3arg)(FLT * a, FLT * b, FLT * c, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
+static int X(partition_2arg)(FLT * a, FLT * b, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
     int i = lo-1, j = hi+1;
-    FLT pivot = X(selectpivot_3arg)(a, b, c, p, lo, hi, by);
+    FLT pivot = X(selectpivot_2arg)(a, b, p, lo, hi, by);
     while (1) {
         do i += 1; while (by(a[i], pivot));
         do j -= 1; while (by(pivot, a[j]));
         if (i >= j) break;
         X(swap)(a, i, j);
         X(swap)(b, i, j);
-        X(swap)(c, i, j);
         X(swapi)(p, i, j);
     }
     return j;
 }
 
-FLT X(selectpivot_3arg)(FLT * a, FLT * b, FLT * c, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
+void X(quicksort_2arg)(FLT * a, FLT * b, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
+    if (lo < hi) {
+        int mid = X(partition_2arg)(a, b, p, lo, hi, by);
+        X(quicksort_2arg)(a, b, p, lo, mid, by);
+        X(quicksort_2arg)(a, b, p, mid + 1, hi, by);
+    }
+}
+
+static FLT X(selectpivot_3arg)(FLT * a, FLT * b, FLT * c, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
     int mid = (lo+hi)/2;
     if (by(a[mid], a[lo])) {
         X(swap)(a, lo, mid);
@@ -1427,17 +1404,9 @@ FLT X(selectpivot_3arg)(FLT * a, FLT * b, FLT * c, int * p, int lo, int hi, int 
     return a[hi];
 }
 
-void X(quicksort_4arg)(FLT * a, FLT * b, FLT * c, FLT * d, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
-    if (lo < hi) {
-        int mid = X(partition_4arg)(a, b, c, d, p, lo, hi, by);
-        X(quicksort_4arg)(a, b, c, d, p, lo, mid, by);
-        X(quicksort_4arg)(a, b, c, d, p, mid + 1, hi, by);
-    }
-}
-
-int X(partition_4arg)(FLT * a, FLT * b, FLT * c, FLT * d, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
+static int X(partition_3arg)(FLT * a, FLT * b, FLT * c, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
     int i = lo-1, j = hi+1;
-    FLT pivot = X(selectpivot_4arg)(a, b, c, d, p, lo, hi, by);
+    FLT pivot = X(selectpivot_3arg)(a, b, c, p, lo, hi, by);
     while (1) {
         do i += 1; while (by(a[i], pivot));
         do j -= 1; while (by(pivot, a[j]));
@@ -1445,13 +1414,20 @@ int X(partition_4arg)(FLT * a, FLT * b, FLT * c, FLT * d, int * p, int lo, int h
         X(swap)(a, i, j);
         X(swap)(b, i, j);
         X(swap)(c, i, j);
-        X(swap)(d, i, j);
         X(swapi)(p, i, j);
     }
     return j;
 }
 
-FLT X(selectpivot_4arg)(FLT * a, FLT * b, FLT * c, FLT * d, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
+void X(quicksort_3arg)(FLT * a, FLT * b, FLT * c, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
+    if (lo < hi) {
+        int mid = X(partition_3arg)(a, b, c, p, lo, hi, by);
+        X(quicksort_3arg)(a, b, c, p, lo, mid, by);
+        X(quicksort_3arg)(a, b, c, p, mid + 1, hi, by);
+    }
+}
+
+static FLT X(selectpivot_4arg)(FLT * a, FLT * b, FLT * c, FLT * d, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
     int mid = (lo+hi)/2;
     if (by(a[mid], a[lo])) {
         X(swap)(a, lo, mid);
@@ -1475,6 +1451,30 @@ FLT X(selectpivot_4arg)(FLT * a, FLT * b, FLT * c, FLT * d, int * p, int lo, int
         X(swapi)(p, mid, hi);
     }
     return a[hi];
+}
+
+static int X(partition_4arg)(FLT * a, FLT * b, FLT * c, FLT * d, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
+    int i = lo-1, j = hi+1;
+    FLT pivot = X(selectpivot_4arg)(a, b, c, d, p, lo, hi, by);
+    while (1) {
+        do i += 1; while (by(a[i], pivot));
+        do j -= 1; while (by(pivot, a[j]));
+        if (i >= j) break;
+        X(swap)(a, i, j);
+        X(swap)(b, i, j);
+        X(swap)(c, i, j);
+        X(swap)(d, i, j);
+        X(swapi)(p, i, j);
+    }
+    return j;
+}
+
+void X(quicksort_4arg)(FLT * a, FLT * b, FLT * c, FLT * d, int * p, int lo, int hi, int (*by)(FLT x, FLT y)) {
+    if (lo < hi) {
+        int mid = X(partition_4arg)(a, b, c, d, p, lo, hi, by);
+        X(quicksort_4arg)(a, b, c, d, p, lo, mid, by);
+        X(quicksort_4arg)(a, b, c, d, p, mid + 1, hi, by);
+    }
 }
 
 void X(swap)(FLT * a, int i, int j) {

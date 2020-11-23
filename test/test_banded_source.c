@@ -22,9 +22,86 @@ static inline X(triangular_banded) * X(create_B_test)(const int n) {
     return B;
 }
 
+static inline X(banded) * X(create_M_test)(const int m, const int n) {
+    X(banded) * M = X(calloc_banded)(m, n, 2, 2);
+    for (int j = 0; j < n; j++) {
+        X(set_banded_index)(M, 1, j-2, j);
+        X(set_banded_index)(M, 2, j-1, j);
+        X(set_banded_index)(M, 4, j  , j);
+        X(set_banded_index)(M, 2, j+1, j);
+        X(set_banded_index)(M, 1, j+2, j);
+    }
+    return M;
+}
+
 void X(inner_test_banded)(int * checksum, int n) {
-    int NTIMES = 10;
+    int m = n+2, NTIMES = 10;
+    FLT err;
     struct timeval start, end;
+
+    X(banded) * M = X(create_M_test)(m, n);
+    X(banded_qr) * QR = X(banded_qrfact)(M);
+
+    FLT * Idm = calloc(m*m, sizeof(FLT));
+    FLT * Idn = calloc(n*n, sizeof(FLT));
+    FLT * DM = calloc(m*n, sizeof(FLT));
+    FLT * DQR = calloc(m*n, sizeof(FLT));
+    for (int j = 0; j < n; j++) {
+        DQR[j+j*m] = Idn[j+j*n] = 1;
+        X(gbmv)(1, M, Idn+j*n, 0, DM+j*m);
+        X(brmv)('N', QR, DQR+j*m);
+        X(bqmv)('N', QR, DQR+j*m);
+    }
+    err = X(norm_2arg)(DM, DQR, m*n)/X(norm_1arg)(DM, m*n);
+    printf("Numerical error of ||M - QR||/||M|| \t (%5i×%5i) \t |%20.2e ", m, n, (double) err);
+    X(checktest)(err, MAX(m, n), checksum);
+
+    FLT * QtQ = calloc(m*m, sizeof(FLT));
+    for (int j = 0; j < m; j++) {
+        QtQ[j+j*m] = Idm[j+j*m] = 1;
+        X(bqmv)('N', QR, QtQ+j*m);
+        X(bqmv)('T', QR, QtQ+j*m);
+    }
+    err = X(norm_2arg)(QtQ, Idm, m*m)/X(norm_1arg)(Idm, m*m);
+    printf("Numerical error of ||QᵀQ - I||/||I|| \t (%5i×%5i) \t |%20.2e ", m, m, (double) err);
+    X(checktest)(err, m, checksum);
+
+    FLT * RtR = calloc(n*n, sizeof(FLT));
+    for (int j = 0; j < n; j++) {
+        RtR[j+j*n] = 1;
+        X(brmv)('N', QR, RtR+j*n);
+        X(brmv)('T', QR, RtR+j*n);
+    }
+
+    FLT * MtM = calloc(n*n, sizeof(FLT));
+    for (int j = 0; j < n; j++)
+        for (int i = 0; i < n; i++)
+            for (int k = 0; k < m; k++)
+                MtM[i+j*n] += DM[k+i*m]*DM[k+j*m];
+
+    err = X(norm_2arg)(MtM, RtR, n*n)/X(norm_1arg)(MtM, n*n);
+    printf("Numerical error of ||MᵀM - RᵀR||/||MᵀM|| (%5i×%5i) \t |%20.2e ", n, n, (double) err);
+    X(checktest)(err, n, checksum);
+
+    FLT * RinvR = calloc(n*n, sizeof(FLT));
+    for (int j = 0; j < n; j++) {
+        RinvR[j+j*n] = 1;
+        X(brmv)('N', QR, RinvR+j*n);
+        X(brsv)('N', QR, RinvR+j*n);
+    }
+    err = X(norm_2arg)(RinvR, Idn, n*n)/X(norm_1arg)(Idn, n*n);
+    printf("Numerical error of ||R⁻¹R - I||/||I|| \t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
+    X(checktest)(err, n, checksum);
+
+    FLT * RtinvRt = calloc(n*n, sizeof(FLT));
+    for (int j = 0; j < n; j++) {
+        RtinvRt[j+j*n] = 1;
+        X(brmv)('T', QR, RtinvRt+j*n);
+        X(brsv)('T', QR, RtinvRt+j*n);
+    }
+    err = X(norm_2arg)(RtinvRt, Idn, n*n)/X(norm_1arg)(Idn, n*n);
+    printf("Numerical error of ||R⁻ᵀRᵀ - I||/||I|| \t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
+    X(checktest)(err, n, checksum);
 
     X(triangular_banded) * A = X(create_A_test)(n);
     X(triangular_banded) * B = X(create_B_test)(n);
@@ -42,7 +119,7 @@ void X(inner_test_banded)(int * checksum, int n) {
             BinvAtrue[j*n] = j;
 
     }
-    FLT err = X(norm_2arg)(BinvA, BinvAtrue, n*n)/X(norm_1arg)(BinvA, n*n);
+    err = X(norm_2arg)(BinvA, BinvAtrue, n*n)/X(norm_1arg)(BinvA, n*n);
     for (int j = 0; j < n; j++) {
         for (int i = 0; i < n; i++) {
             BinvA[i+j*n] = 0;
@@ -106,7 +183,10 @@ void X(inner_test_banded)(int * checksum, int n) {
     printf("Numerical error of triangular linear algebra \t\t |%20.2e ", (double) err);
     X(checktest)(err, n, checksum);
 
-    X(tb_eigen_FMM) * F = X(tb_eig_FMM)(A, B);
+    FLT * D = malloc(n*sizeof(FLT));
+    for (int i = 0; i < n; i++)
+        D[i] = 1;
+    X(tb_eigen_FMM) * F = X(tb_eig_FMM)(A, B, D);
     for (int j = 0; j < n; j++) {
         for (int i = 0; i < n; i++)
             V[i+j*n] = 0;
@@ -147,7 +227,7 @@ void X(inner_test_banded)(int * checksum, int n) {
     printf("Error of fwd-bckwd solves \t\t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
     X(checktest)(err, n, checksum);
 
-    FLT * z  = malloc(n*sizeof(FLT));
+    FLT * z = malloc(n*sizeof(FLT));
     for (int i = 0; i < n; i++)
         z[i] = ONE(FLT)/(i+1);
     for (int i = 0; i < n; i++)
@@ -208,6 +288,8 @@ void X(inner_test_banded)(int * checksum, int n) {
     printf("Laguerre lowering*raising vs. x \t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
     X(checktest)(err, 1, checksum);
 
+    X(destroy_banded)(M);
+    X(destroy_banded_qr)(QR);
     X(destroy_triangular_banded)(A);
     X(destroy_triangular_banded)(B);
     X(destroy_tb_eigen_FMM)(F);
@@ -215,6 +297,16 @@ void X(inner_test_banded)(int * checksum, int n) {
     free(BinvAtrue);
     free(AV);
     free(BVL);
+    free(D);
+    free(DM);
+    free(DQR);
+    free(Idm);
+    free(Idn);
+    free(MtM);
+    free(QtQ);
+    free(RtR);
+    free(RinvR);
+    free(RtinvRt);
     free(V);
     free(lambda);
     free(x);
@@ -228,12 +320,15 @@ void X(inner_timing_test_banded_FMM)(int * checksum, int n) {
 
     X(triangular_banded) * A = X(create_A_test)(n);
     X(triangular_banded) * B = X(create_B_test)(n);
+    FLT * D = malloc(n*sizeof(FLT));
+    for (int i = 0; i < n; i++)
+        D[i] = 1;
 
     printf("Size of a dense matrix \t\t (%7i×%7i) \t |", n, n);
     print_summary_size(sizeof(FLT)*n*n);
 
     gettimeofday(&start, NULL);
-    X(tb_eigen_FMM) * F = X(tb_eig_FMM)(A, B);
+    X(tb_eigen_FMM) * F = X(tb_eig_FMM)(A, B, D);
     gettimeofday(&end, NULL);
 
     printf("Size of the triangular banded eigendecomposition (FMM) \t |");
@@ -255,6 +350,7 @@ void X(inner_timing_test_banded_FMM)(int * checksum, int n) {
     X(destroy_triangular_banded)(A);
     X(destroy_triangular_banded)(B);
     X(destroy_tb_eigen_FMM)(F);
+    free(D);
     free(x);
     free(y);
 }

@@ -747,7 +747,7 @@ int main(int argc, const char * argv[]) {
         A = diskones(N, M);
         Ac = aligned_copymat(A, N, M);
         B = copymat(A, N, M);
-        RP = ft_plan_rotdisk(N);
+        RP = ft_plan_rotdisk(N, alpha, beta);
 
         execute_disk_hi2lo_default(RP, A, M);
         execute_disk_lo2hi_default(RP, A, M);
@@ -876,7 +876,7 @@ int main(int argc, const char * argv[]) {
 
         A = diskones(N, M);
         B = aligned_copymat(A, N, M);
-        RP = ft_plan_rotdisk(N);
+        RP = ft_plan_rotdisk(N, alpha, beta);
 
         FT_TIME(execute_disk_hi2lo_default(RP, A, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
@@ -932,7 +932,7 @@ int main(int argc, const char * argv[]) {
 
         A = diskrand(N, M);
         B = copymat(A, N, M);
-        P = ft_plan_disk2cxf(N);
+        P = ft_plan_disk2cxf(N, alpha, beta);
 
         ft_execute_disk2cxf(P, A, N, M);
         ft_execute_cxf2disk(P, A, N, M);
@@ -957,7 +957,7 @@ int main(int argc, const char * argv[]) {
         NTIMES = 1 + pow(2048/N, 2);
 
         A = diskrand(N, M);
-        P = ft_plan_disk2cxf(N);
+        P = ft_plan_disk2cxf(N, alpha, beta);
 
         FT_TIME(ft_execute_disk2cxf(P, A, N, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));

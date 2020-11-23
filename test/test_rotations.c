@@ -11,6 +11,7 @@ int main(void) {
     double * A, * Ac, * B;
     ft_rotation_plan * RP;
     ft_spin_rotation_plan * SRP;
+    double alpha = 0.0, beta = 0.0, gamma = -0.5;
 
     printf("\nTesting the computation of the spherical harmonic Givens rotations.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
@@ -200,7 +201,7 @@ int main(void) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
     for (int n = 64; n < N; n *= 2) {
-        RP = ft_plan_rottriangle(n, 0.0, -0.5, -0.5);
+        RP = ft_plan_rottriangle(n, alpha, beta, gamma);
         err = rotnorm(RP)/sqrt(n*(n+1)/2);
         printf("Departure from sqrt(s^2+c^2)-1 at \t     n = %3i: \t |%20.2e ", n, err);
         ft_checktest(err, 1, &checksum);
@@ -384,7 +385,7 @@ int main(void) {
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
     for (int n = 64; n < N; n *= 2) {
-        RP = ft_plan_rotdisk(n);
+        RP = ft_plan_rotdisk(n, alpha, beta);
 
         err = 0;
         A = calloc(n, sizeof(double));

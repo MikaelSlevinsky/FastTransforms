@@ -218,7 +218,7 @@ void Y(test_transforms)(int * checksum, int N) {
         free(B);
     }
 
-    printf("\nTesting the accuracy of interrelated transforms.\n\n");
+    printf("\nTesting the accuracy of interrelated classical transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
     for (int n = 64; n < N; n *= 2) {
@@ -260,5 +260,37 @@ void Y(test_transforms)(int * checksum, int N) {
         X(checktest)(err, n, checksum);
         free(Id);
         free(B);
+    }
+
+    printf("\nTesting methods for associated classical orthogonal polynomial transforms.\n\n");
+    printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int n = 64; n < N; n *= 2) {
+        for (int c = 1; c < 5; c++) {
+            alpha = 0.25, beta = 0.25, gamma = -0.25, delta = -0.25, err = 0;
+            for (int norm1 = 0; norm1 <= 1; norm1++) {
+                for (int norm2 = 0; norm2 <= 1; norm2++) {
+                    X(btb_eigen_FMM) * F = X(plan_associated_jacobi_to_jacobi)(norm1, norm2, n, c, alpha, beta, gamma, delta);
+                    X(banded) * M = X(create_jacobi_multiplication)(norm2, n, n, gamma, delta);
+                    FLT * V = calloc(n*n, sizeof(FLT));
+                    for (int j = 0; j < n; j++)
+                        V[j+j*n] = 1;
+                    X(bbbfmm)('N', '2', '1', F, V, n, n);
+                    FLT * x = malloc(n*sizeof(FLT));
+                    for (int nu = 1; nu < n-1; nu++) {
+                        for (int i = 0; i < n; i++)
+                            x[i] = X(rec_B_jacobi)(norm1, nu+c, alpha, beta)*V[i+nu*n] - X(rec_C_jacobi)(norm1, nu+c, alpha, beta)*V[i+(nu-1)*n];
+                        X(gbmv)(X(rec_A_jacobi)(norm1, nu+c, alpha, beta), M, V+nu*n, 1, x);
+                        err += X(norm_2arg)(V+(nu+1)*n, x, n)/X(norm_1arg)(x, n);
+                    }
+                    X(destroy_btb_eigen_FMM)(F);
+                    X(destroy_banded)(M);
+                    free(x);
+                    free(V);
+                }
+            }
+            printf("Associated Jacobi recurrence \t (n, c) = (%4i, %i) \t |%20.2e ", n, c, (double) err);
+            X(checktest)(err, ((FLT) n)*n*n, checksum);
+        }
     }
 }
