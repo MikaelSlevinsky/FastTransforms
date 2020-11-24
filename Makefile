@@ -56,7 +56,7 @@ examples:
 
 runtests:
 	./test_recurrence
-	OMP_NUM_THREADS=$(FT_NUM_THREADS) ./test_transforms
+	./test_transforms
 	./test_permute
 	./test_rotations
 	./test_elliptic
