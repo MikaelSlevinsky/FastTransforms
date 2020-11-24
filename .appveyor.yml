@@ -20,6 +20,6 @@ build_script:
   - mingw32-make examples
 
 test_script:
-  - set FT_NUM_THREADS=4
+  - set FT_NUM_THREADS=1
   - mingw32-make runtests
   - mingw32-make runexamples
