@@ -25,7 +25,10 @@ static inline X2(triangular_banded) * X2(create_B_legendre_to_chebyshev)(const i
 X(tb_eigen_FMM) * X(plan_legendre_to_chebyshev)(const int normleg, const int normcheb, const int n) {
     X2(triangular_banded) * A = X2(create_A_legendre_to_chebyshev)(n);
     X2(triangular_banded) * B = X2(create_B_legendre_to_chebyshev)(n);
-    X2(tb_eigen_FMM) * F2 = X2(tb_eig_FMM)(A, B);
+    FLT2 * D = malloc(n*sizeof(FLT2));
+    for (int i = 0; i < n; i++)
+        D[i] = 1;
+    X2(tb_eigen_FMM) * F2 = X2(tb_eig_FMM)(A, B, D);
     FLT2 * sclrow = malloc(n*sizeof(FLT2));
     FLT2 * sclcol = malloc(n*sizeof(FLT2));
     FLT2 t = 1, sqrtpi = Y2(tgamma)(0.5);
@@ -49,6 +52,7 @@ X(tb_eigen_FMM) * X(plan_legendre_to_chebyshev)(const int normleg, const int nor
     X2(destroy_triangular_banded)(A);
     X2(destroy_triangular_banded)(B);
     X2(destroy_tb_eigen_FMM)(F2);
+    free(D);
     free(sclrow);
     free(sclcol);
     return F;
@@ -81,7 +85,10 @@ static inline X2(triangular_banded) * X2(create_B_chebyshev_to_legendre)(const i
 X(tb_eigen_FMM) * X(plan_chebyshev_to_legendre)(const int normcheb, const int normleg, const int n) {
     X2(triangular_banded) * A = X2(create_A_chebyshev_to_legendre)(n);
     X2(triangular_banded) * B = X2(create_B_chebyshev_to_legendre)(n);
-    X2(tb_eigen_FMM) * F2 = X2(tb_eig_FMM)(A, B);
+    FLT2 * D = malloc(n*sizeof(FLT2));
+    for (int i = 0; i < n; i++)
+        D[i] = 1;
+    X2(tb_eigen_FMM) * F2 = X2(tb_eig_FMM)(A, B, D);
     FLT2 * sclrow = malloc(n*sizeof(FLT2));
     FLT2 * sclcol = malloc(n*sizeof(FLT2));
     FLT2 t = 1, sqrt_1_pi = 1/Y2(tgamma)(0.5);
@@ -105,6 +112,7 @@ X(tb_eigen_FMM) * X(plan_chebyshev_to_legendre)(const int normcheb, const int no
     X2(destroy_triangular_banded)(A);
     X2(destroy_triangular_banded)(B);
     X2(destroy_tb_eigen_FMM)(F2);
+    free(D);
     free(sclrow);
     free(sclcol);
     return F;
@@ -137,7 +145,10 @@ static inline X2(triangular_banded) * X2(create_B_ultraspherical_to_ultraspheric
 X(tb_eigen_FMM) * X(plan_ultraspherical_to_ultraspherical)(const int norm1, const int norm2, const int n, const FLT lambda, const FLT mu) {
     X2(triangular_banded) * A = X2(create_A_ultraspherical_to_ultraspherical)(n, lambda, mu);
     X2(triangular_banded) * B = X2(create_B_ultraspherical_to_ultraspherical)(n, mu);
-    X2(tb_eigen_FMM) * F2 = X2(tb_eig_FMM)(A, B);
+    FLT2 * D = malloc(n*sizeof(FLT2));
+    for (int i = 0; i < n; i++)
+        D[i] = 1;
+    X2(tb_eigen_FMM) * F2 = X2(tb_eig_FMM)(A, B, D);
     FLT2 * sclrow = malloc(n*sizeof(FLT2));
     FLT2 * sclcol = malloc(n*sizeof(FLT2));
     FLT2 lambda2 = lambda, mu2 = mu;
@@ -155,6 +166,7 @@ X(tb_eigen_FMM) * X(plan_ultraspherical_to_ultraspherical)(const int norm1, cons
     X2(destroy_triangular_banded)(A);
     X2(destroy_triangular_banded)(B);
     X2(destroy_tb_eigen_FMM)(F2);
+    free(D);
     free(sclrow);
     free(sclcol);
     return F;
@@ -195,7 +207,10 @@ static inline X2(triangular_banded) * X2(create_B_jacobi_to_jacobi)(const int n,
 X(tb_eigen_FMM) * X(plan_jacobi_to_jacobi)(const int norm1, const int norm2, const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta) {
     X2(triangular_banded) * A = X2(create_A_jacobi_to_jacobi)(n, alpha, beta, gamma, delta);
     X2(triangular_banded) * B = X2(create_B_jacobi_to_jacobi)(n, gamma, delta);
-    X2(tb_eigen_FMM) * F2 = X2(tb_eig_FMM)(A, B);
+    FLT2 * D = malloc(n*sizeof(FLT2));
+    for (int i = 0; i < n; i++)
+        D[i] = 1;
+    X2(tb_eigen_FMM) * F2 = X2(tb_eig_FMM)(A, B, D);
     FLT2 * sclrow = malloc(n*sizeof(FLT2));
     FLT2 * sclcol = malloc(n*sizeof(FLT2));
     FLT2 alpha2 = alpha, beta2 = beta, gamma2 = gamma, delta2 = delta;
@@ -217,6 +232,7 @@ X(tb_eigen_FMM) * X(plan_jacobi_to_jacobi)(const int norm1, const int norm2, con
     X2(destroy_triangular_banded)(A);
     X2(destroy_triangular_banded)(B);
     X2(destroy_tb_eigen_FMM)(F2);
+    free(D);
     free(sclrow);
     free(sclcol);
     return F;
@@ -243,7 +259,10 @@ static inline X2(triangular_banded) * X2(create_B_laguerre_to_laguerre)(const in
 X(tb_eigen_FMM) * X(plan_laguerre_to_laguerre)(const int norm1, const int norm2, const int n, const FLT alpha, const FLT beta) {
     X2(triangular_banded) * A = X2(create_A_laguerre_to_laguerre)(n, alpha, beta);
     X2(triangular_banded) * B = X2(create_B_laguerre_to_laguerre)(n);
-    X2(tb_eigen_FMM) * F2 = X2(tb_eig_FMM)(A, B);
+    FLT2 * D = malloc(n*sizeof(FLT2));
+    for (int i = 0; i < n; i++)
+        D[i] = 1;
+    X2(tb_eigen_FMM) * F2 = X2(tb_eig_FMM)(A, B, D);
     FLT2 * sclrow = malloc(n*sizeof(FLT2));
     FLT2 * sclcol = malloc(n*sizeof(FLT2));
     FLT2 alpha2 = alpha, beta2 = beta;
@@ -261,6 +280,7 @@ X(tb_eigen_FMM) * X(plan_laguerre_to_laguerre)(const int norm1, const int norm2,
     X2(destroy_triangular_banded)(A);
     X2(destroy_triangular_banded)(B);
     X2(destroy_tb_eigen_FMM)(F2);
+    free(D);
     free(sclrow);
     free(sclcol);
     return F;
@@ -355,5 +375,56 @@ X(tb_eigen_FMM) * X(plan_chebyshev_to_ultraspherical)(const int normcheb, const 
         X(scale_columns_tb_eigen_FMM)(1, sclcol, F);
         free(sclcol);
     }
+    return F;
+}
+
+X(btb_eigen_FMM) * X(plan_associated_jacobi_to_jacobi)(const int norm1, const int norm2, const int n, const int c, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta) {
+    X2(triangular_banded) * dataA[2][2] = {X2(create_A_associated_jacobi_to_jacobi)(norm2, n, c, alpha, beta, gamma, delta), X2(create_B_associated_jacobi_to_jacobi)(norm2, n, gamma, delta), X2(calloc_triangular_banded)(n, 4), X2(create_I_triangular_banded)(n, 4)};
+    X2(triangular_banded) * dataB[2][2] = {X2(calloc_triangular_banded)(n, 4), X2(create_C_associated_jacobi_to_jacobi)(norm2, n, gamma, delta), X2(create_I_triangular_banded)(n, 4), X2(calloc_triangular_banded)(n, 4)};
+    X2(block_2x2_triangular_banded) * A = X2(create_block_2x2_triangular_banded)(dataA);
+    X2(block_2x2_triangular_banded) * B = X2(create_block_2x2_triangular_banded)(dataB);
+    FLT2 * D = malloc(2*n*sizeof(FLT2));
+    X2(create_associated_jacobi_to_jacobi_diagonal_connection_coefficient)(norm1, norm2, n, c, alpha, beta, gamma, delta, D, 2);
+    X2(create_associated_jacobi_to_jacobi_diagonal_connection_coefficient)(norm1, norm2, n, c, alpha, beta, gamma, delta, D+1, 2);
+    X2(btb_eigen_FMM) * F2 = X2(btb_eig_FMM)(A, B, D);
+    X(btb_eigen_FMM) * F = X(drop_precision_btb_eigen_FMM)(F2);
+    X2(destroy_block_2x2_triangular_banded)(A);
+    X2(destroy_block_2x2_triangular_banded)(B);
+    X2(destroy_btb_eigen_FMM)(F2);
+    free(D);
+    return F;
+}
+
+X(btb_eigen_FMM) * X(plan_associated_laguerre_to_laguerre)(const int norm1, const int norm2, const int n, const int c, const FLT alpha, const FLT beta) {
+    X2(triangular_banded) * dataA[2][2] = {X2(create_A_associated_laguerre_to_laguerre)(norm2, n, c, alpha, beta), X2(create_B_associated_laguerre_to_laguerre)(norm2, n, beta), X2(calloc_triangular_banded)(n, 4), X2(create_I_triangular_banded)(n, 4)};
+    X2(triangular_banded) * dataB[2][2] = {X2(calloc_triangular_banded)(n, 2), X2(create_C_associated_laguerre_to_laguerre)(norm2, n, beta), X2(create_I_triangular_banded)(n, 2), X2(calloc_triangular_banded)(n, 2)};
+    X2(block_2x2_triangular_banded) * A = X2(create_block_2x2_triangular_banded)(dataA);
+    X2(block_2x2_triangular_banded) * B = X2(create_block_2x2_triangular_banded)(dataB);
+    FLT2 * D = malloc(2*n*sizeof(FLT2));
+    X2(create_associated_laguerre_to_laguerre_diagonal_connection_coefficient)(norm1, norm2, n, c, alpha, beta, D, 2);
+    X2(create_associated_laguerre_to_laguerre_diagonal_connection_coefficient)(norm1, norm2, n, c, alpha, beta, D+1, 2);
+    X2(btb_eigen_FMM) * F2 = X2(btb_eig_FMM)(A, B, D);
+    X(btb_eigen_FMM) * F = X(drop_precision_btb_eigen_FMM)(F2);
+    X2(destroy_block_2x2_triangular_banded)(A);
+    X2(destroy_block_2x2_triangular_banded)(B);
+    X2(destroy_btb_eigen_FMM)(F2);
+    free(D);
+    return F;
+}
+
+X(btb_eigen_FMM) * X(plan_associated_hermite_to_hermite)(const int norm1, const int norm2, const int n, const int c) {
+    X2(triangular_banded) * dataA[2][2] = {X2(create_A_associated_hermite_to_hermite)(norm2, n, c), X2(create_B_associated_hermite_to_hermite)(norm2, n), X2(calloc_triangular_banded)(n, 4), X2(create_I_triangular_banded)(n, 4)};
+    X2(triangular_banded) * dataB[2][2] = {X2(calloc_triangular_banded)(n, 0), X2(create_C_associated_hermite_to_hermite)(n), X2(create_I_triangular_banded)(n, 0), X2(calloc_triangular_banded)(n, 0)};
+    X2(block_2x2_triangular_banded) * A = X2(create_block_2x2_triangular_banded)(dataA);
+    X2(block_2x2_triangular_banded) * B = X2(create_block_2x2_triangular_banded)(dataB);
+    FLT2 * D = malloc(2*n*sizeof(FLT2));
+    X2(create_associated_hermite_to_hermite_diagonal_connection_coefficient)(norm1, norm2, n, c, D, 2);
+    X2(create_associated_hermite_to_hermite_diagonal_connection_coefficient)(norm1, norm2, n, c, D+1, 2);
+    X2(btb_eigen_FMM) * F2 = X2(btb_eig_FMM)(A, B, D);
+    X(btb_eigen_FMM) * F = X(drop_precision_btb_eigen_FMM)(F2);
+    X2(destroy_block_2x2_triangular_banded)(A);
+    X2(destroy_block_2x2_triangular_banded)(B);
+    X2(destroy_btb_eigen_FMM)(F2);
+    free(D);
     return F;
 }

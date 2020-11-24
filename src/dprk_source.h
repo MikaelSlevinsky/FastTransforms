@@ -103,20 +103,9 @@ X(symmetric_dpr1_eigen_FMM) * X(symmetric_definite_dpr1_eig_FMM)(X(symmetric_dpr
 void X(perm)(char DIRECTION, FLT * x, int * p, int n);
 
 void X(quicksort_1arg)(FLT * a, int * p, int lo, int hi, int (*by)(FLT x, FLT y));
-int X(partition_1arg)(FLT * a, int * p, int lo, int hi, int (*by)(FLT x, FLT y));
-FLT X(selectpivot_1arg)(FLT * a, int * p, int lo, int hi, int (*by)(FLT x, FLT y));
-
 void X(quicksort_2arg)(FLT * a, FLT * b, int * p, int lo, int hi, int (*by)(FLT x, FLT y));
-int X(partition_2arg)(FLT * a, FLT * b, int * p, int lo, int hi, int (*by)(FLT x, FLT y));
-FLT X(selectpivot_2arg)(FLT * a, FLT * b, int * p, int lo, int hi, int (*by)(FLT x, FLT y));
-
 void X(quicksort_3arg)(FLT * a, FLT * b, FLT * c, int * p, int lo, int hi, int (*by)(FLT x, FLT y));
-int X(partition_3arg)(FLT * a, FLT * b, FLT * c, int * p, int lo, int hi, int (*by)(FLT x, FLT y));
-FLT X(selectpivot_3arg)(FLT * a, FLT * b, FLT * c, int * p, int lo, int hi, int (*by)(FLT x, FLT y));
-
 void X(quicksort_4arg)(FLT * a, FLT * b, FLT * c, FLT * d, int * p, int lo, int hi, int (*by)(FLT x, FLT y));
-int X(partition_4arg)(FLT * a, FLT * b, FLT * c, FLT * d, int * p, int lo, int hi, int (*by)(FLT x, FLT y));
-FLT X(selectpivot_4arg)(FLT * a, FLT * b, FLT * c, FLT * d, int * p, int lo, int hi, int (*by)(FLT x, FLT y));
 
 void X(swap)(FLT * a, int i, int j);
 void X(swapi)(int * p, int i, int j);

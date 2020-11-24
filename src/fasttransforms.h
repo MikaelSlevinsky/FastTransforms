@@ -149,6 +149,10 @@ ft_tb_eigen_FMM * ft_plan_ultraspherical_to_chebyshev(const int normultra, const
 */
 ft_tb_eigen_FMM * ft_plan_chebyshev_to_ultraspherical(const int normcheb, const int normultra, const int n, const double lambda);
 
+ft_btb_eigen_FMM * ft_plan_associated_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta);
+ft_btb_eigen_FMM * ft_plan_associated_laguerre_to_laguerre(const int norm1, const int norm2, const int n, const int c, const double alpha, const double beta);
+ft_btb_eigen_FMM * ft_plan_associated_hermite_to_hermite(const int norm1, const int norm2, const int n, const int c);
+
 /// A single precision version of \ref ft_plan_legendre_to_chebyshev.
 ft_tb_eigen_FMMf * ft_plan_legendre_to_chebyshevf(const int normleg, const int normcheb, const int n);
 /// A single precision version of \ref ft_plan_chebyshev_to_legendre.
@@ -172,6 +176,10 @@ ft_tb_eigen_FMMf * ft_plan_ultraspherical_to_chebyshevf(const int normultra, con
 /// A single precision version of \ref ft_plan_chebyshev_to_ultraspherical.
 ft_tb_eigen_FMMf * ft_plan_chebyshev_to_ultrasphericalf(const int normcheb, const int normultra, const int n, const float lambda);
 
+ft_btb_eigen_FMMf * ft_plan_associated_jacobi_to_jacobif(const int norm1, const int norm2, const int n, const int c, const float alpha, const float beta, const float gamma, const float delta);
+ft_btb_eigen_FMMf * ft_plan_associated_laguerre_to_laguerref(const int norm1, const int norm2, const int n, const int c, const float alpha, const float beta);
+ft_btb_eigen_FMMf * ft_plan_associated_hermite_to_hermitef(const int norm1, const int norm2, const int n, const int c);
+
 /// A long double precision version of \ref ft_plan_legendre_to_chebyshev.
 ft_tb_eigen_FMMl * ft_plan_legendre_to_chebyshevl(const int normleg, const int normcheb, const int n);
 /// A long double precision version of \ref ft_plan_chebyshev_to_legendre.
@@ -194,6 +202,10 @@ ft_tb_eigen_FMMl * ft_plan_chebyshev_to_jacobil(const int normcheb, const int no
 ft_tb_eigen_FMMl * ft_plan_ultraspherical_to_chebyshevl(const int normultra, const int normcheb, const int n, const long double lambda);
 /// A long double precision version of \ref ft_plan_chebyshev_to_ultraspherical.
 ft_tb_eigen_FMMl * ft_plan_chebyshev_to_ultrasphericall(const int normcheb, const int normultra, const int n, const long double lambda);
+
+ft_btb_eigen_FMMl * ft_plan_associated_jacobi_to_jacobil(const int norm1, const int norm2, const int n, const int c, const long double alpha, const long double beta, const long double gamma, const long double delta);
+ft_btb_eigen_FMMl * ft_plan_associated_laguerre_to_laguerrel(const int norm1, const int norm2, const int n, const int c, const long double alpha, const long double beta);
+ft_btb_eigen_FMMl * ft_plan_associated_hermite_to_hermitel(const int norm1, const int norm2, const int n, const int c);
 
 #include <mpfr.h>
 
@@ -261,7 +273,7 @@ void ft_kernel_tri_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2
 /// Convert a single vector of triangular harmonic coefficients in A with stride S from order m1 up to order m2.
 void ft_kernel_tri_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
-ft_rotation_plan * ft_plan_rotdisk(const int n);
+ft_rotation_plan * ft_plan_rotdisk(const int n, const double alpha, const double beta);
 
 /// Convert a single vector of disk harmonic coefficients in A with stride S from order m2 down to order m1.
 void ft_kernel_disk_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
@@ -339,7 +351,7 @@ void ft_execute_tri2cheb(const ft_harmonic_plan * P, double * A, const int N, co
 void ft_execute_cheb2tri(const ft_harmonic_plan * P, double * A, const int N, const int M);
 
 /// Plan a disk harmonic transform.
-ft_harmonic_plan * ft_plan_disk2cxf(const int n);
+ft_harmonic_plan * ft_plan_disk2cxf(const int n, const double alpha, const double beta);
 
 /// Transform a disk harmonic expansion to a Chebyshev--Fourier series.
 void ft_execute_disk2cxf(const ft_harmonic_plan * P, double * A, const int N, const int M);

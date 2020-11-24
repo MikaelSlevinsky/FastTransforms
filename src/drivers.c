@@ -53,24 +53,6 @@ static void chebyshev_normalization_3d_t(double * A, const int N, const int L, c
     }
 }
 
-static void partial_chebyshev_normalization(double * A, const int N, const int M) {
-    for (int j = 1; j < M; j += 4)
-        for (int i = 0; i < N; i++)
-            A[i+j*N] *= M_2_PI_POW_0P5;
-    for (int j = 2; j < M; j += 4)
-        for (int i = 0; i < N; i++)
-            A[i+j*N] *= M_2_PI_POW_0P5;
-}
-
-static void partial_chebyshev_normalization_t(double * A, const int N, const int M) {
-    for (int j = 1; j < M; j += 4)
-        for (int i = 0; i < N; i++)
-            A[i+j*N] *= M_PI_2_POW_0P5;
-    for (int j = 2; j < M; j += 4)
-        for (int i = 0; i < N; i++)
-            A[i+j*N] *= M_PI_2_POW_0P5;
-}
-
 void ft_set_num_threads(const int n) {FT_SET_NUM_THREADS(n);}
 
 void ft_execute_sph_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M) {
@@ -871,21 +853,27 @@ void ft_execute_cheb2tri(const ft_harmonic_plan * P, double * A, const int N, co
     ft_execute_tri_lo2hi(P->RP, A, P->B, M);
 }
 
-ft_harmonic_plan * ft_plan_disk2cxf(const int n) {
+ft_harmonic_plan * ft_plan_disk2cxf(const int n, const double alpha, const double beta) {
     ft_harmonic_plan * P = malloc(sizeof(ft_harmonic_plan));
-    P->RP = ft_plan_rotdisk(n);
+    P->RP = ft_plan_rotdisk(n, alpha, beta);
     P->B = VMALLOC(VALIGN(n) * (4*n-3) * sizeof(double));
-    P->P1 = plan_legendre_to_chebyshev(1, 0, n);
-    P->P2 = plan_jacobi_to_jacobi(1, 1, n, 0.0, 1.0, -0.5, 0.5);
-    P->P1inv = plan_chebyshev_to_legendre(0, 1, n);
-    P->P2inv = plan_jacobi_to_jacobi(1, 1, n, -0.5, 0.5, 0.0, 1.0);
+    P->P1 = plan_jacobi_to_chebyshev(1, 0, n, beta, alpha);
+    P->P2 = plan_jacobi_to_jacobi(1, 1, n, beta, alpha + 1.0, -0.5, 0.5);
+    P->P1inv = plan_chebyshev_to_jacobi(0, 1, n, beta, alpha);
+    P->P2inv = plan_jacobi_to_jacobi(1, 1, n, -0.5, 0.5, beta, alpha + 1.0);
+    double cst1 = pow(2.0, 0.5*(alpha+beta+2.0));
+    double cst2 = cst1*M_2_PI_POW_0P5;
+    double cst1inv = pow(2.0, -0.5*(alpha+beta+2.0));
+    double cst2inv = cst1inv*M_PI_2_POW_0P5;
     for (int j = 0; j < n; j++)
         for (int i = 0; i <= j; i++) {
-            P->P1[i+j*n] *= 2.0;
-            P->P2[i+j*n] *= 2.0;
-            P->P1inv[i+j*n] *= 0.5;
-            P->P2inv[i+j*n] *= 0.5;
+            P->P1[i+j*n] *= cst1;
+            P->P2[i+j*n] *= cst2;
+            P->P1inv[i+j*n] *= cst1inv;
+            P->P2inv[i+j*n] *= cst2inv;
         }
+    P->alpha = alpha;
+    P->beta = beta;
     return P;
 }
 
@@ -895,11 +883,9 @@ void ft_execute_disk2cxf(const ft_harmonic_plan * P, double * A, const int N, co
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P2, N, A+N, 4*N);
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P2, N, A+2*N, 4*N);
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P1, N, A+3*N, 4*N);
-    partial_chebyshev_normalization(A, N, M);
 }
 
 void ft_execute_cxf2disk(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    partial_chebyshev_normalization_t(A, N, M);
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P1inv, N, A, 4*N);
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P2inv, N, A+N, 4*N);
     cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P2inv, N, A+2*N, 4*N);

@@ -8,6 +8,12 @@ void X(destroy_triangular_banded)(X(triangular_banded) * A) {
     free(A);
 }
 
+void X(destroy_banded_qr)(X(banded_qr) * F) {
+    X(destroy_banded)(F->factors);
+    free(F->tau);
+    free(F);
+}
+
 void X(destroy_tb_eigen_FMM)(X(tb_eigen_FMM) * F) {
     if (F->n < TB_EIGEN_BLOCKSIZE) {
         free(F->V);
@@ -22,6 +28,8 @@ void X(destroy_tb_eigen_FMM)(X(tb_eigen_FMM) * F) {
         free(F->t1);
         free(F->t2);
         free(F->lambda);
+        free(F->p1);
+        free(F->p2);
     }
     free(F);
 }
@@ -49,6 +57,7 @@ size_t X(summary_size_tb_eigen_FMM)(X(tb_eigen_FMM) * F) {
         S += X(summary_size_tb_eigen_FMM)(F->F1);
         S += X(summary_size_tb_eigen_FMM)(F->F2);
         S += sizeof(FLT)*F->n*(2*F->b+1);
+        S += sizeof(int)*F->n;
     }
     return S;
 }
@@ -106,11 +115,74 @@ X(triangular_banded) * X(calloc_triangular_banded)(const int n, const int b) {
     return A;
 }
 
+void X(realloc_triangular_banded)(X(triangular_banded) * A, const int b) {
+    int n = A->n;
+    FLT * data = calloc(n*(b+1), sizeof(FLT));
+    if (b > A->b)
+        for (int j = 0; j < n; j++)
+            for (int i = 0; i < A->b+1; i++)
+                data[i+b-A->b+j*(b+1)] = A->data[i+j*(A->b+1)];
+    else if (b < A->b)
+        for (int j = 0; j < n; j++)
+            for (int i = 0; i < b+1; i++)
+                data[i+j*(b+1)] = A->data[i+A->b-b+j*(A->b+1)];
+    free(A->data);
+    A->data = data;
+    A->b = b;
+}
+
+// Allocate a pointer without reallocating triangular banded data.
+X(triangular_banded) * X(view_triangular_banded)(const X(triangular_banded) * A, const unitrange i) {
+    X(triangular_banded) * V = malloc(sizeof(X(triangular_banded)));
+    V->data = A->data + i.start*(A->b+1);
+    V->n = i.stop-i.start;
+    V->b = A->b;
+    return V;
+}
+
+X(banded) * X(convert_triangular_banded_to_banded)(X(triangular_banded) * A) {
+    X(banded) * B = malloc(sizeof(X(banded)));
+    B->data = A->data;
+    B->n = B->m = A->n;
+    B->l = 0;
+    B->u = A->b;
+    free(A);
+    return B;
+}
+
+X(triangular_banded) * X(convert_banded_to_triangular_banded)(X(banded) * A) {
+    X(triangular_banded) * B = malloc(sizeof(X(triangular_banded)));
+    if (A->l == 0) {
+        B->data = A->data;
+        B->n = A->n;
+        B->b = A->u;
+        free(A);
+        return B;
+    }
+    else {
+        B->data = calloc((A->u+1)*A->n, sizeof(FLT));
+        for (int j = 0; j < A->n; j++)
+            for (int i = 0; i < A->u+1+MIN(0, A->l); i++)
+                B->data[i+j*(A->u+1)] = A->data[i+j*(A->l+A->u+1)];
+        B->n = A->n;
+        B->b = A->u;
+        X(destroy_banded)(A);
+        return B;
+    }
+}
+
+X(triangular_banded) * X(create_I_triangular_banded)(const int n, const int b) {
+    X(triangular_banded) * A = X(calloc_triangular_banded)(n, b);
+    for (int j = 0; j < n; j++)
+        A->data[b+j*(b+1)] = 1;
+    return A;
+}
+
 FLT X(get_banded_index)(const X(banded) * A, const int i, const int j) {
     FLT * data = A->data;
     int m = A->m, n = A->n, l = A->l, u = A->u;
     if (0 <= i && 0 <= j && -l <= j-i && j-i <= u && i < m && j < n)
-        return data[u+i-j+j*(l+u+1)];
+        return data[u+i+j*(l+u)];
     else
         return 0;
 }
@@ -119,7 +191,7 @@ void X(set_banded_index)(const X(banded) * A, const FLT v, const int i, const in
     FLT * data = A->data;
     int m = A->m, n = A->n, l = A->l, u = A->u;
     if (0 <= i && 0 <= j && -l <= j-i && j-i <= u && i < m && j < n)
-        data[u+i-j+j*(l+u+1)] = v;
+        data[u+i+j*(l+u)] = v;
 }
 
 FLT X(get_triangular_banded_index)(const X(triangular_banded) * A, const int i, const int j) {
@@ -154,14 +226,10 @@ void X(gbmm)(FLT alpha, X(banded) * A, X(banded) * B, FLT beta, X(banded) * C) {
     FLT ab, c;
     int m = A->m, n = A->n, p = B->n;
     int l = C->l, u = C->u, l1 = A->l, u1 = A->u, l2 = B->l, u2 = B->u;
-    if (C->m != m || B->m != n || C->n != p) {
-        printf(RED("FastTransforms: gbmm: sizes are off.")"\n");
-        exit(EXIT_FAILURE);
-    }
-    if (C->l < l1+l2 || C->u < u1+u2) {
-        printf(RED("FastTransforms: gbmm: bandwidths are off.")"\n");
-        exit(EXIT_FAILURE);
-    }
+    if (C->m != m || B->m != n || C->n != p)
+        exit_failure("gbmm: sizes are off.");
+    if (C->l < l1+l2 || C->u < u1+u2)
+        exit_failure("gbmm: bandwidths are off.");
     for (int j = 0; j < p; j++)
         for (int i = MAX(0, j-u); i < MIN(m, j+l+1); i++) {
             ab = 0;
@@ -175,14 +243,10 @@ void X(gbmm)(FLT alpha, X(banded) * A, X(banded) * B, FLT beta, X(banded) * C) {
 // C ← α*A+β*B
 void X(banded_add)(FLT alpha, X(banded) * A, FLT beta, X(banded) * B, X(banded) * C) {
     int m = C->m, n = C->n, l = C->l, u = C->u;
-    if (A->m != m || B->m != m || A->n != n || B->n != n) {
-        printf(RED("FastTransforms: banded_add: sizes are off.")"\n");
-        exit(EXIT_FAILURE);
-    }
-    if (l < MAX(A->l, B->l) || C->u < MAX(A->u, B->u)) {
-        printf(RED("FastTransforms: banded_add: bandwidths are off.")"\n");
-        exit(EXIT_FAILURE);
-    }
+    if (A->m != m || B->m != m || A->n != n || B->n != n)
+        exit_failure("banded_add: sizes are off.");
+    if (l < MAX(A->l, B->l) || C->u < MAX(A->u, B->u))
+        exit_failure("banded_add: bandwidths are off.");
     for (int j = 0; j < n; j++)
         for (int i = MAX(0, j-u); i < MIN(m, j+l+1); i++)
             X(set_banded_index)(C, alpha*X(get_banded_index)(A, i, j) + beta*X(get_banded_index)(B, i, j), i, j);
@@ -254,6 +318,155 @@ void X(tssv)(char TRANS, X(triangular_banded) * A, X(triangular_banded) * B, FLT
     }
 }
 
+static inline void X(compute_elementary_transformation)(const int n, FLT * v) {
+    for (int i = 1; i < n; i++)
+        v[i] /= v[0];
+}
+
+static inline void X(apply_elementary_transformation)(const int n, const FLT * v, FLT * A) {
+    for (int i = 1; i < n; i++)
+        A[i] -= v[i]*A[0];
+}
+
+void X(banded_lufact)(X(banded) * A) {
+    int n = A->n, l = A->l, u = A->u;
+    if (A->m != n)
+        exit_failure("banded_lufact: A is not square.");
+    int nu = l+u+1;
+    FLT * data = A->data;
+    for (int j = 0; j < n; j++) {
+        int lv = MIN(l+1, n-j+1);
+        FLT * v = data+u+j*nu;
+        X(compute_elementary_transformation)(lv, v);
+        for (int k = 1; k <= MIN(u, n-j-1); k++)
+            X(apply_elementary_transformation)(lv, v, data+u-k+(j+k)*nu);
+    }
+}
+
+static inline FLT X(compute_reflector)(const int n, FLT * v) {
+    if (n < 1)
+        return 0;
+    FLT v0 = v[0];
+    FLT nrmv = 0;
+    for (int i = 0; i < n; i++)
+        nrmv += v[i]*v[i];
+    if (nrmv == 0)
+        return 0;
+    nrmv = Y(sqrt)(nrmv);
+    FLT nu = Y(copysign)(nrmv, v0);
+    v0 += nu;
+    v[0] = -nu;
+    for (int i = 1; i < n; i++)
+        v[i] /= v0;
+    return v0/nu;
+}
+
+static inline void X(apply_reflector)(const int n, const FLT * v, const FLT tau, FLT * A) {
+    if (n < 1)
+        return;
+    FLT vA = A[0];
+    for (int i = 1; i < n; i++)
+        vA += v[i]*A[i];
+    vA *= tau;
+    A[0] -= vA;
+    for (int i = 1; i < n; i++)
+        A[i] -= v[i]*vA;
+}
+
+X(banded_qr) * X(banded_qrfact)(X(banded) * A) {
+    int m = A->m, n = A->n, l = A->l, u = A->u;
+    X(banded) * R = X(malloc_banded)(m, n, l, l+u);
+    FLT * tau = malloc(MIN(m, n)*sizeof(FLT));
+    FLT * D = R->data;
+    FLT * B = A->data;
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < l; i++)
+            D[i+j*(2*l+u+1)] = 0;
+        for (int i = 0; i < l+u+1; i++)
+            D[l+i+j*(2*l+u+1)] = B[i+j*(l+u+1)];
+    }
+    u = R->u;
+    int nu = l+u+1;
+    for (int j = 0; j < MIN(m, n); j++) {
+        int lh = MIN(l+1, m-j+1);
+        FLT * v = D+u+j*nu;
+        tau[j] = X(compute_reflector)(lh, v);
+        for (int k = 1; k <= MIN(u, n-j-1); k++)
+            X(apply_reflector)(lh, v, tau[j], D+u-k+(j+k)*nu);
+    }
+    X(banded_qr) * F = malloc(sizeof(X(banded_qr)));
+    F->factors = R;
+    F->tau = tau;
+    return F;
+}
+
+// x ← Q*x, x ← Qᵀ*x
+void X(bqmv)(char TRANS, X(banded_qr) * F, FLT * x) {
+    X(banded) * R = F->factors;
+    FLT * D = R->data;
+    FLT * tau = F->tau;
+    int m = R->m, n = R->n, l = R->l, u = R->u;
+    int nu = l+u+1;
+    if (TRANS == 'N') {
+        for (int j = MIN(m, n) - 1; j >= 0; j--) {
+            int lh = MIN(l+1, m-j+1);
+            X(apply_reflector)(lh, D+u+j*nu, tau[j], x+j);
+        }
+    }
+    else if (TRANS == 'T') {
+        for (int j = 0; j < MIN(m, n); j++) {
+            int lh = MIN(l+1, m-j+1);
+            X(apply_reflector)(lh, D+u+j*nu, tau[j], x+j);
+        }
+    }
+}
+
+// x ← R*x, x ← Rᵀ*x
+void X(brmv)(char TRANS, X(banded_qr) * F, FLT * x) {
+    X(banded) * R = F->factors;
+    int n = R->n, l = R->l, u = R->u;
+    FLT * data = R->data, t;
+    if (TRANS == 'N') {
+        for (int i = 0; i < n; i++) {
+            t = 0;
+            for (int k = i; k < MIN(i+u+1, n); k++)
+                t += data[u+i+k*(l+u)]*x[k];
+            x[i] = t;
+        }
+    }
+    else if (TRANS == 'T') {
+        for (int i = n-1; i >= 0; i--) {
+            t = 0;
+            for (int k = MAX(i-u, 0); k <= i; k++)
+                t += data[u+k+i*(l+u)]*x[k];
+            x[i] = t;
+        }
+    }
+}
+
+// x ← R⁻¹*x, x ← R⁻ᵀ*x
+void X(brsv)(char TRANS, X(banded_qr) * F, FLT * x) {
+    X(banded) * R = F->factors;
+    int n = R->n, l = R->l, u = R->u;
+    FLT * data = R->data, t;
+    if (TRANS == 'N') {
+        for (int i = n-1; i >= 0; i--) {
+            t = 0;
+            for (int k = i+1; k < MIN(i+u+1, n); k++)
+                t += data[u+i+k*(l+u)]*x[k];
+            x[i] = (x[i] - t)/data[u+i+i*(l+u)];
+        }
+    }
+    else if (TRANS == 'T') {
+        for (int i = 0; i < n; i++) {
+            t = 0;
+            for (int k = MAX(i-u, 0); k < i; k++)
+                t += data[u+k+i*(l+u)]*x[k];
+            x[i] = (x[i] - t)/data[u+i+i*(l+u)];
+        }
+    }
+}
+
 // AV = BVΛ
 
 void X(triangular_banded_eigenvalues)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * lambda) {
@@ -264,14 +477,21 @@ void X(triangular_banded_eigenvalues)(X(triangular_banded) * A, X(triangular_ban
 // Assumes eigenvectors are initialized by V[i,j] = 0 for i > j and V[j,j] ≠ 0.
 void X(triangular_banded_eigenvectors)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * V) {
     int n = A->n, b = MAX(A->b, B->b);
-    FLT t, lam;
+    FLT t, kt, d, kd, lam;
     for (int j = 1; j < n; j++) {
         lam = X(get_triangular_banded_index)(A, j, j)/X(get_triangular_banded_index)(B, j, j);
         for (int i = j-1; i >= 0; i--) {
-            t = 0;
-            for (int k = i+1; k < MIN(i+b+1, n); k++)
+            t = kt = 0;
+            for (int k = i+1; k < MIN(i+b+1, n); k++) {
                 t += (X(get_triangular_banded_index)(A, i, k) - lam*X(get_triangular_banded_index)(B, i, k))*V[k+j*n];
-            V[i+j*n] = t/(lam*X(get_triangular_banded_index)(B, i, i) - X(get_triangular_banded_index)(A, i, i));
+                kt += (Y(fabs)(X(get_triangular_banded_index)(A, i, k)) + Y(fabs)(lam*X(get_triangular_banded_index)(B, i, k)))*Y(fabs)(V[k+j*n]);
+            }
+            d = lam*X(get_triangular_banded_index)(B, i, i) - X(get_triangular_banded_index)(A, i, i);
+            kd = Y(fabs)(lam*X(get_triangular_banded_index)(B, i, i)) + Y(fabs)(X(get_triangular_banded_index)(A, i, i));
+            if (Y(fabs)(d) < 4*kd*Y(eps)() && Y(fabs)(t) < 4*kt*Y(eps)())
+                V[i+j*n] = 0;
+            else
+                V[i+j*n] = t/d;
         }
     }
 }
@@ -290,30 +510,37 @@ void X(triangular_banded_quadratic_eigenvalues)(X(triangular_banded) * A, X(tria
 
 // Assumes eigenvectors are initialized by V[i,j] = 0 for i > j and V[j,j] ≠ 0.
 void X(triangular_banded_quadratic_eigenvectors)(X(triangular_banded) * A, X(triangular_banded) * B, X(triangular_banded) * C, FLT * V) {
-    int n = A->n, b = MAX(MAX(A->b, B->b), C->b);
-    FLT a, d, c, t, lam;
+    int n = A->n, bnd = MAX(MAX(A->b, B->b), C->b);
+    FLT a, b, c, d, kd, t, kt, lam;
     for (int j = 1; j < n; j++) {
         a = X(get_triangular_banded_index)(A, j, j);
-        d = X(get_triangular_banded_index)(B, j, j);
+        b = X(get_triangular_banded_index)(B, j, j);
         c = X(get_triangular_banded_index)(C, j, j);
-        lam = (d+Y(sqrt)(d*d+4*a*c))/(2*c);
+        lam = (b+Y(sqrt)(b*b+4*a*c))/(2*c);
         for (int i = j-1; i >= 0; i--) {
-            t = 0;
-            for (int k = i+1; k < MIN(i+b+1, n); k++)
+            t = kt = 0;
+            for (int k = i+1; k < MIN(i+bnd+1, n); k++) {
                 t += (X(get_triangular_banded_index)(A, i, k) + lam*(X(get_triangular_banded_index)(B, i, k) - lam*X(get_triangular_banded_index)(C, i, k)))*V[k+j*n];
-            V[i+j*n] = t/(lam*(lam*X(get_triangular_banded_index)(C, i, i) - X(get_triangular_banded_index)(B, i, i)) - X(get_triangular_banded_index)(A, i, i));
+                kt += (Y(fabs)(X(get_triangular_banded_index)(A, i, k)) + Y(fabs)(lam*(Y(fabs)(X(get_triangular_banded_index)(B, i, k)) + Y(fabs)(lam*X(get_triangular_banded_index)(C, i, k)))))*Y(fabs)(V[k+j*n]);
+            }
+            d = lam*(lam*X(get_triangular_banded_index)(C, i, i) - X(get_triangular_banded_index)(B, i, i)) - X(get_triangular_banded_index)(A, i, i);
+            kd = Y(fabs)(lam*(Y(fabs)(lam*X(get_triangular_banded_index)(C, i, i)) + Y(fabs)(X(get_triangular_banded_index)(B, i, i)))) + Y(fabs)(X(get_triangular_banded_index)(A, i, i));
+            if (Y(fabs)(d) < 4*kd*Y(eps)() && Y(fabs)(t) < 4*kt*Y(eps)())
+                V[i+j*n] = 0;
+            else
+                V[i+j*n] = t/d;
         }
     }
 }
 
-X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) * B) {
+X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * D) {
     int n = A->n, b1 = A->b, b2 = B->b;
     int b = MAX(b1, b2);
     X(tb_eigen_FMM) * F = malloc(sizeof(X(tb_eigen_FMM)));
     if (n < TB_EIGEN_BLOCKSIZE) {
         FLT * V = calloc(n*n, sizeof(FLT));
         for (int i = 0; i < n; i++)
-            V[i+i*n] = 1;
+            V[i+i*n] = D[i];
         F->lambda = malloc(n*sizeof(FLT));
         X(triangular_banded_eigenvalues)(A, B, F->lambda);
         X(triangular_banded_eigenvectors)(A, B, V);
@@ -323,29 +550,20 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
     }
     else {
         int s = n>>1;
-        X(triangular_banded) * A1 = malloc(sizeof(X(triangular_banded)));
-        X(triangular_banded) * B1 = malloc(sizeof(X(triangular_banded)));
-        X(triangular_banded) * A2 = malloc(sizeof(X(triangular_banded)));
-        X(triangular_banded) * B2 = malloc(sizeof(X(triangular_banded)));
-        A1->data = A->data;
-        B1->data = B->data;
-        A2->data = A->data + s*(b1+1);
-        B2->data = B->data + s*(b2+1);
-        A1->n = B1->n = s;
-        A2->n = B2->n = n-s;
-        A1->b = A2->b = b1;
-        B1->b = B2->b = b2;
+        unitrange i = {0, s}, j = {s, n};
+        X(triangular_banded) * A1 = X(view_triangular_banded)(A, i);
+        X(triangular_banded) * B1 = X(view_triangular_banded)(B, i);
+        X(triangular_banded) * A2 = X(view_triangular_banded)(A, j);
+        X(triangular_banded) * B2 = X(view_triangular_banded)(B, j);
 
-        F->F1 = X(tb_eig_FMM)(A1, B1);
-        F->F2 = X(tb_eig_FMM)(A2, B2);
+        F->F1 = X(tb_eig_FMM)(A1, B1, D);
+        F->F2 = X(tb_eig_FMM)(A2, B2, D+s);
 
         FLT * lambda = malloc(n*sizeof(FLT));
-        FLT * lambda1 = F->F1->lambda;
-        FLT * lambda2 = F->F2->lambda;
         for (int i = 0; i < s; i++)
-            lambda[i] = lambda1[i];
+            lambda[i] = F->F1->lambda[i];
         for (int i = 0; i < n-s; i++)
-            lambda[i+s] = lambda2[i];
+            lambda[i+s] = F->F2->lambda[i];
 
         FLT * X = calloc(s*b, sizeof(FLT));
         for (int j = 0; j < b; j++) {
@@ -356,30 +574,41 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
 
         FLT * Y = calloc((n-s)*b, sizeof(FLT));
         for (int j = 0; j < b1; j++)
-            for (int k = 0; k < b1-j; k++)
-                Y[j+(k+j)*(n-s)] = A2->data[k+j*(b1+1)];
+            for (int k = j; k < b1; k++)
+                Y[j+k*(n-s)] = X(get_triangular_banded_index)(A, k+s-b1, j+s);
         FLT * Y2 = calloc((n-s)*b2, sizeof(FLT));
         for (int j = 0; j < b2; j++)
-            for (int k = 0; k < b2-j; k++)
-                Y2[j+(k+j)*(n-s)] = B2->data[k+j*(b2+1)];
+            for (int k = j; k < b2; k++)
+                Y2[j+k*(n-s)] = X(get_triangular_banded_index)(B, k+s-b2, j+s);
 
         for (int j = 0; j < b1; j++)
             X(bfmv)('T', F->F2, Y+j*(n-s));
         for (int j = 0; j < b2; j++)
             X(bfmv)('T', F->F2, Y2+j*(n-s));
-        for (int j = 0; j < b2; j++)
-            for (int i = 0; i < n-s; i++)
-                Y2[i+j*(n-s)] *= lambda2[i];
-        for (int j = 0; j < b2; j++)
-            for (int i = 0; i < n-s; i++)
-                Y[i+j*(n-s)] = Y[i+j*(n-s)]-Y2[i+j*(n-s)];
 
-        F->F0 = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda1, lambda2, (unitrange) {0, s}, (unitrange) {0, n-s}, 'G');
+        for (int j = 0; j < b2; j++)
+            for (int i = 0; i < n-s; i++)
+                Y[i+(j+b-b2)*(n-s)] = Y[i+(j+b-b2)*(n-s)]-lambda[i+s]*Y2[i+j*(n-s)];
+
+        int * p1 = malloc(s*sizeof(int));
+        for (int i = 0; i < s; i++)
+            p1[i] = i;
+        X(quicksort_1arg)(lambda, p1, 0, s-1, X(lt));
+        int * p2 = malloc((n-s)*sizeof(int));
+        for (int i = 0; i < n-s; i++)
+            p2[i] = i;
+        X(quicksort_1arg)(lambda+s, p2, 0, n-s-1, X(lt));
+
+        F->F0 = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda, lambda, i, j, 'G');
         F->X = X;
         F->Y = Y;
         F->t1 = calloc(s*FT_GET_MAX_THREADS(), sizeof(FLT));
         F->t2 = calloc((n-s)*FT_GET_MAX_THREADS(), sizeof(FLT));
+        X(perm)('T', lambda, p1, s);
+        X(perm)('T', lambda+s, p2, n-s);
         F->lambda = lambda;
+        F->p1 = p1;
+        F->p2 = p2;
         F->n = n;
         F->b = b;
         free(A1);
@@ -408,31 +637,23 @@ X(tb_eigen_ADI) * X(tb_eig_ADI)(X(triangular_banded) * A, X(triangular_banded) *
     }
     else {
         int s = n>>1;
-        X(triangular_banded) * A1 = malloc(sizeof(X(triangular_banded)));
-        X(triangular_banded) * B1 = malloc(sizeof(X(triangular_banded)));
-        X(triangular_banded) * A2 = malloc(sizeof(X(triangular_banded)));
-        X(triangular_banded) * B2 = malloc(sizeof(X(triangular_banded)));
-        A1->data = A->data;
-        B1->data = B->data;
-        A2->data = A->data + s*(b1+1);
-        B2->data = B->data + s*(b2+1);
-        A1->n = B1->n = s;
-        A2->n = B2->n = n-s;
-        A1->b = A2->b = b1;
-        B1->b = B2->b = b2;
+        unitrange i = {0, s}, j = {s, n};
+        X(triangular_banded) * A1 = X(view_triangular_banded)(A, i);
+        X(triangular_banded) * B1 = X(view_triangular_banded)(B, i);
+        X(triangular_banded) * A2 = X(view_triangular_banded)(A, j);
+        X(triangular_banded) * B2 = X(view_triangular_banded)(B, j);
 
         F->F1 = X(tb_eig_ADI)(A1, B1);
         F->F2 = X(tb_eig_ADI)(A2, B2);
 
         FLT * lambda = malloc(n*sizeof(FLT));
-        FLT * lambda1 = F->F1->lambda;
-        FLT * lambda2 = F->F2->lambda;
         for (int i = 0; i < s; i++)
-            lambda[i] = lambda1[i];
+            lambda[i] = F->F1->lambda[i];
         for (int i = 0; i < n-s; i++)
-            lambda[i+s] = lambda2[i];
+            lambda[i+s] = F->F2->lambda[i];
 
         FLT * X = calloc(s*b, sizeof(FLT));
+        #pragma omp parallel for num_threads(MIN(b, FT_GET_MAX_THREADS()))
         for (int j = 0; j < b; j++) {
             X[s-b+j+j*s] = -1;
             X(tbsv)('N', B1, X+j*s);
@@ -441,25 +662,25 @@ X(tb_eigen_ADI) * X(tb_eig_ADI)(X(triangular_banded) * A, X(triangular_banded) *
 
         FLT * Y = calloc((n-s)*b, sizeof(FLT));
         for (int j = 0; j < b1; j++)
-            for (int k = 0; k < b1-j; k++)
-                Y[j+(k+j)*(n-s)] = A2->data[k+j*(b1+1)];
+            for (int k = j; k < b1; k++)
+                Y[j+k*(n-s)] = X(get_triangular_banded_index)(A, k+s-b1, j+s);
         FLT * Y2 = calloc((n-s)*b2, sizeof(FLT));
         for (int j = 0; j < b2; j++)
-            for (int k = 0; k < b2-j; k++)
-                Y2[j+(k+j)*(n-s)] = B2->data[k+j*(b2+1)];
+            for (int k = j; k < b2; k++)
+                Y2[j+k*(n-s)] = X(get_triangular_banded_index)(B, k+s-b2, j+s);
 
-        for (int j = 0; j < b1; j++)
-            X(bfmv_ADI)('T', F->F2, Y+j*(n-s));
-        for (int j = 0; j < b2; j++)
-            X(bfmv_ADI)('T', F->F2, Y2+j*(n-s));
+        #pragma omp parallel for num_threads(MIN(b1+b2, FT_GET_MAX_THREADS()))
+        for (int j = 0; j < b1+b2; j++)
+            if (j < b1)
+                X(bfmv_ADI)('T', F->F2, Y+j*(n-s));
+            else
+                X(bfmv_ADI)('T', F->F2, Y2+(j-b1)*(n-s));
+
         for (int j = 0; j < b2; j++)
             for (int i = 0; i < n-s; i++)
-                Y2[i+j*(n-s)] *= lambda2[i];
-        for (int j = 0; j < b2; j++)
-            for (int i = 0; i < n-s; i++)
-                Y[i+j*(n-s)] = Y[i+j*(n-s)]-Y2[i+j*(n-s)];
+                Y[i+(j+b-b2)*(n-s)] = Y[i+(j+b-b2)*(n-s)]-lambda[i+s]*Y2[i+j*(n-s)];
 
-        F->F0 = X(ddfadi)(s, lambda1, n-s, lambda2, b, X, Y);
+        F->F0 = X(ddfadi)(s, lambda, n-s, lambda+s, b, X, Y);
         F->lambda = lambda;
         F->n = n;
         F->b = b;
@@ -607,7 +828,7 @@ void X(trsv)(char TRANS, int n, FLT * A, int LDA, FLT * x) {
     }
 #endif
 
-// B ← A*B, B ← Aᵀ*B
+// B ← A⁻¹*B, B ← A⁻ᵀ*B
 #if defined(FT_USE_CBLAS_S)
     void X(trsm)(char TRANS, int n, FLT * A, int LDA, FLT * B, int LDB, int N) {
         if (TRANS == 'N')
@@ -638,14 +859,15 @@ void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
     else {
         int s = n>>1, b = F->b;
         FLT * t1 = F->t1+s*FT_GET_THREAD_NUM(), * t2 = F->t2+(n-s)*FT_GET_THREAD_NUM();
+        int * p1 = F->p1, * p2 = F->p2;
         if (TRANS == 'N') {
             // C(Λ₁, Λ₂) ∘ (-XYᵀ)
             for (int k = 0; k < b; k++) {
                 for (int i = 0; i < n-s; i++)
-                    t2[i] = F->Y[i+k*(n-s)]*x[i+s];
+                    t2[i] = F->Y[p2[i]+k*(n-s)]*x[p2[i]+s];
                 X(ghmv)(TRANS, -1, F->F0, t2, 0, t1);
                 for (int i = 0; i < s; i++)
-                    x[i] += t1[i]*F->X[i+k*s];
+                    x[p1[i]] += t1[i]*F->X[p1[i]+k*s];
             }
             X(bfmv)(TRANS, F->F1, x);
             X(bfmv)(TRANS, F->F2, x+s);
@@ -656,10 +878,10 @@ void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
             // C(Λ₁, Λ₂) ∘ (-XYᵀ)
             for (int k = 0; k < b; k++) {
                 for (int i = 0; i < s; i++)
-                    t1[i] = F->X[i+k*s]*x[i];
+                    t1[i] = F->X[p1[i]+k*s]*x[p1[i]];
                 X(ghmv)(TRANS, -1, F->F0, t1, 0, t2);
                 for (int i = 0; i < n-s; i++)
-                    x[i+s] += t2[i]*F->Y[i+k*(n-s)];
+                    x[p2[i]+s] += t2[i]*F->Y[p2[i]+k*(n-s)];
             }
         }
     }
@@ -693,26 +915,27 @@ void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
     else {
         int s = n>>1, b = F->b;
         FLT * t1 = F->t1+s*FT_GET_THREAD_NUM(), * t2 = F->t2+(n-s)*FT_GET_THREAD_NUM();
+        int * p1 = F->p1, * p2 = F->p2;
         if (TRANS == 'N') {
             X(bfsv)(TRANS, F->F1, x);
             X(bfsv)(TRANS, F->F2, x+s);
             // C(Λ₁, Λ₂) ∘ (-XYᵀ)
             for (int k = 0; k < b; k++) {
                 for (int i = 0; i < n-s; i++)
-                    t2[i] = F->Y[i+k*(n-s)]*x[i+s];
+                    t2[i] = F->Y[p2[i]+k*(n-s)]*x[p2[i]+s];
                 X(ghmv)(TRANS, 1, F->F0, t2, 0, t1);
                 for (int i = 0; i < s; i++)
-                    x[i] += t1[i]*F->X[i+k*s];
+                    x[p1[i]] += t1[i]*F->X[p1[i]+k*s];
             }
         }
         else if (TRANS == 'T') {
             // C(Λ₁, Λ₂) ∘ (-XYᵀ)
             for (int k = 0; k < b; k++) {
                 for (int i = 0; i < s; i++)
-                    t1[i] = F->X[i+k*s]*x[i];
+                    t1[i] = F->X[p1[i]+k*s]*x[p1[i]];
                 X(ghmv)(TRANS, 1, F->F0, t1, 0, t2);
                 for (int i = 0; i < n-s; i++)
-                    x[i+s] += t2[i]*F->Y[i+k*(n-s)];
+                    x[p2[i]+s] += t2[i]*F->Y[p2[i]+k*(n-s)];
             }
             X(bfsv)(TRANS, F->F1, x);
             X(bfsv)(TRANS, F->F2, x+s);
@@ -1272,12 +1495,7 @@ X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int norm, c
     X(destroy_banded)(A1);
     X(destroy_banded)(A0);
 
-    X(triangular_banded) * TA = malloc(sizeof(X(triangular_banded)));
-    TA->data = A->data;
-    TA->n = n;
-    TA->b = 4;
-    free(A);
-    return TA;
+    return X(convert_banded_to_triangular_banded)(A);
 }
 
 X(triangular_banded) * X(create_B_associated_jacobi_to_jacobi)(const int norm, const int n, const FLT gamma, const FLT delta) {
@@ -1322,12 +1540,7 @@ X(triangular_banded) * X(create_B_associated_jacobi_to_jacobi)(const int norm, c
     X(destroy_banded)(B1a);
     X(destroy_banded)(B1);
 
-    X(triangular_banded) * TB = malloc(sizeof(X(triangular_banded)));
-    TB->data = B->data;
-    TB->n = n;
-    TB->b = 4;
-    free(B);
-    return TB;
+    return X(convert_banded_to_triangular_banded)(B);
 }
 
 X(triangular_banded) * X(create_C_associated_jacobi_to_jacobi)(const int norm, const int n, const FLT gamma, const FLT delta) {
@@ -1341,12 +1554,7 @@ X(triangular_banded) * X(create_C_associated_jacobi_to_jacobi)(const int norm, c
     X(destroy_banded)(R0);
     X(destroy_banded)(R1);
 
-    X(triangular_banded) * TC = malloc(sizeof(X(triangular_banded)));
-    TC->data = C->data;
-    TC->n = n;
-    TC->b = 4;
-    free(C);
-    return TC;
+    return X(convert_banded_to_triangular_banded)(C);
 }
 
 X(triangular_banded) * X(create_A_associated_laguerre_to_laguerre)(const int norm, const int n, const int c, const FLT alpha, const FLT beta) {
@@ -1435,12 +1643,7 @@ X(triangular_banded) * X(create_A_associated_laguerre_to_laguerre)(const int nor
     X(destroy_banded)(A1);
     X(destroy_banded)(A0);
 
-    X(triangular_banded) * TA = malloc(sizeof(X(triangular_banded)));
-    TA->data = A->data;
-    TA->n = n;
-    TA->b = 4;
-    free(A);
-    return TA;
+    return X(convert_banded_to_triangular_banded)(A);
 }
 
 X(triangular_banded) * X(create_B_associated_laguerre_to_laguerre)(const int norm, const int n, const FLT beta) {
@@ -1473,12 +1676,7 @@ X(triangular_banded) * X(create_B_associated_laguerre_to_laguerre)(const int nor
     X(destroy_banded)(B2);
     X(destroy_banded)(B1);
 
-    X(triangular_banded) * TB = malloc(sizeof(X(triangular_banded)));
-    TB->data = B->data;
-    TB->n = n;
-    TB->b = 3;
-    free(B);
-    return TB;
+    return X(convert_banded_to_triangular_banded)(B);
 }
 
 X(triangular_banded) * X(create_C_associated_laguerre_to_laguerre)(const int norm, const int n, const FLT beta) {
@@ -1492,12 +1690,7 @@ X(triangular_banded) * X(create_C_associated_laguerre_to_laguerre)(const int nor
     X(destroy_banded)(R0);
     X(destroy_banded)(R1);
 
-    X(triangular_banded) * TC = malloc(sizeof(X(triangular_banded)));
-    TC->data = C->data;
-    TC->n = n;
-    TC->b = 2;
-    free(C);
-    return TC;
+    return X(convert_banded_to_triangular_banded)(C);
 }
 
 X(triangular_banded) * X(create_A_associated_hermite_to_hermite)(const int norm, const int n, const int c) {
@@ -1561,12 +1754,7 @@ X(triangular_banded) * X(create_A_associated_hermite_to_hermite)(const int norm,
     X(destroy_banded)(A1);
     X(destroy_banded)(A0);
 
-    X(triangular_banded) * TA = malloc(sizeof(X(triangular_banded)));
-    TA->data = A->data;
-    TA->n = n;
-    TA->b = 4;
-    free(A);
-    return TA;
+    return X(convert_banded_to_triangular_banded)(A);
 }
 
 X(triangular_banded) * X(create_B_associated_hermite_to_hermite)(const int norm, const int n) {
@@ -1575,20 +1763,10 @@ X(triangular_banded) * X(create_B_associated_hermite_to_hermite)(const int norm,
 
     X(banded_add)(0, B, -2, D2, B);
 
-    X(triangular_banded) * TB = malloc(sizeof(X(triangular_banded)));
-    TB->data = B->data;
-    TB->n = n;
-    TB->b = 2;
-    free(B);
-    return TB;
+    return X(convert_banded_to_triangular_banded)(B);
 }
 
-X(triangular_banded) * X(create_C_associated_hermite_to_hermite)(const int n) {
-    X(triangular_banded) * C = X(calloc_triangular_banded)(n, 0);
-    for (int j = 0; j < n; j++)
-        X(set_triangular_banded_index)(C, 1, j, j);
-    return C;
-}
+X(triangular_banded) * X(create_C_associated_hermite_to_hermite)(const int n) {return X(create_I_triangular_banded)(n, 0);}
 
 // a ≤ σ(A) ≤ b and c ≤ σ(B) ≤ d.
 static inline void X(compute_spectral_enclosing_sets)(const int m, const FLT * A, const int n, const FLT * B, FLT * a, FLT * b, FLT * c, FLT * d) {

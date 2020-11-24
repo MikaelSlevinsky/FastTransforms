@@ -12,6 +12,11 @@ typedef struct {
     int b;
 } X(triangular_banded);
 
+typedef struct {
+    X(banded) * factors;
+    FLT * tau;
+} X(banded_qr);
+
 typedef struct X(tbstruct_FMM) X(tb_eigen_FMM);
 
 struct X(tbstruct_FMM) {
@@ -24,6 +29,8 @@ struct X(tbstruct_FMM) {
     FLT * t1;
     FLT * t2;
     FLT * lambda;
+    int * p1;
+    int * p2;
     int n;
     int b;
 };
@@ -42,6 +49,7 @@ struct X(tbstruct_ADI) {
 
 void X(destroy_banded)(X(banded) * A);
 void X(destroy_triangular_banded)(X(triangular_banded) * A);
+void X(destroy_banded_qr)(X(banded_qr) * F);
 void X(destroy_tb_eigen_FMM)(X(tb_eigen_FMM) * F);
 void X(destroy_tb_eigen_ADI)(X(tb_eigen_ADI) * F);
 
@@ -53,6 +61,14 @@ X(banded) * X(calloc_banded)(const int m, const int n, const int l, const int u)
 
 X(triangular_banded) * X(malloc_triangular_banded)(const int n, const int b);
 X(triangular_banded) * X(calloc_triangular_banded)(const int n, const int b);
+void X(realloc_triangular_banded)(X(triangular_banded) * A, const int b);
+
+X(triangular_banded) * X(view_triangular_banded)(const X(triangular_banded) * A, const unitrange i);
+
+X(banded) * X(convert_triangular_banded_to_banded)(X(triangular_banded) * A);
+X(triangular_banded) * X(convert_banded_to_triangular_banded)(X(banded) * A);
+
+X(triangular_banded) * X(create_I_triangular_banded)(const int n, const int b);
 
 FLT X(get_banded_index)(const X(banded) * A, const int i, const int j);
 void X(set_banded_index)(const X(banded) * A, const FLT v, const int i, const int j);
@@ -68,13 +84,19 @@ void X(tbmv)(char TRANS, X(triangular_banded) * A, FLT * x);
 void X(tbsv)(char TRANS, X(triangular_banded) * A, FLT * x);
 void X(tssv)(char TRANS, X(triangular_banded) * A, X(triangular_banded) * B, FLT gamma, FLT * x);
 
+void X(banded_lufact)(X(banded) * A);
+X(banded_qr) * X(banded_qrfact)(X(banded) * A);
+void X(bqmv)(char TRANS, X(banded_qr) * F, FLT * x);
+void X(brmv)(char TRANS, X(banded_qr) * F, FLT * x);
+void X(brsv)(char TRANS, X(banded_qr) * F, FLT * x);
+
 void X(triangular_banded_eigenvalues)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * lambda);
 void X(triangular_banded_eigenvectors)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * V);
 
 void X(triangular_banded_quadratic_eigenvalues)(X(triangular_banded) * A, X(triangular_banded) * B, X(triangular_banded) * C, FLT * lambda);
 void X(triangular_banded_quadratic_eigenvectors)(X(triangular_banded) * A, X(triangular_banded) * B, X(triangular_banded) * C, FLT * V);
 
-X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) * B);
+X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * D);
 X(tb_eigen_ADI) * X(tb_eig_ADI)(X(triangular_banded) * A, X(triangular_banded) * B);
 
 void X(scale_rows_tb_eigen_FMM)(FLT alpha, FLT * x, X(tb_eigen_FMM) * F);

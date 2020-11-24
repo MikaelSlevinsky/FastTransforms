@@ -170,15 +170,16 @@ void ft_kernel_tri_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2
 #define sd(l,m) s[l+(m)*n-(m)/2*((m)+1)/2]
 #define cd(l,m) c[l+(m)*n-(m)/2*((m)+1)/2]
 
-ft_rotation_plan * ft_plan_rotdisk(const int n) {
+ft_rotation_plan * ft_plan_rotdisk(const int n, const double alpha, const double beta) {
     double * s = malloc(n*n * sizeof(double));
     double * c = malloc(n*n * sizeof(double));
-    double numc, den;
+    double nums, numc, den;
     for (int m = 0; m < 2*n-1; m++)
         for (int l = 0; l < n-(m+1)/2; l++) {
-            numc = (m+1)*(2*l+m+3);
-            den = (l+m+2)*(l+m+2);
-            sd(l, m) = -((double) (l+1))/((double) (l+m+2));
+            nums = (l+1)*(l+beta+1);
+            numc = (m+alpha+1)*(2*l+m+alpha+beta+3);
+            den = (l+m+alpha+2)*(l+m+alpha+beta+2);
+            sd(l, m) = -sqrt(nums/den);
             cd(l, m) = sqrt(numc/den);
         }
     ft_rotation_plan * RP = malloc(sizeof(ft_rotation_plan));

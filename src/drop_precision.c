@@ -145,10 +145,19 @@ X(tb_eigen_FMM) * X(drop_precision_tb_eigen_FMM)(X2(tb_eigen_FMM) * F2) {
     }
     else {
         int s = n>>1, b = F2->b;
+        int * p1 = malloc(s*sizeof(int)), * p2 = malloc((n-s)*sizeof(int));
         FLT * lambda = malloc(n*sizeof(FLT));
+        for (int i = 0; i < s; i++)
+            p1[i] = F2->p1[i];
+        for (int i = 0; i < n-s; i++)
+            p2[i] = F2->p2[i];
         for (int i = 0; i < n; i++)
             lambda[i] = F2->lambda[i];
-        F->F0 = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda, lambda+s, (unitrange) {0, s}, (unitrange) {0, n-s}, 'G');
+        X(perm)('N', lambda, p1, s);
+        X(perm)('N', lambda+s, p2, n-s);
+        F->F0 = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda, lambda, (unitrange) {0, s}, (unitrange) {s, n}, 'G');
+        X(perm)('T', lambda, p1, s);
+        X(perm)('T', lambda+s, p2, n-s);
         F->F1 = X(drop_precision_tb_eigen_FMM)(F2->F1);
         F->F2 = X(drop_precision_tb_eigen_FMM)(F2->F2);
         F->X = malloc(s*b*sizeof(FLT));
@@ -160,8 +169,26 @@ X(tb_eigen_FMM) * X(drop_precision_tb_eigen_FMM)(X2(tb_eigen_FMM) * F2) {
         F->t1 = calloc(s*FT_GET_MAX_THREADS(), sizeof(FLT));
         F->t2 = calloc((n-s)*FT_GET_MAX_THREADS(), sizeof(FLT));
         F->lambda = lambda;
+        F->p1 = p1;
+        F->p2 = p2;
         F->n = n;
         F->b = b;
     }
+    return F;
+}
+
+X(btb_eigen_FMM) * X(drop_precision_btb_eigen_FMM)(X2(btb_eigen_FMM) * F2) {
+    int n = F2->n;
+    X(btb_eigen_FMM) * F = malloc(sizeof(X(btb_eigen_FMM)));
+    F->F = X(drop_precision_tb_eigen_FMM)(F2->F);
+    FLT * s = malloc(n*sizeof(FLT)), * c = malloc(n*sizeof(FLT));
+    for (int i = 0; i < n; i++) {
+        s[i] = F2->s[i];
+        c[i] = F2->c[i];
+    }
+    F->s = s;
+    F->c = c;
+    F->t = calloc(2*n*FT_GET_MAX_THREADS(), sizeof(FLT));
+    F->n = n;
     return F;
 }

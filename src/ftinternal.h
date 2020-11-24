@@ -2,6 +2,7 @@
 #define FTINTERNAL_H
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 #if defined(__i386__) || defined(__x86_64__)
     #include <immintrin.h>
@@ -29,12 +30,18 @@
     #define vmulsub_f64(a, b, c) (-vfmsq_f64(c, a, b))
 #endif
 
+#define BOLD(string) "\x1b[1m" string "\x1b[0m"
 #define RED(string) "\x1b[31m" string "\x1b[0m"
 #define GREEN(string) "\x1b[32m" string "\x1b[0m"
 #define YELLOW(string) "\x1b[33m" string "\x1b[0m"
 #define BLUE(string) "\x1b[34m" string "\x1b[0m"
 #define MAGENTA(string) "\x1b[35m" string "\x1b[0m"
 #define CYAN(string) "\x1b[36m" string "\x1b[0m"
+
+static inline void exit_failure(char * msg) {
+    printf("\x1b[1m\x1b[31mFastTransforms: \x1b[0m\x1b[31m%s\x1b[0m\n", msg);
+    exit(EXIT_FAILURE);
+}
 
 #define M_SQRT_PI      1.772453850905516027   /* sqrt(pi)           */
 #define M_1_SQRT_PI    0.564189583547756287   /* 1/sqrt(pi)         */

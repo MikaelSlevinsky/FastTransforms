@@ -202,15 +202,15 @@ and \ref ft_execute_fourier2sph converts them back.
 
 \subsection disk2cxf
 
-Real orthonormal Zernike polynomials in \f$L^2(\mathbb{D}^2)\f$ are:
+Real orthonormal generalized Zernike polynomials in \f$L^2(\mathbb{D}^2, r^{2\alpha+1}(1-r^2)^\beta\ud r\ud\theta)\f$ are:
 \f[
-Z_\ell^m(r,\theta) = \sqrt{2\ell+2} r^{\abs{m}}P_{\frac{\ell-\abs{m}}{2}}^{(0,\abs{m})}(2r^2-1) \sqrt{\frac{2-\delta_{m,0}}{2\pi}} \left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0.\end{array}\right..
+Z_{\ell,m}^{(\alpha,\beta)}(r,\theta) = 2^{\frac{\abs{m}+\alpha+\beta+2}{2}} r^{\abs{m}}\tilde{P}_{\frac{\ell-\abs{m}}{2}}^{(\beta,\abs{m}+\alpha)}(2r^2-1) \sqrt{\frac{2-\delta_{m,0}}{2\pi}} \left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0.\end{array}\right.,
 \f]
-A degree-\f$(2n-2)\f$ expansion in disk harmonics is given by:
+where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-\f$(2n-2)\f$ expansion in generalized Zernike polynomials is given by:
 \f[
-f_{2n-2}(r,\theta) = \sum_{\ell=0}^{2n-2}\sum_{m=-\ell,2}^{+\ell} f_\ell^m Z_\ell^m(r,\theta),
+f_{2n-2}(r,\theta) = \sum_{\ell=0}^{2n-2}\sum_{m=-\ell,2}^{+\ell} f_\ell^m Z_{\ell,m}^{(\alpha,\beta)}(r,\theta),
 \f]
-where the \f$,2\f$ in the inner summation index implies that the inner summation runs from \f$m=-\ell\f$ in steps of \f$2\f$ up to \f$+\ell\f$. If disk harmonic expansion coefficients are organized into the array:
+where the \f$,2\f$ in the inner summation index implies that the inner summation runs from \f$m=-\ell\f$ in steps of \f$2\f$ up to \f$+\ell\f$. If generalized Zernike expansion coefficients are organized into the array:
 \f[
 F = \begin{pmatrix}
 f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_{2n-2}^{2-2n} & f_{2n-2}^{2n-2}\\

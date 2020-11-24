@@ -216,7 +216,7 @@ int main(int argc, const char * argv[]) {
 
         A = diskrand(N, M);
         B = copymat(A, N, M);
-        P = ft_plan_disk2cxf(N);
+        P = ft_plan_disk2cxf(N, alpha, beta);
         RS = ft_plan_disk_synthesis(N, M);
         RA = ft_plan_disk_analysis(N, M);
 
@@ -247,7 +247,7 @@ int main(int argc, const char * argv[]) {
         NTIMES = 1 + pow(2048/N, 2);
 
         A = diskrand(N, M);
-        P = ft_plan_disk2cxf(N);
+        P = ft_plan_disk2cxf(N, alpha, beta);
         RS = ft_plan_disk_synthesis(N, M);
         RA = ft_plan_disk_analysis(N, M);
 

@@ -9,7 +9,26 @@ double f(double x, double y) {return (x*x-y*y+1.0)/((x*x-y*y+1.0)*(x*x-y*y+1.0)+
   \f[
   f(x,y) = \frac{x^2-y^2+1}{(x^2-y^2+1)^2+(2xy+1)^2},
   \f]
-  over the unit disk. In this case, we know from complex analysis that the integral of a holomorphic function is equal to \f$\pi\times f(0,0)\f$.
+  over the unit disk. In this case, we know from complex analysis that the integral of a holomorphic function is equal to \f$\pi\times f(0,0) = \pi/2\f$.
+
+  More generally, the (weighted) integral follows from:
+  \f[
+  \int_0^{2\pi}\int_0^1 f(r\cos\theta, r\sin\theta) r^{2\alpha+1}(1-r^2)^\beta{\rm\,d}r{\rm\,d}\theta = \frac{\pi}{2}{\rm B}(\alpha+1,\beta+1),
+  \f]
+  where ${\rm B}(x,y)$ is the beta function.
+
+  We also know that the (weighted) square integral over the disk is related to the sum of the squares of the (generalized) Zernike coefficients. By:
+  \f[
+  \int_0^{2\pi}\int_0^1 [f(r\cos\theta, r\sin\theta)]^2r^{2\alpha+1}(1-r^2)^\beta{\rm\,d}r{\rm\,d}\theta = \pi\int_0^1\frac{r^{2\alpha+1}(1-r^2)^\beta}{2-r^4}{\rm\,d}r,
+  \f]
+  and:
+  \f[
+  \pi\int_0^1\frac{r^{2\alpha+1}(1-r^2)^\beta}{2-r^4}{\rm\,d}r = \frac{\pi^{\frac{3}{2}}}{2^{\alpha+\beta+3}}\frac{\Gamma(\alpha+1)\Gamma(\beta+1)}{\Gamma(\frac{\alpha+\beta+2}{2})\Gamma(\frac{\alpha+\beta+3}{2})} {}_3F_2\left(\begin{array}{c} 1, \frac{\alpha+1}{2}, \frac{\alpha+2}{2}\\ \frac{\alpha+\beta+2}{2}, \frac{\alpha+\beta+3}{2} \end{array}; \frac{1}{2}\right),
+  \f]
+  we may simplify the special case \f$(\alpha,\beta)=(0,0)\f$:
+  \f[
+  \int_0^{2\pi}\int_0^1 [f(r\cos\theta, r\sin\theta)]^2r{\rm\,d}r{\rm\,d}\theta = \frac{\pi}{2\sqrt{2}}\log(1+\sqrt{2}).
+  \f]
 */
 int main(void) {
     printf("In this example, we explore integration of a harmonic function over \n");
@@ -63,7 +82,8 @@ int main(void) {
     printmat("F", FMT, F, N, M);
     printf("\n");
 
-    ft_harmonic_plan * P = ft_plan_disk2cxf(N);
+    double alpha = 0.0, beta = 0.0;
+    ft_harmonic_plan * P = ft_plan_disk2cxf(N, alpha, beta);
     ft_disk_fftw_plan * PA = ft_plan_disk_analysis(N, M);
 
     ft_execute_disk_analysis(PA, F, N, M);
@@ -82,6 +102,9 @@ int main(void) {
     printf("Using an orthonormal basis, the integral of "MAGENTA("[f(x,y)]^2")" over the\n");
     printf("disk is approximately the square of the 2-norm of the coefficients, ");
     printf(FMT, pow(ft_norm_1arg(F, N*M), 2));
+    printf(".\n");
+    printf("This compares favourably to the exact result, ");
+    printf(FMT, M_PI/(2*sqrt(2))*log1p(sqrt(2)));
     printf(".\n");
 
     ft_destroy_harmonic_plan(P);
