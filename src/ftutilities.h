@@ -29,6 +29,8 @@ double * triones(int n, int m);
 double * trirand(int n, int m);
 double * diskones(int n, int m);
 double * diskrand(int n, int m);
+double * rectdiskones(int n, int m);
+double * rectdiskrand(int n, int m);
 double * tetones(int n, int l, int m);
 double * tetrand(int n, int l, int m);
 ft_complex * spinsphones(int n, int m, int s);

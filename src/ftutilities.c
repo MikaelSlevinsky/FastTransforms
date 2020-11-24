@@ -112,6 +112,22 @@ double * diskrand(int n, int m) {
     return A;
 }
 
+double * rectdiskones(int n, int m) {
+    double * A = calloc(n * m, sizeof(double));
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m-i; j++)
+            A(i,j) = 1.0;
+    return A;
+}
+
+double * rectdiskrand(int n, int m) {
+    double * A = calloc(n * m, sizeof(double));
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m-i; j++)
+            A(i,j) = 2.0*(((double) rand())/RAND_MAX)-1.0;
+    return A;
+}
+
 double * tetones(int n, int l, int m) {
     double * A = calloc(n * l * m, sizeof(double));
     for (int k = 0; k < m; k++)

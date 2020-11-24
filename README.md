@@ -66,7 +66,7 @@ The library is compiled by Apple LLVM version 10.0.1 as above with the compiler 
 
 The error growth rate is significantly reduced if (α, β, γ) = (-0.5, -0.5, -0.5).
 
-### Zernike series to Chebyshev×Fourier series (`disk2cxf`)
+### Generalized Zernike series to Chebyshev×Fourier series (`disk2cxf`) with (α, β) = (0, 0)
 
 | Degree            | 63       | 127      | 255      | 511      | 1023     | 2047     | 4095     | 8191     |
 | ----------------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: |

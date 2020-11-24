@@ -485,6 +485,28 @@ void execute_disk_lo2hi_NEON(const ft_rotation_plan * RP, double * A, double * B
     EXECUTE_DISK(2, kernel_disk_lo2hi_default, kernel_disk_lo2hi_NEON)
 }
 
+void ft_execute_rectdisk_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    return execute_rectdisk_hi2lo_default(RP, A, M);
+}
+
+void ft_execute_rectdisk_lo2hi(const ft_rotation_plan * RP, double * A, double * B, const int M) {
+    return execute_rectdisk_lo2hi_default(RP, A, M);
+}
+
+void execute_rectdisk_hi2lo_default(const ft_rotation_plan * RP, double * A, const int M) {
+    int N = RP->n;
+    #pragma omp parallel
+    for (int m = 2+FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS())
+        kernel_rectdisk_hi2lo_default(RP, m%2, m, A+N*m, 1);
+}
+
+void execute_rectdisk_lo2hi_default(const ft_rotation_plan * RP, double * A, const int M) {
+    int N = RP->n;
+    #pragma omp parallel
+    for (int m = 2+FT_GET_THREAD_NUM(); m < M; m += FT_GET_NUM_THREADS())
+        kernel_rectdisk_lo2hi_default(RP, m%2, m, A+N*m, 1);
+}
+
 void ft_execute_tet_hi2lo(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M) {
     int N = RP1->n;
     #pragma omp parallel
@@ -771,10 +793,12 @@ void execute_spinsph_lo2hi_NEON(const ft_spin_rotation_plan * SRP, ft_complex * 
 void ft_destroy_harmonic_plan(ft_harmonic_plan * P) {
     ft_destroy_rotation_plan(P->RP);
     VFREE(P->B);
-    free(P->P1);
-    free(P->P2);
-    free(P->P1inv);
-    free(P->P2inv);
+    for (int i = 0; i < P->NP; i++) {
+        free(P->P[i]);
+        free(P->Pinv[i]);
+    }
+    free(P->P);
+    free(P->Pinv);
     free(P);
 }
 
@@ -782,42 +806,45 @@ ft_harmonic_plan * ft_plan_sph2fourier(const int n) {
     ft_harmonic_plan * P = malloc(sizeof(ft_harmonic_plan));
     P->RP = ft_plan_rotsphere(n);
     P->B = VMALLOC(VALIGN(n) * (2*n-1) * sizeof(double));
-    P->P1 = plan_legendre_to_chebyshev(1, 0, n);
-    P->P2 = plan_ultraspherical_to_ultraspherical(1, 0, n, 1.5, 1.0);
-    P->P1inv = plan_chebyshev_to_legendre(0, 1, n);
-    P->P2inv = plan_ultraspherical_to_ultraspherical(0, 1, n, 1.0, 1.5);
+    P->P = malloc(2 * sizeof(double *));
+    P->P[0] = plan_legendre_to_chebyshev(1, 0, n);
+    P->P[1] = plan_ultraspherical_to_ultraspherical(1, 0, n, 1.5, 1.0);
+    P->Pinv = malloc(2 * sizeof(double *));
+    P->Pinv[0] = plan_chebyshev_to_legendre(0, 1, n);
+    P->Pinv[1] = plan_ultraspherical_to_ultraspherical(0, 1, n, 1.0, 1.5);
+    P->NP = 2;
     return P;
 }
 
 void ft_execute_sph2fourier(const ft_harmonic_plan * P, double * A, const int N, const int M) {
     ft_execute_sph_hi2lo(P->RP, A, P->B, M);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P1, N, A, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P2, N, A+N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P2, N, A+2*N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P1, N, A+3*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P[0], N, A, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P[1], N, A+N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P[1], N, A+2*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P[0], N, A+3*N, 4*N);
 }
 
 void ft_execute_fourier2sph(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P1inv, N, A, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P2inv, N, A+N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P2inv, N, A+2*N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P1inv, N, A+3*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->Pinv[0], N, A, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->Pinv[1], N, A+N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->Pinv[1], N, A+2*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->Pinv[0], N, A+3*N, 4*N);
     ft_execute_sph_lo2hi(P->RP, A, P->B, M);
 }
 
 void ft_execute_sphv2fourier(const ft_harmonic_plan * P, double * A, const int N, const int M) {
     ft_execute_sphv_hi2lo(P->RP, A, P->B, M);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P2, N, A, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P1, N, A+N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P1, N, A+2*N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P2, N, A+3*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P[1], N, A, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P[0], N, A+N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P[0], N, A+2*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P[1], N, A+3*N, 4*N);
 }
 
 void ft_execute_fourier2sphv(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P2inv, N, A, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P1inv, N, A+N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P1inv, N, A+2*N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P2inv, N, A+3*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->Pinv[1], N, A, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->Pinv[0], N, A+N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->Pinv[0], N, A+2*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->Pinv[1], N, A+3*N, 4*N);
     ft_execute_sphv_lo2hi(P->RP, A, P->B, M);
 }
 
@@ -825,31 +852,34 @@ ft_harmonic_plan * ft_plan_tri2cheb(const int n, const double alpha, const doubl
     ft_harmonic_plan * P = malloc(sizeof(ft_harmonic_plan));
     P->RP = ft_plan_rottriangle(n, alpha, beta, gamma);
     P->B = VMALLOC(VALIGN(n) * n * sizeof(double));
-    P->P1 = plan_jacobi_to_jacobi(1, 1, n, beta + gamma + 1.0, alpha, -0.5, -0.5);
-    P->P2 = plan_jacobi_to_jacobi(1, 1, n, gamma, beta, -0.5, -0.5);
-    P->P1inv = plan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, beta + gamma + 1.0, alpha);
-    P->P2inv = plan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, gamma, beta);
+    P->P = malloc(2 * sizeof(double *));
+    P->P[0] = plan_jacobi_to_jacobi(1, 1, n, beta + gamma + 1.0, alpha, -0.5, -0.5);
+    P->P[1] = plan_jacobi_to_jacobi(1, 1, n, gamma, beta, -0.5, -0.5);
+    P->Pinv = malloc(2 * sizeof(double *));
+    P->Pinv[0] = plan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, beta + gamma + 1.0, alpha);
+    P->Pinv[1] = plan_jacobi_to_jacobi(1, 1, n, -0.5, -0.5, gamma, beta);
     P->alpha = alpha;
     P->beta = beta;
     P->gamma = gamma;
+    P->NP = 2;
     return P;
 }
 
 void ft_execute_tri2cheb(const ft_harmonic_plan * P, double * A, const int N, const int M) {
     ft_execute_tri_hi2lo(P->RP, A, P->B, M);
     if ((P->beta + P->gamma != -1.5) || (P->alpha != -0.5))
-        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1, N, A, N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P[0], N, A, N);
     if ((P->gamma != -0.5) || (P->beta != -0.5))
-        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P2, N, A, N);
+        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P[1], N, A, N);
     chebyshev_normalization_2d(A, N, M);
 }
 
 void ft_execute_cheb2tri(const ft_harmonic_plan * P, double * A, const int N, const int M) {
     chebyshev_normalization_2d_t(A, N, M);
     if ((P->beta != -0.5) || (P->gamma != -0.5))
-        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P2inv, N, A, N);
+        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->Pinv[1], N, A, N);
     if ((P->alpha != -0.5) || (P->beta + P->gamma != -1.5))
-        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P1inv, N, A, N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->Pinv[0], N, A, N);
     ft_execute_tri_lo2hi(P->RP, A, P->B, M);
 }
 
@@ -857,40 +887,74 @@ ft_harmonic_plan * ft_plan_disk2cxf(const int n, const double alpha, const doubl
     ft_harmonic_plan * P = malloc(sizeof(ft_harmonic_plan));
     P->RP = ft_plan_rotdisk(n, alpha, beta);
     P->B = VMALLOC(VALIGN(n) * (4*n-3) * sizeof(double));
-    P->P1 = plan_jacobi_to_chebyshev(1, 0, n, beta, alpha);
-    P->P2 = plan_jacobi_to_jacobi(1, 1, n, beta, alpha + 1.0, -0.5, 0.5);
-    P->P1inv = plan_chebyshev_to_jacobi(0, 1, n, beta, alpha);
-    P->P2inv = plan_jacobi_to_jacobi(1, 1, n, -0.5, 0.5, beta, alpha + 1.0);
-    double cst1 = pow(2.0, 0.5*(alpha+beta+2.0));
-    double cst2 = cst1*M_2_PI_POW_0P5;
-    double cst1inv = pow(2.0, -0.5*(alpha+beta+2.0));
-    double cst2inv = cst1inv*M_PI_2_POW_0P5;
+    P->P = malloc(2 * sizeof(double *));
+    P->P[0] = plan_jacobi_to_chebyshev(1, 0, n, beta, alpha);
+    P->P[1] = plan_jacobi_to_jacobi(1, 1, n, beta, alpha + 1.0, -0.5, 0.5);
+    P->Pinv = malloc(2 * sizeof(double *));
+    P->Pinv[0] = plan_chebyshev_to_jacobi(0, 1, n, beta, alpha);
+    P->Pinv[1] = plan_jacobi_to_jacobi(1, 1, n, -0.5, 0.5, beta, alpha + 1.0);
+    double cst0 = pow(2.0, 0.5*(alpha+beta+2.0));
+    double cst1 = cst0*M_2_PI_POW_0P5;
+    double cst0inv = pow(2.0, -0.5*(alpha+beta+2.0));
+    double cst1inv = cst0inv*M_PI_2_POW_0P5;
     for (int j = 0; j < n; j++)
         for (int i = 0; i <= j; i++) {
-            P->P1[i+j*n] *= cst1;
-            P->P2[i+j*n] *= cst2;
-            P->P1inv[i+j*n] *= cst1inv;
-            P->P2inv[i+j*n] *= cst2inv;
+            P->P[0][i+j*n] *= cst0;
+            P->P[1][i+j*n] *= cst1;
+            P->Pinv[0][i+j*n] *= cst0inv;
+            P->Pinv[1][i+j*n] *= cst1inv;
         }
     P->alpha = alpha;
     P->beta = beta;
+    P->NP = 2;
     return P;
 }
 
 void ft_execute_disk2cxf(const ft_harmonic_plan * P, double * A, const int N, const int M) {
     ft_execute_disk_hi2lo(P->RP, A, P->B, M);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P1, N, A, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P2, N, A+N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P2, N, A+2*N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P1, N, A+3*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P[0], N, A, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P[1], N, A+N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P[1], N, A+2*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P[0], N, A+3*N, 4*N);
 }
 
 void ft_execute_cxf2disk(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P1inv, N, A, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P2inv, N, A+N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P2inv, N, A+2*N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P1inv, N, A+3*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->Pinv[0], N, A, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->Pinv[1], N, A+N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->Pinv[1], N, A+2*N, 4*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->Pinv[0], N, A+3*N, 4*N);
     ft_execute_disk_lo2hi(P->RP, A, P->B, M);
+}
+
+ft_harmonic_plan * ft_plan_rectdisk2cheb(const int n, const double beta) {
+    ft_harmonic_plan * P = malloc(sizeof(ft_harmonic_plan));
+    P->RP = ft_plan_rotrectdisk(n, beta);
+    P->B = VMALLOC(VALIGN(n) * n * sizeof(double));
+    P->P = malloc(3 * sizeof(double *));
+    P->P[0] = plan_ultraspherical_to_chebyshev(1, 0, n, beta + 1.0);
+    P->P[1] = plan_ultraspherical_to_ultraspherical(1, 0, n, beta + 2.0, 1.0);
+    P->P[2] = plan_ultraspherical_to_chebyshev(1, 0, n, beta + 0.5);
+    P->Pinv = malloc(3 * sizeof(double *));
+    P->Pinv[0] = plan_chebyshev_to_ultraspherical(0, 1, n, beta + 1.0);
+    P->Pinv[1] = plan_ultraspherical_to_ultraspherical(0, 1, n, 1.0, beta + 2.0);
+    P->Pinv[2] = plan_chebyshev_to_ultraspherical(0, 1, n, beta + 0.5);
+    P->beta = beta;
+    P->NP = 3;
+    return P;
+}
+
+void ft_execute_rectdisk2cheb(const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    ft_execute_rectdisk_hi2lo(P->RP, A, P->B, M);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/2, 1.0, P->P[0], N, A, 2*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/2, 1.0, P->P[1], N, A+N, 2*N);
+    cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P[2], N, A, N);
+}
+
+void ft_execute_cheb2rectdisk(const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->Pinv[2], N, A, N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/2, 1.0, P->Pinv[0], N, A, 2*N);
+    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/2, 1.0, P->Pinv[1], N, A+N, 2*N);
+    ft_execute_rectdisk_lo2hi(P->RP, A, P->B, M);
 }
 
 void ft_destroy_tetrahedral_harmonic_plan(ft_tetrahedral_harmonic_plan * P) {

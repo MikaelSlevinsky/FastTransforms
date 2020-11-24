@@ -379,6 +379,73 @@ void ft_execute_disk_analysis(const ft_disk_fftw_plan * P, double * X, const int
     }
 }
 
+void ft_destroy_rectdisk_fftw_plan(ft_rectdisk_fftw_plan * P) {
+    fftw_destroy_plan(P->planx1);
+    fftw_destroy_plan(P->planx2);
+    fftw_destroy_plan(P->plany);
+    free(P);
+}
+
+ft_rectdisk_fftw_plan * ft_plan_rectdisk_with_kind(const int N, const int M, const fftw_r2r_kind kind[3][1]) {
+    int rank = 1; // not 2: we are computing 1d transforms //
+    int n[] = {N}; // 1d transforms of length n //
+    int idist = 2*N, odist = 2*N;
+    int istride = 1, ostride = 1; // distance between two elements in the same column //
+    int * inembed = n, * onembed = n;
+
+    ft_rectdisk_fftw_plan * P = malloc(sizeof(ft_rectdisk_fftw_plan));
+
+    double * X = fftw_malloc(N*M*sizeof(double));
+
+    int howmany = (M+1)/2;
+    P->planx1 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
+
+    howmany = M/2;
+    P->planx2 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind[1], FT_FFTW_FLAGS);
+
+    n[0] = M;
+    idist = odist = 1;
+    istride = ostride = N;
+    howmany = N;
+    P->plany = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind[2], FT_FFTW_FLAGS);
+    fftw_free(X);
+
+    return P;
+}
+
+ft_rectdisk_fftw_plan * ft_plan_rectdisk_synthesis(const int N, const int M) {
+    const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_RODFT01}, {FFTW_REDFT01}};
+    return ft_plan_rectdisk_with_kind(N, M, kind);
+}
+
+ft_rectdisk_fftw_plan * ft_plan_rectdisk_analysis(const int N, const int M) {
+    const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_RODFT10}, {FFTW_REDFT10}};
+    return ft_plan_rectdisk_with_kind(N, M, kind);
+}
+
+void ft_execute_rectdisk_synthesis(const ft_rectdisk_fftw_plan * P, double * X, const int N, const int M) {
+    for (int j = 0; j < M; j += 2)
+        X[j*N] *= 2.0;
+    fftw_execute_r2r(P->planx1, X, X);
+    fftw_execute_r2r(P->planx2, X+N, X+N);
+    for (int i = 0; i < N; i++)
+        X[i] *= 2.0;
+    for (int i = 0; i < N*M; i++)
+        X[i] *= 0.25;
+    fftw_execute_r2r(P->plany, X, X);
+}
+
+void ft_execute_rectdisk_analysis(const ft_rectdisk_fftw_plan * P, double * X, const int N, const int M) {
+    fftw_execute_r2r(P->plany, X, X);
+    for (int i = 0; i < N*M; i++)
+        X[i] /= N*M;
+    for (int i = 0; i < N; i++)
+        X[i] *= 0.5;
+    fftw_execute_r2r(P->planx1, X, X);
+    fftw_execute_r2r(P->planx2, X+N, X+N);
+    for (int j = 0; j < M; j += 2)
+        X[j*N] *= 0.5;
+}
 
 void ft_destroy_spinsphere_fftw_plan(ft_spinsphere_fftw_plan * P) {
     fftw_destroy_plan(P->plantheta1);

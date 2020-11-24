@@ -238,6 +238,43 @@ f_{2n-2}(r,\theta) = \sum_{\ell=0}^{n-1}\sum_{m=2-2n}^{2n-2} g_{2\ell}^m \left\{
 and \ref ft_execute_cxf2disk converts them back.
 
 
+\subsection rectdisk2cheb
+
+Real orthonormal Dunkl--Xu polynomials in \f$L^2(\mathbb{D}^2, (1-x^2-y^2)^\beta\ud x\ud y)\f$ are:
+\f[
+\tilde{P}_{\ell,m}^{(\beta)}(x,y) = (1-x^2)^{\frac{m}{2}}\tilde{P}_{\ell-m}^{(m+\beta+\frac{1}{2},m+\beta+\frac{1}{2})}(x) \tilde{P}_m^{(\beta,\beta)}\left(\frac{y}{\sqrt{1-x^2}}\right),
+\f]
+where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-\f$(n-1)\f$ expansion in Dunkl--Xu polynomials is given by:
+\f[
+f_{n-1}(x,y) = \sum_{\ell=0}^{n-1}\sum_{m=0}^\ell f_\ell^m \tilde{P}_{\ell,m}^{(\beta)}(x,y).
+\f]
+If Dunkl--Xu expansion coefficients are organized into the array:
+\f[
+F = \begin{pmatrix}
+f_0^0 & f_1^1 & f_2^2 & \cdots & f_{n-1}^{n-1}\\
+\vdots & \vdots &  \vdots & \ddots & 0\\
+f_{n-3}^0 & f_{n-2}^1 & f_{n-1}^2 & & \vdots\\
+f_{n-2}^0 & f_{n-1}^1 & 0 & \cdots & 0\\
+f_{n-1}^0 & 0 & 0 & \cdots & 0\\
+\end{pmatrix},
+\f]
+then \ref ft_plan_rectdisk2cheb creates the appropriate \ref ft_harmonic_plan, and \ref ft_execute_rectdisk2cheb returns the bivariate (partially weighted) Chebyshev coefficients:
+\f[
+G = \begin{pmatrix}
+g_0^0 & g_0^1 & \cdots & g_0^{n-1}\\
+g_1^0 & g_1^1 & \cdots & g_1^{n-1}\\
+\vdots & \vdots & \ddots & \vdots\\
+g_{n-2}^0 & g_{n-2}^1 & \cdots & g_{n-2}^{n-1}\\
+g_{n-1}^0 & 0 & \cdots & g_{n-1}^{n-1}\\
+\end{pmatrix}.
+\f]
+That is:
+\f[
+f_{n-1}(x,y) = \sum_{\ell=0}^{n-1}\sum_{m=0}^{n-1} g_\ell^m \left\{\begin{array}{ccc} T_\ell(x) & {\rm for} & m~{\rm even},\\ \sqrt{1-x^2}U_\ell(x) & {\rm for} & m~{\rm odd},\end{array}\right\} T_m\left(\frac{y}{\sqrt{1-x^2}}\right),
+\f]
+and \ref ft_execute_cheb2rectdisk converts them back.
+
+
 \subsection tri2cheb
 
 Proriol polynomials on the triangle with vertices \f$(0,0)\f$, \f$(1,0)\f$, and \f$(0,1)\f$ are:
@@ -390,6 +427,21 @@ On the disk, the \f$N\times M\f$ radial--azimuthal grids are:
 r_n & = \cos\left(\frac{2n+1}{4N}\pi\right) = \sin\left(\frac{2N-2n-1}{4N}\pi\right),\quad {\rm for} \quad 0 \le n < N,\\
 \theta_m & = \frac{2m}{M}\pi,\quad {\rm for} \quad 0 \le m < M.
 \f}
+
+\subsection ft_fftw_rectdisk_plan
+
+On the rectangularized disk, the \f$N\times M\f$ mapped tensor product grids are:
+\f{align*}
+x_n & = \cos\left(\frac{2n+1}{2N}\pi\right) = \sin\left(\frac{N-2n-1}{2N}\pi\right),\quad {\rm for} \quad 0 \le n < N,\\
+z_m & = \cos\left(\frac{2m+1}{2M}\pi\right) = \sin\left(\frac{M-2m-1}{2M}\pi\right),\quad {\rm for} \quad 0 \le m < M,\\
+y_{n,m} & = \sqrt{1-x_n^2}z_m.
+\f}
+
+Slightly more accuracy can be expected by using an auxiliary array:
+\f[
+w_n = \sin\left(\frac{2n+1}{2N}\pi\right),\quad {\rm for} \quad 0 \le n < N,
+\f]
+so that \f$y_{n,m} = w_nz_m\f$.
 
 \subsection ft_fftw_triangle_plan
 

@@ -280,6 +280,13 @@ void ft_kernel_disk_hi2lo(const ft_rotation_plan * RP, const int m1, const int m
 /// Convert a single vector of disk harmonic coefficients in A with stride S from order m1 up to order m2.
 void ft_kernel_disk_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
+ft_rotation_plan * ft_plan_rotrectdisk(const int n, const double beta);
+
+/// Convert a single vector of rectangularized disk harmonic coefficients in A with stride S from order m2 down to order m1.
+void ft_kernel_rectdisk_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+/// Convert a single vector of rectangularized disk harmonic coefficients in A with stride S from order m1 up to order m2.
+void ft_kernel_rectdisk_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
+
 void ft_kernel_tet_hi2lo(const ft_rotation_plan * RP, const int L, const int m, double * A);
 void ft_kernel_tet_lo2hi(const ft_rotation_plan * RP, const int L, const int m, double * A);
 
@@ -309,6 +316,9 @@ void ft_execute_tri_lo2hi(const ft_rotation_plan * RP, double * A, double * B, c
 void ft_execute_disk_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M);
 void ft_execute_disk_lo2hi(const ft_rotation_plan * RP, double * A, double * B, const int M);
 
+void ft_execute_rectdisk_hi2lo(const ft_rotation_plan * RP, double * A, double * B, const int M);
+void ft_execute_rectdisk_lo2hi(const ft_rotation_plan * RP, double * A, double * B, const int M);
+
 void ft_execute_tet_hi2lo(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M);
 void ft_execute_tet_lo2hi(const ft_rotation_plan * RP1, const ft_rotation_plan * RP2, double * A, const int L, const int M);
 
@@ -319,13 +329,12 @@ void ft_execute_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, ft_complex * A,
 typedef struct {
     ft_rotation_plan * RP;
     double * B;
-    double * P1;
-    double * P2;
-    double * P1inv;
-    double * P2inv;
+    double ** P;
+    double ** Pinv;
     double alpha;
     double beta;
     double gamma;
+    int NP;
 } ft_harmonic_plan;
 
 /// Destroy a \ref ft_harmonic_plan.
@@ -357,6 +366,14 @@ ft_harmonic_plan * ft_plan_disk2cxf(const int n, const double alpha, const doubl
 void ft_execute_disk2cxf(const ft_harmonic_plan * P, double * A, const int N, const int M);
 /// Transform a Chebyshev--Fourier series to a disk harmonic expansion.
 void ft_execute_cxf2disk(const ft_harmonic_plan * P, double * A, const int N, const int M);
+
+/// Plan a rectangularized disk harmonic transform.
+ft_harmonic_plan * ft_plan_rectdisk2cheb(const int n, const double beta);
+
+/// Transform a rectangularized disk harmonic expansion to a Chebyshev series.
+void ft_execute_rectdisk2cheb(const ft_harmonic_plan * P, double * A, const int N, const int M);
+/// Transform a Chebyshev series to a rectangularized disk harmonic expansion.
+void ft_execute_cheb2rectdisk(const ft_harmonic_plan * P, double * A, const int N, const int M);
 
 typedef struct {
     ft_rotation_plan * RP1;
@@ -491,6 +508,26 @@ ft_disk_fftw_plan * ft_plan_disk_analysis(const int N, const int M);
 void ft_execute_disk_synthesis(const ft_disk_fftw_plan * P, double * X, const int N, const int M);
 /// Execute FFTW analysis on the disk.
 void ft_execute_disk_analysis(const ft_disk_fftw_plan * P, double * X, const int N, const int M);
+
+typedef struct {
+    fftw_plan planx1;
+    fftw_plan planx2;
+    fftw_plan plany;
+} ft_rectdisk_fftw_plan;
+
+/// Destroy a \ref ft_rectdisk_fftw_plan.
+void ft_destroy_rectdisk_fftw_plan(ft_rectdisk_fftw_plan * P);
+
+ft_rectdisk_fftw_plan * ft_plan_rectdisk_with_kind(const int N, const int M, const fftw_r2r_kind kind[3][1]);
+/// Plan FFTW synthesis on the rectangularized disk.
+ft_rectdisk_fftw_plan * ft_plan_rectdisk_synthesis(const int N, const int M);
+/// Plan FFTW analysis on the rectangularized disk.
+ft_rectdisk_fftw_plan * ft_plan_rectdisk_analysis(const int N, const int M);
+
+/// Execute FFTW synthesis on the rectangularized disk.
+void ft_execute_rectdisk_synthesis(const ft_rectdisk_fftw_plan * P, double * X, const int N, const int M);
+/// Execute FFTW analysis on the rectangularized disk.
+void ft_execute_rectdisk_analysis(const ft_rectdisk_fftw_plan * P, double * X, const int N, const int M);
 
 typedef struct {
     fftw_plan plantheta1;

@@ -15,7 +15,7 @@ double f(double x, double y) {return (x*x-y*y+1.0)/((x*x-y*y+1.0)*(x*x-y*y+1.0)+
   \f[
   \int_0^{2\pi}\int_0^1 f(r\cos\theta, r\sin\theta) r^{2\alpha+1}(1-r^2)^\beta{\rm\,d}r{\rm\,d}\theta = \frac{\pi}{2}{\rm B}(\alpha+1,\beta+1),
   \f]
-  where ${\rm B}(x,y)$ is the beta function.
+  where \f${\rm B}(x,y)\f$ is the beta function.
 
   We also know that the (weighted) square integral over the disk is related to the sum of the squares of the (generalized) Zernike coefficients. By:
   \f[
@@ -29,6 +29,8 @@ double f(double x, double y) {return (x*x-y*y+1.0)/((x*x-y*y+1.0)*(x*x-y*y+1.0)+
   \f[
   \int_0^{2\pi}\int_0^1 [f(r\cos\theta, r\sin\theta)]^2r{\rm\,d}r{\rm\,d}\theta = \frac{\pi}{2\sqrt{2}}\log(1+\sqrt{2}).
   \f]
+
+  Provided we take \f$\alpha=0\f$ above, we may repeat the experiment with the Dunkl-Xu polynomials that rectangularize the disk.
 */
 int main(void) {
     printf("In this example, we explore integration of a harmonic function over \n");
@@ -61,7 +63,7 @@ int main(void) {
 
     printf("\n\n"MAGENTA("N = %i")", and "MAGENTA("M = %i")"\n\n", N, M);
 
-    double r[N], theta[M], F[N*M];
+    double r[N], theta[M], F[4*N*N];
 
     for (int n = 0; n < N; n++)
         r[n] = sin((N-n-0.5)*M_PI/(2*N));
@@ -99,8 +101,64 @@ int main(void) {
     printf("The coefficient of "MAGENTA("Z_0^0")" multiplied by "MAGENTA("√π")" is: ");
     printf(FMT, F[0]*sqrt(M_PI));
     printf(".\n\n");
-    printf("Using an orthonormal basis, the integral of "MAGENTA("[f(x,y)]^2")" over the\n");
-    printf("disk is approximately the square of the 2-norm of the coefficients, ");
+    printf("Using an orthonormal basis, the integral of "MAGENTA("[f(x,y)]^2")" over the disk is\n");
+    printf("approximately the square of the 2-norm of the coefficients, ");
+    printf(FMT, pow(ft_norm_1arg(F, N*M), 2));
+    printf(".\n");
+    printf("This compares favourably to the exact result, ");
+    printf(FMT, M_PI/(2*sqrt(2))*log1p(sqrt(2)));
+    printf(".\n\n");
+
+    ft_destroy_harmonic_plan(P);
+    ft_destroy_disk_fftw_plan(PA);
+
+    printf("But there's more! Next, we repeat the experiment using the Dunkl-Xu\n");
+    printf("orthonormal polynomials supported on the rectangularized disk.\n");
+
+    N = 2*N;
+    M = N;
+
+    double w[N], x[N], z[M];
+
+    for (int n = 0; n < N; n++) {
+        w[n] = sin((n+0.5)*M_PI/N);
+        x[n] = sin((N-2*n-1.0)*M_PI/(2*N));
+    }
+    for (int m = 0; m < M; m++)
+        z[m] = sin((M-2*m-1.0)*M_PI/(2*M));
+
+    printmat(MAGENTA("x")" grid", FMT, x, N, 1);
+    printf("\n");
+    printmat(MAGENTA("z")" grid", FMT, z, 1, M);
+    printf("\n");
+
+    for (int m = 0; m < M; m++)
+        for (int n = 0; n < N; n++)
+            F[n+N*m] = f(x[n], w[n]*z[m]);
+
+    printf("On the mapped tensor product grid, our function samples are:\n\n");
+
+    printmat("F", FMT, F, N, M);
+    printf("\n");
+
+    P = ft_plan_rectdisk2cheb(N, beta);
+    ft_rectdisk_fftw_plan * QA = ft_plan_rectdisk_analysis(N, M);
+
+    ft_execute_rectdisk_analysis(QA, F, N, M);
+    ft_execute_cheb2rectdisk(P, F, N, M);
+
+    printf("Its Dunkl-Xu coefficients are:\n\n");
+
+    printmat("U", FMT, F, N, M);
+    printf("\n");
+
+    printf("The Dunkl-Xu coefficients are useful for integration. The integral\n");
+    printf("of "MAGENTA("f(x,y)")" over the disk should be "MAGENTA("π/2")" by harmonicity.\n");
+    printf("The coefficient of "MAGENTA("P_{0,0}")" multiplied by "MAGENTA("√π")" is: ");
+    printf(FMT, F[0]*sqrt(M_PI));
+    printf(".\n\n");
+    printf("Using an orthonormal basis, the integral of "MAGENTA("[f(x,y)]^2")" over the disk is\n");
+    printf("approximately the square of the 2-norm of the coefficients, ");
     printf(FMT, pow(ft_norm_1arg(F, N*M), 2));
     printf(".\n");
     printf("This compares favourably to the exact result, ");
@@ -108,7 +166,7 @@ int main(void) {
     printf(".\n");
 
     ft_destroy_harmonic_plan(P);
-    ft_destroy_disk_fftw_plan(PA);
+    ft_destroy_rectdisk_fftw_plan(QA);
 
     return 0;
 }

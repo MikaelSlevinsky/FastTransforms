@@ -562,6 +562,33 @@ int main(void) {
         ft_destroy_rotation_plan(RP);
     }
 
+    printf("\nTesting the computation of the rectangularized disk harmonic Givens rotations.\n\n");
+    printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int n = 64; n < N; n *= 2) {
+        RP = ft_plan_rotrectdisk(n, beta);
+
+        err = 0;
+        A = calloc(n, sizeof(double));
+        B = calloc(n, sizeof(double));
+        for (int m = 2; m < n; m++) {
+            for (int i = 0; i < n-m; i++)
+                A[i] = B[i] = 1.0;
+            for (int i = n-m; i < n; i++)
+                A[i] = B[i] = 0.0;
+            ft_kernel_rectdisk_hi2lo(RP, m%2, m, A, 1);
+            ft_kernel_rectdisk_lo2hi(RP, m%2, m, A, 1);
+            err += pow(ft_norm_2arg(A, B, n)/ft_norm_1arg(B, n), 2);
+        }
+        err = sqrt(err);
+        printf("Applying the rotations with one   column  at n = %3i: \t |%20.2e ", n, err);
+        ft_checktest(err, 2*n, &checksum);
+        free(A);
+        free(B);
+
+        ft_destroy_rotation_plan(RP);
+    }
+
     printf("\nTesting the computation of the spin-weighted spherical harmonic Givens rotations.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
