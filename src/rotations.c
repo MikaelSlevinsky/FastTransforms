@@ -197,6 +197,32 @@ void ft_kernel_disk_lo2hi(const ft_rotation_plan * RP, const int m1, const int m
     kernel_disk_lo2hi_default(RP, m1, m2, A, S);
 }
 
+ft_rotation_plan * ft_plan_rotrectdisk(const int n, const double beta) {
+    double * s = malloc(n*(n+1)/2 * sizeof(double));
+    double * c = malloc(n*(n+1)/2 * sizeof(double));
+    double nums, numc, den;
+    for (int m = 0; m < n; m++)
+        for (int l = 0; l < n-m; l++) {
+            nums = (l+1)*(l+2);
+            numc = (2*m+2*beta+3)*(2*l+2*m+2*beta+6);
+            den = (l+2*m+2*beta+4)*(l+2*m+2*beta+5);
+            s(l, m) = sqrt(nums/den);
+            c(l, m) = sqrt(numc/den);
+        }
+    ft_rotation_plan * RP = malloc(sizeof(ft_rotation_plan));
+    RP->s = s;
+    RP->c = c;
+    RP->n = n;
+    return RP;
+}
+
+void ft_kernel_rectdisk_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
+    kernel_rectdisk_hi2lo_default(RP, m1, m2, A, S);
+}
+
+void ft_kernel_rectdisk_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S) {
+    kernel_rectdisk_lo2hi_default(RP, m1, m2, A, S);
+}
 
 void ft_kernel_tet_hi2lo(const ft_rotation_plan * RP, const int L, const int m, double * A) {
     int n = RP->n;

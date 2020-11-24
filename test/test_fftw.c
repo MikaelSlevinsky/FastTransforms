@@ -14,8 +14,9 @@ int main(int argc, const char * argv[]) {
     ft_sphere_fftw_plan * PS, * PA;
     ft_triangle_fftw_plan * QS, * QA;
     ft_disk_fftw_plan * RS, * RA;
-    ft_tetrahedron_fftw_plan * SS, * SA;
-    ft_spinsphere_fftw_plan * TS, * TA;
+    ft_rectdisk_fftw_plan * SS, * SA;
+    ft_tetrahedron_fftw_plan * TS, * TA;
+    ft_spinsphere_fftw_plan * US, * UA;
     //double alpha = -0.5, beta = -0.5, gamma = -0.5, delta = -0.5; // best case scenario
     double alpha = 0.0, beta = 0.0, gamma = 0.0, delta = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 
@@ -264,6 +265,63 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
+    printf("\nTesting the accuracy of Dunkl-Xu transforms + FFTW synthesis and analysis.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 64*pow(2, i)+J;
+        M = N;
+
+        A = rectdiskrand(N, M);
+        B = copymat(A, N, M);
+        P = ft_plan_rectdisk2cheb(N, beta);
+        SS = ft_plan_rectdisk_synthesis(N, M);
+        SA = ft_plan_rectdisk_analysis(N, M);
+
+        ft_execute_rectdisk2cheb(P, A, N, M);
+        ft_execute_rectdisk_synthesis(SS, A, N, M);
+        ft_execute_rectdisk_analysis(SA, A, N, M);
+        ft_execute_cheb2rectdisk(P, A, N, M);
+
+        err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+        printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 8*sqrt(N), &checksum);
+        err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+        printf("ϵ_∞ \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 4*N, &checksum);
+
+        free(A);
+        free(B);
+        ft_destroy_harmonic_plan(P);
+        ft_destroy_rectdisk_fftw_plan(SS);
+        ft_destroy_rectdisk_fftw_plan(SA);
+    }
+
+    printf("\nTiming Dunkl-Xu transforms + FFTW synthesis and analysis.\n\n");
+    printf("t5 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 64*pow(2, i)+J;
+        M = N;
+        NTIMES = 1 + pow(2048/N, 2);
+
+        A = rectdiskrand(N, M);
+        P = ft_plan_rectdisk2cheb(N, beta);
+        SS = ft_plan_rectdisk_synthesis(N, M);
+        SA = ft_plan_rectdisk_analysis(N, M);
+
+        FT_TIME({ft_execute_rectdisk2cheb(P, A, N, M); ft_execute_rectdisk_synthesis(SS, A, N, M);}, start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
+
+        FT_TIME({ft_execute_rectdisk_analysis(SA, A, N, M); ft_execute_cheb2rectdisk(P, A, N, M);}, start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
+
+        free(A);
+        ft_destroy_harmonic_plan(P);
+        ft_destroy_rectdisk_fftw_plan(SS);
+        ft_destroy_rectdisk_fftw_plan(SA);
+    }
+    printf("];\n");
+
     printf("\nTesting the accuracy of Proriol³ transforms + FFTW synthesis and analysis.\n\n");
     printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
@@ -274,12 +332,12 @@ int main(int argc, const char * argv[]) {
         A = tetrand(N, L, M);
         B = copymat(A, N, L*M);
         TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
-        SS = ft_plan_tet_synthesis(N, L, M);
-        SA = ft_plan_tet_analysis(N, L, M);
+        TS = ft_plan_tet_synthesis(N, L, M);
+        TA = ft_plan_tet_analysis(N, L, M);
 
         ft_execute_tet2cheb(TP, A, N, L, M);
-        ft_execute_tet_synthesis(SS, A, N, L, M);
-        ft_execute_tet_analysis(SA, A, N, L, M);
+        ft_execute_tet_synthesis(TS, A, N, L, M);
+        ft_execute_tet_analysis(TA, A, N, L, M);
         ft_execute_cheb2tet(TP, A, N, L, M);
 
         err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
@@ -292,12 +350,12 @@ int main(int argc, const char * argv[]) {
         free(A);
         free(B);
         ft_destroy_tetrahedral_harmonic_plan(TP);
-        ft_destroy_tetrahedron_fftw_plan(SS);
-        ft_destroy_tetrahedron_fftw_plan(SA);
+        ft_destroy_tetrahedron_fftw_plan(TS);
+        ft_destroy_tetrahedron_fftw_plan(TA);
     }
 
     printf("\nTiming Proriol³ transforms + FFTW synthesis and analysis.\n\n");
-    printf("t5 = [\n");
+    printf("t6 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 16*pow(2, i)+J;
         L = M = N;
@@ -305,19 +363,19 @@ int main(int argc, const char * argv[]) {
 
         A = tetrand(N, L, M);
         TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
-        SS = ft_plan_tet_synthesis(N, L, M);
-        SA = ft_plan_tet_analysis(N, L, M);
+        TS = ft_plan_tet_synthesis(N, L, M);
+        TA = ft_plan_tet_analysis(N, L, M);
 
-        FT_TIME({ft_execute_tet2cheb(TP, A, N, L, M); ft_execute_tet_synthesis(SS, A, N, L, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_tet2cheb(TP, A, N, L, M); ft_execute_tet_synthesis(TS, A, N, L, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME({ft_execute_tet_analysis(SA, A, N, L, M); ft_execute_cheb2tet(TP, A, N, L, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_tet_analysis(TA, A, N, L, M); ft_execute_cheb2tet(TP, A, N, L, M);}, start, end, NTIMES)
         printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
         ft_destroy_tetrahedral_harmonic_plan(TP);
-        ft_destroy_tetrahedron_fftw_plan(SS);
-        ft_destroy_tetrahedron_fftw_plan(SA);
+        ft_destroy_tetrahedron_fftw_plan(TS);
+        ft_destroy_tetrahedron_fftw_plan(TA);
     }
     printf("];\n");
 
@@ -335,12 +393,12 @@ int main(int argc, const char * argv[]) {
             B = (double *) BC;
 
             SP = ft_plan_spinsph2fourier(N, S);
-            TS = ft_plan_spinsph_synthesis(N, M, S);
-            TA = ft_plan_spinsph_analysis(N, M, S);
+            US = ft_plan_spinsph_synthesis(N, M, S);
+            UA = ft_plan_spinsph_analysis(N, M, S);
 
             ft_execute_spinsph2fourier(SP, AC, N, M);
-            ft_execute_spinsph_synthesis(TS, AC, N, M);
-            ft_execute_spinsph_analysis(TA, AC, N, M);
+            ft_execute_spinsph_synthesis(US, AC, N, M);
+            ft_execute_spinsph_analysis(UA, AC, N, M);
             ft_execute_fourier2spinsph(SP, AC, N, M);
 
             err = ft_norm_2arg(A, B, 2*N*M)/ft_norm_1arg(B, 2*N*M);
@@ -353,13 +411,13 @@ int main(int argc, const char * argv[]) {
             free(AC);
             free(BC);
             ft_destroy_spin_harmonic_plan(SP);
-            ft_destroy_spinsphere_fftw_plan(TS);
-            ft_destroy_spinsphere_fftw_plan(TA);
+            ft_destroy_spinsphere_fftw_plan(US);
+            ft_destroy_spinsphere_fftw_plan(UA);
         }
     }
 
     printf("\nTiming spin-weighted SHTs + FFTW synthesis and analysis.\n\n");
-    printf("t6 = [\n");
+    printf("t7 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
@@ -368,19 +426,19 @@ int main(int argc, const char * argv[]) {
         for (int S = -2; S <= 2; S++) {
             ft_complex * AC = spinsphrand(N, M, S);
             SP = ft_plan_spinsph2fourier(N, S);
-            TS = ft_plan_spinsph_synthesis(N, M, S);
-            TA = ft_plan_spinsph_analysis(N, M, S);
+            US = ft_plan_spinsph_synthesis(N, M, S);
+            UA = ft_plan_spinsph_analysis(N, M, S);
 
-            FT_TIME({ft_execute_spinsph2fourier(SP, AC, N, M); ft_execute_spinsph_synthesis(TS, AC, N, M);}, start, end, NTIMES)
+            FT_TIME({ft_execute_spinsph2fourier(SP, AC, N, M); ft_execute_spinsph_synthesis(US, AC, N, M);}, start, end, NTIMES)
             printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-            FT_TIME({ft_execute_spinsph_analysis(TA, AC, N, M); ft_execute_fourier2spinsph(SP, AC, N, M);}, start, end, NTIMES)
+            FT_TIME({ft_execute_spinsph_analysis(UA, AC, N, M); ft_execute_fourier2spinsph(SP, AC, N, M);}, start, end, NTIMES)
             printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
             free(AC);
             ft_destroy_spin_harmonic_plan(SP);
-            ft_destroy_spinsphere_fftw_plan(TS);
-            ft_destroy_spinsphere_fftw_plan(TA);
+            ft_destroy_spinsphere_fftw_plan(US);
+            ft_destroy_spinsphere_fftw_plan(UA);
         }
     }
     printf("];\n");
