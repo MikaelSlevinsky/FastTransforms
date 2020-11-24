@@ -488,13 +488,10 @@ void X(triangular_banded_eigenvectors)(X(triangular_banded) * A, X(triangular_ba
             }
             d = lam*X(get_triangular_banded_index)(B, i, i) - X(get_triangular_banded_index)(A, i, i);
             kd = Y(fabs)(lam*X(get_triangular_banded_index)(B, i, i)) + Y(fabs)(X(get_triangular_banded_index)(A, i, i));
-            V[i+j*n] = t/d;
-            /*
             if (Y(fabs)(d) < 4*kd*Y(eps)() && Y(fabs)(t) < 4*kt*Y(eps)())
                 V[i+j*n] = 0;
             else
                 V[i+j*n] = t/d;
-            */
         }
     }
 }
@@ -528,13 +525,10 @@ void X(triangular_banded_quadratic_eigenvectors)(X(triangular_banded) * A, X(tri
             }
             d = lam*(lam*X(get_triangular_banded_index)(C, i, i) - X(get_triangular_banded_index)(B, i, i)) - X(get_triangular_banded_index)(A, i, i);
             kd = Y(fabs)(lam*(Y(fabs)(lam*X(get_triangular_banded_index)(C, i, i)) + Y(fabs)(X(get_triangular_banded_index)(B, i, i)))) + Y(fabs)(X(get_triangular_banded_index)(A, i, i));
-            V[i+j*n] = t/d;
-            /*
             if (Y(fabs)(d) < 4*kd*Y(eps)() && Y(fabs)(t) < 4*kt*Y(eps)())
                 V[i+j*n] = 0;
             else
                 V[i+j*n] = t/d;
-            */
         }
     }
 }
@@ -595,9 +589,13 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
             else
                 X(bfmv)('T', F->F2, Y2+(j-b1)*(n-s));
 
+       for (int j = 0; j < b2; j++)
+             for (int i = 0; i < n-s; i++)
+                 Y2[i+j*(n-s)] *= lambda[i+s];
+
         for (int j = 0; j < b2; j++)
             for (int i = 0; i < n-s; i++)
-                Y[i+(j+b-b2)*(n-s)] = Y[i+(j+b-b2)*(n-s)]-lambda[i+s]*Y2[i+j*(n-s)];
+                Y[i+(j+b-b2)*(n-s)] = Y[i+(j+b-b2)*(n-s)]-Y2[i+j*(n-s)];
 
         int * p1 = malloc(s*sizeof(int));
         for (int i = 0; i < s; i++)
