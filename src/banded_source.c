@@ -566,7 +566,7 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
             lambda[i+s] = F->F2->lambda[i];
 
         FLT * X = calloc(s*b, sizeof(FLT));
-        #pragma omp parallel for num_threads(MIN(b, FT_GET_MAX_THREADS()))
+        //#pragma omp parallel for num_threads(MIN(b, FT_GET_MAX_THREADS()))
         for (int j = 0; j < b; j++) {
             X[s-b+j+j*s] = 1;
             X(tbsv)('N', B1, X+j*s);
@@ -582,20 +582,16 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
             for (int k = j; k < b2; k++)
                 Y2[j+k*(n-s)] = X(get_triangular_banded_index)(B, k+s-b2, j+s);
 
-        #pragma omp parallel for num_threads(MIN(b1+b2, FT_GET_MAX_THREADS()))
+        //#pragma omp parallel for num_threads(MIN(b1+b2, FT_GET_MAX_THREADS()))
         for (int j = 0; j < b1+b2; j++)
             if (j < b1)
                 X(bfmv)('T', F->F2, Y+j*(n-s));
             else
                 X(bfmv)('T', F->F2, Y2+(j-b1)*(n-s));
 
-       for (int j = 0; j < b2; j++)
-             for (int i = 0; i < n-s; i++)
-                 Y2[i+j*(n-s)] *= lambda[i+s];
-
         for (int j = 0; j < b2; j++)
             for (int i = 0; i < n-s; i++)
-                Y[i+(j+b-b2)*(n-s)] = Y[i+(j+b-b2)*(n-s)]-Y2[i+j*(n-s)];
+                Y[i+(j+b-b2)*(n-s)] = Y[i+(j+b-b2)*(n-s)]-lambda[i+s]*Y2[i+j*(n-s)];
 
         int * p1 = malloc(s*sizeof(int));
         for (int i = 0; i < s; i++)
