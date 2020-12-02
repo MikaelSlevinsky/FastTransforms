@@ -1,3 +1,10 @@
+void X(destroy_sparse)(X(sparse) * A) {
+    free(A->p);
+    free(A->q);
+    free(A->v);
+    free(A);
+}
+
 void X(destroy_banded)(X(banded) * A) {
     free(A->data);
     free(A);
@@ -23,6 +30,7 @@ void X(destroy_tb_eigen_FMM)(X(tb_eigen_FMM) * F) {
         X(destroy_hierarchicalmatrix)(F->F0);
         X(destroy_tb_eigen_FMM)(F->F1);
         X(destroy_tb_eigen_FMM)(F->F2);
+        X(destroy_sparse)(F->S);
         free(F->X);
         free(F->Y);
         free(F->t1);
@@ -73,6 +81,28 @@ size_t X(summary_size_tb_eigen_ADI)(X(tb_eigen_ADI) * F) {
         S += sizeof(FLT)*F->n;
     }
     return S;
+}
+
+X(sparse) * X(malloc_sparse)(const int m, const int n, const int nnz) {
+    X(sparse) * A = malloc(sizeof(X(sparse)));
+    A->p = malloc(nnz*sizeof(int));
+    A->q = malloc(nnz*sizeof(int));
+    A->v = malloc(nnz*sizeof(FLT));
+    A->m = m;
+    A->n = n;
+    A->nnz = nnz;
+    return A;
+}
+
+X(sparse) * X(calloc_sparse)(const int m, const int n, const int nnz) {
+    X(sparse) * A = malloc(sizeof(X(sparse)));
+    A->p = calloc(nnz, sizeof(int));
+    A->q = calloc(nnz, sizeof(int));
+    A->v = calloc(nnz, sizeof(FLT));
+    A->m = m;
+    A->n = n;
+    A->nnz = nnz;
+    return A;
 }
 
 X(banded) * X(malloc_banded)(const int m, const int n, const int l, const int u) {
@@ -488,7 +518,7 @@ void X(triangular_banded_eigenvectors)(X(triangular_banded) * A, X(triangular_ba
             }
             d = lam*X(get_triangular_banded_index)(B, i, i) - X(get_triangular_banded_index)(A, i, i);
             kd = Y(fabs)(lam*X(get_triangular_banded_index)(B, i, i)) + Y(fabs)(X(get_triangular_banded_index)(A, i, i));
-            if (Y(fabs)(d) < 4*kd*Y(eps)() && Y(fabs)(t) < 4*kt*Y(eps)())
+            if (Y(fabs)(d) < 4*kd*Y(eps)() || Y(fabs)(t) < 4*kt*Y(eps)())
                 V[i+j*n] = 0;
             else
                 V[i+j*n] = t/d;
@@ -531,6 +561,83 @@ void X(triangular_banded_quadratic_eigenvectors)(X(triangular_banded) * A, X(tri
                 V[i+j*n] = t/d;
         }
     }
+}
+
+// Assumptions: x, y are non-decreasing.
+static inline int X(count_intersections)(const int m, const FLT * x, const int n, const FLT * y, const FLT epsilon) {
+    int istart = 0, idx = 0;
+    for (int j = 0; j < n; j++) {
+        int i = istart;
+        int thefirst = 1;
+        while (i < m) {
+            if (Y(fabs)(x[i] - y[j]) < epsilon*MAX(Y(fabs)(x[i]), Y(fabs)(y[j]))) {
+                idx++;
+                if (thefirst) {
+                    istart = i;
+                    thefirst--;
+                }
+            }
+            else if (x[i] > y[j])
+                break;
+            i++;
+        }
+    }
+    return idx;
+}
+
+// Assumptions: p and q have been malloc'ed with `idx` integers.
+static inline void X(produce_intersection_indices)(const int m, const FLT * x, const int n, const FLT * y, const FLT epsilon, int * p, int * q) {
+    int istart = 0, idx = 0;
+    for (int j = 0; j < n; j++) {
+        int i = istart;
+        int thefirst = 1;
+        while (i < m) {
+            if (Y(fabs)(x[i] - y[j]) < epsilon*MAX(Y(fabs)(x[i]), Y(fabs)(y[j]))) {
+                p[idx] = i;
+                q[idx] = j;
+                idx++;
+                if (thefirst) {
+                    istart = i;
+                    thefirst--;
+                }
+            }
+            else if (x[i] > y[j])
+                break;
+            i++;
+        }
+    }
+}
+
+static inline X(sparse) * X(get_sparse_from_eigenvectors)(X(tb_eigen_FMM) * F1, X(triangular_banded) * A, X(triangular_banded) * B, FLT * D, int * p1, int * p2, int * p3, int * p4, int n, int s, int b, int idx) {
+    X(sparse) * S = X(malloc_sparse)(s, n-s, idx);
+    FLT * V = calloc(n, sizeof(FLT));
+    for (int l = 0; l < idx; l++) {
+        int j = p2[p4[l]]+s;
+        for (int i = 0; i < n; i++)
+            V[i] = 0;
+        V[j] = D[j];
+        FLT t, kt, d, kd, lam;
+        lam = X(get_triangular_banded_index)(A, j, j)/X(get_triangular_banded_index)(B, j, j);
+        for (int i = j-1; i >= 0; i--) {
+            t = kt = 0;
+            for (int k = i+1; k < MIN(i+b+1, n); k++) {
+                t += (X(get_triangular_banded_index)(A, i, k) - lam*X(get_triangular_banded_index)(B, i, k))*V[k];
+                kt += (Y(fabs)(X(get_triangular_banded_index)(A, i, k)) + Y(fabs)(lam*X(get_triangular_banded_index)(B, i, k)))*Y(fabs)(V[k]);
+            }
+            d = lam*X(get_triangular_banded_index)(B, i, i) - X(get_triangular_banded_index)(A, i, i);
+            kd = Y(fabs)(lam*X(get_triangular_banded_index)(B, i, i)) + Y(fabs)(X(get_triangular_banded_index)(A, i, i));
+            if (Y(fabs)(d) < 4*kd*Y(eps)() || Y(fabs)(t) < 4*kt*Y(eps)())
+                V[i] = 0;
+            else
+                V[i] = t/d;
+        }
+        X(bfsv)('N', F1, V);
+        S->p[l] = p1[p3[l]];
+        S->q[l] = p2[p4[l]];
+        S->v[l] = V[p1[p3[l]]];
+    }
+    free(V);
+    return S;
 }
 
 X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * D) {
@@ -599,9 +706,18 @@ X(tb_eigen_FMM) * X(tb_eig_FMM)(X(triangular_banded) * A, X(triangular_banded) *
             p2[i] = i;
         X(quicksort_1arg)(lambda+s, p2, 0, n-s-1, X(lt));
 
-        F->F0 = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda, lambda, i, j, 'G');
+        int idx = X(count_intersections)(s, lambda, n-s, lambda+s, 16*Y(sqrt)(Y(eps)()));
+        int * p3 = malloc(idx*sizeof(int));
+        int * p4 = malloc(idx*sizeof(int));
+        X(produce_intersection_indices)(s, lambda, n-s, lambda+s, 16*Y(sqrt)(Y(eps)()), p3, p4);
+        X(sparse) * S = X(get_sparse_from_eigenvectors)(F->F1, A, B, D, p1, p2, p3, p4, n, s, b, idx);
+        free(p3);
+        free(p4);
+
+        F->F0 = X(sample_hierarchicalmatrix)(X(thresholded_cauchykernel), lambda, lambda, i, j, 'G');
         F->X = X;
         F->Y = Y;
+        F->S = S;
         F->t1 = calloc(s*FT_GET_MAX_THREADS(), sizeof(FLT));
         F->t2 = calloc((n-s)*FT_GET_MAX_THREADS(), sizeof(FLT));
         X(perm)('T', lambda, p1, s);
@@ -860,6 +976,7 @@ void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
         int s = n>>1, b = F->b;
         FLT * t1 = F->t1+s*FT_GET_THREAD_NUM(), * t2 = F->t2+(n-s)*FT_GET_THREAD_NUM();
         int * p1 = F->p1, * p2 = F->p2;
+        X(sparse) * S = F->S;
         if (TRANS == 'N') {
             // C(Λ₁, Λ₂) ∘ (-XYᵀ)
             for (int k = 0; k < b; k++) {
@@ -869,6 +986,8 @@ void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
                 for (int i = 0; i < s; i++)
                     x[p1[i]] += t1[i]*F->X[p1[i]+k*s];
             }
+            for (int l = 0; l < S->nnz; l++)
+                x[S->p[l]] += S->v[l]*x[S->q[l]+s];
             X(bfmv)(TRANS, F->F1, x);
             X(bfmv)(TRANS, F->F2, x+s);
         }
@@ -883,6 +1002,8 @@ void X(bfmv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
                 for (int i = 0; i < n-s; i++)
                     x[p2[i]+s] += t2[i]*F->Y[p2[i]+k*(n-s)];
             }
+            for (int l = 0; l < S->nnz; l++)
+                x[S->q[l]+s] += S->v[l]*x[S->p[l]];
         }
     }
 }
@@ -916,6 +1037,7 @@ void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
         int s = n>>1, b = F->b;
         FLT * t1 = F->t1+s*FT_GET_THREAD_NUM(), * t2 = F->t2+(n-s)*FT_GET_THREAD_NUM();
         int * p1 = F->p1, * p2 = F->p2;
+        X(sparse) * S = F->S;
         if (TRANS == 'N') {
             X(bfsv)(TRANS, F->F1, x);
             X(bfsv)(TRANS, F->F2, x+s);
@@ -927,6 +1049,8 @@ void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
                 for (int i = 0; i < s; i++)
                     x[p1[i]] += t1[i]*F->X[p1[i]+k*s];
             }
+            for (int l = 0; l < S->nnz; l++)
+                x[S->p[l]] -= S->v[l]*x[S->q[l]+s];
         }
         else if (TRANS == 'T') {
             // C(Λ₁, Λ₂) ∘ (-XYᵀ)
@@ -937,6 +1061,8 @@ void X(bfsv)(char TRANS, X(tb_eigen_FMM) * F, FLT * x) {
                 for (int i = 0; i < n-s; i++)
                     x[p2[i]+s] += t2[i]*F->Y[p2[i]+k*(n-s)];
             }
+            for (int l = 0; l < S->nnz; l++)
+                x[S->q[l]+s] -= S->v[l]*x[S->p[l]];
             X(bfsv)(TRANS, F->F1, x);
             X(bfsv)(TRANS, F->F2, x+s);
         }

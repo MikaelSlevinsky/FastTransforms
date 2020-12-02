@@ -1,7 +1,9 @@
 void Y(test_transforms)(int * checksum, int N) {
     FLT err;
-    FLT * Id, * B;
+    FLT * Id, * B, * x;
     X(tb_eigen_FMM) * A;
+    X(btb_eigen_FMM) * C;
+    X(banded) * M;
 
     printf("\nTesting the accuracy of Chebyshev--Legendre transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
@@ -262,35 +264,84 @@ void Y(test_transforms)(int * checksum, int N) {
         free(B);
     }
 
-    printf("\nTesting methods for associated classical orthogonal polynomial transforms.\n\n");
+    printf("\nTesting methods for associated Jacobi--Jacobi transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
-    for (int n = 64; n < N; n *= 2) {
+    for (int n = 64; n < N>>1; n *= 2) {
+        B = malloc(n*n*sizeof(FLT));
+        x = malloc(n*sizeof(FLT));
         for (int c = 1; c < 5; c++) {
-            alpha = 0.25, beta = 0.25, gamma = -0.25, delta = -0.25, err = 0;
-            for (int norm1 = 0; norm1 <= 1; norm1++) {
-                for (int norm2 = 0; norm2 <= 1; norm2++) {
-                    X(btb_eigen_FMM) * F = X(plan_associated_jacobi_to_jacobi)(norm1, norm2, n, c, alpha, beta, gamma, delta);
-                    X(banded) * M = X(create_jacobi_multiplication)(norm2, n, n, gamma, delta);
-                    FLT * V = calloc(n*n, sizeof(FLT));
-                    for (int j = 0; j < n; j++)
-                        V[j+j*n] = 1;
-                    X(bbbfmm)('N', '2', '1', F, V, n, n);
-                    FLT * x = malloc(n*sizeof(FLT));
-                    for (int nu = 1; nu < n-1; nu++) {
-                        for (int i = 0; i < n; i++)
-                            x[i] = X(rec_B_jacobi)(norm1, nu+c, alpha, beta)*V[i+nu*n] - X(rec_C_jacobi)(norm1, nu+c, alpha, beta)*V[i+(nu-1)*n];
-                        X(gbmv)(X(rec_A_jacobi)(norm1, nu+c, alpha, beta), M, V+nu*n, 1, x);
-                        err += X(norm_2arg)(V+(nu+1)*n, x, n)/X(norm_1arg)(x, n);
-                    }
-                    X(destroy_btb_eigen_FMM)(F);
-                    X(destroy_banded)(M);
-                    free(x);
-                    free(V);
+            for (int cases = 0; cases < 7; cases++) {
+                err = 0;
+                switch (cases) {
+                    case 0:
+                        alpha = 0.0;
+                        beta = -0.25;
+                        gamma = -0.25;
+                        delta = -0.5;
+                        break;
+                    case 1:
+                        alpha = 0.1;
+                        beta = 0.2;
+                        gamma = 0.3;
+                        delta = 0.4;
+                        break;
+                    case 2:
+                        alpha = 1.0;
+                        beta = 0.5;
+                        gamma = 0.5;
+                        delta = 0.25;
+                        break;
+                    case 3:
+                        alpha = -0.25;
+                        beta = 0.25;
+                        gamma = 0.25;
+                        delta = 0.75;
+                        break;
+                    case 4:
+                        alpha = 0.0;
+                        beta = 0.625;
+                        gamma = -0.25;
+                        delta = 0.5;
+                        break;
+                    case 5:
+                        alpha = 0.5;
+                        beta = -0.25;
+                        gamma = 0.0;
+                        delta = 0.0;
+                        break;
+                    case 6:
+                        alpha = 0.0;
+                        beta = 1.1920929e-7;
+                        gamma = 0.0;
+                        delta = 0.0;
+                        break;
                 }
+                for (int norm1 = 0; norm1 <= 1; norm1++) {
+                    for (int norm2 = 0; norm2 <= 1; norm2++) {
+                        C = X(plan_associated_jacobi_to_jacobi)(norm1, norm2, n, c, alpha, beta, gamma, delta);
+                        M = X(create_jacobi_multiplication)(norm2, n, n, gamma, delta);
+                        for (int j = 0; j < n; j++) {
+                            for (int i = 0; i < n; i++)
+                                B[i+j*n] = 0;
+                            B[j+j*n] = 1;
+                        }
+                        X(bbbfmm)('N', '2', '1', C, B, n, n);
+                        for (int nu = 1; nu < n-1; nu++) {
+                            for (int i = 0; i < n; i++)
+                                x[i] = X(rec_B_jacobi)(norm1, nu+c, alpha, beta)*B[i+nu*n] - X(rec_C_jacobi)(norm1, nu+c, alpha, beta)*B[i+(nu-1)*n];
+                            X(gbmv)(X(rec_A_jacobi)(norm1, nu+c, alpha, beta), M, B+nu*n, 1, x);
+                            err += X(norm_2arg)(B+(nu+1)*n, x, n)/X(norm_1arg)(x, n);
+                        }
+                        X(destroy_btb_eigen_FMM)(C);
+                        X(destroy_banded)(M);
+                    }
+                }
+                printf("(n, c) = (%4i, %i), (%+1.2f, %+1.2f) → (%+1.2f, %+1.2f): \t |%20.2e ", n, c, (double) alpha, (double) beta, (double) gamma, (double) delta, (double) err);
+                X(checktest)(err, ((FLT) n)*n*n, checksum);
             }
-            printf("Associated Jacobi recurrence \t (n, c) = (%4i, %i) \t |%20.2e ", n, c, (double) err);
-            X(checktest)(err, ((FLT) n)*n*n, checksum);
         }
+        free(B);
+        free(x);
     }
 }

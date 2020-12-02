@@ -114,3 +114,5 @@ FLT X(cauchykernel2)(FLT x, FLT ylo, FLT yhi);
 FLT X(coulombkernel2)(FLT x, FLT ylo, FLT yhi);
 FLT X(coulombprimekernel2)(FLT x, FLT ylo, FLT yhi);
 FLT X(logkernel2)(FLT x, FLT ylo, FLT yhi);
+
+FLT X(thresholded_cauchykernel)(FLT x, FLT y);

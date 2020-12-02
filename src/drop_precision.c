@@ -129,6 +129,18 @@ X(symmetric_dpr1_eigen_FMM) * X(drop_precision_symmetric_dpr1_eigen_FMM)(X2(symm
     return F;
 }
 
+X(sparse) * X(drop_precision_sparse)(X2(sparse) * S2) {
+    X(sparse) * S = X(malloc_sparse)(S2->m, S2->n, S2->nnz);
+    for (int l = 0; l < S->nnz; l++) {
+        S->p[l] = S2->p[l];
+        S->q[l] = S2->q[l];
+        S->v[l] = S2->v[l];
+    }
+    return S;
+}
+
+static inline FLT X(thresholded_cauchykernel2)(FLT x, FLT y) {return X2(thresholded_cauchykernel)(x, y);}
+
 X(tb_eigen_FMM) * X(drop_precision_tb_eigen_FMM)(X2(tb_eigen_FMM) * F2) {
     int n = F2->n;
     X(tb_eigen_FMM) * F = malloc(sizeof(X(tb_eigen_FMM)));
@@ -155,11 +167,12 @@ X(tb_eigen_FMM) * X(drop_precision_tb_eigen_FMM)(X2(tb_eigen_FMM) * F2) {
             lambda[i] = F2->lambda[i];
         X(perm)('N', lambda, p1, s);
         X(perm)('N', lambda+s, p2, n-s);
-        F->F0 = X(sample_hierarchicalmatrix)(X(cauchykernel), lambda, lambda, (unitrange) {0, s}, (unitrange) {s, n}, 'G');
+        F->F0 = X(sample_hierarchicalmatrix)(X(thresholded_cauchykernel2), lambda, lambda, (unitrange) {0, s}, (unitrange) {s, n}, 'G');
         X(perm)('T', lambda, p1, s);
         X(perm)('T', lambda+s, p2, n-s);
         F->F1 = X(drop_precision_tb_eigen_FMM)(F2->F1);
         F->F2 = X(drop_precision_tb_eigen_FMM)(F2->F2);
+        F->S = X(drop_precision_sparse)(F2->S);
         F->X = malloc(s*b*sizeof(FLT));
         for (int i = 0; i < s*b; i++)
             F->X[i] = F2->X[i];

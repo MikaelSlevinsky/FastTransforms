@@ -1,4 +1,13 @@
 typedef struct {
+    int * p;
+    int * q;
+    FLT * v;
+    int m;
+    int n;
+    int nnz;
+} X(sparse);
+
+typedef struct {
     FLT * data;
     int m;
     int n;
@@ -23,6 +32,7 @@ struct X(tbstruct_FMM) {
     X(hierarchicalmatrix) * F0;
     X(tb_eigen_FMM) * F1;
     X(tb_eigen_FMM) * F2;
+    X(sparse) * S;
     FLT * V;
     FLT * X;
     FLT * Y;
@@ -47,6 +57,7 @@ struct X(tbstruct_ADI) {
     int b;
 };
 
+void X(destroy_sparse)(X(sparse) * A);
 void X(destroy_banded)(X(banded) * A);
 void X(destroy_triangular_banded)(X(triangular_banded) * A);
 void X(destroy_banded_qr)(X(banded_qr) * F);
@@ -55,6 +66,9 @@ void X(destroy_tb_eigen_ADI)(X(tb_eigen_ADI) * F);
 
 size_t X(summary_size_tb_eigen_FMM)(X(tb_eigen_FMM) * F);
 size_t X(summary_size_tb_eigen_ADI)(X(tb_eigen_ADI) * F);
+
+X(sparse) * X(malloc_sparse)(const int m, const int n, const int nnz);
+X(sparse) * X(calloc_sparse)(const int m, const int n, const int nnz);
 
 X(banded) * X(malloc_banded)(const int m, const int n, const int l, const int u);
 X(banded) * X(calloc_banded)(const int m, const int n, const int l, const int u);

@@ -937,3 +937,10 @@ FLT X(cauchykernel2)(FLT x, FLT ylo, FLT yhi) {return 1/(X(diff)(x, yhi) - ylo);
 FLT X(coulombkernel2)(FLT x, FLT ylo, FLT yhi) {return 1/((X(diff)(x, yhi) - ylo)*(X(diff)(x, yhi) - ylo));}
 FLT X(coulombprimekernel2)(FLT x, FLT ylo, FLT yhi) {return 1/(((X(diff)(x, yhi) - ylo)*(X(diff)(x, yhi) - ylo))*(X(diff)(x, yhi) - ylo));}
 FLT X(logkernel2)(FLT x, FLT ylo, FLT yhi) {return Y(log)(Y(fabs)(X(diff)(x, yhi) - ylo));}
+
+FLT X(thresholded_cauchykernel)(FLT x, FLT y) {
+    if (Y(fabs)(x - y) < 16*Y(sqrt)(Y(eps)())*MAX(Y(fabs)(x), Y(fabs)(y)))
+        return 0;
+    else
+        return 1/(x-y);
+}

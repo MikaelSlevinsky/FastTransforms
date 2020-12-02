@@ -98,7 +98,7 @@ int main(void) {
 
     printf("The Zernike coefficients are useful for integration. The integral\n");
     printf("of "MAGENTA("f(x,y)")" over the disk should be "MAGENTA("π/2")" by harmonicity.\n");
-    printf("The coefficient of "MAGENTA("Z_0^0")" multiplied by "MAGENTA("√π")" is: ");
+    printf("The coefficient of "MAGENTA("Z_{0,0}")" multiplied by "MAGENTA("√π")" is: ");
     printf(FMT, F[0]*sqrt(M_PI));
     printf(".\n\n");
     printf("Using an orthonormal basis, the integral of "MAGENTA("[f(x,y)]^2")" over the disk is\n");
