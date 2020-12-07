@@ -53,6 +53,7 @@ examples:
 	$(CC) src/ftutilities.c examples/holomorphic.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o holomorphic
 	$(CC) src/ftutilities.c examples/nonlocaldiffusion.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o nonlocaldiffusion
 	$(CC) src/ftutilities.c examples/spinweighted.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o spinweighted
+	$(CC) src/ftutilities.c examples/subspaceangles.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o subspaceangles
 
 runtests:
 	./test_recurrence
@@ -75,6 +76,7 @@ runexamples:
 	./holomorphic
 	./nonlocaldiffusion
 	./spinweighted
+	./subspaceangles
 
 coverage:
 	$(COV) $(SRC) -o $(LIBDIR)
@@ -86,6 +88,7 @@ clean:
 	rm -f holomorphic
 	rm -f nonlocaldiffusion
 	rm -f spinweighted
+	rm -f subspaceangles
 	rm -f test_*
 	find . -type f -name '*.s' -delete
 	find . -type f -name '*.gcda' -delete
