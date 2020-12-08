@@ -17,7 +17,6 @@ int main(int argc, const char * argv[]) {
     ft_spin_rotation_plan * SRP;
     ft_harmonic_plan * P;
     ft_spin_harmonic_plan * SP;
-    ft_tetrahedral_harmonic_plan * TP;
     //double alpha = -0.5, beta = -0.5, gamma = -0.5, delta = -0.5; // best case scenario
     double alpha = 0.0, beta = 0.0, gamma = 0.0, delta = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
 
@@ -1216,10 +1215,10 @@ int main(int argc, const char * argv[]) {
 
         A = tetrand(N, L, M);
         B = copymat(A, N, L*M);
-        TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
+        P = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
 
-        ft_execute_tet2cheb(TP, A, N, L, M);
-        ft_execute_cheb2tet(TP, A, N, L, M);
+        ft_execute_tet2cheb(P, A, N, L, M);
+        ft_execute_cheb2tet(P, A, N, L, M);
 
         err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
         printf("ϵ_2 \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
@@ -1230,7 +1229,7 @@ int main(int argc, const char * argv[]) {
 
         free(A);
         free(B);
-        ft_destroy_tetrahedral_harmonic_plan(TP);
+        ft_destroy_harmonic_plan(P);
     }
 
     printf("\nTiming Proriol³ transforms.\n\n");
@@ -1241,17 +1240,17 @@ int main(int argc, const char * argv[]) {
         NTIMES = 1 + pow(256/N, 2);
 
         A = tetrand(N, L, M);
-        TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
+        P = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
 
-        FT_TIME(ft_execute_tet2cheb(TP, A, N, L, M), start, end, NTIMES)
+        FT_TIME(ft_execute_tet2cheb(P, A, N, L, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_cheb2tet(TP, A, N, L, M), start, end, NTIMES)
+        FT_TIME(ft_execute_cheb2tet(P, A, N, L, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
         printf("\n");
         free(A);
-        ft_destroy_tetrahedral_harmonic_plan(TP);
+        ft_destroy_harmonic_plan(P);
     }
     printf("];\n");
 

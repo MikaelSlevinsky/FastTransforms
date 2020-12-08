@@ -325,15 +325,17 @@ void ft_execute_tet_lo2hi(const ft_rotation_plan * RP1, const ft_rotation_plan *
 void ft_execute_spinsph_hi2lo(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
 void ft_execute_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, ft_complex * A, ft_complex * B, const int M);
 
-/// Data structure to store a \ref ft_rotation_plan, and various arrays to represent 1D orthogonal polynomial transforms.
+/// Data structure to store \ref ft_rotation_plan "ft_rotation_plan"s, arrays to represent 1D orthogonal polynomial transforms and their inverses, and Greek parameters.
 typedef struct {
-    ft_rotation_plan * RP;
+    ft_rotation_plan ** RP;
     double * B;
     double ** P;
     double ** Pinv;
     double alpha;
     double beta;
     double gamma;
+    double delta;
+    int NRP;
     int NP;
 } ft_harmonic_plan;
 
@@ -375,31 +377,13 @@ void ft_execute_rectdisk2cheb(const ft_harmonic_plan * P, double * A, const int 
 /// Transform a Chebyshev series to a rectangularized disk harmonic expansion.
 void ft_execute_cheb2rectdisk(const ft_harmonic_plan * P, double * A, const int N, const int M);
 
-typedef struct {
-    ft_rotation_plan * RP1;
-    ft_rotation_plan * RP2;
-    double * B;
-    double * P1;
-    double * P2;
-    double * P3;
-    double * P1inv;
-    double * P2inv;
-    double * P3inv;
-    double alpha;
-    double beta;
-    double gamma;
-    double delta;
-} ft_tetrahedral_harmonic_plan;
-
-void ft_destroy_tetrahedral_harmonic_plan(ft_tetrahedral_harmonic_plan * P);
-
 /// Plan a tetrahedral harmonic transform.
-ft_tetrahedral_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha, const double beta, const double gamma, const double delta);
+ft_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha, const double beta, const double gamma, const double delta);
 
 /// Transform a tetrahedral harmonic expansion to a trivariate Chebyshev series.
-void ft_execute_tet2cheb(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M);
+void ft_execute_tet2cheb(const ft_harmonic_plan * P, double * A, const int N, const int L, const int M);
 /// Transform a trivariate Chebyshev series to a tetrahedral harmonic expansion.
-void ft_execute_cheb2tet(const ft_tetrahedral_harmonic_plan * P, double * A, const int N, const int L, const int M);
+void ft_execute_cheb2tet(const ft_harmonic_plan * P, double * A, const int N, const int L, const int M);
 
 /// Data structure to store a \ref ft_spin_rotation_plan, and various arrays to represent 1D orthogonal polynomial transforms.
 typedef struct {

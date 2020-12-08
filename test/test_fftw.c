@@ -10,7 +10,6 @@ int main(int argc, const char * argv[]) {
     static double * B;
     ft_harmonic_plan * P;
     ft_spin_harmonic_plan * SP;
-    ft_tetrahedral_harmonic_plan * TP;
     ft_sphere_fftw_plan * PS, * PA;
     ft_triangle_fftw_plan * QS, * QA;
     ft_disk_fftw_plan * RS, * RA;
@@ -331,14 +330,14 @@ int main(int argc, const char * argv[]) {
 
         A = tetrand(N, L, M);
         B = copymat(A, N, L*M);
-        TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
+        P = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
         TS = ft_plan_tet_synthesis(N, L, M);
         TA = ft_plan_tet_analysis(N, L, M);
 
-        ft_execute_tet2cheb(TP, A, N, L, M);
+        ft_execute_tet2cheb(P, A, N, L, M);
         ft_execute_tet_synthesis(TS, A, N, L, M);
         ft_execute_tet_analysis(TA, A, N, L, M);
-        ft_execute_cheb2tet(TP, A, N, L, M);
+        ft_execute_cheb2tet(P, A, N, L, M);
 
         err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
         printf("ϵ_2 \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
@@ -349,7 +348,7 @@ int main(int argc, const char * argv[]) {
 
         free(A);
         free(B);
-        ft_destroy_tetrahedral_harmonic_plan(TP);
+        ft_destroy_harmonic_plan(P);
         ft_destroy_tetrahedron_fftw_plan(TS);
         ft_destroy_tetrahedron_fftw_plan(TA);
     }
@@ -362,18 +361,18 @@ int main(int argc, const char * argv[]) {
         NTIMES = 1 + pow(256/N, 2);
 
         A = tetrand(N, L, M);
-        TP = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
+        P = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
         TS = ft_plan_tet_synthesis(N, L, M);
         TA = ft_plan_tet_analysis(N, L, M);
 
-        FT_TIME({ft_execute_tet2cheb(TP, A, N, L, M); ft_execute_tet_synthesis(TS, A, N, L, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_tet2cheb(P, A, N, L, M); ft_execute_tet_synthesis(TS, A, N, L, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME({ft_execute_tet_analysis(TA, A, N, L, M); ft_execute_cheb2tet(TP, A, N, L, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_tet_analysis(TA, A, N, L, M); ft_execute_cheb2tet(P, A, N, L, M);}, start, end, NTIMES)
         printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
-        ft_destroy_tetrahedral_harmonic_plan(TP);
+        ft_destroy_harmonic_plan(P);
         ft_destroy_tetrahedron_fftw_plan(TS);
         ft_destroy_tetrahedron_fftw_plan(TA);
     }
