@@ -42,160 +42,77 @@
 #undef Y2
 
 double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n) {
-    ft_triangular_bandedl * A = ft_create_A_legendre_to_chebyshevl(n);
-    ft_triangular_bandedl * B = ft_create_B_legendre_to_chebyshevl(n);
+    ft_triangular_bandedl * A = ft_create_A_legendre_to_chebyshevl(normcheb, n);
+    ft_triangular_bandedl * B = ft_create_B_legendre_to_chebyshevl(normcheb, n);
     long double * Vl = calloc(n*n, sizeof(long double));
-    if (n > 0)
-        Vl[0] = 1;
-    if (n > 1)
-        Vl[1+n] = 1;
-    for (int i = 2; i < n; i++)
-        Vl[i+i*n] = (2*i-1)*Vl[i-1+(i-1)*n]/(2*i);
+    ft_create_legendre_to_chebyshev_diagonal_connection_coefficientl(normleg, normcheb, n, Vl, n+1);
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
-    double * V = calloc(n*n, sizeof(double));
-    long double * sclrow = malloc(n*sizeof(long double));
-    long double * sclcol = malloc(n*sizeof(long double));
-    for (int i = 0; i < n; i++) {
-        sclrow[i] = normcheb ? i ? sqrtl(M_PI_2l) : sqrtl(M_PIl) : 1.0L;
-        sclcol[i] = normleg ? sqrtl(i+0.5L) : 1.0L;
-    }
-    for (int j = 0; j < n; j++)
-        for (int i = j; i >= 0; i -= 2)
-            V[i+j*n] = sclrow[i]*Vl[i+j*n]*sclcol[j];
+    double * V = malloc(n*n*sizeof(double));
+    for (int i = 0; i < n*n; i++)
+        V[i] = Vl[i];
     ft_destroy_triangular_bandedl(A);
     ft_destroy_triangular_bandedl(B);
     free(Vl);
-    free(sclrow);
-    free(sclcol);
     return V;
 }
 
 double * plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n) {
-    ft_triangular_bandedl * A = ft_create_A_chebyshev_to_legendrel(n);
-    ft_triangular_bandedl * B = ft_create_B_chebyshev_to_legendrel(n);
+    ft_triangular_bandedl * A = ft_create_A_chebyshev_to_legendrel(normleg, n);
+    ft_triangular_bandedl * B = ft_create_B_chebyshev_to_legendrel(normleg, n);
     long double * Vl = calloc(n*n, sizeof(long double));
-    if (n > 0)
-        Vl[0] = 1;
-    if (n > 1)
-        Vl[1+n] = 1;
-    for (int i = 2; i < n; i++)
-        Vl[i+i*n] = (2*i)*Vl[i-1+(i-1)*n]/(2*i-1);
+    ft_create_chebyshev_to_legendre_diagonal_connection_coefficientl(normcheb, normleg, n, Vl, n+1);
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
-    double * V = calloc(n*n, sizeof(double));
-    long double * sclrow = malloc(n*sizeof(long double));
-    long double * sclcol = malloc(n*sizeof(long double));
-    for (int i = 0; i < n; i++) {
-        sclrow[i] = normleg ? 1.0L/sqrtl(i+0.5L) : 1.0L;
-        sclcol[i] = normcheb ? i ? sqrtl(M_2_PIl) : sqrtl(M_1_PIl) : 1.0L;
-    }
-    for (int j = 0; j < n; j++)
-        for (int i = j; i >= 0; i -= 2)
-            V[i+j*n] = sclrow[i]*Vl[i+j*n]*sclcol[j];
+    double * V = malloc(n*n*sizeof(double));
+    for (int i = 0; i < n*n; i++)
+        V[i] = Vl[i];
     ft_destroy_triangular_bandedl(A);
     ft_destroy_triangular_bandedl(B);
     free(Vl);
-    free(sclrow);
-    free(sclcol);
     return V;
 }
 
 double * plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, const double lambda, const double mu) {
-    ft_triangular_bandedl * A = ft_create_A_ultraspherical_to_ultrasphericall(n, lambda, mu);
-    ft_triangular_bandedl * B = ft_create_B_ultraspherical_to_ultrasphericall(n, mu);
+    ft_triangular_bandedl * A = ft_create_A_ultraspherical_to_ultrasphericall(norm2, n, lambda, mu);
+    ft_triangular_bandedl * B = ft_create_B_ultraspherical_to_ultrasphericall(norm2, n, mu);
     long double * Vl = calloc(n*n, sizeof(long double));
-    long double lambdal = lambda, mul = mu;
-    if (n > 0)
-        Vl[0] = 1;
-    for (int i = 1; i < n; i++)
-        Vl[i+i*n] = (i-1+lambdal)*Vl[i-1+(i-1)*n]/(i-1+mul);
+    ft_create_ultraspherical_to_ultraspherical_diagonal_connection_coefficientl(norm1, norm2, n, lambda, mu, Vl, n+1);
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
-    double * V = calloc(n*n, sizeof(double));
-    long double * sclrow = calloc(n, sizeof(long double));
-    long double * sclcol = calloc(n, sizeof(long double));
-    if (n > 0) {
-        sclrow[0] = norm2 ? sqrtl(sqrtl(M_PIl)*tgammal(mul+0.5L)/tgammal(mul+1)) : 1.0L;
-        sclcol[0] = norm1 ? sqrtl(tgammal(lambdal+1)/(sqrtl(M_PIl)*tgammal(lambdal+0.5L))) : 1.0L;
-    }
-    for (int i = 1; i < n; i++) {
-        sclrow[i] = norm2 ? sqrtl((i-1+mul)/i*(i-1+2*mul)/(i+mul))*sclrow[i-1] : 1.0L;
-        sclcol[i] = norm1 ? sqrtl(i/(i-1+lambdal)*(i+lambdal)/(i-1+2*lambdal))*sclcol[i-1] : 1.0L;
-    }
-    for (int j = 0; j < n; j++)
-        for (int i = j; i >= 0; i -= 2)
-            V[i+j*n] = sclrow[i]*Vl[i+j*n]*sclcol[j];
+    double * V = malloc(n*n*sizeof(double));
+    for (int i = 0; i < n*n; i++)
+        V[i] = Vl[i];
     ft_destroy_triangular_bandedl(A);
     ft_destroy_triangular_bandedl(B);
     free(Vl);
-    free(sclrow);
-    free(sclcol);
     return V;
 }
 
 double * plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const double alpha, const double beta, const double gamma, const double delta) {
-    ft_triangular_bandedl * A = ft_create_A_jacobi_to_jacobil(n, alpha, beta, gamma, delta);
-    ft_triangular_bandedl * B = ft_create_B_jacobi_to_jacobil(n, gamma, delta);
-    long double alphal = alpha, betal = beta, gammal = gamma, deltal = delta;
+    ft_triangular_bandedl * A = ft_create_A_jacobi_to_jacobil(norm2, n, alpha, beta, gamma, delta);
+    ft_triangular_bandedl * B = ft_create_B_jacobi_to_jacobil(norm2, n, gamma, delta);
     long double * Vl = calloc(n*n, sizeof(long double));
-    if (n > 0)
-        Vl[0] = 1;
-    if (n > 1)
-        Vl[1+n] = (alphal+betal+2)/(gammal+deltal+2);
-    for (int i = 2; i < n; i++)
-        Vl[i+i*n] = (2*i+alphal+betal-1)/(i+alphal+betal)*(2*i+alphal+betal)/(2*i+gammal+deltal-1)*(i+gammal+deltal)/(2*i+gammal+deltal)*Vl[i-1+(i-1)*n];
+    ft_create_jacobi_to_jacobi_diagonal_connection_coefficientl(norm1, norm2, n, alpha, beta, gamma, delta, Vl, n+1);
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
-    double * V = calloc(n*n, sizeof(double));
-    long double * sclrow = calloc(n, sizeof(long double));
-    long double * sclcol = calloc(n, sizeof(long double));
-    if (n > 0) {
-        sclrow[0] = norm2 ? sqrtl(powl(2.0L, gammal+deltal+1)*tgammal(gammal+1)*tgammal(deltal+1)/tgammal(gammal+deltal+2)) : 1.0L;
-        sclcol[0] = norm1 ? sqrtl(tgammal(alphal+betal+2)/(powl(2.0L, alphal+betal+1)*tgammal(alphal+1)*tgammal(betal+1))) : 1.0L;
-    }
-    if (n > 1) {
-        sclrow[1] = norm2 ? sqrtl((gammal+1)*(deltal+1)/(gammal+deltal+3))*sclrow[0] : 1.0L;
-        sclcol[1] = norm1 ? sqrtl((alphal+betal+3)/(alphal+1)/(betal+1))*sclcol[0] : 1.0L;
-    }
-    for (int i = 2; i < n; i++) {
-        sclrow[i] = norm2 ? sqrtl((i+gammal)/i*(i+deltal)/(i+gammal+deltal)*(2*i+gammal+deltal-1)/(2*i+gammal+deltal+1))*sclrow[i-1] : 1.0L;
-        sclcol[i] = norm1 ? sqrtl(i/(i+alphal)*(i+alphal+betal)/(i+betal)*(2*i+alphal+betal+1)/(2*i+alphal+betal-1))*sclcol[i-1] : 1.0L;
-    }
-    for (int j = 0; j < n; j++)
-        for (int i = 0; i <= j; i++)
-            V[i+j*n] = sclrow[i]*Vl[i+j*n]*sclcol[j];
+    double * V = malloc(n*n*sizeof(double));
+    for (int i = 0; i < n*n; i++)
+        V[i] = Vl[i];
     ft_destroy_triangular_bandedl(A);
     ft_destroy_triangular_bandedl(B);
     free(Vl);
-    free(sclrow);
-    free(sclcol);
     return V;
 }
 
 double * plan_laguerre_to_laguerre(const int norm1, const int norm2, const int n, const double alpha, const double beta) {
-    ft_triangular_bandedl * A = ft_create_A_laguerre_to_laguerrel(n, alpha, beta);
-    ft_triangular_bandedl * B = ft_create_B_laguerre_to_laguerrel(n);
+    ft_triangular_bandedl * A = ft_create_A_laguerre_to_laguerrel(norm2, n, alpha, beta);
+    ft_triangular_bandedl * B = ft_create_B_laguerre_to_laguerrel(norm2, n, beta);
     long double * Vl = calloc(n*n, sizeof(long double));
-    long double alphal = alpha, betal = beta;
-    for (int i = 0; i < n; i++)
-        Vl[i+i*n] = 1;
+    ft_create_laguerre_to_laguerre_diagonal_connection_coefficientl(norm1, norm2, n, alpha, beta, Vl, n+1);
     ft_triangular_banded_eigenvectorsl(A, B, Vl);
-    double * V = calloc(n*n, sizeof(double));
-    long double * sclrow = calloc(n, sizeof(long double));
-    long double * sclcol = calloc(n, sizeof(long double));
-    if (n > 0) {
-        sclrow[0] = norm2 ? sqrtl(tgammal(betal+1)) : 1.0L;
-        sclcol[0] = norm1 ? 1.0L/sqrtl(tgammal(alphal+1)) : 1.0L;
-    }
-    for (int i = 1; i < n; i++) {
-        sclrow[i] = norm2 ? sqrtl((i+betal)/i)*sclrow[i-1] : 1.0L;
-        sclcol[i] = norm1 ? sqrtl(i/(i+alphal))*sclcol[i-1] : 1.0L;
-    }
-    for (int j = 0; j < n; j++)
-        for (int i = 0; i <= j; i++)
-            V[i+j*n] = sclrow[i]*Vl[i+j*n]*sclcol[j];
+    double * V = malloc(n*n*sizeof(double));
+    for (int i = 0; i < n*n; i++)
+        V[i] = Vl[i];
     ft_destroy_triangular_bandedl(A);
     ft_destroy_triangular_bandedl(B);
     free(Vl);
-    free(sclrow);
-    free(sclcol);
     return V;
 }
 

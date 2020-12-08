@@ -7,7 +7,7 @@
   \example subspaceangles.c
   This example considers the angles between neighbouring Laguerre polynomials with a perturbed measure:
   \f[
-  \cos\theta_n = \frac{\langle L_n, L_{n+k}\rangle}{\|L_n|_2 \|L_{n+k}\|_2},\quad{\rm for}\quad 0\le n < N-k,
+  \cos\theta_n = \frac{\langle L_n, L_{n+k}\rangle}{\|L_n\|_2 \|L_{n+k}\|_2},\quad{\rm for}\quad 0\le n < N-k,
   \f]
   where the inner product is defined by \f$\langle f, g\rangle = \int_0^\infty f(x) g(x) x^\beta e^{-x}{\rm\,d}x\f$.
   We do so by connecting Laguerre polynomials to the normalized generalized Laguerre polynomials associated with the perturbed measure. It follows by the inner product of the connection coefficients that:

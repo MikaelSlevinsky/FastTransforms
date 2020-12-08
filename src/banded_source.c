@@ -1425,6 +1425,183 @@ X(banded) * X(create_hermite_multiplication)(const int norm, const int m, const 
     return A;
 }
 
+void X(create_legendre_to_chebyshev_diagonal_connection_coefficient)(const int normleg, const int normcheb, const int n, FLT * D, const int INCD) {
+    if (normleg) {
+        if (normcheb) {
+            if (n > 0)
+                D[0] = Y(sqrt)(0.5)*Y(tgamma)(0.5);
+            if (n > 1)
+                D[INCD] = Y(sqrt)(1.5)*D[0];
+            for (int i = 2; i < n; i++)
+                D[i*INCD] = Y(sqrt)((2*i+1)*(2*i-ONE(FLT)))*D[(i-1)*INCD]/(2*i);
+        }
+        else {
+            if (n > 0)
+                D[0] = Y(sqrt)(0.5);
+            if (n > 1)
+                D[INCD] = Y(sqrt)(1.5);
+            for (int i = 2; i < n; i++)
+                D[i*INCD] = Y(sqrt)((2*i+1)*(2*i-ONE(FLT)))*D[(i-1)*INCD]/(2*i);
+        }
+    }
+    else {
+        if (normcheb) {
+            if (n > 0)
+                D[0] = Y(tgamma)(0.5);
+            if (n > 1)
+                D[INCD] = D[0]/Y(sqrt)(2);
+            for (int i = 2; i < n; i++)
+                D[i*INCD] = (2*i-1)*D[(i-1)*INCD]/(2*i);
+        }
+        else {
+            if (n > 0)
+                D[0] = 1;
+            if (n > 1)
+                D[INCD] = 1;
+            for (int i = 2; i < n; i++)
+                D[i*INCD] = (2*i-1)*D[(i-1)*INCD]/(2*i);
+        }
+    }
+}
+
+void X(create_chebyshev_to_legendre_diagonal_connection_coefficient)(const int normcheb, const int normleg, const int n, FLT * D, const int INCD) {
+    if (normcheb) {
+        if (normleg) {
+            if (n > 0)
+                D[0] = Y(sqrt)(2)/Y(tgamma)(0.5);
+            if (n > 1)
+                D[INCD] = D[0]/Y(sqrt)(1.5);
+            for (int i = 2; i < n; i++)
+                D[i*INCD] = (2*i)/Y(sqrt)((2*i+1)*(2*i-ONE(FLT)))*D[(i-1)*INCD];
+        }
+        else {
+            if (n > 0)
+                D[0] = 1/Y(tgamma)(0.5);
+            if (n > 1)
+                D[INCD] = Y(sqrt)(2)*D[0];
+            for (int i = 2; i < n; i++)
+                D[i*INCD] = (2*i)*D[(i-1)*INCD]/(2*i-1);
+        }
+    }
+    else {
+        if (normleg) {
+            if (n > 0)
+                D[0] = Y(sqrt)(2);
+            if (n > 1)
+                D[INCD] = 1/Y(sqrt)(1.5);
+            for (int i = 2; i < n; i++)
+                D[i*INCD] = (2*i)/Y(sqrt)((2*i+1)*(2*i-ONE(FLT)))*D[(i-1)*INCD];
+        }
+        else {
+            if (n > 0)
+                D[0] = 1;
+            if (n > 1)
+                D[INCD] = 1;
+            for (int i = 2; i < n; i++)
+                D[i*INCD] = (2*i)*D[(i-1)*INCD]/(2*i-1);
+        }
+    }
+}
+
+void X(create_ultraspherical_to_ultraspherical_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT lambda, const FLT mu, FLT * D, const int INCD) {
+    if (norm1) {
+        if (norm2) {
+            if (n > 0)
+                D[0] = Y(sqrt)(Y(tgamma)(lambda+1)/(Y(tgamma)(0.5)*Y(tgamma)(lambda+0.5))) * Y(sqrt)(Y(tgamma)(0.5)*Y(tgamma)(mu+0.5)/Y(tgamma)(mu+1));
+            for (int i = 1; i < n; i++)
+                D[i*INCD] = Y(sqrt)((i-1+mu)/i*(i-1+2*mu)/(i+mu)) * Y(sqrt)(i/(i-1+lambda)*(i+lambda)/(i-1+2*lambda)) * (i-1+lambda)/(i-1+mu)*D[(i-1)*INCD];
+        }
+        else {
+            if (n > 0)
+                D[0] = Y(sqrt)(Y(tgamma)(lambda+1)/(Y(tgamma)(0.5)*Y(tgamma)(lambda+0.5)));
+            for (int i = 1; i < n; i++)
+                D[i*INCD] = Y(sqrt)(i/(i-1+lambda)*(i+lambda)/(i-1+2*lambda)) * (i-1+lambda)/(i-1+mu)*D[(i-1)*INCD];
+        }
+    }
+    else {
+        if (norm2) {
+            if (n > 0)
+                D[0] = Y(sqrt)(Y(tgamma)(0.5)*Y(tgamma)(mu+0.5)/Y(tgamma)(mu+1));
+            for (int i = 1; i < n; i++)
+                D[i*INCD] = Y(sqrt)((i-1+mu)/i*(i-1+2*mu)/(i+mu)) * (i-1+lambda)/(i-1+mu)*D[(i-1)*INCD];
+        }
+        else {
+            if (n > 0)
+                D[0] = 1;
+            for (int i = 1; i < n; i++)
+                D[i*INCD] = (i-1+lambda)/(i-1+mu)*D[(i-1)*INCD];
+        }
+    }
+}
+
+void X(create_jacobi_to_jacobi_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta, FLT * D, const int INCD) {
+    if (norm1) {
+        if (norm2) {
+            if (n > 0)
+                D[0] = Y(sqrt)(Y(tgamma)(alpha+beta+2)/(Y(pow)(2, alpha+beta+1)*Y(tgamma)(alpha+1)*Y(tgamma)(beta+1))*(Y(pow)(2, gamma+delta+1)*Y(tgamma)(gamma+1)*Y(tgamma)(delta+1))/Y(tgamma)(gamma+delta+2));
+            if (n > 1)
+                D[INCD] = (alpha+beta+2)/(gamma+delta+2)*Y(sqrt)((alpha+beta+3)/((alpha+1)*(beta+1))*((gamma+1)*(delta+1))/(gamma+delta+3))*D[0];
+            for (int i = 2; i < n; i++)
+                D[i*INCD] = (2*i+alpha+beta)/(2*i+gamma+delta)*Y(sqrt)(((2*i+alpha+beta-1)*(2*i+alpha+beta+1))/((i+alpha)*(i+beta)*(i+alpha+beta))*((i+gamma)*(i+delta)*(i+gamma+delta))/((2*i+gamma+delta-1)*(2*i+gamma+delta+1)))*D[(i-1)*INCD];
+        }
+        else {
+            if (n > 0)
+                D[0] = Y(sqrt)(Y(tgamma)(alpha+beta+2)/(Y(pow)(2, alpha+beta+1)*Y(tgamma)(alpha+1)*Y(tgamma)(beta+1)));
+            if (n > 1)
+                D[INCD] = (alpha+beta+2)/(gamma+delta+2)*Y(sqrt)((alpha+beta+3)/((alpha+1)*(beta+1)))*D[0];
+            for (int i = 2; i < n; i++)
+                D[i*INCD] = Y(sqrt)(((2*i+alpha+beta-1)*(2*i+alpha+beta)*(2*i+alpha+beta)*(2*i+alpha+beta+1))/(i*(i+alpha)*(i+beta)*(i+alpha+beta)))*(i*(i+gamma+delta))/((2*i+gamma+delta-1)*(2*i+gamma+delta))*D[(i-1)*INCD];
+        }
+    }
+    else {
+        if (norm2) {
+            if (n > 0)
+                D[0] = Y(sqrt)((Y(pow)(2, gamma+delta+1)*Y(tgamma)(gamma+1)*Y(tgamma)(delta+1))/Y(tgamma)(gamma+delta+2));
+            if (n > 1)
+                D[INCD] = (alpha+beta+2)/(gamma+delta+2)*Y(sqrt)(((gamma+1)*(delta+1))/(gamma+delta+3))*D[0];
+            for (int i = 2; i < n; i++)
+                D[i*INCD] = ((2*i+alpha+beta-1)*(2*i+alpha+beta))/(i*(i+alpha+beta))*Y(sqrt)((i*(i+gamma)*(i+delta)*(i+gamma+delta))/((2*i+gamma+delta-1)*(2*i+gamma+delta)*(2*i+gamma+delta)*(2*i+gamma+delta+1)))*D[(i-1)*INCD];
+        }
+        else {
+            if (n > 0)
+                D[0] = 1;
+            if (n > 1)
+                D[INCD] = (alpha+beta+2)/(gamma+delta+2);
+            for (int i = 2; i < n; i++)
+                D[i*INCD] = ((2*i+alpha+beta-1)*(2*i+alpha+beta)*(i+gamma+delta))/((i+alpha+beta)*(2*i+gamma+delta-1)*(2*i+gamma+delta))*D[(i-1)*INCD];
+        }
+    }
+}
+
+void X(create_laguerre_to_laguerre_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT alpha, const FLT beta, FLT * D, const int INCD) {
+    if (norm1) {
+        if (norm2) {
+            if (n > 0)
+                D[0] = Y(sqrt)(Y(tgamma)(beta+1)/Y(tgamma)(alpha+1));
+            for (int i = 1; i < n; i++)
+                D[i*INCD] = Y(sqrt)((i+beta)/(i+alpha))*D[(i-1)*INCD];
+        }
+        else {
+            if (n > 0)
+                D[0] = 1/Y(sqrt)(Y(tgamma)(alpha+1));
+            for (int i = 1; i < n; i++)
+                D[i*INCD] = Y(sqrt)(i/(i+alpha))*D[(i-1)*INCD];
+        }
+    }
+    else {
+        if (norm2) {
+            if (n > 0)
+                D[0] = Y(sqrt)(Y(tgamma)(beta+1));
+            for (int i = 1; i < n; i++)
+                D[i*INCD] = Y(sqrt)((i+beta)/i)*D[(i-1)*INCD];
+        }
+        else {
+            for (int i = 0; i < n; i++)
+                D[i*INCD] = 1;
+        }
+    }
+}
+
 void X(create_associated_jacobi_to_jacobi_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT c, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta, FLT * D, const int INCD) {
     if (norm1) {
         if (norm2) {
@@ -1524,6 +1701,170 @@ void X(create_associated_hermite_to_hermite_diagonal_connection_coefficient)(con
     }
 }
 
+
+X(triangular_banded) * X(create_A_legendre_to_chebyshev)(const int norm, const int n) {
+    X(triangular_banded) * A = X(calloc_triangular_banded)(n, 2);
+    if (n > 1)
+        X(set_triangular_banded_index)(A, 2, 1, 1);
+    for (int i = 2; i < n; i++) {
+        X(set_triangular_banded_index)(A, -i*(i-ONE(FLT)), i-2, i);
+        X(set_triangular_banded_index)(A, i*(i+ONE(FLT)), i, i);
+    }
+    return A;
+}
+
+X(triangular_banded) * X(create_B_legendre_to_chebyshev)(const int norm, const int n) {
+    X(triangular_banded) * B = X(calloc_triangular_banded)(n, 2);
+    if (n > 0)
+        X(set_triangular_banded_index)(B, norm ? Y(sqrt)(2) : 2, 0, 0);
+    if (n > 1)
+        X(set_triangular_banded_index)(B, 1, 1, 1);
+    for (int i = 2; i < n; i++) {
+        X(set_triangular_banded_index)(B, -1, i-2, i);
+        X(set_triangular_banded_index)(B, 1, i, i);
+    }
+    return B;
+}
+
+X(triangular_banded) * X(create_A_chebyshev_to_legendre)(const int norm, const int n) {
+    X(triangular_banded) * A = X(calloc_triangular_banded)(n, 2);
+    if (norm) {
+        if (n > 1)
+            X(set_triangular_banded_index)(A, Y(sqrt)(TWO(FLT)/5), 1, 1);
+        for (int i = 2; i < n; i++) {
+            X(set_triangular_banded_index)(A, -(i+1)*Y(sqrt)(((i-ONE(FLT))*i)/((2*i-ONE(FLT))*(2*i+1)))*(i+1), i-2, i);
+            X(set_triangular_banded_index)(A, i*Y(sqrt)(((i+ONE(FLT))*(i+2))/((2*i+ONE(FLT))*(2*i+3)))*i, i, i);
+        }
+    }
+    else {
+        if (n > 1)
+            X(set_triangular_banded_index)(A, ONE(FLT)/3, 1, 1);
+        for (int i = 2; i < n; i++) {
+            X(set_triangular_banded_index)(A, -(i+1)/(2*i+ONE(FLT))*(i+1), i-2, i);
+            X(set_triangular_banded_index)(A, i/(2*i+ONE(FLT))*i, i, i);
+        }
+    }
+    return A;
+}
+
+X(triangular_banded) * X(create_B_chebyshev_to_legendre)(const int norm, const int n) {
+    X(triangular_banded) * B = X(calloc_triangular_banded)(n, 2);
+    if (norm) {
+        if (n > 0)
+            X(set_triangular_banded_index)(B, Y(sqrt)(TWO(FLT)/3), 0, 0);
+        if (n > 1)
+            X(set_triangular_banded_index)(B, Y(sqrt)(TWO(FLT)/5), 1, 1);
+        for (int i = 2; i < n; i++) {
+            X(set_triangular_banded_index)(B, -Y(sqrt)(((i-ONE(FLT))*i)/((2*i-ONE(FLT))*(2*i+1))), i-2, i);
+            X(set_triangular_banded_index)(B, Y(sqrt)(((i+ONE(FLT))*(i+2))/((2*i+ONE(FLT))*(2*i+3))), i, i);
+        }
+    }
+    else {
+        if (n > 0)
+            X(set_triangular_banded_index)(B, 1, 0, 0);
+        if (n > 1)
+            X(set_triangular_banded_index)(B, ONE(FLT)/3, 1, 1);
+        for (int i = 2; i < n; i++) {
+            X(set_triangular_banded_index)(B, -1/(2*i+ONE(FLT)), i-2, i);
+            X(set_triangular_banded_index)(B, 1/(2*i+ONE(FLT)), i, i);
+        }
+    }
+    return B;
+}
+
+X(triangular_banded) * X(create_A_ultraspherical_to_ultraspherical)(const int norm, const int n, const FLT lambda, const FLT mu) {
+    X(triangular_banded) * A = X(calloc_triangular_banded)(n, 2);
+    if (norm) {
+        if (n > 1)
+            X(set_triangular_banded_index)(A, (1+2*lambda)*Y(copysign)(Y(sqrt)((2*mu+1)/(2*mu+4)), mu), 1, 1);
+        for (int i = 2; i < n; i++) {
+            X(set_triangular_banded_index)(A, -(i+2*mu)*(i+2*(mu-lambda))*Y(copysign)(Y(sqrt)((i*(i-ONE(FLT)))/(4*(i+mu)*(i+mu-1))), mu), i-2, i);
+            X(set_triangular_banded_index)(A, i*(i+2*lambda)*Y(copysign)(Y(sqrt)(((i+2*mu)*(i+2*mu+1))/(4*(i+mu)*(i+mu+1))), mu), i, i);
+        }
+    }
+    else {
+        if (n > 1)
+            X(set_triangular_banded_index)(A, (1+2*lambda)*mu/(1+mu), 1, 1);
+        for (int i = 2; i < n; i++) {
+            X(set_triangular_banded_index)(A, -(i+2*mu)*(i+2*(mu-lambda))*mu/(i+mu), i-2, i);
+            X(set_triangular_banded_index)(A, i*(i+2*lambda)*mu/(i+mu), i, i);
+        }
+    }
+    return A;
+}
+
+X(triangular_banded) * X(create_B_ultraspherical_to_ultraspherical)(const int norm, const int n, const FLT mu) {
+    X(triangular_banded) * B = X(calloc_triangular_banded)(n, 2);
+    if (norm) {
+        if (n > 0)
+            X(set_triangular_banded_index)(B, Y(sqrt)((2*mu+1)/(2*mu+2)), 0, 0);
+        if (n > 1)
+            X(set_triangular_banded_index)(B, Y(copysign)(Y(sqrt)((2*mu+1)/(2*mu+4)), mu), 1, 1);
+        for (int i = 2; i < n; i++) {
+            X(set_triangular_banded_index)(B, -Y(copysign)(Y(sqrt)((i*(i-ONE(FLT)))/(4*(i+mu)*(i+mu-1))), mu), i-2, i);
+            X(set_triangular_banded_index)(B, Y(copysign)(Y(sqrt)(((i+2*mu)*(i+2*mu+1))/(4*(i+mu)*(i+mu+1))), mu), i, i);
+        }
+    }
+    else {
+        if (n > 0)
+            X(set_triangular_banded_index)(B, 1, 0, 0);
+        if (n > 1)
+            X(set_triangular_banded_index)(B, mu/(1+mu), 1, 1);
+        for (int i = 2; i < n; i++) {
+            X(set_triangular_banded_index)(B, -mu/(i+mu), i-2, i);
+            X(set_triangular_banded_index)(B, mu/(i+mu), i, i);
+        }
+    }
+    return B;
+}
+
+X(triangular_banded) * X(create_A_jacobi_to_jacobi)(const int norm, const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta) {
+    X(banded) * A = X(calloc_banded)(n, n, 0, 2);
+
+    X(banded) * D1 = X(create_jacobi_derivative)(norm, n, n, 1, gamma, delta);
+    X(banded) * D2 = X(create_jacobi_derivative)(norm, n, n, 2, gamma, delta);
+    X(banded) * L1 = X(create_jacobi_lowering)(norm, n, n, gamma+1, delta+1);
+    X(banded) * M1 = X(create_jacobi_multiplication)(norm, n, n, gamma+1, delta+1);
+
+    // A = σ D² + τ D
+    X(gbmm)(-1, L1, D2, 0, A);
+    X(banded_add)(1, A, alpha-beta, D1, A);
+    X(gbmm)(alpha+beta+2, M1, D1, 1, A);
+
+    X(destroy_banded)(D1);
+    X(destroy_banded)(D2);
+    X(destroy_banded)(L1);
+    X(destroy_banded)(M1);
+
+    return X(convert_banded_to_triangular_banded)(A);
+}
+
+X(triangular_banded) * X(create_B_jacobi_to_jacobi)(const int norm, const int n, const FLT gamma, const FLT delta) {
+    X(banded) * B = X(create_jacobi_raising)(norm, n, n, gamma, delta);
+    return X(convert_banded_to_triangular_banded)(B);
+}
+
+X(triangular_banded) * X(create_A_laguerre_to_laguerre)(const int norm, const int n, const FLT alpha, const FLT beta) {
+    X(triangular_banded) * A = X(malloc_triangular_banded)(n, 1);
+    if (norm) {
+        for (int i = 0; i < n; i++) {
+            X(set_triangular_banded_index)(A, (alpha-beta-i)*Y(sqrt)(i), i-1, i);
+            X(set_triangular_banded_index)(A, i*Y(sqrt)(i+beta+1), i, i);
+        }
+    }
+    else {
+        for (int i = 0; i < n; i++) {
+            X(set_triangular_banded_index)(A, alpha-beta-i, i-1, i);
+            X(set_triangular_banded_index)(A, i, i, i);
+        }
+    }
+    return A;
+}
+
+X(triangular_banded) * X(create_B_laguerre_to_laguerre)(const int norm, const int n, const FLT beta) {
+    X(banded) * B = X(create_laguerre_raising)(norm, n, n, beta);
+    return X(convert_banded_to_triangular_banded)(B);
+}
 
 X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int norm, const int n, const int c, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta) {
     X(banded) * A = X(calloc_banded)(n, n, 0, 4);

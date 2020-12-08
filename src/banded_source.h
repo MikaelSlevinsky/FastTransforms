@@ -152,9 +152,29 @@ X(banded) * X(create_laguerre_lowering)(const int norm, const int m, const int n
 X(banded) * X(create_hermite_derivative)(const int norm, const int m, const int n, const int order);
 X(banded) * X(create_hermite_multiplication)(const int norm, const int m, const int n);
 
+void X(create_legendre_to_chebyshev_diagonal_connection_coefficient)(const int normleg, const int normcheb, const int n, FLT * D, const int INCD);
+void X(create_chebyshev_to_legendre_diagonal_connection_coefficient)(const int normcheb, const int normleg, const int n, FLT * D, const int INCD);
+void X(create_ultraspherical_to_ultraspherical_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT lambda, const FLT mu, FLT * D, const int INCD);
+void X(create_jacobi_to_jacobi_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta, FLT * D, const int INCD);
+void X(create_laguerre_to_laguerre_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT alpha, const FLT beta, FLT * D, const int INCD);
 void X(create_associated_jacobi_to_jacobi_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT c, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta, FLT * D, const int INCD);
 void X(create_associated_laguerre_to_laguerre_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT c, const FLT alpha, const FLT beta, FLT * D, const int INCD);
 void X(create_associated_hermite_to_hermite_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT c, FLT * D, const int INCD);
+
+X(triangular_banded) * X(create_A_legendre_to_chebyshev)(const int norm, const int n);
+X(triangular_banded) * X(create_B_legendre_to_chebyshev)(const int norm, const int n);
+
+X(triangular_banded) * X(create_A_chebyshev_to_legendre)(const int norm, const int n);
+X(triangular_banded) * X(create_B_chebyshev_to_legendre)(const int norm, const int n);
+
+X(triangular_banded) * X(create_A_ultraspherical_to_ultraspherical)(const int norm, const int n, const FLT lambda, const FLT mu);
+X(triangular_banded) * X(create_B_ultraspherical_to_ultraspherical)(const int norm, const int n, const FLT mu);
+
+X(triangular_banded) * X(create_A_jacobi_to_jacobi)(const int norm, const int n, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta);
+X(triangular_banded) * X(create_B_jacobi_to_jacobi)(const int norm, const int n, const FLT gamma, const FLT delta);
+
+X(triangular_banded) * X(create_A_laguerre_to_laguerre)(const int norm, const int n, const FLT alpha, const FLT beta);
+X(triangular_banded) * X(create_B_laguerre_to_laguerre)(const int norm, const int n, const FLT beta);
 
 X(triangular_banded) * X(create_A_associated_jacobi_to_jacobi)(const int norm, const int n, const int c, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta);
 X(triangular_banded) * X(create_B_associated_jacobi_to_jacobi)(const int norm, const int n, const FLT gamma, const FLT delta);
