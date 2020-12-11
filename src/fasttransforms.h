@@ -537,6 +537,32 @@ void ft_execute_spinsph_synthesis(const ft_spinsphere_fftw_plan * P, ft_complex 
 /// Execute FFTW analysis on the sphere with spin.
 void ft_execute_spinsph_analysis(const ft_spinsphere_fftw_plan * P, ft_complex * X, const int N, const int M);
 
+typedef struct {
+    ft_banded ** B;
+    ft_triangular_banded ** T;
+    int n;
+} ft_gradient_plan;
+
+void ft_destroy_gradient_plan(ft_gradient_plan * P);
+
+ft_gradient_plan * ft_plan_sph_gradient(const int n);
+
+void ft_execute_sph_gradient(ft_gradient_plan * P, double * U, double * Ut, double * Up, const int N, const int M);
+void ft_execute_sph_curl(ft_gradient_plan * P, double * U, double * Ut, double * Up, const int N, const int M);
+
+typedef struct {
+    ft_triangular_banded ** T;
+    ft_banded_qr ** F;
+    double * X;
+    int n;
+} ft_helmholtzhodge_plan;
+
+void ft_destroy_helmholtzhodge_plan(ft_helmholtzhodge_plan * P);
+
+ft_helmholtzhodge_plan * ft_plan_sph_helmholtzhodge(const int n);
+
+void ft_execute_sph_helmholtzhodge(ft_helmholtzhodge_plan * P, double * U1, double * U2, double * V1, double * V2, const int N, const int M);
+
 /*!
   \brief A static struct to store an orthogonal matrix \f$Q \in \mathbb{R}^{3\times3}\f$, such that \f$Q^\top Q = I\f$.
   \f$Q\f$ has column-major storage.
