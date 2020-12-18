@@ -50,7 +50,7 @@ ifneq (, $(filter -mfma +fma, $(simd)))
         MFMA := -mfma
     endif
 endif
-ifneq (, $(filter -mavx512f +avx512f, $(simd)))
+ifneq (, $(filter -mavx512f +avx512f -march=knl -march=knm -march=skylake-avx512 -march=cannonlake -march=icelake -march=cascadelake -march=cooperlake -march=tigerlake -march=sapphirerapids, $(simd)))
     ifneq ($(UNAME), Windows)
         MAVX512F := -mavx512f
     endif
@@ -120,13 +120,17 @@ ifdef FT_PREFIX
     endif
 else
     ifeq ($(UNAME), Darwin)
+        CFLAGS += -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+        LDFLAGS += -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
         ifeq ($(FT_USE_APPLEBLAS), 1)
-            CFLAGS += -I/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
-            LDFLAGS += -L/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A
+            CFLAGS += -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
+            LDFLAGS += -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A
         else
             CFLAGS += -I/usr/local/opt/openblas/include
             LDFLAGS += -L/usr/local/opt/openblas/lib
         endif
+        CFLAGS += -I/usr/local/opt/libomp/include
+        LDFLAGS += -L/usr/local/opt/libomp/lib
         CFLAGS += -I/usr/local/opt/fftw/include
         LDFLAGS += -L/usr/local/opt/fftw/lib
         CFLAGS += -I/usr/local/opt/mpfr/include

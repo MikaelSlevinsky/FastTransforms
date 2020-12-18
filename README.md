@@ -19,7 +19,7 @@ Sample installation:
 brew install libomp fftw mpfr
 make CC=clang FT_USE_APPLEBLAS=1
 ```
-On macOS, the OpenBLAS dependency is optional in light of the vecLib framework, though on macOS 10.14 and above, one must locate the headers in the software development kit. In case the library is compiled with vecLib, then the environment variable `VECLIB_MAXIMUM_THREADS` partially controls the multithreading.
+On macOS, the OpenBLAS dependency is optional in light of the vecLib framework. It is also important to have `export SDKROOT="/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"` defined in your environment. In case the library is compiled with vecLib, then the environment variable `VECLIB_MAXIMUM_THREADS` partially controls the multithreading.
 
 ### Linux
 
