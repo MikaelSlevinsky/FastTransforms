@@ -168,7 +168,11 @@ Real orthonormal spherical harmonics in \f$L^2(\mathbb{S}^2)\f$ are:
 \f{align*}
 Y_\ell^m(\theta,\varphi) & = (-1)^{\abs{m}}\sqrt{(\ell+\tfrac{1}{2})\frac{(\ell-\abs{m})!}{(\ell+\abs{m})!}} P_\ell^{\abs{m}}(\cos\theta) \sqrt{\frac{2-\delta_{m,0}}{2\pi}} \left\{\begin{array}{ccc} \cos(m\varphi) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\varphi) & {\rm for} & m < 0,\end{array}\right.
 \f}
-where \f$P_\ell^m(\cos\theta)\f$ are the associated Legendre functions. For \f$0\le m\le\ell\f$, these may be defined by ultraspherical polynomials:
+where \f$P_\ell^m(\cos\theta)\f$ are the associated Legendre functions. For \f$0\le m\le\ell\f$, these may be defined by differentiating Legendre polynomials:
+\f[
+P_\ell^m(x) = (-1)^m (1-x^2)^{\frac{m}{2}} \dfrac{{\rm d}^m}{{\rm d} x^m} P_\ell(x),
+\f]
+and defined equivalently by ultraspherical polynomials:
 \f[
 P_\ell^m(\cos\theta) = (-2)^m(\tfrac{1}{2})_m \sin^m\theta C_{\ell-m}^{(m+\frac{1}{2})}(\cos\theta),
 \f]
