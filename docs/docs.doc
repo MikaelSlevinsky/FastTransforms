@@ -166,9 +166,13 @@ The <tt>ft_execute_*</tt> functions are drivers that perform transforms as defin
 \anchor sh
 Real orthonormal spherical harmonics in \f$L^2(\mathbb{S}^2)\f$ are:
 \f{align*}
-Y_\ell^m(\theta,\varphi) & = (-1)^{\abs{m}}\sqrt{(\ell+\tfrac{1}{2})\frac{(\ell-\abs{m})!}{(\ell+\abs{m})!}} P_\ell^{\abs{m}}(\cos\theta) \sqrt{\frac{2-\delta_{m,0}}{2\pi}} \left\{\begin{array}{ccc} \cos(m\varphi) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\varphi) & {\rm for} & m < 0.\end{array}\right.,
+Y_\ell^m(\theta,\varphi) & = (-1)^{\abs{m}}\sqrt{(\ell+\tfrac{1}{2})\frac{(\ell-\abs{m})!}{(\ell+\abs{m})!}} P_\ell^{\abs{m}}(\cos\theta) \sqrt{\frac{2-\delta_{m,0}}{2\pi}} \left\{\begin{array}{ccc} \cos(m\varphi) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\varphi) & {\rm for} & m < 0,\end{array}\right.
 \f}
-where \f$P_\ell^m(\cos\theta)\f$ are the associated Legendre functions. A degree-\f$(n-1)\f$ expansion in spherical harmonics is given by:
+where \f$P_\ell^m(\cos\theta)\f$ are the associated Legendre functions. For \f$0\le m\le\ell\f$, these may be defined by ultraspherical polynomials:
+\f[
+P_\ell^m(\cos\theta) = (-2)^m(\tfrac{1}{2})_m \sin^m\theta C_{\ell-m}^{(m+\frac{1}{2})}(\cos\theta),
+\f]
+so that the spherical harmonics have positive real phase. A degree-\f$(n-1)\f$ expansion in spherical harmonics is given by:
 \f[
 f_{n-1}(\theta,\varphi) = \sum_{\ell=0}^{n-1}\sum_{m=-\ell}^{+\ell} f_\ell^m Y_\ell^m(\theta,\varphi).
 \f]
@@ -195,7 +199,7 @@ g_{n-1}^0 & 0 & 0 & \cdots & g_{n-1}^{1-n} & g_{n-1}^{n-1}\\
 \f]
 That is:
 \f[
-f_n(\theta,\varphi) = \sum_{\ell=0}^{n-1}\sum_{m=1-n}^{n-1} g_\ell^m \left\{\begin{array}{ccc} \cos(\ell\theta) & {\rm for} & m~{\rm even},\\ \sin((\ell+1)\theta) & {\rm for} & m~{\rm odd},\end{array}\right\} \sqrt{\frac{2-\delta_{m,0}}{2\pi}}\left\{\begin{array}{ccc} \cos(m\varphi) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\varphi) & {\rm for} & m < 0.\end{array}\right.,
+f_n(\theta,\varphi) = \sum_{\ell=0}^{n-1}\sum_{m=1-n}^{n-1} g_\ell^m \left\{\begin{array}{ccc} \cos(\ell\theta) & {\rm for} & m~{\rm even},\\ \sin((\ell+1)\theta) & {\rm for} & m~{\rm odd},\end{array}\right\} \sqrt{\frac{2-\delta_{m,0}}{2\pi}}\left\{\begin{array}{ccc} \cos(m\varphi) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\varphi) & {\rm for} & m < 0,\end{array}\right.
 \f]
 and \ref ft_execute_fourier2sph converts them back.
 
@@ -204,7 +208,7 @@ and \ref ft_execute_fourier2sph converts them back.
 
 Real orthonormal generalized Zernike polynomials in \f$L^2(\mathbb{D}^2, r^{2\alpha+1}(1-r^2)^\beta\ud r\ud\theta)\f$ are:
 \f[
-Z_{\ell,m}^{(\alpha,\beta)}(r,\theta) = 2^{\frac{\abs{m}+\alpha+\beta+2}{2}} r^{\abs{m}}\tilde{P}_{\frac{\ell-\abs{m}}{2}}^{(\beta,\abs{m}+\alpha)}(2r^2-1) \sqrt{\frac{2-\delta_{m,0}}{2\pi}} \left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0.\end{array}\right.,
+Z_{\ell,m}^{(\alpha,\beta)}(r,\theta) = 2^{\frac{\abs{m}+\alpha+\beta+2}{2}} r^{\abs{m}}\tilde{P}_{\frac{\ell-\abs{m}}{2}}^{(\beta,\abs{m}+\alpha)}(2r^2-1) \sqrt{\frac{2-\delta_{m,0}}{2\pi}} \left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0,\end{array}\right.
 \f]
 where the tilde implies that the univariate Jacobi polynomials are orthonormal. A degree-\f$(2n-2)\f$ expansion in generalized Zernike polynomials is given by:
 \f[
@@ -233,7 +237,7 @@ g_{2n-2}^0 & 0 & 0 & g_{2n-2}^{-2} & g_{2n-2}^2 & \cdots & g_{2n-2}^{2-2n} & g_{
 \f]
 That is:
 \f[
-f_{2n-2}(r,\theta) = \sum_{\ell=0}^{n-1}\sum_{m=2-2n}^{2n-2} g_{2\ell}^m \left\{\begin{array}{ccc} T_{2\ell}(r) & {\rm for} & m~{\rm even},\\ T_{2\ell+1}(r) & {\rm for} & m~{\rm odd},\end{array}\right\} \sqrt{\frac{2-\delta_{m,0}}{2\pi}}\left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0.\end{array}\right.,
+f_{2n-2}(r,\theta) = \sum_{\ell=0}^{n-1}\sum_{m=2-2n}^{2n-2} g_{2\ell}^m \left\{\begin{array}{ccc} T_{2\ell}(r) & {\rm for} & m~{\rm even},\\ T_{2\ell+1}(r) & {\rm for} & m~{\rm odd},\end{array}\right\} \sqrt{\frac{2-\delta_{m,0}}{2\pi}}\left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0,\end{array}\right.
 \f]
 and \ref ft_execute_cxf2disk converts them back.
 
@@ -340,7 +344,7 @@ f_{n-1}(x,y,z) = \sum_{k=0}^{n-1}\sum_{\ell=0}^{n-1}\sum_{m=0}^{n-1} g_{k,\ell}^
 
 Complex-valued orthonormal spin-weighted spherical harmonics in \f$L^2(\mathbb{S}^2)\f$ are:
 \f{align*}
-Y_{\ell,m}^s(\theta,\varphi) & = \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \sqrt{(\ell+\tfrac{1}{2})\frac{(\ell+\ell_0)!(\ell-\ell_0)!}{(\ell+\ell_1)!(\ell-\ell_1)!}} \sin^{\abs{m+s}}(\tfrac{\theta}{2})\cos^{\abs{m-s}}(\tfrac{\theta}{2}) P_{\ell-\ell_0}^{(\abs{m+s},\abs{m-s})}(\cos\theta).
+Y_{\ell,m}^s(\theta,\varphi) & = \frac{e^{\ii m\varphi}}{\sqrt{2\pi}} \sqrt{(\ell+\tfrac{1}{2})\frac{(\ell+\ell_0)!(\ell-\ell_0)!}{(\ell+\ell_1)!(\ell-\ell_1)!}} \sin^{\abs{m+s}}(\tfrac{\theta}{2})\cos^{\abs{m-s}}(\tfrac{\theta}{2}) P_{\ell-\ell_0}^{(\abs{m+s},\abs{m-s})}(\cos\theta),
 \f}
 where \f$P_n^{(\alpha,\beta)}(\cos\theta)\f$ are the Jacobi polynomials and \f$\ell_0 = \max\{\abs{m},\abs{s}\}\f$ and \f$\ell_1 = \min\{\abs{m},\abs{s}\}\f$. A degree-\f$(n-1)\f$ expansion in spin-weighted spherical harmonics is given by:
 \f[
