@@ -432,12 +432,12 @@ ft_sphere_fftw_plan * ft_plan_sphv_synthesis(const int N, const int M);
 ft_sphere_fftw_plan * ft_plan_sphv_analysis(const int N, const int M);
 
 /// Execute FFTW synthesis on the sphere.
-void ft_execute_sph_synthesis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M);
+void ft_execute_sph_synthesis(const char TRANS, const ft_sphere_fftw_plan * P, double * X, const int N, const int M);
 /// Execute FFTW analysis on the sphere.
-void ft_execute_sph_analysis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M);
+void ft_execute_sph_analysis(const char TRANS, const ft_sphere_fftw_plan * P, double * X, const int N, const int M);
 
-void ft_execute_sphv_synthesis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M);
-void ft_execute_sphv_analysis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M);
+void ft_execute_sphv_synthesis(const char TRANS, const ft_sphere_fftw_plan * P, double * X, const int N, const int M);
+void ft_execute_sphv_analysis(const char TRANS, const ft_sphere_fftw_plan * P, double * X, const int N, const int M);
 
 typedef struct {
     fftw_plan planxy;

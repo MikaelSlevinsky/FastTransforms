@@ -46,6 +46,8 @@ static inline void exit_failure(char * msg) {
 #define M_SQRT_PI      1.772453850905516027   /* sqrt(pi)           */
 #define M_1_SQRT_PI    0.564189583547756287   /* 1/sqrt(pi)         */
 #define M_SQRT_PI_2    0.886226925452758014   /* sqrt(pi)/2         */
+#define M_2_SQRT_PI    3.544907701811032055   /* 2*sqrt(pi)         */
+#define M_1_2_SQRT_PI  0.282094791773878143   /* 1/(2*sqrt(pi))     */
 #define M_2_SQRT_2PI   5.013256549262001005   /* 2*sqrt(2*pi)       */
 #define M_1_2_SQRT_2PI 0.199471140200716338   /* 1/(2*sqrt(2*pi))   */
 #define M_4_SQRT_PI    7.089815403622064109   /* 4*sqrt(pi)         */

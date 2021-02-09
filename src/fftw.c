@@ -126,73 +126,147 @@ ft_sphere_fftw_plan * ft_plan_sphv_analysis(const int N, const int M) {
     return ft_plan_sph_with_kind(N, M, kind);
 }
 
-void ft_execute_sph_synthesis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
-    X[0] *= 2.0;
-    for (int j = 3; j < M; j += 4) {
-        X[j*N] *= 2.0;
-        X[(j+1)*N] *= 2.0;
+void ft_execute_sph_synthesis(const char TRANS, const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
+    if (TRANS == 'N') {
+        X[0] *= 2.0;
+        for (int j = 3; j < M; j += 4) {
+            X[j*N] *= 2.0;
+            X[(j+1)*N] *= 2.0;
+        }
+        fftw_execute_r2r(P->plantheta1, X, X);
+        fftw_execute_r2r(P->plantheta2, X+N, X+N);
+        fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
+        fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
+        for (int i = 0; i < N*M; i++)
+            X[i] *= M_1_4_SQRT_PI;
+        for (int i = 0; i < N; i++)
+            X[i] *= M_SQRT2;
+        data_r2c(X, P->Y, N, M);
+        fftw_execute_dft_c2r(P->planphi, (fftw_complex *) P->Y, X);
     }
-    fftw_execute_r2r(P->plantheta1, X, X);
-    fftw_execute_r2r(P->plantheta2, X+N, X+N);
-    fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
-    fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
-    for (int i = 0; i < N*M; i++)
-        X[i] *= M_1_4_SQRT_PI;
-    for (int i = 0; i < N; i++)
-        X[i] *= M_SQRT2;
-    data_r2c(X, P->Y, N, M);
-    fftw_execute_dft_c2r(P->planphi, (fftw_complex *) P->Y, X);
+    else if (TRANS == 'T') {
+        fftw_execute_dft_r2c(P->planphi, X, (fftw_complex *) P->Y);
+        data_c2r(X, P->Y, N, M);
+        for (int i = 0; i < N*M; i++)
+            X[i] *= M_1_2_SQRT_PI;
+        for (int i = 0; i < N; i++)
+            X[i] *= M_SQRT1_2;
+        fftw_execute_r2r(P->plantheta1, X, X);
+        fftw_execute_r2r(P->plantheta2, X+N, X+N);
+        fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
+        fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
+        for (int j = 1; j < M; j += 4) {
+            X[(j+1)*N-1] *= 0.5;
+            X[(j+2)*N-1] *= 0.5;
+        }
+    }
 }
 
-void ft_execute_sph_analysis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
-    fftw_execute_dft_r2c(P->planphi, X, (fftw_complex *) P->Y);
-    data_c2r(X, P->Y, N, M);
-    for (int i = 0; i < N*M; i++)
-        X[i] *= M_4_SQRT_PI/(2*N*M);
-    for (int i = 0; i < N; i++)
-        X[i] *= M_SQRT1_2;
-    fftw_execute_r2r(P->plantheta1, X, X);
-    fftw_execute_r2r(P->plantheta2, X+N, X+N);
-    fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
-    fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
-    X[0] *= 0.5;
-    for (int j = 3; j < M; j += 4) {
-        X[j*N] *= 0.5;
-        X[(j+1)*N] *= 0.5;
+void ft_execute_sph_analysis(const char TRANS, const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
+    if (TRANS == 'N') {
+        fftw_execute_dft_r2c(P->planphi, X, (fftw_complex *) P->Y);
+        data_c2r(X, P->Y, N, M);
+        for (int i = 0; i < N*M; i++)
+            X[i] *= M_4_SQRT_PI/(2*N*M);
+        for (int i = 0; i < N; i++)
+            X[i] *= M_SQRT1_2;
+        fftw_execute_r2r(P->plantheta1, X, X);
+        fftw_execute_r2r(P->plantheta2, X+N, X+N);
+        fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
+        fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
+        X[0] *= 0.5;
+        for (int j = 3; j < M; j += 4) {
+            X[j*N] *= 0.5;
+            X[(j+1)*N] *= 0.5;
+        }
+    }
+    else if (TRANS == 'T') {
+        for (int j = 1; j < M; j += 4) {
+            X[(j+1)*N-1] *= 2.0;
+            X[(j+2)*N-1] *= 2.0;
+        }
+        fftw_execute_r2r(P->plantheta1, X, X);
+        fftw_execute_r2r(P->plantheta2, X+N, X+N);
+        fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
+        fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
+        for (int i = 0; i < N*M; i++)
+            X[i] *= M_2_SQRT_PI/(2*N*M);
+        for (int i = 0; i < N; i++)
+            X[i] *= M_SQRT2;
+        data_r2c(X, P->Y, N, M);
+        fftw_execute_dft_c2r(P->planphi, (fftw_complex *) P->Y, X);
     }
 }
 
-void ft_execute_sphv_synthesis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
-    for (int j = 1; j < M-2; j += 4) {
-        X[j*N] *= 2.0;
-        X[(j+1)*N] *= 2.0;
+void ft_execute_sphv_synthesis(const char TRANS, const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
+    if (TRANS == 'N') {
+        for (int j = 1; j < M; j += 4) {
+            X[j*N] *= 2.0;
+            X[(j+1)*N] *= 2.0;
+        }
+        fftw_execute_r2r(P->plantheta1, X, X);
+        fftw_execute_r2r(P->plantheta2, X+N, X+N);
+        fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
+        fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
+        for (int i = 0; i < N*M; i++)
+            X[i] *= M_1_4_SQRT_PI;
+        for (int i = 0; i < N; i++)
+            X[i] *= M_SQRT2;
+        data_r2c(X, P->Y, N, M);
+        fftw_execute_dft_c2r(P->planphi, (fftw_complex *) P->Y, X);
     }
-    fftw_execute_r2r(P->plantheta1, X, X);
-    fftw_execute_r2r(P->plantheta2, X+N, X+N);
-    fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
-    fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
-    for (int i = 0; i < N*M; i++)
-        X[i] *= M_1_4_SQRT_PI;
-    for (int i = 0; i < N; i++)
-        X[i] *= M_SQRT2;
-    data_r2c(X, P->Y, N, M);
-    fftw_execute_dft_c2r(P->planphi, (fftw_complex *) P->Y, X);
+    else if (TRANS == 'T') {
+        fftw_execute_dft_r2c(P->planphi, X, (fftw_complex *) P->Y);
+        data_c2r(X, P->Y, N, M);
+        for (int i = 0; i < N*M; i++)
+            X[i] *= M_1_2_SQRT_PI;
+        for (int i = 0; i < N; i++)
+            X[i] *= M_SQRT1_2;
+        fftw_execute_r2r(P->plantheta1, X, X);
+        fftw_execute_r2r(P->plantheta2, X+N, X+N);
+        fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
+        fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
+        X[N-1] *= 0.5;
+        for (int j = 3; j < M; j += 4) {
+            X[(j+1)*N-1] *= 0.5;
+            X[(j+2)*N-1] *= 0.5;
+        }
+    }
 }
 
-void ft_execute_sphv_analysis(const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
-    fftw_execute_dft_r2c(P->planphi, X, (fftw_complex *) P->Y);
-    data_c2r(X, P->Y, N, M);
-    for (int i = 0; i < N*M; i++)
-        X[i] *= M_4_SQRT_PI/(2*N*M);
-    for (int i = 0; i < N; i++)
-        X[i] *= M_SQRT1_2;
-    fftw_execute_r2r(P->plantheta1, X, X);
-    fftw_execute_r2r(P->plantheta2, X+N, X+N);
-    fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
-    fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
-    for (int j = 1; j < M-2; j += 4) {
-        X[j*N] *= 0.5;
-        X[(j+1)*N] *= 0.5;
+void ft_execute_sphv_analysis(const char TRANS, const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
+    if (TRANS == 'N') {
+        fftw_execute_dft_r2c(P->planphi, X, (fftw_complex *) P->Y);
+        data_c2r(X, P->Y, N, M);
+        for (int i = 0; i < N*M; i++)
+            X[i] *= M_4_SQRT_PI/(2*N*M);
+        for (int i = 0; i < N; i++)
+            X[i] *= M_SQRT1_2;
+        fftw_execute_r2r(P->plantheta1, X, X);
+        fftw_execute_r2r(P->plantheta2, X+N, X+N);
+        fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
+        fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
+        for (int j = 1; j < M; j += 4) {
+            X[j*N] *= 0.5;
+            X[(j+1)*N] *= 0.5;
+        }
+    }
+    else if (TRANS == 'T') {
+        X[N-1] *= 2.0;
+        for (int j = 3; j < M; j += 4) {
+            X[(j+1)*N-1] *= 2.0;
+            X[(j+2)*N-1] *= 2.0;
+        }
+        fftw_execute_r2r(P->plantheta1, X, X);
+        fftw_execute_r2r(P->plantheta2, X+N, X+N);
+        fftw_execute_r2r(P->plantheta3, X+2*N, X+2*N);
+        fftw_execute_r2r(P->plantheta4, X+3*N, X+3*N);
+        for (int i = 0; i < N*M; i++)
+            X[i] *= M_2_SQRT_PI/(2*N*M);
+        for (int i = 0; i < N; i++)
+            X[i] *= M_SQRT2;
+        data_r2c(X, P->Y, N, M);
+        fftw_execute_dft_c2r(P->planphi, (fftw_complex *) P->Y, X);
     }
 }
 
