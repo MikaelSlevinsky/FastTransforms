@@ -346,12 +346,12 @@ void ft_destroy_harmonic_plan(ft_harmonic_plan * P);
 ft_harmonic_plan * ft_plan_sph2fourier(const int n);
 
 /// Transform a spherical harmonic expansion to a bivariate Fourier series.
-void ft_execute_sph2fourier(const ft_harmonic_plan * P, double * A, const int N, const int M);
+void ft_execute_sph2fourier(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
 /// Transform a bivariate Fourier series to a spherical harmonic expansion.
-void ft_execute_fourier2sph(const ft_harmonic_plan * P, double * A, const int N, const int M);
+void ft_execute_fourier2sph(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
 
-void ft_execute_sphv2fourier(const ft_harmonic_plan * P, double * A, const int N, const int M);
-void ft_execute_fourier2sphv(const ft_harmonic_plan * P, double * A, const int N, const int M);
+void ft_execute_sphv2fourier(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
+void ft_execute_fourier2sphv(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
 
 /// Plan a triangular harmonic transform.
 ft_harmonic_plan * ft_plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma);

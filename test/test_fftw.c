@@ -49,10 +49,10 @@ int main(int argc, const char * argv[]) {
         PS = ft_plan_sph_synthesis(N, M);
         PA = ft_plan_sph_analysis(N, M);
 
-        ft_execute_sph2fourier(P, A, N, M);
+        ft_execute_sph2fourier('N', P, A, N, M);
         ft_execute_sph_synthesis(PS, A, N, M);
         ft_execute_sph_analysis(PA, A, N, M);
-        ft_execute_fourier2sph(P, A, N, M);
+        ft_execute_fourier2sph('N', P, A, N, M);
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
@@ -80,10 +80,10 @@ int main(int argc, const char * argv[]) {
         PS = ft_plan_sph_synthesis(N, M);
         PA = ft_plan_sph_analysis(N, M);
 
-        FT_TIME({ft_execute_sph2fourier(P, A, N, M); ft_execute_sph_synthesis(PS, A, N, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_sph2fourier('N', P, A, N, M); ft_execute_sph_synthesis(PS, A, N, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME({ft_execute_sph_analysis(PA, A, N, M); ft_execute_fourier2sph(P, A, N, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_sph_analysis(PA, A, N, M); ft_execute_fourier2sph('N', P, A, N, M);}, start, end, NTIMES)
         printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
@@ -106,10 +106,10 @@ int main(int argc, const char * argv[]) {
         PS = ft_plan_sphv_synthesis(N, M);
         PA = ft_plan_sphv_analysis(N, M);
 
-        ft_execute_sphv2fourier(P, A, N, M);
+        ft_execute_sphv2fourier('N', P, A, N, M);
         ft_execute_sphv_synthesis(PS, A, N, M);
         ft_execute_sphv_analysis(PA, A, N, M);
-        ft_execute_fourier2sphv(P, A, N, M);
+        ft_execute_fourier2sphv('N', P, A, N, M);
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
@@ -137,10 +137,10 @@ int main(int argc, const char * argv[]) {
         PS = ft_plan_sphv_synthesis(N, M);
         PA = ft_plan_sphv_analysis(N, M);
 
-        FT_TIME({ft_execute_sphv2fourier(P, A, N, M); ft_execute_sphv_synthesis(PS, A, N, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_sphv2fourier('N', P, A, N, M); ft_execute_sphv_synthesis(PS, A, N, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME({ft_execute_sphv_analysis(PA, A, N, M); ft_execute_fourier2sphv(P, A, N, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_sphv_analysis(PA, A, N, M); ft_execute_fourier2sphv('N', P, A, N, M);}, start, end, NTIMES)
         printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);

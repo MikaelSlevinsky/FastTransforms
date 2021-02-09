@@ -104,7 +104,7 @@ int main(void) {
     ft_sphere_fftw_plan * PA = ft_plan_sph_analysis(N, M);
 
     ft_execute_sph_analysis(PA, F, N, M);
-    ft_execute_fourier2sph(P, F, N, M);
+    ft_execute_fourier2sph('N', P, F, N, M);
 
     printf("Its spherical harmonic coefficients demonstrate that it is exact-degree-%i:\n\n", N-1);
 
@@ -124,7 +124,7 @@ int main(void) {
     printf("\n");
 
     ft_execute_sph_analysis(PA, F, N, M);
-    ft_execute_fourier2sph(P, F, N, M);
+    ft_execute_fourier2sph('N', P, F, N, M);
 
     printf("Its spherical harmonic coefficients demonstrate that it is degree-(%i-1):\n\n", N-1);
 
@@ -142,7 +142,7 @@ int main(void) {
     printf("\n");
 
     ft_execute_sph_analysis(PA, F, N, M);
-    ft_execute_fourier2sph(P, F, N, M);
+    ft_execute_fourier2sph('N', P, F, N, M);
 
     printf("It only has one nonnegligible spherical harmonic coefficient.\n");
     printf("Can you spot it?\n\n");

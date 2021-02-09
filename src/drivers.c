@@ -820,36 +820,72 @@ ft_harmonic_plan * ft_plan_sph2fourier(const int n) {
     return P;
 }
 
-void ft_execute_sph2fourier(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    ft_execute_sph_hi2lo(P->RP[0], A, P->B, M);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P[0], N, A, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P[1], N, A+N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P[1], N, A+2*N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P[0], N, A+3*N, 4*N);
+void ft_execute_sph2fourier(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    if (TRANS == 'N') {
+        ft_execute_sph_hi2lo(P->RP[0], A, P->B, M);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P[0], N, A, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P[1], N, A+N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P[1], N, A+2*N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P[0], N, A+3*N, 4*N);
+    }
+    else if (TRANS == 'T') {
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P[0], N, A, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P[1], N, A+N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P[1], N, A+2*N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, M/4, 1.0, P->P[0], N, A+3*N, 4*N);
+        ft_execute_sph_lo2hi(P->RP[0], A, P->B, M);
+    }
 }
 
-void ft_execute_fourier2sph(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->Pinv[0], N, A, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->Pinv[1], N, A+N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->Pinv[1], N, A+2*N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->Pinv[0], N, A+3*N, 4*N);
-    ft_execute_sph_lo2hi(P->RP[0], A, P->B, M);
+void ft_execute_fourier2sph(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    if (TRANS == 'N') {
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->Pinv[0], N, A, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->Pinv[1], N, A+N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->Pinv[1], N, A+2*N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->Pinv[0], N, A+3*N, 4*N);
+        ft_execute_sph_lo2hi(P->RP[0], A, P->B, M);
+    }
+    else if (TRANS == 'T') {
+        ft_execute_sph_hi2lo(P->RP[0], A, P->B, M);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->Pinv[0], N, A, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->Pinv[1], N, A+N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->Pinv[1], N, A+2*N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, M/4, 1.0, P->Pinv[0], N, A+3*N, 4*N);
+    }
 }
 
-void ft_execute_sphv2fourier(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    ft_execute_sphv_hi2lo(P->RP[0], A, P->B, M);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P[1], N, A, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P[0], N, A+N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P[0], N, A+2*N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P[1], N, A+3*N, 4*N);
+void ft_execute_sphv2fourier(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    if (TRANS == 'N') {
+        ft_execute_sphv_hi2lo(P->RP[0], A, P->B, M);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P[1], N, A, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P[0], N, A+N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P[0], N, A+2*N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P[1], N, A+3*N, 4*N);
+    }
+    else if (TRANS == 'T') {
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P[1], N, A, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P[0], N, A+N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P[0], N, A+2*N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, M/4, 1.0, P->P[1], N, A+3*N, 4*N);
+        ft_execute_sphv_lo2hi(P->RP[0], A, P->B, M);
+    }
 }
 
-void ft_execute_fourier2sphv(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->Pinv[1], N, A, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->Pinv[0], N, A+N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->Pinv[0], N, A+2*N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->Pinv[1], N, A+3*N, 4*N);
-    ft_execute_sphv_lo2hi(P->RP[0], A, P->B, M);
+void ft_execute_fourier2sphv(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    if (TRANS == 'N') {
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->Pinv[1], N, A, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->Pinv[0], N, A+N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->Pinv[0], N, A+2*N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->Pinv[1], N, A+3*N, 4*N);
+        ft_execute_sphv_lo2hi(P->RP[0], A, P->B, M);
+    }
+    else if (TRANS == 'T') {
+        ft_execute_sphv_hi2lo(P->RP[0], A, P->B, M);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->Pinv[1], N, A, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->Pinv[0], N, A+N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->Pinv[0], N, A+2*N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, M/4, 1.0, P->Pinv[1], N, A+3*N, 4*N);
+    }
 }
 
 ft_harmonic_plan * ft_plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma) {

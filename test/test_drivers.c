@@ -231,8 +231,11 @@ int main(int argc, const char * argv[]) {
         B = copymat(A, N, M);
         P = ft_plan_sph2fourier(N);
 
-        ft_execute_sph2fourier(P, A, N, M);
-        ft_execute_fourier2sph(P, A, N, M);
+        ft_execute_sph2fourier('N', P, A, N, M);
+        ft_execute_fourier2sph('N', P, A, N, M);
+
+        ft_execute_sph2fourier('T', P, A, N, M);
+        ft_execute_fourier2sph('T', P, A, N, M);
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
@@ -256,10 +259,10 @@ int main(int argc, const char * argv[]) {
         A = sphrand(N, M);
         P = ft_plan_sph2fourier(N);
 
-        FT_TIME(ft_execute_sph2fourier(P, A, N, M), start, end, NTIMES)
+        FT_TIME(ft_execute_sph2fourier('N', P, A, N, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_fourier2sph(P, A, N, M), start, end, NTIMES)
+        FT_TIME(ft_execute_fourier2sph('N', P, A, N, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
         printf("\n");
@@ -465,8 +468,11 @@ int main(int argc, const char * argv[]) {
         B = copymat(A, N, M);
         P = ft_plan_sph2fourier(N);
 
-        ft_execute_sphv2fourier(P, A, N, M);
-        ft_execute_fourier2sphv(P, A, N, M);
+        ft_execute_sphv2fourier('N', P, A, N, M);
+        ft_execute_fourier2sphv('N', P, A, N, M);
+
+        ft_execute_sphv2fourier('T', P, A, N, M);
+        ft_execute_fourier2sphv('T', P, A, N, M);
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
@@ -490,10 +496,10 @@ int main(int argc, const char * argv[]) {
         A = sphrand(N, M);
         P = ft_plan_sph2fourier(N);
 
-        FT_TIME(ft_execute_sphv2fourier(P, A, N, M), start, end, NTIMES)
+        FT_TIME(ft_execute_sphv2fourier('N', P, A, N, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_fourier2sphv(P, A, N, M), start, end, NTIMES)
+        FT_TIME(ft_execute_fourier2sphv('N', P, A, N, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
         printf("\n");
