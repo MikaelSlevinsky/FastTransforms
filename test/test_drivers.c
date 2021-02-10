@@ -1453,8 +1453,11 @@ int main(int argc, const char * argv[]) {
             B = (double *) BC;
             SP = ft_plan_spinsph2fourier(N, S);
 
-            ft_execute_spinsph2fourier(SP, AC, N, M);
-            ft_execute_fourier2spinsph(SP, AC, N, M);
+            ft_execute_spinsph2fourier('N', SP, AC, N, M);
+            ft_execute_fourier2spinsph('N', SP, AC, N, M);
+
+            ft_execute_spinsph2fourier('T', SP, AC, N, M);
+            ft_execute_fourier2spinsph('T', SP, AC, N, M);
 
             err = ft_norm_2arg(A, B, 2*N*M)/ft_norm_1arg(B, 2*N*M);
             printf("ϵ_2 \t\t\t (N×M, S) = (%5ix%5i,%3i): \t |%20.2e ", N, M, S, err);
@@ -1481,10 +1484,10 @@ int main(int argc, const char * argv[]) {
             ft_complex * AC = spinsphrand(N, M, S);
             SP = ft_plan_spinsph2fourier(N, S);
 
-            FT_TIME(ft_execute_spinsph2fourier(SP, AC, N, M), start, end, NTIMES)
+            FT_TIME(ft_execute_spinsph2fourier('N', SP, AC, N, M), start, end, NTIMES)
             printf("%d  %.6f", S, elapsed(&start, &end, NTIMES));
 
-            FT_TIME(ft_execute_fourier2spinsph(SP, AC, N, M), start, end, NTIMES)
+            FT_TIME(ft_execute_fourier2spinsph('N', SP, AC, N, M), start, end, NTIMES)
             printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
             free(AC);

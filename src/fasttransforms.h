@@ -403,9 +403,9 @@ void ft_destroy_spin_harmonic_plan(ft_spin_harmonic_plan * P);
 ft_spin_harmonic_plan * ft_plan_spinsph2fourier(const int n, const int s);
 
 /// Transform a spin-weighted spherical harmonic expansion to a bivariate Fourier series.
-void ft_execute_spinsph2fourier(const ft_spin_harmonic_plan * P, ft_complex * A, const int N, const int M);
+void ft_execute_spinsph2fourier(const char TRANS, const ft_spin_harmonic_plan * P, ft_complex * A, const int N, const int M);
 /// Transform a bivariate Fourier series to a spin-weighted spherical harmonic expansion.
-void ft_execute_fourier2spinsph(const ft_spin_harmonic_plan * P, ft_complex * A, const int N, const int M);
+void ft_execute_fourier2spinsph(const char TRANS, const ft_spin_harmonic_plan * P, ft_complex * A, const int N, const int M);
 
 
 int ft_fftw_init_threads(void);
