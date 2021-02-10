@@ -705,15 +705,18 @@ int main(int argc, const char * argv[]) {
         B = copymat(A, N, M);
         P = ft_plan_tri2cheb(N, alpha, beta, gamma);
 
-        ft_execute_tri2cheb(P, A, N, M);
-        ft_execute_cheb2tri(P, A, N, M);
+        ft_execute_tri2cheb('N', P, A, N, M);
+        ft_execute_cheb2tri('N', P, A, N, M);
+
+        ft_execute_tri2cheb('T', P, A, N, M);
+        ft_execute_cheb2tri('T', P, A, N, M);
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
-        ft_checktest(err, 8*sqrt(N), &checksum);
+        ft_checktest(err, 32*sqrt(N), &checksum);
         err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
         printf("ϵ_∞ \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
-        ft_checktest(err, 4*N, &checksum);
+        ft_checktest(err, 8*N, &checksum);
 
         free(A);
         free(B);
@@ -730,10 +733,10 @@ int main(int argc, const char * argv[]) {
         A = trirand(N, M);
         P = ft_plan_tri2cheb(N, alpha, beta, gamma);
 
-        FT_TIME(ft_execute_tri2cheb(P, A, N, M), start, end, NTIMES)
+        FT_TIME(ft_execute_tri2cheb('N', P, A, N, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_cheb2tri(P, A, N, M), start, end, NTIMES)
+        FT_TIME(ft_execute_cheb2tri('N', P, A, N, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
         printf("\n");
@@ -939,8 +942,11 @@ int main(int argc, const char * argv[]) {
         B = copymat(A, N, M);
         P = ft_plan_disk2cxf(N, alpha, beta);
 
-        ft_execute_disk2cxf(P, A, N, M);
-        ft_execute_cxf2disk(P, A, N, M);
+        ft_execute_disk2cxf('N', P, A, N, M);
+        ft_execute_cxf2disk('N', P, A, N, M);
+
+        ft_execute_disk2cxf('T', P, A, N, M);
+        ft_execute_cxf2disk('T', P, A, N, M);
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
@@ -964,10 +970,10 @@ int main(int argc, const char * argv[]) {
         A = diskrand(N, M);
         P = ft_plan_disk2cxf(N, alpha, beta);
 
-        FT_TIME(ft_execute_disk2cxf(P, A, N, M), start, end, NTIMES)
+        FT_TIME(ft_execute_disk2cxf('N', P, A, N, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_cxf2disk(P, A, N, M), start, end, NTIMES)
+        FT_TIME(ft_execute_cxf2disk('N', P, A, N, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
         printf("\n");
@@ -1039,8 +1045,11 @@ int main(int argc, const char * argv[]) {
         B = copymat(A, N, M);
         P = ft_plan_rectdisk2cheb(N, beta);
 
-        ft_execute_rectdisk2cheb(P, A, N, M);
-        ft_execute_cheb2rectdisk(P, A, N, M);
+        ft_execute_rectdisk2cheb('N', P, A, N, M);
+        ft_execute_cheb2rectdisk('N', P, A, N, M);
+
+        ft_execute_rectdisk2cheb('T', P, A, N, M);
+        ft_execute_cheb2rectdisk('T', P, A, N, M);
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
@@ -1064,10 +1073,10 @@ int main(int argc, const char * argv[]) {
         A = rectdiskrand(N, M);
         P = ft_plan_rectdisk2cheb(N, beta);
 
-        FT_TIME(ft_execute_rectdisk2cheb(P, A, N, M), start, end, NTIMES)
+        FT_TIME(ft_execute_rectdisk2cheb('N', P, A, N, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_cheb2rectdisk(P, A, N, M), start, end, NTIMES)
+        FT_TIME(ft_execute_cheb2rectdisk('N', P, A, N, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
         printf("\n");

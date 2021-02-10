@@ -173,10 +173,10 @@ int main(int argc, const char * argv[]) {
         QS = ft_plan_tri_synthesis(N, M);
         QA = ft_plan_tri_analysis(N, M);
 
-        ft_execute_tri2cheb(P, A, N, M);
+        ft_execute_tri2cheb('N', P, A, N, M);
         ft_execute_tri_synthesis(QS, A, N, M);
         ft_execute_tri_analysis(QA, A, N, M);
-        ft_execute_cheb2tri(P, A, N, M);
+        ft_execute_cheb2tri('N', P, A, N, M);
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
@@ -204,10 +204,10 @@ int main(int argc, const char * argv[]) {
         QS = ft_plan_tri_synthesis(N, M);
         QA = ft_plan_tri_analysis(N, M);
 
-        FT_TIME({ft_execute_tri2cheb(P, A, N, M); ft_execute_tri_synthesis(QS, A, N, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_tri2cheb('N', P, A, N, M); ft_execute_tri_synthesis(QS, A, N, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME({ft_execute_tri_analysis(QA, A, N, M); ft_execute_cheb2tri(P, A, N, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_tri_analysis(QA, A, N, M); ft_execute_cheb2tri('N', P, A, N, M);}, start, end, NTIMES)
         printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
@@ -230,10 +230,10 @@ int main(int argc, const char * argv[]) {
         RS = ft_plan_disk_synthesis(N, M);
         RA = ft_plan_disk_analysis(N, M);
 
-        ft_execute_disk2cxf(P, A, N, M);
+        ft_execute_disk2cxf('N', P, A, N, M);
         ft_execute_disk_synthesis(RS, A, N, M);
         ft_execute_disk_analysis(RA, A, N, M);
-        ft_execute_cxf2disk(P, A, N, M);
+        ft_execute_cxf2disk('N', P, A, N, M);
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
@@ -261,10 +261,10 @@ int main(int argc, const char * argv[]) {
         RS = ft_plan_disk_synthesis(N, M);
         RA = ft_plan_disk_analysis(N, M);
 
-        FT_TIME({ft_execute_disk2cxf(P, A, N, M); ft_execute_disk_synthesis(RS, A, N, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_disk2cxf('N', P, A, N, M); ft_execute_disk_synthesis(RS, A, N, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME({ft_execute_disk_analysis(RA, A, N, M); ft_execute_cxf2disk(P, A, N, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_disk_analysis(RA, A, N, M); ft_execute_cxf2disk('N', P, A, N, M);}, start, end, NTIMES)
         printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
@@ -287,10 +287,10 @@ int main(int argc, const char * argv[]) {
         SS = ft_plan_rectdisk_synthesis(N, M);
         SA = ft_plan_rectdisk_analysis(N, M);
 
-        ft_execute_rectdisk2cheb(P, A, N, M);
+        ft_execute_rectdisk2cheb('N', P, A, N, M);
         ft_execute_rectdisk_synthesis(SS, A, N, M);
         ft_execute_rectdisk_analysis(SA, A, N, M);
-        ft_execute_cheb2rectdisk(P, A, N, M);
+        ft_execute_cheb2rectdisk('N', P, A, N, M);
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
@@ -318,10 +318,10 @@ int main(int argc, const char * argv[]) {
         SS = ft_plan_rectdisk_synthesis(N, M);
         SA = ft_plan_rectdisk_analysis(N, M);
 
-        FT_TIME({ft_execute_rectdisk2cheb(P, A, N, M); ft_execute_rectdisk_synthesis(SS, A, N, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_rectdisk2cheb('N', P, A, N, M); ft_execute_rectdisk_synthesis(SS, A, N, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME({ft_execute_rectdisk_analysis(SA, A, N, M); ft_execute_cheb2rectdisk(P, A, N, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_rectdisk_analysis(SA, A, N, M); ft_execute_cheb2rectdisk('N', P, A, N, M);}, start, end, NTIMES)
         printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);

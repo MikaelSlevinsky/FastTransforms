@@ -907,22 +907,42 @@ ft_harmonic_plan * ft_plan_tri2cheb(const int n, const double alpha, const doubl
     return P;
 }
 
-void ft_execute_tri2cheb(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    ft_execute_tri_hi2lo(P->RP[0], A, P->B, M);
-    if ((P->beta + P->gamma != -1.5) || (P->alpha != -0.5))
-        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P[0], N, A, N);
-    if ((P->gamma != -0.5) || (P->beta != -0.5))
-        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P[1], N, A, N);
-    chebyshev_normalization_2d(A, N, M);
+void ft_execute_tri2cheb(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    if (TRANS == 'N') {
+        ft_execute_tri_hi2lo(P->RP[0], A, P->B, M);
+        if ((P->beta + P->gamma != -1.5) || (P->alpha != -0.5))
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P[0], N, A, N);
+        if ((P->gamma != -0.5) || (P->beta != -0.5))
+            cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P[1], N, A, N);
+        chebyshev_normalization_2d(A, N, M);
+    }
+    else if (TRANS == 'T') {
+        chebyshev_normalization_2d(A, N, M);
+        if ((P->gamma != -0.5) || (P->beta != -0.5))
+            cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P[1], N, A, N);
+        if ((P->beta + P->gamma != -1.5) || (P->alpha != -0.5))
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P[0], N, A, N);
+        ft_execute_tri_lo2hi(P->RP[0], A, P->B, M);
+    }
 }
 
-void ft_execute_cheb2tri(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    chebyshev_normalization_2d_t(A, N, M);
-    if ((P->beta != -0.5) || (P->gamma != -0.5))
-        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->Pinv[1], N, A, N);
-    if ((P->alpha != -0.5) || (P->beta + P->gamma != -1.5))
-        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->Pinv[0], N, A, N);
-    ft_execute_tri_lo2hi(P->RP[0], A, P->B, M);
+void ft_execute_cheb2tri(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    if (TRANS == 'N') {
+        chebyshev_normalization_2d_t(A, N, M);
+        if ((P->beta != -0.5) || (P->gamma != -0.5))
+            cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->Pinv[1], N, A, N);
+        if ((P->alpha != -0.5) || (P->beta + P->gamma != -1.5))
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->Pinv[0], N, A, N);
+        ft_execute_tri_lo2hi(P->RP[0], A, P->B, M);
+    }
+    else if (TRANS == 'T') {
+        ft_execute_tri_hi2lo(P->RP[0], A, P->B, M);
+        if ((P->alpha != -0.5) || (P->beta + P->gamma != -1.5))
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->Pinv[0], N, A, N);
+        if ((P->beta != -0.5) || (P->gamma != -0.5))
+            cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->Pinv[1], N, A, N);
+        chebyshev_normalization_2d_t(A, N, M);
+    }
 }
 
 ft_harmonic_plan * ft_plan_disk2cxf(const int n, const double alpha, const double beta) {
@@ -954,20 +974,38 @@ ft_harmonic_plan * ft_plan_disk2cxf(const int n, const double alpha, const doubl
     return P;
 }
 
-void ft_execute_disk2cxf(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    ft_execute_disk_hi2lo(P->RP[0], A, P->B, M);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P[0], N, A, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P[1], N, A+N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P[1], N, A+2*N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P[0], N, A+3*N, 4*N);
+void ft_execute_disk2cxf(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    if (TRANS == 'N') {
+        ft_execute_disk_hi2lo(P->RP[0], A, P->B, M);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P[0], N, A, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P[1], N, A+N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P[1], N, A+2*N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->P[0], N, A+3*N, 4*N);
+    }
+    else if (TRANS == 'T') {
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->P[0], N, A, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->P[1], N, A+N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->P[1], N, A+2*N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, M/4, 1.0, P->P[0], N, A+3*N, 4*N);
+        ft_execute_disk_lo2hi(P->RP[0], A, P->B, M);
+    }
 }
 
-void ft_execute_cxf2disk(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->Pinv[0], N, A, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->Pinv[1], N, A+N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->Pinv[1], N, A+2*N, 4*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->Pinv[0], N, A+3*N, 4*N);
-    ft_execute_disk_lo2hi(P->RP[0], A, P->B, M);
+void ft_execute_cxf2disk(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    if (TRANS == 'N') {
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->Pinv[0], N, A, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->Pinv[1], N, A+N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->Pinv[1], N, A+2*N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/4, 1.0, P->Pinv[0], N, A+3*N, 4*N);
+        ft_execute_disk_lo2hi(P->RP[0], A, P->B, M);
+    }
+    else if (TRANS == 'T') {
+        ft_execute_disk_hi2lo(P->RP[0], A, P->B, M);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+3)/4, 1.0, P->Pinv[0], N, A, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+2)/4, 1.0, P->Pinv[1], N, A+N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+1)/4, 1.0, P->Pinv[1], N, A+2*N, 4*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, M/4, 1.0, P->Pinv[0], N, A+3*N, 4*N);
+    }
 }
 
 ft_harmonic_plan * ft_plan_rectdisk2cheb(const int n, const double beta) {
@@ -989,18 +1027,34 @@ ft_harmonic_plan * ft_plan_rectdisk2cheb(const int n, const double beta) {
     return P;
 }
 
-void ft_execute_rectdisk2cheb(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    ft_execute_rectdisk_hi2lo(P->RP[0], A, P->B, M);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/2, 1.0, P->P[0], N, A, 2*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/2, 1.0, P->P[1], N, A+N, 2*N);
-    cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P[2], N, A, N);
+void ft_execute_rectdisk2cheb(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    if (TRANS == 'N') {
+        ft_execute_rectdisk_hi2lo(P->RP[0], A, P->B, M);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/2, 1.0, P->P[0], N, A, 2*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/2, 1.0, P->P[1], N, A+N, 2*N);
+        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P[2], N, A, N);
+    }
+    else if (TRANS == 'T') {
+        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P[2], N, A, N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+1)/2, 1.0, P->P[0], N, A, 2*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, M/2, 1.0, P->P[1], N, A+N, 2*N);
+        ft_execute_rectdisk_lo2hi(P->RP[0], A, P->B, M);
+    }
 }
 
-void ft_execute_cheb2rectdisk(const ft_harmonic_plan * P, double * A, const int N, const int M) {
-    cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->Pinv[2], N, A, N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/2, 1.0, P->Pinv[0], N, A, 2*N);
-    cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/2, 1.0, P->Pinv[1], N, A+N, 2*N);
-    ft_execute_rectdisk_lo2hi(P->RP[0], A, P->B, M);
+void ft_execute_cheb2rectdisk(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    if (TRANS == 'N') {
+        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->Pinv[2], N, A, N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (M+1)/2, 1.0, P->Pinv[0], N, A, 2*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M/2, 1.0, P->Pinv[1], N, A+N, 2*N);
+        ft_execute_rectdisk_lo2hi(P->RP[0], A, P->B, M);
+    }
+    else if (TRANS == 'T') {
+        ft_execute_rectdisk_hi2lo(P->RP[0], A, P->B, M);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (M+1)/2, 1.0, P->Pinv[0], N, A, 2*N);
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, M/2, 1.0, P->Pinv[1], N, A+N, 2*N);
+        cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->Pinv[2], N, A, N);
+    }
 }
 
 ft_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha, const double beta, const double gamma, const double delta) {

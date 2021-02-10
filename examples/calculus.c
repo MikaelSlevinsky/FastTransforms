@@ -85,7 +85,7 @@ int main(void) {
     printf("\n");
 
     ft_execute_tri_analysis(PA, F, N, M);
-    ft_execute_cheb2tri(P, F, N, M);
+    ft_execute_cheb2tri('N', P, F, N, M);
 
     printf("Its Proriol-"MAGENTA("(α,β,γ)")" coefficients are:\n\n");
 
@@ -115,7 +115,7 @@ int main(void) {
     printf("These expressions are adapted from "CYAN("https://doi.org/10.1137/19M1245888")"\n");
 
     ft_execute_tri_analysis(PA, Fx, N, M);
-    ft_execute_cheb2tri(Px, Fx, N, M);
+    ft_execute_cheb2tri('N', Px, Fx, N, M);
 
     printmat("Ux from sampling", FMT, Fx, N, M);
     printf("\n");
@@ -138,7 +138,7 @@ int main(void) {
     printf("\n");
 
     ft_execute_tri_analysis(PA, Fy, N, M);
-    ft_execute_cheb2tri(Py, Fy, N, M);
+    ft_execute_cheb2tri('N', Py, Fy, N, M);
 
     printmat("Uy from sampling", FMT, Fy, N, M);
     printf("\n");

@@ -357,25 +357,25 @@ void ft_execute_fourier2sphv(const char TRANS, const ft_harmonic_plan * P, doubl
 ft_harmonic_plan * ft_plan_tri2cheb(const int n, const double alpha, const double beta, const double gamma);
 
 /// Transform a triangular harmonic expansion to a bivariate Chebyshev series.
-void ft_execute_tri2cheb(const ft_harmonic_plan * P, double * A, const int N, const int M);
+void ft_execute_tri2cheb(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
 /// Transform a bivariate Chebyshev series to a triangular harmonic expansion.
-void ft_execute_cheb2tri(const ft_harmonic_plan * P, double * A, const int N, const int M);
+void ft_execute_cheb2tri(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
 
 /// Plan a disk harmonic transform.
 ft_harmonic_plan * ft_plan_disk2cxf(const int n, const double alpha, const double beta);
 
 /// Transform a disk harmonic expansion to a Chebyshev--Fourier series.
-void ft_execute_disk2cxf(const ft_harmonic_plan * P, double * A, const int N, const int M);
+void ft_execute_disk2cxf(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
 /// Transform a Chebyshev--Fourier series to a disk harmonic expansion.
-void ft_execute_cxf2disk(const ft_harmonic_plan * P, double * A, const int N, const int M);
+void ft_execute_cxf2disk(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
 
 /// Plan a rectangularized disk harmonic transform.
 ft_harmonic_plan * ft_plan_rectdisk2cheb(const int n, const double beta);
 
 /// Transform a rectangularized disk harmonic expansion to a Chebyshev series.
-void ft_execute_rectdisk2cheb(const ft_harmonic_plan * P, double * A, const int N, const int M);
+void ft_execute_rectdisk2cheb(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
 /// Transform a Chebyshev series to a rectangularized disk harmonic expansion.
-void ft_execute_cheb2rectdisk(const ft_harmonic_plan * P, double * A, const int N, const int M);
+void ft_execute_cheb2rectdisk(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
 
 /// Plan a tetrahedral harmonic transform.
 ft_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha, const double beta, const double gamma, const double delta);

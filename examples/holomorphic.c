@@ -89,7 +89,7 @@ int main(void) {
     ft_disk_fftw_plan * PA = ft_plan_disk_analysis(N, M);
 
     ft_execute_disk_analysis(PA, F, N, M);
-    ft_execute_cxf2disk(P, F, N, M);
+    ft_execute_cxf2disk('N', P, F, N, M);
 
     printf("Its Zernike coefficients are:\n\n");
 
@@ -145,7 +145,7 @@ int main(void) {
     ft_rectdisk_fftw_plan * QA = ft_plan_rectdisk_analysis(N, M);
 
     ft_execute_rectdisk_analysis(QA, F, N, M);
-    ft_execute_cheb2rectdisk(P, F, N, M);
+    ft_execute_cheb2rectdisk('N', P, F, N, M);
 
     printf("Its Dunkl-Xu coefficients are:\n\n");
 
