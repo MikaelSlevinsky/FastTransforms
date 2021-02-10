@@ -453,9 +453,9 @@ ft_triangle_fftw_plan * ft_plan_tri_synthesis(const int N, const int M);
 ft_triangle_fftw_plan * ft_plan_tri_analysis(const int N, const int M);
 
 /// Execute FFTW synthesis on the triangle.
-void ft_execute_tri_synthesis(const ft_triangle_fftw_plan * P, double * X, const int N, const int M);
+void ft_execute_tri_synthesis(const char TRANS, const ft_triangle_fftw_plan * P, double * X, const int N, const int M);
 /// Execute FFTW analysis on the triangle.
-void ft_execute_tri_analysis(const ft_triangle_fftw_plan * P, double * X, const int N, const int M);
+void ft_execute_tri_analysis(const char TRANS, const ft_triangle_fftw_plan * P, double * X, const int N, const int M);
 
 typedef struct {
     fftw_plan planxyz;
@@ -467,8 +467,8 @@ ft_tetrahedron_fftw_plan * ft_plan_tet_with_kind(const int N, const int L, const
 ft_tetrahedron_fftw_plan * ft_plan_tet_synthesis(const int N, const int L, const int M);
 ft_tetrahedron_fftw_plan * ft_plan_tet_analysis(const int N, const int L, const int M);
 
-void ft_execute_tet_synthesis(const ft_tetrahedron_fftw_plan * P, double * X, const int N, const int L, const int M);
-void ft_execute_tet_analysis(const ft_tetrahedron_fftw_plan * P, double * X, const int N, const int L, const int M);
+void ft_execute_tet_synthesis(const char TRANS, const ft_tetrahedron_fftw_plan * P, double * X, const int N, const int L, const int M);
+void ft_execute_tet_analysis(const char TRANS, const ft_tetrahedron_fftw_plan * P, double * X, const int N, const int L, const int M);
 
 typedef struct {
     fftw_plan planr1;
@@ -489,9 +489,9 @@ ft_disk_fftw_plan * ft_plan_disk_synthesis(const int N, const int M);
 ft_disk_fftw_plan * ft_plan_disk_analysis(const int N, const int M);
 
 /// Execute FFTW synthesis on the disk.
-void ft_execute_disk_synthesis(const ft_disk_fftw_plan * P, double * X, const int N, const int M);
+void ft_execute_disk_synthesis(const char TRANS, const ft_disk_fftw_plan * P, double * X, const int N, const int M);
 /// Execute FFTW analysis on the disk.
-void ft_execute_disk_analysis(const ft_disk_fftw_plan * P, double * X, const int N, const int M);
+void ft_execute_disk_analysis(const char TRANS, const ft_disk_fftw_plan * P, double * X, const int N, const int M);
 
 typedef struct {
     fftw_plan planx1;
@@ -509,9 +509,9 @@ ft_rectdisk_fftw_plan * ft_plan_rectdisk_synthesis(const int N, const int M);
 ft_rectdisk_fftw_plan * ft_plan_rectdisk_analysis(const int N, const int M);
 
 /// Execute FFTW synthesis on the rectangularized disk.
-void ft_execute_rectdisk_synthesis(const ft_rectdisk_fftw_plan * P, double * X, const int N, const int M);
+void ft_execute_rectdisk_synthesis(const char TRANS, const ft_rectdisk_fftw_plan * P, double * X, const int N, const int M);
 /// Execute FFTW analysis on the rectangularized disk.
-void ft_execute_rectdisk_analysis(const ft_rectdisk_fftw_plan * P, double * X, const int N, const int M);
+void ft_execute_rectdisk_analysis(const char TRANS, const ft_rectdisk_fftw_plan * P, double * X, const int N, const int M);
 
 typedef struct {
     fftw_plan plantheta1;
@@ -526,6 +526,8 @@ typedef struct {
 /// Destroy a \ref ft_spinsphere_fftw_plan.
 void ft_destroy_spinsphere_fftw_plan(ft_spinsphere_fftw_plan * P);
 
+int ft_get_spin_spinsphere_fftw_plan(const ft_spinsphere_fftw_plan * P);
+
 ft_spinsphere_fftw_plan * ft_plan_spinsph_with_kind(const int N, const int M, const int S, const fftw_r2r_kind kind[2][1], const int sign);
 /// Plan FFTW synthesis on the sphere with spin.
 ft_spinsphere_fftw_plan * ft_plan_spinsph_synthesis(const int N, const int M, const int S);
@@ -533,9 +535,9 @@ ft_spinsphere_fftw_plan * ft_plan_spinsph_synthesis(const int N, const int M, co
 ft_spinsphere_fftw_plan * ft_plan_spinsph_analysis(const int N, const int M, const int S);
 
 /// Execute FFTW synthesis on the sphere with spin.
-void ft_execute_spinsph_synthesis(const ft_spinsphere_fftw_plan * P, ft_complex * X, const int N, const int M);
+void ft_execute_spinsph_synthesis(const char TRANS, const ft_spinsphere_fftw_plan * P, ft_complex * X, const int N, const int M);
 /// Execute FFTW analysis on the sphere with spin.
-void ft_execute_spinsph_analysis(const ft_spinsphere_fftw_plan * P, ft_complex * X, const int N, const int M);
+void ft_execute_spinsph_analysis(const char TRANS, const ft_spinsphere_fftw_plan * P, ft_complex * X, const int N, const int M);
 
 typedef struct {
     ft_banded ** B;

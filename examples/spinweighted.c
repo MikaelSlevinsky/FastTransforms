@@ -70,7 +70,7 @@ int main(void) {
     ft_spin_harmonic_plan * P = ft_plan_spinsph2fourier(N, 0);
     ft_spinsphere_fftw_plan * PA = ft_plan_spinsph_analysis(N, M, 0);
 
-    ft_execute_spinsph_analysis(PA, F, N, M);
+    ft_execute_spinsph_analysis('N', PA, F, N, M);
     ft_execute_fourier2spinsph('N', P, F, N, M);
 
     printf("Its spin-0 spherical harmonic coefficients are:\n\n");
@@ -108,7 +108,7 @@ int main(void) {
     P = ft_plan_spinsph2fourier(N, 1);
     PA = ft_plan_spinsph_analysis(N, M, 1);
 
-    ft_execute_spinsph_analysis(PA, F, N, M);
+    ft_execute_spinsph_analysis('N', PA, F, N, M);
     ft_execute_fourier2spinsph('N', P, F, N, M);
 
     printmat("U¹sampling", FMT, (double *) F, 2*N, M);

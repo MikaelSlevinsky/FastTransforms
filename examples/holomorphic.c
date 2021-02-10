@@ -88,7 +88,7 @@ int main(void) {
     ft_harmonic_plan * P = ft_plan_disk2cxf(N, alpha, beta);
     ft_disk_fftw_plan * PA = ft_plan_disk_analysis(N, M);
 
-    ft_execute_disk_analysis(PA, F, N, M);
+    ft_execute_disk_analysis('N', PA, F, N, M);
     ft_execute_cxf2disk('N', P, F, N, M);
 
     printf("Its Zernike coefficients are:\n\n");
@@ -144,7 +144,7 @@ int main(void) {
     P = ft_plan_rectdisk2cheb(N, beta);
     ft_rectdisk_fftw_plan * QA = ft_plan_rectdisk_analysis(N, M);
 
-    ft_execute_rectdisk_analysis(QA, F, N, M);
+    ft_execute_rectdisk_analysis('N', QA, F, N, M);
     ft_execute_cheb2rectdisk('N', P, F, N, M);
 
     printf("Its Dunkl-Xu coefficients are:\n\n");
