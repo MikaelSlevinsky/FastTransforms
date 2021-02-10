@@ -344,10 +344,10 @@ int main(int argc, const char * argv[]) {
         TS = ft_plan_tet_synthesis(N, L, M);
         TA = ft_plan_tet_analysis(N, L, M);
 
-        ft_execute_tet2cheb(P, A, N, L, M);
+        ft_execute_tet2cheb('N', P, A, N, L, M);
         ft_execute_tet_synthesis(TS, A, N, L, M);
         ft_execute_tet_analysis(TA, A, N, L, M);
-        ft_execute_cheb2tet(P, A, N, L, M);
+        ft_execute_cheb2tet('N', P, A, N, L, M);
 
         err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
         printf("ϵ_2 \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
@@ -375,10 +375,10 @@ int main(int argc, const char * argv[]) {
         TS = ft_plan_tet_synthesis(N, L, M);
         TA = ft_plan_tet_analysis(N, L, M);
 
-        FT_TIME({ft_execute_tet2cheb(P, A, N, L, M); ft_execute_tet_synthesis(TS, A, N, L, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_tet2cheb('N', P, A, N, L, M); ft_execute_tet_synthesis(TS, A, N, L, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME({ft_execute_tet_analysis(TA, A, N, L, M); ft_execute_cheb2tet(P, A, N, L, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_tet_analysis(TA, A, N, L, M); ft_execute_cheb2tet('N', P, A, N, L, M);}, start, end, NTIMES)
         printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);

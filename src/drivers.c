@@ -1080,34 +1080,66 @@ ft_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha, const doubl
     return P;
 }
 
-void ft_execute_tet2cheb(const ft_harmonic_plan * P, double * A, const int N, const int L, const int M) {
-    execute_tet_hi2lo_AVX(P->RP[0], P->RP[1], A, P->B, L, M);
-    if ((P->beta + P->gamma + P->delta != -2.5) || (P->alpha != -0.5))
-        for (int m = 0; m < M; m++)
-            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P[0], N, A+N*L*m, N);
-    if ((P->gamma + P->delta != -1.5) || (P->beta != -0.5))
-        for (int m = 0; m < M; m++)
-            cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, L, 1.0, P->P[1], N, A+N*L*m, N);
-    if ((P->delta != -0.5) || (P->gamma != -0.5))
-        for (int n = 0; n < N; n++)
-            for (int l = 0; l < L; l++)
-                cblas_dtrmv(CblasColMajor, CblasUpper, CblasTrans, CblasNonUnit, N, P->P[2], N, A+n+N*l, N*L);
-    chebyshev_normalization_3d(A, N, L, M);
+void ft_execute_tet2cheb(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M) {
+    if (TRANS == 'N') {
+        execute_tet_hi2lo_AVX(P->RP[0], P->RP[1], A, P->B, L, M);
+        if ((P->beta + P->gamma + P->delta != -2.5) || (P->alpha != -0.5))
+            for (int m = 0; m < M; m++)
+                cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P[0], N, A+N*L*m, N);
+        if ((P->gamma + P->delta != -1.5) || (P->beta != -0.5))
+            for (int m = 0; m < M; m++)
+                cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, L, 1.0, P->P[1], N, A+N*L*m, N);
+        if ((P->delta != -0.5) || (P->gamma != -0.5))
+            for (int n = 0; n < N; n++)
+                for (int l = 0; l < L; l++)
+                    cblas_dtrmv(CblasColMajor, CblasUpper, CblasTrans, CblasNonUnit, N, P->P[2], N, A+n+N*l, N*L);
+        chebyshev_normalization_3d(A, N, L, M);
+    }
+    else if (TRANS == 'T') {
+        chebyshev_normalization_3d(A, N, L, M);
+        if ((P->gamma != -0.5) || (P->delta != -0.5))
+            for (int n = 0; n < N; n++)
+                for (int l = 0; l < L; l++)
+                    cblas_dtrmv(CblasColMajor, CblasUpper, CblasNoTrans, CblasNonUnit, N, P->P[2], N, A+n+N*l, N*L);
+        if ((P->beta != -0.5) || (P->gamma + P->delta != -1.5))
+            for (int m = 0; m < M; m++)
+                cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->P[1], N, A+N*L*m, N);
+        if ((P->alpha != -0.5) || (P->beta + P->gamma + P->delta != -2.5))
+            for (int m = 0; m < M; m++)
+                cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, L, 1.0, P->P[0], N, A+N*L*m, N);
+        execute_tet_lo2hi_AVX(P->RP[0], P->RP[1], A, P->B, L, M);
+    }
 }
 
-void ft_execute_cheb2tet(const ft_harmonic_plan * P, double * A, const int N, const int L, const int M) {
-    chebyshev_normalization_3d_t(A, N, L, M);
-    if ((P->gamma != -0.5) || (P->delta != -0.5))
-        for (int n = 0; n < N; n++)
-            for (int l = 0; l < L; l++)
-                cblas_dtrmv(CblasColMajor, CblasUpper, CblasTrans, CblasNonUnit, N, P->Pinv[2], N, A+n+N*l, N*L);
-    if ((P->beta != -0.5) || (P->gamma + P->delta != -1.5))
-        for (int m = 0; m < M; m++)
-            cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, L, 1.0, P->Pinv[1], N, A+N*L*m, N);
-    if ((P->alpha != -0.5) || (P->beta + P->gamma + P->delta != -2.5))
-        for (int m = 0; m < M; m++)
-            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->Pinv[0], N, A+N*L*m, N);
-    execute_tet_lo2hi_AVX(P->RP[0], P->RP[1], A, P->B, L, M);
+void ft_execute_cheb2tet(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M) {
+    if (TRANS == 'N') {
+        chebyshev_normalization_3d_t(A, N, L, M);
+        if ((P->gamma != -0.5) || (P->delta != -0.5))
+            for (int n = 0; n < N; n++)
+                for (int l = 0; l < L; l++)
+                    cblas_dtrmv(CblasColMajor, CblasUpper, CblasTrans, CblasNonUnit, N, P->Pinv[2], N, A+n+N*l, N*L);
+        if ((P->beta != -0.5) || (P->gamma + P->delta != -1.5))
+            for (int m = 0; m < M; m++)
+                cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, L, 1.0, P->Pinv[1], N, A+N*L*m, N);
+        if ((P->alpha != -0.5) || (P->beta + P->gamma + P->delta != -2.5))
+            for (int m = 0; m < M; m++)
+                cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->Pinv[0], N, A+N*L*m, N);
+        execute_tet_lo2hi_AVX(P->RP[0], P->RP[1], A, P->B, L, M);
+    }
+    else if (TRANS == 'T') {
+        execute_tet_hi2lo_AVX(P->RP[0], P->RP[1], A, P->B, L, M);
+        if ((P->beta + P->gamma + P->delta != -2.5) || (P->alpha != -0.5))
+            for (int m = 0; m < M; m++)
+                cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, L, 1.0, P->Pinv[0], N, A+N*L*m, N);
+        if ((P->gamma + P->delta != -1.5) || (P->beta != -0.5))
+            for (int m = 0; m < M; m++)
+                cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P->Pinv[1], N, A+N*L*m, N);
+        if ((P->delta != -0.5) || (P->gamma != -0.5))
+            for (int n = 0; n < N; n++)
+                for (int l = 0; l < L; l++)
+                    cblas_dtrmv(CblasColMajor, CblasUpper, CblasNoTrans, CblasNonUnit, N, P->Pinv[2], N, A+n+N*l, N*L);
+        chebyshev_normalization_3d_t(A, N, L, M);
+    }
 }
 
 void ft_destroy_spin_harmonic_plan(ft_spin_harmonic_plan * P) {

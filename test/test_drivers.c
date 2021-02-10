@@ -1232,8 +1232,8 @@ int main(int argc, const char * argv[]) {
         B = copymat(A, N, L*M);
         P = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
 
-        ft_execute_tet2cheb(P, A, N, L, M);
-        ft_execute_cheb2tet(P, A, N, L, M);
+        ft_execute_tet2cheb('N', P, A, N, L, M);
+        ft_execute_cheb2tet('N', P, A, N, L, M);
 
         err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
         printf("ϵ_2 \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
@@ -1241,6 +1241,16 @@ int main(int argc, const char * argv[]) {
         err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
         printf("ϵ_∞ \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
         ft_checktest(err, 4*pow(N*L*M, 2.0/3.0), &checksum);
+
+        ft_execute_tet2cheb('T', P, A, N, L, M);
+        ft_execute_cheb2tet('T', P, A, N, L, M);
+
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 tranposed \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 64*pow(N*L*M, 2.0/3.0), &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ tranposed \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 32*pow(N*L*M, 3.0/3.0), &checksum);
 
         free(A);
         free(B);
@@ -1257,10 +1267,10 @@ int main(int argc, const char * argv[]) {
         A = tetrand(N, L, M);
         P = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
 
-        FT_TIME(ft_execute_tet2cheb(P, A, N, L, M), start, end, NTIMES)
+        FT_TIME(ft_execute_tet2cheb('N', P, A, N, L, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_cheb2tet(P, A, N, L, M), start, end, NTIMES)
+        FT_TIME(ft_execute_cheb2tet('N', P, A, N, L, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
         printf("\n");
