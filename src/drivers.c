@@ -718,10 +718,10 @@ void execute_spinsph_hi2lo_AVX(const ft_spin_rotation_plan * SRP, ft_complex * A
     int N = SRP->n;
     double * AD = (double *) A;
     double * BD = (double *) B;
+    kernel_spinsph_hi2lo_default(SRP, 0, A, 1);
+    kernel_spinsph_hi2lo_default(SRP, -1, A + N, 1);
+    kernel_spinsph_hi2lo_default(SRP, 1, A + 2*N, 1);
     permute_sph(AD, BD, 2*N, M, 2);
-    kernel_spinsph_hi2lo_default(SRP, 0, B, 1);
-    kernel_spinsph_hi2lo_default(SRP, -1, B + N, 1);
-    kernel_spinsph_hi2lo_default(SRP, 1, B + 2*N, 1);
     #pragma omp parallel
     for (int m = 2+FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
         kernel_spinsph_hi2lo_AVX(SRP, m, B + N*(2*m-1), 2);
@@ -732,10 +732,10 @@ void execute_spinsph_lo2hi_AVX(const ft_spin_rotation_plan * SRP, ft_complex * A
     int N = SRP->n;
     double * AD = (double *) A;
     double * BD = (double *) B;
+    kernel_spinsph_lo2hi_default(SRP, 0, A, 1);
+    kernel_spinsph_lo2hi_default(SRP, -1, A + N, 1);
+    kernel_spinsph_lo2hi_default(SRP, 1, A + 2*N, 1);
     permute_sph(AD, BD, 2*N, M, 2);
-    kernel_spinsph_lo2hi_default(SRP, 0, B, 1);
-    kernel_spinsph_lo2hi_default(SRP, -1, B + N, 1);
-    kernel_spinsph_lo2hi_default(SRP, 1, B + 2*N, 1);
     #pragma omp parallel
     for (int m = 2+FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
         kernel_spinsph_lo2hi_AVX(SRP, m, B + N*(2*m-1), 2);
@@ -746,10 +746,10 @@ void execute_spinsph_hi2lo_AVX_FMA(const ft_spin_rotation_plan * SRP, ft_complex
     int N = SRP->n;
     double * AD = (double *) A;
     double * BD = (double *) B;
+    kernel_spinsph_hi2lo_default(SRP, 0, A, 1);
+    kernel_spinsph_hi2lo_default(SRP, -1, A + N, 1);
+    kernel_spinsph_hi2lo_default(SRP, 1, A + 2*N, 1);
     permute_sph(AD, BD, 2*N, M, 2);
-    kernel_spinsph_hi2lo_default(SRP, 0, B, 1);
-    kernel_spinsph_hi2lo_default(SRP, -1, B + N, 1);
-    kernel_spinsph_hi2lo_default(SRP, 1, B + 2*N, 1);
     #pragma omp parallel
     for (int m = 2+FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
         kernel_spinsph_hi2lo_AVX_FMA(SRP, m, B + N*(2*m-1), 2);
@@ -760,10 +760,10 @@ void execute_spinsph_lo2hi_AVX_FMA(const ft_spin_rotation_plan * SRP, ft_complex
     int N = SRP->n;
     double * AD = (double *) A;
     double * BD = (double *) B;
+    kernel_spinsph_lo2hi_default(SRP, 0, A, 1);
+    kernel_spinsph_lo2hi_default(SRP, -1, A + N, 1);
+    kernel_spinsph_lo2hi_default(SRP, 1, A + 2*N, 1);
     permute_sph(AD, BD, 2*N, M, 2);
-    kernel_spinsph_lo2hi_default(SRP, 0, B, 1);
-    kernel_spinsph_lo2hi_default(SRP, -1, B + N, 1);
-    kernel_spinsph_lo2hi_default(SRP, 1, B + 2*N, 1);
     #pragma omp parallel
     for (int m = 2+FT_GET_THREAD_NUM(); m <= M/2; m += FT_GET_NUM_THREADS())
         kernel_spinsph_lo2hi_AVX_FMA(SRP, m, B + N*(2*m-1), 2);
