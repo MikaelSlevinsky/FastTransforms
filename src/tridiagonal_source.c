@@ -4,6 +4,11 @@ void X(destroy_symmetric_tridiagonal)(X(symmetric_tridiagonal) * A) {
     free(A);
 }
 
+void X(destroy_skew_symmetric_tridiagonal)(X(skew_symmetric_tridiagonal) * A) {
+    free(A->b);
+    free(A);
+}
+
 void X(destroy_bidiagonal)(X(bidiagonal) * B) {
     free(B->c);
     free(B->d);
@@ -49,6 +54,26 @@ void X(stmv)(char TRANS, FLT alpha, X(symmetric_tridiagonal) * A, FLT * x, FLT b
         for (int i = 1; i < n-1; i++)
             y[i] += alpha*(b[i-1]*x[i-1] + a[i]*x[i] + b[i]*x[i+1]);
         y[n-1] += alpha*(b[n-2]*x[n-2] + a[n-1]*x[n-1]);
+    }
+}
+
+// y ← α*A*x + β*y, y ← α*Aᵀ*x + β*y
+void X(ktmv)(char TRANS, FLT alpha, X(skew_symmetric_tridiagonal) * A, FLT * x, FLT beta, FLT * y) {
+    int n = A->n;
+    FLT * b = A->b;
+    for (int i = 0; i < n; i++)
+        y[i] = beta*y[i];
+    if (TRANS == 'N') {
+        y[0] += alpha*b[0]*x[1];
+        for (int i = 1; i < n-1; i++)
+            y[i] -= alpha*(b[i-1]*x[i-1] - b[i]*x[i+1]);
+        y[n-1] -= alpha*b[n-2]*x[n-2];
+    }
+    else if (TRANS == 'T') {
+        y[0] -= alpha*b[0]*x[1];
+        for (int i = 1; i < n-1; i++)
+            y[i] += alpha*(b[i-1]*x[i-1] - b[i]*x[i+1]);
+        y[n-1] += alpha*b[n-2]*x[n-2];
     }
 }
 
@@ -350,6 +375,26 @@ void X(semv)(X(symmetric_tridiagonal_symmetric_eigen) * F, FLT * x, int incx, FL
     X(eigen_eval)(F->n, x, incx, F->A, F->B, F->C, F->n, F->lambda, F->sign, y);
 }
 
+// AᵀA = B ⊕ C
+void X(skew_to_symmetric_tridiagonal)(X(skew_symmetric_tridiagonal) * A, X(symmetric_tridiagonal) * B, X(symmetric_tridiagonal) * C) {
+    int n = A->n;
+    FLT * b = A->b;
+    if (n > 0)
+        B->a[0] = b[0]*b[0];
+    for (int i = 1; i < n/2; i++)
+        B->a[i] = (b[2*i-1]*b[2*i-1] + b[2*i]*b[2*i]);
+    if (n%2)
+        B->a[n/2] = b[n-2]*b[n-2];
+    for (int i = 0; i < (n-1)/2; i++)
+        B->b[i] = -b[2*i]*b[2*i+1];
+    for (int i = 0; i < (n-1)/2; i++)
+        C->a[i] = (b[2*i]*b[2*i] + b[2*i+1]*b[2*i+1]);
+    if (n%2 == 0)
+        C->a[n/2-1] = b[n-2]*b[n-2];
+    for (int i = 0; i < n/2-1; i++)
+        C->b[i] = -b[2*i+1]*b[2*i+2];
+}
+
 X(symmetric_tridiagonal) * X(create_A_shtsdtev)(const int n, const int mu, const int m, char PARITY) {
     X(symmetric_tridiagonal) * A = malloc(sizeof(X(symmetric_tridiagonal)));
     int shft;
@@ -431,4 +476,20 @@ X(bidiagonal) * X(create_R_shtsdtev)(const int n, const int m, char PARITY) {
     R->c = c;
     R->d = d;
     return R;
+}
+
+// n is the polynomial degree
+X(skew_symmetric_tridiagonal) * X(create_rectdisk_angular_momentum)(const int n, const FLT beta) {
+    X(skew_symmetric_tridiagonal) * A = malloc(sizeof(X(skew_symmetric_tridiagonal)));
+    FLT num, den, * b = malloc(n*sizeof(FLT));
+    if (n > 0)
+        b[0] = Y(sqrt)(n*(n+2*beta+2)/(2*beta+3));
+    for (int k = 1; k < n; k++) {
+        num = (k+1)*(k+2*beta+1)*(n-k)*(n+k+2*beta+2);
+        den = (2*k+2*beta+1)*(2*k+2*beta+3);
+        b[k] = Y(sqrt)(num/den);
+    }
+    A->n = n+1;
+    A->b = b;
+    return A;
 }

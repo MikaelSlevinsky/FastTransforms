@@ -151,11 +151,47 @@ void Y(test_tridiagonal)(int * checksum) {
     printf("Numerical symmetric orthogonality w/ known eigenvalues \t |%20.2e ", (double) err);
     X(checktest)(err, n*n, checksum);
 
+    X(skew_symmetric_tridiagonal) * E = X(create_rectdisk_angular_momentum)(n-1, beta);
+    FLT * DE = calloc(n*n, sizeof(FLT));
+    FLT * DEtE = calloc(n*n, sizeof(FLT));
+    for (int j = 0; j < n; j++) {
+        X(ktmv)('N', 1, E, Id+j*n, 0, DE+j*n);
+        X(ktmv)('T', 1, E, DE+j*n, 0, DEtE+j*n);
+    }
+
+    X(symmetric_tridiagonal) * E1 = malloc(sizeof(X(symmetric_tridiagonal)));
+    E1->a = calloc((n+1)/2, sizeof(FLT));
+    E1->b = calloc((n-1)/2, sizeof(FLT));
+    E1->n = (n+1)/2;
+
+    X(symmetric_tridiagonal) * E2 = malloc(sizeof(X(symmetric_tridiagonal)));
+    E2->a = calloc(n/2, sizeof(FLT));
+    E2->b = calloc(n/2-1, sizeof(FLT));
+    E2->n = n/2;
+
+    X(skew_to_symmetric_tridiagonal)(E, E1, E2);
+
+    err = 0;
+    for (int i = 0; i < E1->n; i++)
+        err += (E1->a[i] - DEtE[2*i+2*i*n])*(E1->a[i] - DEtE[2*i+2*i*n]);
+    for (int i = 0; i < E1->n-1; i++)
+        err += (E1->b[i] - DEtE[2*i+2+2*i*n])*(E1->b[i] - DEtE[2*i+2+2*i*n]);
+    for (int i = 0; i < E2->n; i++)
+        err += (E2->a[i] - DEtE[2*i+1+(2*i+1)*n])*(E2->a[i] - DEtE[2*i+1+(2*i+1)*n]);
+    for (int i = 0; i < E2->n-1; i++)
+        err += (E2->b[i] - DEtE[2*i+3+(2*i+1)*n])*(E2->b[i] - DEtE[2*i+3+(2*i+1)*n]);
+
+    printf("Skew-symmetric to symmetric tridiagonal pair AᵀA = B ⊕ C |%20.2e ", (double) err);
+    X(checktest)(err, n, checksum);
+
     X(destroy_symmetric_tridiagonal)(A);
     X(destroy_symmetric_tridiagonal)(C);
     X(destroy_symmetric_tridiagonal)(D);
+    X(destroy_symmetric_tridiagonal)(E1);
+    X(destroy_symmetric_tridiagonal)(E2);
     X(destroy_symmetric_tridiagonal)(T);
     X(destroy_symmetric_tridiagonal)(S);
+    X(destroy_skew_symmetric_tridiagonal)(E);
     X(destroy_bidiagonal)(B);
     X(destroy_bidiagonal)(R);
     X(destroy_symmetric_tridiagonal_symmetric_eigen)(F);
@@ -168,6 +204,8 @@ void Y(test_tridiagonal)(int * checksum) {
     free(VtBV);
     free(Id);
     free(QtQ);
+    free(DE);
+    free(DEtE);
     free(lambda);
     free(lambda_true);
 }
