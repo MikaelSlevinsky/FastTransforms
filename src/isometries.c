@@ -201,8 +201,61 @@ static inline double Gz_index(int l, int i, int j) {
         return 0.0;
 }
 
+static inline double Gy_index_squared_i_plus_j_eq_2l(int l, int i, int j) {
+    double num, den;
+	if (l+2 <= i && i <= 2*l) {
+        num = (j+1)*(j+2);
+        den = (2*l+1)*(2*l+3);
+        return 0.25*num/den;
+    }
+	else if (0 <= i && i <= l-1) {
+        num = (2*l+1-i)*(2*l+2-i);
+        den = (2*l+1)*(2*l+3);
+        return 0.25*num/den;
+    }
+	else if (i == l+1 && j == l-1) {
+        num = 2*l*(l+1);
+        den = (2*l+1)*(2*l+3);
+        return 0.25*num/den;
+    }
+	else if (i == l && j == l) {
+        num = 2*(l+1)*(l+2);
+        den = (2*l+1)*(2*l+3);
+        return 0.25*num/den;
+    }
+    else
+        return 0.0;
+}
+static inline double Gy_index_squared_i_plus_j_eq_2l_plus_2(int l, int i, int j) {
+    double num, den;
+ if (2 <= i && i <= l) {
+        num = (i-1)*i;
+        den = (2*l+1)*(2*l+3);
+        return 0.25*num/den;
+    }
+	else if (l+3 <= i && i <= 2*l+2) {
+        num = (2*l+1-j)*(2*l+2-j);
+        den = (2*l+1)*(2*l+3);
+        return 0.25*num/den;
+    }
+ else
+   return 0.0;
+}
+
 static inline double Y_index(int l, int i, int j) {
     return Gy_index(l, 2*l-i, i)*Gy_index(l, 2*l-i, j) + Gy_index(l, 2*l-i+1, i)*Gy_index(l, 2*l-i+1, j) + Gy_index(l, 2*l-i+2, i)*Gy_index(l, 2*l-i+2, j);
+}
+
+static inline double Y_index_j_eq_i(int l, int i) {
+    return Gy_index_squared_i_plus_j_eq_2l(l, 2*l-i, i)
+//         + Gy_index(l, 2*l-i+1, i)*Gy_index(l, 2*l-i+1, i)  // this term is always zero
+         + Gy_index_squared_i_plus_j_eq_2l_plus_2(l, 2*l-i+2, i);
+}
+
+static inline double Y_index_j_eq_i_plus_2(int l, int i) {
+    return Gy_index(l, 2*l-i, i)*Gy_index(l, 2*l-i, i+2);
+//         + Gy_index(l, 2*l-i+1, i)*Gy_index(l, 2*l-i+1, i+2)  // this term is always zero
+//         + Gy_index(l, 2*l-i+2, i)*Gy_index(l, 2*l-i+2, i+2); // this term is always zero
 }
 
 static inline double Z_index(int l, int i, int j) {
@@ -238,9 +291,9 @@ ft_partial_sph_isometry_plan * ft_plan_partial_sph_isometry(const int l) {
     double * b11 = malloc((n11-1)*sizeof(double));
 
     for (int i = 0; i < n11; i++)
-        a11[n11-1-i] = Y_index(l, 2*i+1, 2*i+1);
+        a11[n11-1-i] = Y_index_j_eq_i(l, 2*i+1);
     for (int i = 0; i < n11-1; i++)
-        b11[n11-2-i] = Y_index(l, 2*i+1, 2*i+3);
+        b11[n11-2-i] = Y_index_j_eq_i_plus_2(l, 2*i+1);
 
     Y11->a = a11;
     Y11->b = b11;
@@ -260,9 +313,9 @@ ft_partial_sph_isometry_plan * ft_plan_partial_sph_isometry(const int l) {
     double * b21 = malloc((n21-1)*sizeof(double));
 
     for (int i = 0; i < n21; i++)
-        a21[n21-1-i] = Y_index(l, 2*i, 2*i);
+        a21[n21-1-i] = Y_index_j_eq_i(l, 2*i);
     for (int i = 0; i < n21-1; i++)
-        b21[n21-2-i] = Y_index(l, 2*i, 2*i+2);
+        b21[n21-2-i] = Y_index_j_eq_i_plus_2(l, 2*i);
 
     Y21->a = a21;
     Y21->b = b21;
@@ -282,9 +335,9 @@ ft_partial_sph_isometry_plan * ft_plan_partial_sph_isometry(const int l) {
     double * b12 = malloc((n12-1)*sizeof(double));
 
     for (int i = 0; i < n12; i++)
-        a12[i] = Y_index(l, 2*i+l-l%2+1, 2*i+l-l%2+1);
+        a12[i] = Y_index_j_eq_i(l, 2*i+l-l%2+1);
     for (int i = 0; i < n12-1; i++)
-        b12[i] = Y_index(l, 2*i+l-l%2+1, 2*i+l-l%2+3);
+        b12[i] = Y_index_j_eq_i_plus_2(l, 2*i+l-l%2+1);
 
     Y12->a = a12;
     Y12->b = b12;
@@ -302,9 +355,9 @@ ft_partial_sph_isometry_plan * ft_plan_partial_sph_isometry(const int l) {
     double * b22 = malloc((n22-1)*sizeof(double));
 
     for (int i = 0; i < n22; i++)
-        a22[i] = Y_index(l, 2*i+l+l%2, 2*i+l+l%2);
+        a22[i] = Y_index_j_eq_i(l, 2*i+l+l%2);
     for (int i = 0; i < n22-1; i++)
-        b22[i] = Y_index(l, 2*i+l+l%2, 2*i+l+l%2+2);
+        b22[i] = Y_index_j_eq_i_plus_2(l, 2*i+l+l%2);
 
     Y22->a = a22;
     Y22->b = b22;
