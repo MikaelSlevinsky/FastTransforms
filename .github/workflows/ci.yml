@@ -25,6 +25,8 @@ jobs:
           - os: macOS-latest
             arch: aarch64
       fail-fast: false
+    env:
+      CC: ${{ matrix.compiler }}
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies on ubuntu
@@ -40,18 +42,18 @@ jobs:
       - name: Compiler version
         run: cc --version
       - name: Build assembly
-        run: make assembly CC=${{ matrix.compiler }}
+        run: make assembly
       - name: Build library
-        run: make lib CC=${{ matrix.compiler }}
+        run: make lib
       - name: Build tests
-        run: make tests CC=${{ matrix.compiler }}
+        run: make tests
       - name: Build examples
-        run: make examples CC=${{ matrix.compiler }}
+        run: make examples
       - name: Run tests
         run: |
           export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.
-          make runtests CC=${{ matrix.compiler }} FT_NUM_THREADS=2
+          make runtests FT_NUM_THREADS=2
       - name: Run examples
         run: |
           export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.
-          make runexamples CC=${{ matrix.compiler }}
+          make runexamples
