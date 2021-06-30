@@ -40,8 +40,11 @@ jobs:
       - name: Compiler version
         run: cc --version
       - name: Build library
-        run: make
-      - name: Run tests
-        run: make runtests FT_NUM_THREADS=2
-      - name: Run examples
-        run: make runexamples
+        run: |
+          make
+            make runtests FT_NUM_THREADS=2
+            make runexamples
+      #- name: Run tests
+    #    run: make runtests FT_NUM_THREADS=2
+     # - name: Run examples
+    #    run: make runexamples
