@@ -41,6 +41,8 @@ jobs:
         run: cc --version
       - name: Build library
         run: |
+          echo $GITHUB_WORKSPACE
+          echo $GITHUB_WORKSPACE
           echo $LD_LIBRARY_PATH
           make
             make runtests FT_NUM_THREADS=2
