@@ -160,11 +160,7 @@ ifndef FT_OPENMP
             FT_OPENMP := -fopenmp
         endif
     else
-        ifneq (, $(findstring clang, $(shell $(CC) --version)))
-            FT_OPENMP := -fopenmp -lomp
-        else
-            FT_OPENMP := -fopenmp
-        endif
+        FT_OPENMP := -fopenmp
     endif
 endif
 
