@@ -8,13 +8,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        compiler:
-          - gcc
-          - clang
         os:
           - ubuntu-latest
           - macOS-latest
           - windows-latest
+        compiler:
+          - gcc
+          - clang
         arch:
           - x86
           - x64
@@ -30,9 +30,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install libomp-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
           export CC=${{ matrix.compiler }}
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GITHUB_WORKSPACE
-        env:
-          LD_LIBRARY_PATH: .
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GITHUB_WORKSPACE/FastTransforms
       - name: Install dependencies on macOS
         if: startsWith(matrix.os, 'macOS')
         run: |
