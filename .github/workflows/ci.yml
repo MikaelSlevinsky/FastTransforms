@@ -11,16 +11,19 @@ jobs:
         os:
           - ubuntu-latest
           - macOS-latest
-          - windows-latest
+          #- windows-latest
         compiler:
           - gcc
           - clang
         arch:
           - x86
           - x64
+          - aarch64
         exclude:
           - os: macOS-latest
-            arch: x86
+            arch:
+              - x86
+              - aarch64
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
@@ -30,7 +33,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install libomp-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
           export CC=${{ matrix.compiler }}
-          export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${GITHUB_WORKSPACE}
       - name: Install dependencies on macOS
         if: startsWith(matrix.os, 'macOS')
         run: |
@@ -39,15 +41,19 @@ jobs:
           export CC=${{ matrix.compiler }}
       - name: Compiler version
         run: cc --version
+      - name: Build assembly
+        run: make assembly
       - name: Build library
+        run: make lib
+      - name: Build tests
+        run: make tests
+      - name: Build examples
+        run: make examples
+      - name: Run tests
         run: |
           export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.
-          echo $LD_LIBRARY_PATH
-          echo $LD_LIBRARY_PATH
-          make
-            make runtests FT_NUM_THREADS=2
-            make runexamples
-      #- name: Run tests
-    #    run: make runtests FT_NUM_THREADS=2
-     # - name: Run examples
-    #    run: make runexamples
+          make runtests FT_NUM_THREADS=2
+      - name: Run examples
+        run: |
+          export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.
+          make runexamples
