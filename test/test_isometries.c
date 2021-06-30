@@ -97,30 +97,30 @@ int main(int argc, const char * argv[]) {
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 J^2 \t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
-        ft_checktest(err, N*sqrt(N), &checksum);
+        ft_checktest(err, N, &checksum);
         err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
         printf("ϵ_∞ J^2 \t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
-        ft_checktest(err, N*N, &checksum);
+        ft_checktest(err, 16*N, &checksum);
 
         ft_execute_sph_rotation(J, alpha, beta, gamma, A, N, M);
         ft_execute_sph_rotation(J, -gamma, -beta, -alpha, A, N, M);
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 rotation \t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
-        ft_checktest(err, N*sqrt(N), &checksum);
+        ft_checktest(err, N, &checksum);
         err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
         printf("ϵ_∞ rotation \t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
-        ft_checktest(err, N*N, &checksum);
+        ft_checktest(err, 16*N, &checksum);
 
         ft_execute_sph_reflection(J, W, A, N, M);
         ft_execute_sph_reflection(J, W, A, N, M);
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 reflection \t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
-        ft_checktest(err, N*sqrt(N), &checksum);
+        ft_checktest(err, N, &checksum);
         err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
         printf("ϵ_∞ reflection \t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
-        ft_checktest(err, N*N, &checksum);
+        ft_checktest(err, 16*N, &checksum);
 
         free(A);
         free(B);
