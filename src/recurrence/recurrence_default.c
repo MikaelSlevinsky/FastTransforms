@@ -124,7 +124,7 @@ void eigen_eval_default(const int n, const double * c, const int incc, const dou
         double X = x[j];
         f[j] = c[(n-1)*incc];
         for (int k = n-1; k > 0; k--) {
-            vkm1 = (A[k]*X+B[k])*vk - C[k]*vkp1;
+            vkm1 = A[k]*((X+B[k])*vk + C[k]*vkp1);
             vkp1 = vk;
             vk = vkm1;
             nrm += vkm1*vkm1;
@@ -157,7 +157,7 @@ void eigen_eval_defaultf(const int n, const float * c, const int incc, const flo
         float X = x[j];
         f[j] = c[(n-1)*incc];
         for (int k = n-1; k > 0; k--) {
-            vkm1 = (A[k]*X+B[k])*vk - C[k]*vkp1;
+            vkm1 = A[k]*((X+B[k])*vk + C[k]*vkp1);
             vkp1 = vk;
             vk = vkm1;
             nrm += vkm1*vkm1;
@@ -190,7 +190,7 @@ void eigen_eval_defaultl(const int n, const long double * c, const int incc, con
         long double X = x[j];
         f[j] = c[(n-1)*incc];
         for (int k = n-1; k > 0; k--) {
-            vkm1 = (A[k]*X+B[k])*vk - C[k]*vkp1;
+            vkm1 = A[k]*((X+B[k])*vk + C[k]*vkp1);
             vkp1 = vk;
             vk = vkm1;
             nrm += vkm1*vkm1;
@@ -224,7 +224,7 @@ void eigen_eval_defaultl(const int n, const long double * c, const int incc, con
             quadruple X = x[j];
             f[j] = c[(n-1)*incc];
             for (int k = n-1; k > 0; k--) {
-                vkm1 = (A[k]*X+B[k])*vk - C[k]*vkp1;
+                vkm1 = A[k]*((X+B[k])*vk + C[k]*vkp1);
                 vkp1 = vk;
                 vk = vkm1;
                 nrm += vkm1*vkm1;

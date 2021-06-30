@@ -205,19 +205,19 @@ static inline double Gy_index_i_plus_j_eq_2l_no_den(int l, int i, int j) {
     double num;
 	if (l+2 <= i && i <= 2*l) {
         num = (j+1)*(j+2);
-        return sqrt(num)/2.0;
+        return sqrt(num);
     }
 	else if (0 <= i && i <= l-1) {
         num = (2*l+1-i)*(2*l+2-i);
-        return -sqrt(num)/2.0;
+        return -sqrt(num);
     }
 	else if (i == l+1 && j == l-1) {
         num = 2*l*(l+1);
-        return sqrt(num)/2.0;
+        return sqrt(num);
     }
 	else if (i == l && j == l) {
         num = 2*(l+1)*(l+2);
-        return -sqrt(num)/2.0;
+        return -sqrt(num);
     }
     else
         return 0.0;
@@ -227,11 +227,11 @@ static inline double Gy_index_i_plus_j_eq_2l_plus_2_no_den(int l, int i, int j) 
     double num;
  if (2 <= i && i <= l) {
         num = (i-1)*i;
-        return -sqrt(num)/2.0;
+        return -sqrt(num);
     }
 	else if (l+3 <= i && i <= 2*l+2) {
         num = (2*l+1-j)*(2*l+2-j);
-        return sqrt(num)/2.0;
+        return sqrt(num);
     }
     else
         return 0.0;
@@ -241,19 +241,19 @@ static inline double Gy_index_squared_i_plus_j_eq_2l_no_den(int l, int i, int j)
     double num;
 	if (l+2 <= i && i <= 2*l) {
         num = (j+1)*(j+2);
-        return 0.25*num;
+        return num;
     }
 	else if (0 <= i && i <= l-1) {
         num = (2*l+1-i)*(2*l+2-i);
-        return 0.25*num;
+        return num;
     }
 	else if (i == l+1 && j == l-1) {
         num = 2*l*(l+1);
-        return 0.25*num;
+        return num;
     }
 	else if (i == l && j == l) {
         num = 2*(l+1)*(l+2);
-        return 0.25*num;
+        return num;
     }
     else
         return 0.0;
@@ -262,11 +262,11 @@ static inline double Gy_index_squared_i_plus_j_eq_2l_plus_2_no_den(int l, int i,
     double num;
  if (2 <= i && i <= l) {
         num = (i-1)*i;
-        return 0.25*num;
+        return num;
     }
 	else if (l+3 <= i && i <= 2*l+2) {
         num = (2*l+1-j)*(2*l+2-j);
-        return 0.25*num;
+        return num;
     }
  else
    return 0.0;
@@ -300,7 +300,7 @@ static inline double Z_index(int l, int i, int j) {
 }
 static inline double Z_index_no_den(int l, int i, int j) {
 	if (i == j) {
-        double num = (j+1)*(2*l+1-j);
+        double num = 4*(j+1)*(2*l+1-j);
         return num;
     }
     else
