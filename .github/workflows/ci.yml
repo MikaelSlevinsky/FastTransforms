@@ -23,10 +23,15 @@ jobs:
             arch: x86
     steps:
       - uses: actions/checkout@v2
-      - if: ${{ matrix.os }} == 'macOS-latest'
-        env: DEPS_EVAL = "brew update && brew install libomp openblas fftw mpfr"
+      - name: Install dependencies on macOS
+        if: startsWith(matrix.os, 'macOS')
         run: |
-          eval "${DEPS_EVAL}"
-          make
-            make runtests FT_NUM_THREADS=2
-            make runexamples
+          brew update
+          brew install libomp openblas fftw mpfr
+          export CC=${{ matrix.compiler }}
+      - name: Build library
+        run: make
+      - name: Run tests
+        run: make runtests FT_NUM_THREADS=2
+      - name: Run examples
+        run: make runexamples
