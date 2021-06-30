@@ -32,28 +32,26 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libomp-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
-          export CC=${{ matrix.compiler }}
       - name: Install dependencies on macOS
         if: startsWith(matrix.os, 'macOS')
         run: |
           brew update
           brew install libomp openblas fftw mpfr
-          export CC=${{ matrix.compiler }}
       - name: Compiler version
         run: cc --version
       - name: Build assembly
-        run: make assembly
+        run: make assembly CC=${{ matrix.compiler }}
       - name: Build library
-        run: make lib
+        run: make lib CC=${{ matrix.compiler }}
       - name: Build tests
-        run: make tests
+        run: make tests CC=${{ matrix.compiler }}
       - name: Build examples
-        run: make examples
+        run: make examples CC=${{ matrix.compiler }}
       - name: Run tests
         run: |
           export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.
-          make runtests FT_NUM_THREADS=2
+          make runtests CC=${{ matrix.compiler }} FT_NUM_THREADS=2
       - name: Run examples
         run: |
           export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.
-          make runexamples
+          make runexamples CC=${{ matrix.compiler }}
