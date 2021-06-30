@@ -21,9 +21,9 @@ jobs:
           - aarch64
         exclude:
           - os: macOS-latest
-            arch:
-              - x86
-              - aarch64
+            arch: x86
+          - os: macOS-latest
+            arch: aarch64
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
