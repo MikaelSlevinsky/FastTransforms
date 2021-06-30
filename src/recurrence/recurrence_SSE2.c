@@ -11,7 +11,7 @@
         ORTHOGONAL_POLYNOMIAL_CLENSHAW_KERNEL(double, double2, 2, 8, vloadu2, vstoreu2, vmuladd, vmulsub, vall2)
     }
     void eigen_eval_SSE2(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, const int sign, double * f) {
-        EIGEN_EVAL_KERNEL(double, double2, 2, 8, vloadu2, vstoreu2, vmuladd, vmulsub, vall2, vsqrt2, vmovemask2, eps()/floatmin(), sqrt)
+        EIGEN_EVAL_KERNEL(double, double2, 2, 8, vloadu2, vstoreu2, vmuladd, vall2, vsqrt2, vmovemask2, eps()/floatmin(), sqrt)
     }
 #else
     void horner_SSE2(const int n, const double * c, const int incc, const int m, double * x, double * f) {horner_default(n, c, incc, m, x, f);}

@@ -20,10 +20,10 @@
         ORTHOGONAL_POLYNOMIAL_CLENSHAW_KERNEL(float, float16, 16, 4, vloadu16f, vstoreu16f, vfma16f, vfms16f, vall16f)
     }
     void eigen_eval_AVX512F(const int n, const double * c, const int incc, const double * A, const double * B, const double * C, const int m, double * x, const int sign, double * f) {
-        EIGEN_EVAL_KERNEL(double, double8, 8, 4, vloadu8, vstoreu8, vfma8, vfms8, vall8, vsqrt8, vmovemask8, eps()/floatmin(), sqrt)
+        EIGEN_EVAL_KERNEL(double, double8, 8, 4, vloadu8, vstoreu8, vfma8, vall8, vsqrt8, vmovemask8, eps()/floatmin(), sqrt)
     }
     void eigen_eval_AVX512Ff(const int n, const float * c, const int incc, const float * A, const float * B, const float * C, const int m, float * x, const int sign, float * f) {
-        EIGEN_EVAL_KERNEL(float, float16, 16, 4, vloadu16f, vstoreu16f, vfma16f, vfms16f, vall16f, vsqrt16f, vmovemask16f, epsf()/floatminf(), sqrtf)
+        EIGEN_EVAL_KERNEL(float, float16, 16, 4, vloadu16f, vstoreu16f, vfma16f, vall16f, vsqrt16f, vmovemask16f, epsf()/floatminf(), sqrtf)
     }
 #else
     void horner_AVX512F(const int n, const double * c, const int incc, const int m, double * x, double * f) {horner_AVX_FMA(n, c, incc, m, x, f);}

@@ -100,7 +100,7 @@ for (; j < m; j++) {                                                           \
     f[j] = phi0[j]*bk;                                                         \
 }
 
-#define EIGEN_EVAL_KERNEL(T, VT, S, L, VLOAD, VSTORE, VMULADD, VMULSUB, VALL, VSQRT, VMOVEMASK, HUGE, SSQRT)  \
+#define EIGEN_EVAL_KERNEL(T, VT, S, L, VLOAD, VSTORE, VMULADD, VALL, VSQRT, VMOVEMASK, HUGE, SSQRT) \
 if (n < 1) {                                                                   \
     for (int j = 0; j < m; j++)                                                \
         f[j] = 0;                                                              \
@@ -124,7 +124,7 @@ for (; j < m+1-S*L; j += S*L) {                                                \
     }                                                                          \
     for (int k = n-1; k > 0; k--) {                                            \
         for (int l = 0; l < L; l++) {                                          \
-            vkm1[l] = VALL(A[k])*((X[l]+VALL(B[k])) * vk[l] - VALL(C[k])* vkp1[l]); \
+            vkm1[l] = VALL(A[k])*VMULADD(X[l]+VALL(B[k]), vk[l], VALL(C[k])*vkp1[l]); \
             vkp1[l] = vk[l];                                                   \
             vk[l] = vkm1[l];                                                   \
             nrm[l] = VMULADD(vkm1[l], vkm1[l], nrm[l]);                        \
@@ -157,7 +157,7 @@ for (; j < m; j++) {                                                           \
     T X = x[j];                                                                \
     T sum = c[(n-1)*incc];                                                     \
     for (int k = n-1; k > 0; k--) {                                            \
-        vkm1 = A[k]*((X+B[k])*vk - C[k]*vkp1);                                   \
+        vkm1 = A[k]*((X+B[k])*vk + C[k]*vkp1);                                   \
         vkp1 = vk;                                                             \
         vk = vkm1;                                                             \
         nrm += vkm1*vkm1;                                                      \

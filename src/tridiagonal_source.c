@@ -356,7 +356,7 @@ X(symmetric_tridiagonal_symmetric_eigen) * X(symmetric_tridiagonal_symmetric_eig
     for (int i = n-2; i > 0; i--) {
         A[i] = 1/T->b[i-1];
         B[i] = -T->a[i];
-        C[i] = T->b[i];
+        C[i] = -T->b[i];
     }
     X(symmetric_tridiagonal_symmetric_eigen) * F = malloc(sizeof(X(symmetric_tridiagonal_symmetric_eigen)));
     F->A = A;
