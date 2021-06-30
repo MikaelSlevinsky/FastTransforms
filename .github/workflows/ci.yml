@@ -40,7 +40,7 @@ jobs:
           brew update
           brew install libomp openblas fftw mpfr
       - name: Compiler version
-        run: cc --version
+        run: ${CC} --version
       - name: Build assembly
         run: make assembly
       - name: Build library
