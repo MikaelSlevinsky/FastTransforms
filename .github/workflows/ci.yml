@@ -24,12 +24,20 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
+      - name: Install dependencies on ubuntu
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install libomp-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
+          export CC=${{ matrix.compiler }} && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
       - name: Install dependencies on macOS
         if: startsWith(matrix.os, 'macOS')
         run: |
           brew update
           brew install libomp openblas fftw mpfr
           export CC=${{ matrix.compiler }}
+      - name: Compiler version
+        run: cc --version
       - name: Build library
         run: make
       - name: Run tests
