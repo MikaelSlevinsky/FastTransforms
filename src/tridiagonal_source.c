@@ -351,12 +351,12 @@ X(symmetric_tridiagonal_symmetric_eigen) * X(symmetric_tridiagonal_symmetric_eig
     FLT * C = calloc(n, sizeof(FLT));
     if (n > 1) {
         A[n-1] = 1/T->b[n-2];
-        B[n-1] = -T->a[n-1]/T->b[n-2];
+        B[n-1] = -T->a[n-1];
     }
     for (int i = n-2; i > 0; i--) {
         A[i] = 1/T->b[i-1];
-        B[i] = -T->a[i]/T->b[i-1];
-        C[i] = T->b[i]/T->b[i-1];
+        B[i] = -T->a[i];
+        C[i] = T->b[i];
     }
     X(symmetric_tridiagonal_symmetric_eigen) * F = malloc(sizeof(X(symmetric_tridiagonal_symmetric_eigen)));
     F->A = A;
