@@ -1,0 +1,32 @@
+name: CI
+on:
+  - push
+  - pull_request
+jobs:
+  test:
+    name: C ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        compiler:
+          - gcc
+          - clang
+        os:
+          - ubuntu-latest
+          - macOS-latest
+          - windows-latest
+        arch:
+          - x86
+          - x64
+        exclude:
+          - os: macOS-latest
+            arch: x86
+    steps:
+      - uses: actions/checkout@v2
+      - if: ${{ matrix.os }} == 'macOS-latest'
+        env: DEPS_EVAL = "brew update && brew install libomp openblas fftw mpfr"
+        run: |
+          eval "${DEPS_EVAL}"
+          make
+            make runtests FT_NUM_THREADS=2
+            make runexamples
