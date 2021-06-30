@@ -157,7 +157,7 @@ for (; j < m; j++) {                                                           \
     T X = x[j];                                                                \
     T sum = c[(n-1)*incc];                                                     \
     for (int k = n-1; k > 0; k--) {                                            \
-        vkm1 = A[k]*((X+B[k])*vk + C[k]*vkp1);                                   \
+        vkm1 = A[k]*((X+B[k])*vk + C[k]*vkp1);                                 \
         vkp1 = vk;                                                             \
         vk = vkm1;                                                             \
         nrm += vkm1*vkm1;                                                      \
