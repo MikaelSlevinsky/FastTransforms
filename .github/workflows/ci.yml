@@ -30,7 +30,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install libomp-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
           export CC=${{ matrix.compiler }}
-          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GITHUB_WORKSPACE/FastTransforms
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/runner/work/FastTransforms/FastTransforms
       - name: Install dependencies on macOS
         if: startsWith(matrix.os, 'macOS')
         run: |
@@ -41,6 +41,8 @@ jobs:
         run: cc --version
       - name: Build library
         run: |
+          echo $GITHUB_WORKSPACE
+          echo $LD_LIBRARY_PATH
           make
             make runtests FT_NUM_THREADS=2
             make runexamples
