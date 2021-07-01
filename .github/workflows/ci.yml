@@ -54,3 +54,18 @@ jobs:
         run: make runtests FT_NUM_THREADS=2
       - name: Run examples
         run: make runexamples
+  docs:
+    name: Documentation
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Doxygen
+        run: brew install doxygen
+      - name: Build site
+        run: doxygen Doxyfile
+      - if: github.ref == 'refs/heads/master'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/html
+          #force_orphan: true
