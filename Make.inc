@@ -154,6 +154,10 @@ ifndef FT_BLAS
     FT_BLAS = blas
 endif
 
+ifndef FT_MPFR
+    FT_MPFR = mpfr
+endif
+
 ifndef FT_OPENMP
     ifneq (, $(findstring Apple LLVM version, $(shell $(CC) --version)))
         FT_OPENMP := -Xpreprocessor -fopenmp -lomp
@@ -170,7 +174,7 @@ ifndef FT_OPENMP
     endif
 endif
 
-LDLIBS += $(FT_OPENMP) -lm -lmpfr -l$(FT_BLAS) -lfftw3
+LDLIBS += $(FT_OPENMP) -lm -l$(FT_MPFR) -l$(FT_BLAS) -lfftw3
 
 ifdef FT_QUADMATH
     AFLAGS += -DFT_QUADMATH

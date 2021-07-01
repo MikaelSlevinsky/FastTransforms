@@ -72,6 +72,7 @@ jobs:
       CC: ${{ matrix.compiler }}
       FT_QUADMATH: 1
       FT_BLAS: openblas
+      FT_MPFR: mpfr-6
       FT_FFTW_WITH_COMBINED_THREADS: 1
     steps:
       - uses: actions/checkout@v2
@@ -94,16 +95,6 @@ jobs:
         run: mingw32-make assembly
       - name: Build library
         run: |
-          cd c:\vcpkg\
-          ls
-          cd c:\vcpkg\packages\
-          ls
-          cd c:\vcpkg\packages\mpfr_${{ matrix.arch }}-windows
-          ls
-          cd c:\vcpkg\packages\mpfr_${{ matrix.arch }}-windows\include
-          ls
-          cd c:\vcpkg\packages\mpfr_${{ matrix.arch }}-windows\bin
-          ls
           mingw32-make lib
     #  - name: Build tests
     #    run: mingw32-make tests
