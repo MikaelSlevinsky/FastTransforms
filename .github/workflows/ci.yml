@@ -43,6 +43,7 @@ jobs:
           brew update
           brew install libomp openblas fftw mpfr
       - name: Cache dependencies on Windows
+        if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v2
         env:
           cache-name: cache-dependencies
