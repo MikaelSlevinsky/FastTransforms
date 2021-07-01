@@ -48,7 +48,7 @@ jobs:
         env:
           cache-name: cache-dependencies
         with:
-          path: ${{ VCPKG_INSTALLATION_ROOT }}/packages/
+          path: C:/vcpkg/packages/
           key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles( '**/vcpkg.json' ) }}
           restore-keys: |
             ${{ runner.os }}-test-${{ env.cache-name }}-
