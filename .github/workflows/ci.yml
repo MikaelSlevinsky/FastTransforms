@@ -46,13 +46,13 @@ jobs:
         uses: actions/cache@v2
         env:
           cache-name: cache-dependencies
-          with:
-            path: ${{ VCPKG_INSTALLATION_ROOT }}/packages/
-            key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles( '**/vcpkg.json' ) }}
-            restore-keys: |
-              ${{ runner.os }}-test-${{ env.cache-name }}-
-              ${{ runner.os }}-test-
-              ${{ runner.os }}-
+        with:
+          path: ${{ VCPKG_INSTALLATION_ROOT }}/packages/
+          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles( '**/vcpkg.json' ) }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ env.cache-name }}-
+            ${{ runner.os }}-test-
+            ${{ runner.os }}-
       - name: Install dependencies on Windows
         if: startsWith(matrix.os, 'windows')
         run: vcpkg install openblas:x64-windows fftw3[core,threads]:x64-windows mpfr:x64-windows --recurse
