@@ -138,15 +138,27 @@ else
         CFLAGS += -I/usr/local/opt/gmp/include
         LDFLAGS += -L/usr/local/opt/gmp/lib
     else ifeq ($(UNAME), Windows)
-        CFLAGS += -Ic:\vcpkg\packages\openblas_x64-windows\include\openblas
-        CFLAGS += -Ic:\vcpkg\packages\openblas_x64-windows\include
-        CFLAGS += -Ic:\vcpkg\packages\fftw3_x64-windows\include
-        CFLAGS += -Ic:\vcpkg\packages\mpfr_x64-windows\include
-        CFLAGS += -Ic:\vcpkg\packages\gmp_x64-windows\include
-        LDFLAGS += -Lc:\vcpkg\packages\openblas_x64-windows\bin
-        LDFLAGS += -Lc:\vcpkg\packages\fftw3_x64-windows\bin
-        LDFLAGS += -Lc:\vcpkg\packages\mpfr_x64-windows\bin
-        LDFLAGS += -Lc:\vcpkg\packages\gmp_x64-windows\bin
+        ifneq (, $(findstring 86_64, $(machine)))
+            CFLAGS += -Ic:\vcpkg\packages\openblas_x64-windows\include\openblas
+            CFLAGS += -Ic:\vcpkg\packages\openblas_x64-windows\include
+            CFLAGS += -Ic:\vcpkg\packages\fftw3_x64-windows\include
+            CFLAGS += -Ic:\vcpkg\packages\mpfr_x64-windows\include
+            CFLAGS += -Ic:\vcpkg\packages\gmp_x64-windows\include
+            LDFLAGS += -Lc:\vcpkg\packages\openblas_x64-windows\bin
+            LDFLAGS += -Lc:\vcpkg\packages\fftw3_x64-windows\bin
+            LDFLAGS += -Lc:\vcpkg\packages\mpfr_x64-windows\bin
+            LDFLAGS += -Lc:\vcpkg\packages\gmp_x64-windows\bin
+        else ifneq (, $(findstring 86, $(machine)))
+            CFLAGS += -Ic:\vcpkg\packages\openblas_x86-windows\include\openblas
+            CFLAGS += -Ic:\vcpkg\packages\openblas_x86-windows\include
+            CFLAGS += -Ic:\vcpkg\packages\fftw3_x86-windows\include
+            CFLAGS += -Ic:\vcpkg\packages\mpfr_x86-windows\include
+            CFLAGS += -Ic:\vcpkg\packages\gmp_x86-windows\include
+            LDFLAGS += -Lc:\vcpkg\packages\openblas_x86-windows\bin
+            LDFLAGS += -Lc:\vcpkg\packages\fftw3_x86-windows\bin
+            LDFLAGS += -Lc:\vcpkg\packages\mpfr_x86-windows\bin
+            LDFLAGS += -Lc:\vcpkg\packages\gmp_x86-windows\bin
+        endif
     endif
 endif
 
