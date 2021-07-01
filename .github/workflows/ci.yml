@@ -73,20 +73,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Cache dependencies on Windows
+        id: cache
         uses: actions/cache@v2
         env:
-          cache-name: cache-dependencies
+          cache-name: cache-dependencies-${{ matrix.arch }}
         with:
           path: C:/vcpkg/packages/
-          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
+          key: cache-dependencies-${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.arch}}-${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
           restore-keys: |
-            ${{ runner.os }}-test-${{ env.cache-name }}-
-            ${{ runner.os }}-test-
-            ${{ runner.os }}-
+            cache-dependencies-${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.arch}}-
+            cache-dependencies-${{ runner.os }}-${{ matrix.compiler }}-
+            cache-dependencies-${{ runner.os }}-
       - name: Install dependencies on Windows
+        if: steps.cache.outputs.cache-hit != 'true'
         run: vcpkg install openblas:${{ matrix.arch }}-windows fftw3[core,threads]:${{ matrix.arch }}-windows mpfr:${{ matrix.arch }}-windows --recurse
-      - name: Build assembly
-        run: mingw32-make assembly
+      #- name: Build assembly
+    #    run: mingw32-make assembly
     #  - name: Build library
     #    run: mingw32-make lib
     #  - name: Build tests
