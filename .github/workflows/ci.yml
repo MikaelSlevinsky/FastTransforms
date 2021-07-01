@@ -97,6 +97,7 @@ jobs:
           cd c:\vcpkg\packages\
           ls
           cd c:\vcpkg\packages\openblas_x64-windows
+          ls
           mingw32-make lib
     #  - name: Build tests
     #    run: mingw32-make tests
