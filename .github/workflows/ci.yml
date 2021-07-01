@@ -86,7 +86,6 @@ jobs:
       fail-fast: false
     env:
       CC: ${{ matrix.compiler }}
-      PATH: .
     steps:
       - uses: actions/checkout@v2
       - name: Cache dependencies on Windows
