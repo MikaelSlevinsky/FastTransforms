@@ -72,12 +72,12 @@ jobs:
       - name: Run examples
         run: make runexamples
   test_windows:
-    name: C - ${{ matrix.os }} - ${{ matrix.compiler }} - ${{ matrix.arch }}
-    runs-on: ${{ matrix.os }}
+    name: C - windows-latest - ${{ matrix.compiler }} - ${{ matrix.arch }}
+    runs-on: windows-latest
     strategy:
       matrix:
-        os: windows-latest
-        compiler: gcc
+        compiler:
+          - gcc
         arch:
           - x86
           - x64
@@ -104,17 +104,17 @@ jobs:
       - name: Compiler version
         run: ${CC} --version
       #- name: Build assembly
-    #    run: make assembly
+    #    run: mingw32-make assembly
     #  - name: Build library
-    #    run: make lib
+    #    run: mingw32-make lib
     #  - name: Build tests
-    #    run: make tests
+    #    run: mingw32-make tests
     #  - name: Build examples
-    #    run: make examples
+    #    run: mingw32-make examples
     #  - name: Run tests
-    #    run: make runtests FT_NUM_THREADS=2
+    #    run: mingw32-make runtests FT_NUM_THREADS=2
     #  - name: Run examples
-    #    run: make runexamples
+    #    run: mingw32-make runexamples
   docs:
     name: Documentation
     runs-on: macOS-latest
