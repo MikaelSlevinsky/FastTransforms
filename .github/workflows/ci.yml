@@ -42,21 +42,21 @@ jobs:
         run: |
           brew update
           brew install libomp openblas fftw mpfr
-      #- name: Cache dependencies on Windows
-    #    if: startsWith(matrix.os, 'windows')
-    #    uses: actions/cache@v2
-    #    env:
-    #      cache-name: cache-dependencies
-    #    with:
-    #      path: C:/vcpkg/packages/
-    #      key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles( '**/vcpkg.json' ) }}
-    #      restore-keys: |
-    #        ${{ runner.os }}-test-${{ env.cache-name }}-
-    #        ${{ runner.os }}-test-
-    #        ${{ runner.os }}-
+      - name: Cache dependencies on Windows
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-dependencies
+        with:
+          path: C:/vcpkg/packages/
+          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
+          restore-keys: |
+            ${{ runner.os }}-test-${{ env.cache-name }}-
+            ${{ runner.os }}-test-
+            ${{ runner.os }}-
       - name: Install dependencies on Windows
         if: startsWith(matrix.os, 'windows')
-        run: vcpkg install
+        run: vcpkg install openblas fftw3[core,threads] mpfr --recurse
       - name: Compiler version
         run: ${CC} --version
       - name: Build assembly
