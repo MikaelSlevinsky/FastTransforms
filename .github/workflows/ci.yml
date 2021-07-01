@@ -56,7 +56,7 @@ jobs:
     #        ${{ runner.os }}-
       - name: Install dependencies on Windows
         if: startsWith(matrix.os, 'windows')
-        run: vcpkg install openblas fftw3[core,threads] mpfr --recurse
+        run: vcpkg install
       - name: Compiler version
         run: ${CC} --version
       - name: Build assembly
