@@ -27,6 +27,7 @@ jobs:
       fail-fast: false
     env:
       CC: ${{ matrix.compiler }}
+      LD_LIBRARY_PATH: .
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies on ubuntu
@@ -50,10 +51,6 @@ jobs:
       - name: Build examples
         run: make examples
       - name: Run tests
-        run: |
-          export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.
-          make runtests FT_NUM_THREADS=2
+        run: make runtests FT_NUM_THREADS=2
       - name: Run examples
-        run: |
-          export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.
-          make runexamples
+        run: make runexamples
