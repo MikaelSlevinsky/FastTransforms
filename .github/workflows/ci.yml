@@ -87,8 +87,8 @@ jobs:
       - name: Install dependencies on Windows
         if: steps.cache.outputs.cache-hit != 'true'
         run: vcpkg install openblas:${{ matrix.arch }}-windows fftw3[core,threads]:${{ matrix.arch }}-windows mpfr:${{ matrix.arch }}-windows --recurse
-      #- name: Build assembly
-    #    run: mingw32-make assembly
+      - name: Build assembly
+        run: mingw32-make assembly
     #  - name: Build library
     #    run: mingw32-make lib
     #  - name: Build tests
