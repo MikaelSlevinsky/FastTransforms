@@ -70,6 +70,7 @@ jobs:
       fail-fast: false
     env:
       CC: ${{ matrix.compiler }}
+      CFLAGS: -O3 -mavx -fno-asynchronous-unwind-tables
       FT_QUADMATH: 1
       FT_BLAS: openblas
       FT_MPFR: mpfr-6
