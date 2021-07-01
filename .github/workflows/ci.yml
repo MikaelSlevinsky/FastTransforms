@@ -70,6 +70,9 @@ jobs:
       fail-fast: false
     env:
       CC: ${{ matrix.compiler }}
+      FT_QUADMATH: 1
+      FT_BLAS: openblas
+      FT_FFTW_WITH_COMBINED_THREADS: 1
     steps:
       - uses: actions/checkout@v2
       - name: Cache dependencies on Windows
