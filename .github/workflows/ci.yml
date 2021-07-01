@@ -94,6 +94,10 @@ jobs:
         run: mingw32-make assembly
       - name: Build library
         run: mingw32-make lib
+      - name: Locate dir
+        run: |
+          cd c:\vcpkg\packages\x64-windows
+          ls -all
     #  - name: Build tests
     #    run: mingw32-make tests
     #  - name: Build examples
