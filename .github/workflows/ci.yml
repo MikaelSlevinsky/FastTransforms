@@ -102,6 +102,8 @@ jobs:
           ls
           cd c:\vcpkg\packages\mpfr_${{ matrix.arch }}-windows\include
           ls
+          cd c:\vcpkg\packages\mpfr_${{ matrix.arch }}-windows\bin
+          ls
           mingw32-make lib
     #  - name: Build tests
     #    run: mingw32-make tests
