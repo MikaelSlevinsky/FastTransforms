@@ -1,0 +1,15 @@
+{
+  "name": "openblas",
+  "version": "0.3.10",
+  "port-version": 1
+}
+{
+  "name": "fftw3",
+  "version": "3.3.8",
+  "port-version": 7
+}
+{
+  "name": "mpfr",
+  "version": "4.1.0",
+  "port-version": 0
+}
