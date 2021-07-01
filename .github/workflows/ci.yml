@@ -97,14 +97,14 @@ jobs:
       - name: Build library
         run: |
           mingw32-make lib
-    #  - name: Build tests
-    #    run: mingw32-make tests
-    #  - name: Build examples
-    #    run: mingw32-make examples
-    #  - name: Run tests
-    #    run: mingw32-make runtests FT_NUM_THREADS=2
-    #  - name: Run examples
-    #    run: mingw32-make runexamples
+      - name: Build tests
+        run: mingw32-make tests
+      - name: Build examples
+        run: mingw32-make examples
+      - name: Run tests
+        run: mingw32-make runtests FT_NUM_THREADS=2
+      - name: Run examples
+        run: mingw32-make runexamples
   docs:
     name: Documentation
     runs-on: macOS-latest
