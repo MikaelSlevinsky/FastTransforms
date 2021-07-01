@@ -95,7 +95,7 @@ jobs:
       - name: Build library
         run: |
           cd c:\vcpkg\packages\
-          ls -all
+          ls
           mingw32-make lib
     #  - name: Build tests
     #    run: mingw32-make tests
