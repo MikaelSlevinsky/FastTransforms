@@ -93,16 +93,7 @@ jobs:
       - name: Build assembly
         run: mingw32-make assembly
       - name: Build library
-        run: |
-          cd c:\vcpkg\packages\
-          ls
-          cd c:\vcpkg\packages\openblas_${{ matrix.arch }}-windows
-          ls
-          cd c:\vcpkg\packages\openblas_${{ matrix.arch }}-windows\include
-          ls
-          cd c:\vcpkg\packages\openblas_${{ matrix.arch }}-windows\include\openblas
-          ls
-          mingw32-make lib
+        run: mingw32-make lib
     #  - name: Build tests
     #    run: mingw32-make tests
     #  - name: Build examples
