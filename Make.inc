@@ -142,9 +142,11 @@ else
         CFLAGS += -Ic:\vcpkg\packages\openblas_x64-windows\include
         CFLAGS += -Ic:\vcpkg\packages\fftw3_x64-windows\include
         CFLAGS += -Ic:\vcpkg\packages\mpfr_x64-windows\include
+        CFLAGS += -Ic:\vcpkg\packages\gmp_x64-windows\include
         LDFLAGS += -Lc:\vcpkg\packages\openblas_x64-windows\bin
         LDFLAGS += -Lc:\vcpkg\packages\fftw3_x64-windows\bin
         LDFLAGS += -Lc:\vcpkg\packages\mpfr_x64-windows\bin
+        LDFLAGS += -Lc:\vcpkg\packages\gmp_x64-windows\bin
     endif
 endif
 
