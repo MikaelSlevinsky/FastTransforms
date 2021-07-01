@@ -138,9 +138,13 @@ else
         CFLAGS += -I/usr/local/opt/gmp/include
         LDFLAGS += -L/usr/local/opt/gmp/lib
     else ifeq ($(UNAME), Windows)
-        CFLAGS += -Ic:\vcpkg\packages\x64-windows\include\openblas
-        CFLAGS += -Ic:\vcpkg\packages\x64-windows\include
-        LDFLAGS += -Lc:\vcpkg\packages\x64-windows\bin
+        CFLAGS += -Ic:\vcpkg\packages\openblas_x64-windows\include\openblas
+        CFLAGS += -Ic:\vcpkg\packages\openblas_x64-windows\include
+        CFLAGS += -Ic:\vcpkg\packages\fftw3_x64-windows\include
+        CFLAGS += -Ic:\vcpkg\packages\mpfr_x64-windows\include
+        LDFLAGS += -Lc:\vcpkg\packages\openblas_x64-windows\bin
+        LDFLAGS += -Lc:\vcpkg\packages\fftw3_x64-windows\bin
+        LDFLAGS += -Lc:\vcpkg\packages\mpfr_x64-windows\bin
     endif
 endif
 

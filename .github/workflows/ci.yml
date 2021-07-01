@@ -96,11 +96,11 @@ jobs:
         run: |
           cd c:\vcpkg\packages\
           ls
-          cd c:\vcpkg\packages\openblas_x64-windows
+          cd c:\vcpkg\packages\openblas_${{ matrix.arch }}-windows
           ls
-          cd c:\vcpkg\packages\openblas_x64-windows\include
+          cd c:\vcpkg\packages\openblas_${{ matrix.arch }}-windows\include
           ls
-          cd c:\vcpkg\packages\openblas_x64-windows\include\openblas
+          cd c:\vcpkg\packages\openblas_${{ matrix.arch }}-windows\include\openblas
           ls
           mingw32-make lib
     #  - name: Build tests
