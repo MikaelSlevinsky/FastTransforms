@@ -10,8 +10,8 @@ jobs:
       matrix:
         os:
           #- ubuntu-latest
-          #- macOS-latest
-          - windows-latest
+          - macOS-latest
+          #- windows-latest
         compiler:
           - gcc
           - clang
@@ -42,8 +42,52 @@ jobs:
         run: |
           brew update
           brew install libomp openblas fftw mpfr
+      #- name: Cache dependencies on Windows
+    #    if: startsWith(matrix.os, 'windows')
+    #    uses: actions/cache@v2
+    #    env:
+    #      cache-name: cache-dependencies
+    #    with:
+    #      path: C:/vcpkg/packages/
+    #      key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
+    #      restore-keys: |
+    #        ${{ runner.os }}-test-${{ env.cache-name }}-
+    #        ${{ runner.os }}-test-
+    #        ${{ runner.os }}-
+     # - name: Install dependencies on Windows
+    #    if: startsWith(matrix.os, 'windows')
+    #    run: vcpkg install openblas:${{ matrix.arch }}-windows fftw3[core,threads]:${{ matrix.arch }}-windows mpfr:${{ matrix.arch }}-windows --recurse
+      - name: Compiler version
+        run: ${CC} --version
+      - name: Build assembly
+        run: make assembly
+      - name: Build library
+        run: make lib
+      - name: Build tests
+        run: make tests
+      - name: Build examples
+        run: make examples
+      - name: Run tests
+        run: make runtests FT_NUM_THREADS=2
+      - name: Run examples
+        run: make runexamples
+  test_windows:
+    name: C - ${{ matrix.os }} - ${{ matrix.compiler }} - ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: windows-latest
+        compiler: gcc
+        arch:
+          - x86
+          - x64
+      fail-fast: false
+    env:
+      CC: ${{ matrix.compiler }}
+      PATH: .
+    steps:
+      - uses: actions/checkout@v2
       - name: Cache dependencies on Windows
-        if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v2
         env:
           cache-name: cache-dependencies
@@ -59,18 +103,18 @@ jobs:
         run: vcpkg install openblas:${{ matrix.arch }}-windows fftw3[core,threads]:${{ matrix.arch }}-windows mpfr:${{ matrix.arch }}-windows --recurse
       - name: Compiler version
         run: ${CC} --version
-      - name: Build assembly
-        run: make assembly
-      - name: Build library
-        run: make lib
-      - name: Build tests
-        run: make tests
-      - name: Build examples
-        run: make examples
-      - name: Run tests
-        run: make runtests FT_NUM_THREADS=2
-      - name: Run examples
-        run: make runexamples
+      #- name: Build assembly
+    #    run: make assembly
+    #  - name: Build library
+    #    run: make lib
+    #  - name: Build tests
+    #    run: make tests
+    #  - name: Build examples
+    #    run: make examples
+    #  - name: Run tests
+    #    run: make runtests FT_NUM_THREADS=2
+    #  - name: Run examples
+    #    run: make runexamples
   docs:
     name: Documentation
     runs-on: macOS-latest
