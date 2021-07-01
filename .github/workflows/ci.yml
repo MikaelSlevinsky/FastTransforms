@@ -10,7 +10,7 @@ jobs:
       matrix:
         os:
           #- ubuntu-latest
-          #- macOS-latest
+          - macOS-latest
         compiler:
           - gcc
           - clang
@@ -85,8 +85,6 @@ jobs:
             ${{ runner.os }}-
       - name: Install dependencies on Windows
         run: vcpkg install openblas:${{ matrix.arch }}-windows fftw3[core,threads]:${{ matrix.arch }}-windows mpfr:${{ matrix.arch }}-windows --recurse
-      - name: Compiler version
-        run: ${CC} --version
       #- name: Build assembly
     #    run: mingw32-make assembly
     #  - name: Build library
