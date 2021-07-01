@@ -79,11 +79,11 @@ jobs:
           cache-name: cache-dependencies-${{ matrix.arch }}
         with:
           path: C:/vcpkg/packages/
-          key: cache-dependencies-${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.arch}}-${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
+          key: cache-dependencies-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.arch }}-${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
           restore-keys: |
-            cache-dependencies-${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.arch}}-
-            cache-dependencies-${{ runner.os }}-${{ matrix.compiler }}-
-            cache-dependencies-${{ runner.os }}-
+            cache-dependencies-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.arch }}-
+            cache-dependencies-${{ matrix.os }}-${{ matrix.compiler }}-
+            cache-dependencies-${{ matrix.os }}-
       - name: Install dependencies on Windows
         if: steps.cache.outputs.cache-hit != 'true'
         run: vcpkg install openblas:${{ matrix.arch }}-windows fftw3[core,threads]:${{ matrix.arch }}-windows mpfr:${{ matrix.arch }}-windows --recurse
