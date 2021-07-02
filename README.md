@@ -1,6 +1,6 @@
 # FastTransforms
 
-[![Travis](https://travis-ci.com/MikaelSlevinsky/FastTransforms.svg?branch=master)](https://travis-ci.com/MikaelSlevinsky/FastTransforms) [![Build status](https://ci.appveyor.com/api/projects/status/er98t0q3bsx4a5l9/branch/master?svg=true)](https://ci.appveyor.com/project/MikaelSlevinsky/fasttransforms/branch/master) [![codecov](https://codecov.io/gh/MikaelSlevinsky/FastTransforms/branch/master/graph/badge.svg)](https://codecov.io/gh/MikaelSlevinsky/FastTransforms) [![](https://img.shields.io/badge/docs-master-blue.svg)](https://MikaelSlevinsky.github.io/FastTransforms)
+[![Build Status](https://github.com/MikaelSlevinsky/FastTransforms/workflows/CI/badge.svg)](https://github.com/MikaelSlevinsky/FastTransforms/actions?query=workflow%3ACI) [![Build status](https://ci.appveyor.com/api/projects/status/er98t0q3bsx4a5l9/branch/master?svg=true)](https://ci.appveyor.com/project/MikaelSlevinsky/fasttransforms/branch/master) [![codecov](https://codecov.io/gh/MikaelSlevinsky/FastTransforms/branch/master/graph/badge.svg)](https://codecov.io/gh/MikaelSlevinsky/FastTransforms) [![](https://img.shields.io/badge/docs-master-blue.svg)](https://MikaelSlevinsky.github.io/FastTransforms)
 
 [FastTransforms](https://github.com/MikaelSlevinsky/FastTransforms) provides computational kernels and driver routines for orthogonal polynomial transforms. The univariate algorithms have a runtime complexity of O(n log n), while the multivariate algorithms are 2-normwise backward stable with a runtime complexity of O(n<sup>d+1</sup>), where n is the polynomial degree and d is the spatial dimension of the problem.
 
@@ -29,7 +29,7 @@ apt-get install libomp-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
 make CC=gcc
 ```
-See the [Travis build](https://github.com/MikaelSlevinsky/FastTransforms/blob/master/.travis.yml) for further details.
+See the [GitHub build](https://github.com/MikaelSlevinsky/FastTransforms/blob/master/.github/workflows/ci.yml) for further details.
 
 ### Windows
 

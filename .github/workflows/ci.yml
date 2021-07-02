@@ -1,0 +1,73 @@
+name: CI
+on:
+  - push
+  - pull_request
+jobs:
+  test:
+    name: C - ${{ matrix.os }} - ${{ matrix.compiler }} - ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macOS-latest
+        compiler:
+          - gcc
+          - clang
+        arch:
+          - x86
+          - x64
+          - aarch64
+        exclude:
+          - os: macOS-latest
+            arch: x86
+          - os: macOS-latest
+            arch: aarch64
+      fail-fast: false
+    env:
+      CC: ${{ matrix.compiler }}
+      LD_LIBRARY_PATH: .
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies on ubuntu
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install libomp-11-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
+      - name: Install dependencies on macOS
+        if: startsWith(matrix.os, 'macOS')
+        run: |
+          brew update
+          brew install libomp openblas fftw mpfr
+      - name: Compiler version
+        run: ${CC} --version
+      - name: Configure environment for quadmath
+        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.compiler, 'gcc')
+        run: echo "FT_QUADMATH=1" >> $GITHUB_ENV
+      - name: Build assembly
+        run: make assembly
+      - name: Build library
+        run: make lib
+      - name: Build tests
+        run: make tests
+      - name: Build examples
+        run: make examples
+      - name: Run tests
+        run: make runtests FT_NUM_THREADS=2
+      - name: Run examples
+        run: make runexamples
+  docs:
+    name: Documentation
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Doxygen
+        run: brew install doxygen
+      - name: Build site
+        run: doxygen Doxyfile
+      - if: ${{ github.ref == 'refs/heads/master' }}
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/html
+          #force_orphan: true
