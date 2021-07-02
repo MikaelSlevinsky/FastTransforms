@@ -123,13 +123,17 @@ for (; j < m+1-S*L; j += S*L) {                                                \
         X[l] = VLOAD(x+j+S*l);                                                 \
     }                                                                          \
     for (int k = n-1; k > 0; k--) {                                            \
+        VT nrmsum = VALL(0);                                                   \
         for (int l = 0; l < L; l++) {                                          \
             vkm1[l] = VALL(A[k])*VMULADD(X[l]+VALL(B[k]), vk[l], VALL(C[k])*vkp1[l]); \
             vkp1[l] = vk[l];                                                   \
             vk[l] = vkm1[l];                                                   \
             nrm[l] = VMULADD(vkm1[l], vkm1[l], nrm[l]);                        \
+            nrmsum += nrm[l];                                                  \
             sum[l] = VMULADD(vkm1[l], VALL(c[(k-1)*incc]), sum[l]);            \
-            if (VMOVEMASK(nrm[l] > VALL(HUGE)) != 0) {                         \
+        }                                                                      \
+        if (VMOVEMASK(nrmsum > VALL(HUGE)) != 0) {                             \
+            for (int l = 0; l < L; l++) {                                      \
                 nrm[l] = VALL(ONE)/VSQRT(nrm[l]);                              \
                 vkp1[l] = nrm[l]*vkp1[l];                                      \
                 vk[l] = nrm[l]*vk[l];                                          \
