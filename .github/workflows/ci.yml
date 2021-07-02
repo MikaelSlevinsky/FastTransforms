@@ -44,11 +44,6 @@ jobs:
       - name: Configure environment for quadmath
         if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.compiler, 'gcc')
         run: echo "FT_QUADMATH=1" >> $GITHUB_ENV
-      - name: Configure environment for coverage
-        if: startsWith(matrix.os, 'macOS') && startsWith(matrix.compiler, 'gcc')
-        run: |
-          echo "COV=gcov" >> $GITHUB_ENV
-          echo "FT_COVERAGE=1" >> $GITHUB_ENV
       - name: Build assembly
         run: make assembly
       - name: Build library
@@ -61,11 +56,6 @@ jobs:
         run: make runtests FT_NUM_THREADS=2
       - name: Run examples
         run: make runexamples
-      - name: Upload coverage
-        if: startsWith(matrix.os, 'macOS') && startsWith(matrix.compiler, 'gcc')
-        run: |
-          make coverage
-          bash <(curl -s https://codecov.io/bash)
   docs:
     name: Documentation
     runs-on: macOS-latest
