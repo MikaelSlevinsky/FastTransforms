@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os:
-          #- ubuntu-latest
+          - ubuntu-latest
           - macOS-latest
         compiler:
           - gcc
@@ -22,8 +22,6 @@ jobs:
           - os: macOS-latest
             arch: x86
           - os: macOS-latest
-            arch: aarch64
-          - os: windows-latest
             arch: aarch64
       fail-fast: false
     env:
@@ -55,56 +53,6 @@ jobs:
         run: make runtests FT_NUM_THREADS=2
       - name: Run examples
         run: make runexamples
-  test_windows:
-    name: C - ${{ matrix.os }} - ${{ matrix.compiler }} - ${{ matrix.arch }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-          - windows-latest
-        compiler:
-          - gcc
-        arch:
-          - x86
-          - x64
-      fail-fast: false
-    env:
-      CC: ${{ matrix.compiler }}
-      CFLAGS: -O3 -mavx -fno-asynchronous-unwind-tables
-      FT_QUADMATH: 1
-      FT_BLAS: openblas
-      FT_MPFR: mpfr-6
-      FT_FFTW_WITH_COMBINED_THREADS: 1
-    steps:
-      - uses: actions/checkout@v2
-      - name: Cache dependencies on Windows
-        id: cache
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-dependencies-${{ matrix.arch }}
-        with:
-          path: C:/vcpkg/packages/
-          key: cache-dependencies-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.arch }}-${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
-          restore-keys: |
-            cache-dependencies-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.arch }}-
-            cache-dependencies-${{ matrix.os }}-${{ matrix.compiler }}-
-            cache-dependencies-${{ matrix.os }}-
-      - name: Install dependencies on Windows
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: vcpkg install openblas:${{ matrix.arch }}-windows fftw3[core,threads]:${{ matrix.arch }}-windows mpfr:${{ matrix.arch }}-windows --recurse
-      - name: Build assembly
-        run: mingw32-make assembly
-      - name: Build library
-        run: |
-          mingw32-make lib
-      - name: Build tests
-        run: mingw32-make tests
-      - name: Build examples
-        run: mingw32-make examples
-      - name: Run examples
-        run: mingw32-make runexamples
-      - name: Run tests
-        run: mingw32-make runtests FT_NUM_THREADS=2
   docs:
     name: Documentation
     runs-on: macOS-latest

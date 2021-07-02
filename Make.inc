@@ -138,36 +138,14 @@ else
         CFLAGS += -I/usr/local/opt/gmp/include
         LDFLAGS += -L/usr/local/opt/gmp/lib
     else ifeq ($(UNAME), Windows)
-        ifneq (, $(findstring 86_64, $(machine)))
-            CFLAGS += -Ic:\vcpkg\packages\openblas_x64-windows\include\openblas
-            CFLAGS += -Ic:\vcpkg\packages\openblas_x64-windows\include
-            CFLAGS += -Ic:\vcpkg\packages\fftw3_x64-windows\include
-            CFLAGS += -Ic:\vcpkg\packages\mpfr_x64-windows\include
-            CFLAGS += -Ic:\vcpkg\packages\gmp_x64-windows\include
-            LDFLAGS += -Lc:\vcpkg\packages\openblas_x64-windows\bin
-            LDFLAGS += -Lc:\vcpkg\packages\fftw3_x64-windows\bin
-            LDFLAGS += -Lc:\vcpkg\packages\mpfr_x64-windows\bin
-            LDFLAGS += -Lc:\vcpkg\packages\gmp_x64-windows\bin
-        else ifneq (, $(findstring 86, $(machine)))
-            CFLAGS += -Ic:\vcpkg\packages\openblas_x86-windows\include\openblas
-            CFLAGS += -Ic:\vcpkg\packages\openblas_x86-windows\include
-            CFLAGS += -Ic:\vcpkg\packages\fftw3_x86-windows\include
-            CFLAGS += -Ic:\vcpkg\packages\mpfr_x86-windows\include
-            CFLAGS += -Ic:\vcpkg\packages\gmp_x86-windows\include
-            LDFLAGS += -Lc:\vcpkg\packages\openblas_x86-windows\bin
-            LDFLAGS += -Lc:\vcpkg\packages\fftw3_x86-windows\bin
-            LDFLAGS += -Lc:\vcpkg\packages\mpfr_x86-windows\bin
-            LDFLAGS += -Lc:\vcpkg\packages\gmp_x86-windows\bin
-        endif
+        CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include\openblas
+        CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include
+        LDFLAGS += -Lc:\tools\vcpkg\installed\x64-windows\bin
     endif
 endif
 
 ifndef FT_BLAS
     FT_BLAS = blas
-endif
-
-ifndef FT_MPFR
-    FT_MPFR = mpfr
 endif
 
 ifndef FT_OPENMP
@@ -186,7 +164,7 @@ ifndef FT_OPENMP
     endif
 endif
 
-LDLIBS += $(FT_OPENMP) -lm -l$(FT_MPFR) -l$(FT_BLAS) -lfftw3
+LDLIBS += $(FT_OPENMP) -lm -lmpfr -l$(FT_BLAS) -lfftw3
 
 ifdef FT_QUADMATH
     AFLAGS += -DFT_QUADMATH
