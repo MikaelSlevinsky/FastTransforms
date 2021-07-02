@@ -41,11 +41,13 @@ jobs:
           brew install libomp openblas fftw mpfr
       - name: Compiler version
         run: ${CC} --version
-      - name: Set additional environment variables for coverage
-        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.compiler, 'gcc')
+      - name: Configure environment for coverage
+        if: startsWith(matrix.os, 'macOS') && startsWith(matrix.compiler, 'gcc')
         run: |
           echo "COV=gcov" >> $GITHUB_ENV
           echo "FT_COVERAGE=1" >> $GITHUB_ENV
+      - if: startsWith(matrix.compiler, 'gcc')
+        run: echo "FT_QUADMATH=1" >> $GITHUB_ENV
       - name: Build assembly
         run: make assembly
       - name: Build library
@@ -59,7 +61,7 @@ jobs:
       - name: Run examples
         run: make runexamples
       - name: Upload coverage
-        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.compiler, 'gcc')
+        if: startsWith(matrix.os, 'macOS') && startsWith(matrix.compiler, 'gcc')
         run: |
           make coverage
           bash <(curl -s https://codecov.io/bash)
