@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['ft_5fdisk_5ffftw_5fplan_126',['ft_disk_fftw_plan',['../structft__disk__fftw__plan.html',1,'']]],
+  ['ft_5fgradient_5fplan_127',['ft_gradient_plan',['../structft__gradient__plan.html',1,'']]],
+  ['ft_5fharmonic_5fplan_128',['ft_harmonic_plan',['../structft__harmonic__plan.html',1,'']]],
+  ['ft_5fhelmholtzhodge_5fplan_129',['ft_helmholtzhodge_plan',['../structft__helmholtzhodge__plan.html',1,'']]],
+  ['ft_5fmpfr_5ftriangular_5fbanded_130',['ft_mpfr_triangular_banded',['../structft__mpfr__triangular__banded.html',1,'']]],
+  ['ft_5forthogonal_5ftransformation_131',['ft_orthogonal_transformation',['../structft__orthogonal__transformation.html',1,'']]],
+  ['ft_5fpartial_5fsph_5fisometry_5fplan_132',['ft_partial_sph_isometry_plan',['../structft__partial__sph__isometry__plan.html',1,'']]],
+  ['ft_5frectdisk_5ffftw_5fplan_133',['ft_rectdisk_fftw_plan',['../structft__rectdisk__fftw__plan.html',1,'']]],
+  ['ft_5freflection_134',['ft_reflection',['../structft__reflection.html',1,'']]],
+  ['ft_5fsph_5fisometry_5fplan_135',['ft_sph_isometry_plan',['../structft__sph__isometry__plan.html',1,'']]],
+  ['ft_5fsphere_5ffftw_5fplan_136',['ft_sphere_fftw_plan',['../structft__sphere__fftw__plan.html',1,'']]],
+  ['ft_5fspin_5fharmonic_5fplan_137',['ft_spin_harmonic_plan',['../structft__spin__harmonic__plan.html',1,'']]],
+  ['ft_5fspinsphere_5ffftw_5fplan_138',['ft_spinsphere_fftw_plan',['../structft__spinsphere__fftw__plan.html',1,'']]],
+  ['ft_5ftetrahedron_5ffftw_5fplan_139',['ft_tetrahedron_fftw_plan',['../structft__tetrahedron__fftw__plan.html',1,'']]],
+  ['ft_5ftriangle_5ffftw_5fplan_140',['ft_triangle_fftw_plan',['../structft__triangle__fftw__plan.html',1,'']]],
+  ['ft_5fzyzr_141',['ft_ZYZR',['../structft___z_y_z_r.html',1,'']]]
+];
