@@ -79,16 +79,16 @@ The error growth rate is significantly reduced if (α, β, γ) = (-0.5, -0.5, -0
 
 | Degree            | 63       | 127      | 255      | 511      | 1023     | 2047     | 4095     | 8191     |
 | ----------------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: | -------: |
-| **Time**          | 0.000143 | 0.000453 | 0.001642 | 0.007235 | 0.036641 | 0.206787 | 1.305053 | 11.21242 |
+| **Time**          | 0.000141 | 0.000453 | 0.001598 | 0.006742 | 0.031256 | 0.170632 | 1.082894 | 10.35029 |
 | **ϵ<sub>2</sub>** | 7.75e-15 | 8.29e-15 | 1.08e-14 | 1.77e-14 | 2.93e-14 | 5.12e-14 | 1.09e-13 | 1.87e-13 |
 | **ϵ<sub>∞</sub>** | 1.47e-14 | 2.55e-14 | 8.01e-14 | 2.59e-13 | 7.36e-13 | 2.45e-12 | 6.74e-12 | 1.55e-11 |
 
-# References:
+## References
 
    [1] J. Molina and R. M. Slevinsky. <a href="https://arxiv.org/abs/1809.04555">A rapid and well-conditioned algorithm for the Helmholtz–Hodge decomposition of vector fields on the sphere</a>, arXiv:1809.04555, 2018.
 
-   [1] S. Olver, R. M. Slevinsky, and A. Townsend. <a href="https://doi.org/10.1017/S0962492920000045">Fast algorithms using orthogonal polynomials</a>, *Acta Numerica*, **29**:573—699, 2020.
+   [2] S. Olver, R. M. Slevinsky, and A. Townsend. <a href="https://doi.org/10.1017/S0962492920000045">Fast algorithms using orthogonal polynomials</a>, *Acta Numerica*, **29**:573—699, 2020.
 
-   [2]  R. M. Slevinsky. <a href="https://doi.org/10.1016/j.acha.2017.11.001">Fast and backward stable transforms between spherical harmonic expansions and bivariate Fourier series</a>, *Appl. Comput. Harmon. Anal.*, **47**:585—606, 2019.
+   [3]  R. M. Slevinsky. <a href="https://doi.org/10.1016/j.acha.2017.11.001">Fast and backward stable transforms between spherical harmonic expansions and bivariate Fourier series</a>, *Appl. Comput. Harmon. Anal.*, **47**:585—606, 2019.
 
-   [3]  R. M. Slevinsky, <a href="https://arxiv.org/abs/1711.07866">Conquering the pre-computation in two-dimensional harmonic polynomial transforms</a>, arXiv:1711.07866, 2017.
+   [4]  R. M. Slevinsky, <a href="https://arxiv.org/abs/1711.07866">Conquering the pre-computation in two-dimensional harmonic polynomial transforms</a>, arXiv:1711.07866, 2017.
