@@ -41,6 +41,11 @@ jobs:
           brew install libomp openblas fftw mpfr
       - name: Compiler version
         run: ${CC} --version
+      - name: Set additional environment variables for coverage
+        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.compiler, 'gcc')
+        run: |
+          echo "COV=gcov" >> $GITHUB_ENV
+          echo "FT_COVERAGE=1" >> $GITHUB_ENV
       - name: Build assembly
         run: make assembly
       - name: Build library
@@ -53,6 +58,11 @@ jobs:
         run: make runtests FT_NUM_THREADS=2
       - name: Run examples
         run: make runexamples
+      - name: Upload coverage
+        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.compiler, 'gcc')
+        run: |
+          make coverage
+          bash <(curl -s https://codecov.io/bash)
   docs:
     name: Documentation
     runs-on: macOS-latest
@@ -62,7 +72,7 @@ jobs:
         run: brew install doxygen
       - name: Build site
         run: doxygen Doxyfile
-      - if: github.ref == 'refs/heads/master'
+      - if: ${{ github.ref == 'refs/heads/master' }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
