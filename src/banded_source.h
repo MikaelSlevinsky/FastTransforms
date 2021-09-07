@@ -15,16 +15,22 @@ typedef struct {
     int u;
 } X(banded);
 
+// Upper-triangular banded matrix
+
 typedef struct {
     FLT * data;
     int n;
     int b;
 } X(triangular_banded);
 
-typedef struct {
+struct X(banded_orthogonal_triangular) {
     X(banded) * factors;
     FLT * tau;
-} X(banded_qr);
+    char UPLO;
+};
+
+typedef struct X(banded_orthogonal_triangular) X(banded_qr);
+typedef struct X(banded_orthogonal_triangular) X(banded_ql);
 
 typedef struct X(tbstruct_FMM) X(tb_eigen_FMM);
 
@@ -61,6 +67,7 @@ void X(destroy_sparse)(X(sparse) * A);
 void X(destroy_banded)(X(banded) * A);
 void X(destroy_triangular_banded)(X(triangular_banded) * A);
 void X(destroy_banded_qr)(X(banded_qr) * F);
+void X(destroy_banded_ql)(X(banded_ql) * F);
 void X(destroy_tb_eigen_FMM)(X(tb_eigen_FMM) * F);
 void X(destroy_tb_eigen_ADI)(X(tb_eigen_ADI) * F);
 
@@ -92,17 +99,24 @@ void X(set_triangular_banded_index)(const X(triangular_banded) * A, const FLT v,
 
 void X(gbmv)(FLT alpha, X(banded) * A, FLT * x, FLT beta, FLT * y);
 void X(gbmm)(FLT alpha, X(banded) * A, X(banded) * B, FLT beta, X(banded) * C);
+void X(tridiagonal_banded_multiplication)(FLT alpha, X(banded) * A, FLT beta, X(banded) * B, const int l, const int u);
 void X(banded_add)(FLT alpha, X(banded) * A, FLT beta, X(banded) * B, X(banded) * C);
+void X(banded_uniform_scaling_add)(FLT alpha, X(banded) * A, FLT beta);
+X(banded) * X(operator_orthogonal_polynomial_clenshaw)(const int n, const FLT * c, const int incc, const FLT * A, const FLT * B, const FLT * C, X(banded) * X, FLT phi0);
 
 void X(tbmv)(char TRANS, X(triangular_banded) * A, FLT * x);
 void X(tbsv)(char TRANS, X(triangular_banded) * A, FLT * x);
 void X(tssv)(char TRANS, X(triangular_banded) * A, X(triangular_banded) * B, FLT gamma, FLT * x);
 
 void X(banded_lufact)(X(banded) * A);
+void X(banded_cholfact)(X(banded) * A);
 X(banded_qr) * X(banded_qrfact)(X(banded) * A);
+X(banded_ql) * X(banded_qlfact)(X(banded) * A);
 void X(bqmv)(char TRANS, X(banded_qr) * F, FLT * x);
 void X(brmv)(char TRANS, X(banded_qr) * F, FLT * x);
 void X(brsv)(char TRANS, X(banded_qr) * F, FLT * x);
+void X(blmv)(char TRANS, X(banded_ql) * F, FLT * x);
+void X(blsv)(char TRANS, X(banded_ql) * F, FLT * x);
 
 void X(triangular_banded_eigenvalues)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * lambda);
 void X(triangular_banded_eigenvectors)(X(triangular_banded) * A, X(triangular_banded) * B, FLT * V);
