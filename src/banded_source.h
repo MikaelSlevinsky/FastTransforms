@@ -112,7 +112,8 @@ void X(banded_lufact)(X(banded) * A);
 void X(banded_cholfact)(X(banded) * A);
 X(banded_qr) * X(banded_qrfact)(X(banded) * A);
 X(banded_ql) * X(banded_qlfact)(X(banded) * A);
-void X(bqmv)(char TRANS, X(banded_qr) * F, FLT * x);
+void X(bqmv)(char TRANS, struct X(banded_orthogonal_triangular) * F, FLT * x);
+void X(partial_bqmm)(struct X(banded_orthogonal_triangular) * F, int nu, int nv, X(banded) * A);
 void X(brmv)(char TRANS, X(banded_qr) * F, FLT * x);
 void X(brsv)(char TRANS, X(banded_qr) * F, FLT * x);
 void X(blmv)(char TRANS, X(banded_ql) * F, FLT * x);
@@ -152,6 +153,16 @@ FLT X(normest_tb_eigen_ADI)(X(tb_eigen_ADI) * F);
 
 X(triangular_banded) * X(create_A_konoplev_to_jacobi)(const int n, const FLT alpha, const FLT beta);
 X(triangular_banded) * X(create_B_konoplev_to_jacobi)(const int n, const FLT alpha);
+
+FLT X(rec_A_jacobi)(const int norm, const int n, const FLT alpha, const FLT beta);
+FLT X(rec_B_jacobi)(const int norm, const int n, const FLT alpha, const FLT beta);
+FLT X(rec_C_jacobi)(const int norm, const int n, const FLT alpha, const FLT beta);
+FLT X(rec_A_laguerre)(const int norm, const int n, const FLT alpha);
+FLT X(rec_B_laguerre)(const int norm, const int n, const FLT alpha);
+FLT X(rec_C_laguerre)(const int norm, const int n, const FLT alpha);
+FLT X(rec_A_hermite)(const int norm, const int n);
+FLT X(rec_B_hermite)(const int norm, const int n);
+FLT X(rec_C_hermite)(const int norm, const int n);
 
 X(banded) * X(create_jacobi_derivative)(const int norm, const int m, const int n, const int order, const FLT alpha, const FLT beta);
 X(banded) * X(create_jacobi_multiplication)(const int norm, const int m, const int n, const FLT alpha, const FLT beta);
@@ -201,5 +212,9 @@ X(triangular_banded) * X(create_C_associated_laguerre_to_laguerre)(const int nor
 X(triangular_banded) * X(create_A_associated_hermite_to_hermite)(const int norm, const int n, const int c);
 X(triangular_banded) * X(create_B_associated_hermite_to_hermite)(const int norm, const int n);
 X(triangular_banded) * X(create_C_associated_hermite_to_hermite)(const int n);
+
+X(banded) * X(operator_normalized_jacobi_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const FLT alpha, const FLT beta);
+X(banded) * X(operator_normalized_laguerre_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const FLT alpha);
+X(banded) * X(operator_normalized_hermite_clenshaw)(const int n, const int nc, const FLT * c, const int incc);
 
 X(lowrankmatrix) * X(ddfadi)(const int m, const FLT * A, const int n, const FLT * B, const int b, const FLT * X, const FLT * Y);
