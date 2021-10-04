@@ -117,7 +117,7 @@ void X(inner_test_banded)(int * checksum, int n) {
     free(QtQ);
     QtQ = calloc(m*m, sizeof(FLT));
     for (int j = 0; j < m; j++) {
-        QtQ[j+j*m] = Idm[j+j*m] = 1;
+        QtQ[j+j*m] = 1;
         X(bqmv)('N', QL, QtQ+j*m);
         X(bqmv)('T', QL, QtQ+j*m);
     }
@@ -178,6 +178,7 @@ void X(inner_test_banded)(int * checksum, int n) {
     printf("Numerical error of ||M - RᵀR||/||M|| \t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
     X(checktest)(err, n, checksum);
 
+    /*
     {
         X(banded) * X = X(create_jacobi_multiplication)(0, n, n, 0, 0);
         int N = MIN(n, 10);
@@ -194,6 +195,7 @@ void X(inner_test_banded)(int * checksum, int n) {
         X(destroy_banded)(M);
         X(destroy_banded)(X);
     }
+    */
 
     X(triangular_banded) * A = X(create_A_test)(n);
     X(triangular_banded) * B = X(create_B_test)(n);
