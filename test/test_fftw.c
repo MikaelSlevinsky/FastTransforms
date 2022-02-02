@@ -46,8 +46,8 @@ int main(int argc, const char * argv[]) {
         A = sphrand(N, M);
         B = copymat(A, N, M);
         P = ft_plan_sph2fourier(N);
-        PS = ft_plan_sph_synthesis(N, M);
-        PA = ft_plan_sph_analysis(N, M);
+        PS = ft_plan_sph_synthesis(N, M, FT_FFTW_FLAGS);
+        PA = ft_plan_sph_analysis(N, M, FT_FFTW_FLAGS);
 
         ft_execute_sph2fourier('N', P, A, N, M);
         ft_execute_sph_synthesis('N', PS, A, N, M);
@@ -82,8 +82,8 @@ int main(int argc, const char * argv[]) {
 
         A = sphrand(N, M);
         P = ft_plan_sph2fourier(N);
-        PS = ft_plan_sph_synthesis(N, M);
-        PA = ft_plan_sph_analysis(N, M);
+        PS = ft_plan_sph_synthesis(N, M, FT_FFTW_FLAGS);
+        PA = ft_plan_sph_analysis(N, M, FT_FFTW_FLAGS);
 
         FT_TIME({ft_execute_sph2fourier('N', P, A, N, M); ft_execute_sph_synthesis('N', PS, A, N, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
@@ -108,8 +108,8 @@ int main(int argc, const char * argv[]) {
         A = sphrand(N, M);
         B = copymat(A, N, M);
         P = ft_plan_sph2fourier(N);
-        PS = ft_plan_sphv_synthesis(N, M);
-        PA = ft_plan_sphv_analysis(N, M);
+        PS = ft_plan_sphv_synthesis(N, M, FT_FFTW_FLAGS);
+        PA = ft_plan_sphv_analysis(N, M, FT_FFTW_FLAGS);
 
         ft_execute_sphv2fourier('N', P, A, N, M);
         ft_execute_sphv_synthesis('N', PS, A, N, M);
@@ -144,8 +144,8 @@ int main(int argc, const char * argv[]) {
 
         A = sphrand(N, M);
         P = ft_plan_sph2fourier(N);
-        PS = ft_plan_sphv_synthesis(N, M);
-        PA = ft_plan_sphv_analysis(N, M);
+        PS = ft_plan_sphv_synthesis(N, M, FT_FFTW_FLAGS);
+        PA = ft_plan_sphv_analysis(N, M, FT_FFTW_FLAGS);
 
         FT_TIME({ft_execute_sphv2fourier('N', P, A, N, M); ft_execute_sphv_synthesis('N', PS, A, N, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
@@ -170,8 +170,8 @@ int main(int argc, const char * argv[]) {
         A = trirand(N, M);
         B = copymat(A, N, M);
         P = ft_plan_tri2cheb(N, alpha, beta, gamma);
-        QS = ft_plan_tri_synthesis(N, M);
-        QA = ft_plan_tri_analysis(N, M);
+        QS = ft_plan_tri_synthesis(N, M, FT_FFTW_FLAGS);
+        QA = ft_plan_tri_analysis(N, M, FT_FFTW_FLAGS);
 
         ft_execute_tri2cheb('N', P, A, N, M);
         ft_execute_tri_synthesis('N', QS, A, N, M);
@@ -206,8 +206,8 @@ int main(int argc, const char * argv[]) {
 
         A = trirand(N, M);
         P = ft_plan_tri2cheb(N, alpha, beta, gamma);
-        QS = ft_plan_tri_synthesis(N, M);
-        QA = ft_plan_tri_analysis(N, M);
+        QS = ft_plan_tri_synthesis(N, M, FT_FFTW_FLAGS);
+        QA = ft_plan_tri_analysis(N, M, FT_FFTW_FLAGS);
 
         FT_TIME({ft_execute_tri2cheb('N', P, A, N, M); ft_execute_tri_synthesis('N', QS, A, N, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
@@ -232,8 +232,8 @@ int main(int argc, const char * argv[]) {
         A = diskrand(N, M);
         B = copymat(A, N, M);
         P = ft_plan_disk2cxf(N, alpha, beta);
-        RS = ft_plan_disk_synthesis(N, M);
-        RA = ft_plan_disk_analysis(N, M);
+        RS = ft_plan_disk_synthesis(N, M, FT_FFTW_FLAGS);
+        RA = ft_plan_disk_analysis(N, M, FT_FFTW_FLAGS);
 
         ft_execute_disk2cxf('N', P, A, N, M);
         ft_execute_disk_synthesis('N', RS, A, N, M);
@@ -268,8 +268,8 @@ int main(int argc, const char * argv[]) {
 
         A = diskrand(N, M);
         P = ft_plan_disk2cxf(N, alpha, beta);
-        RS = ft_plan_disk_synthesis(N, M);
-        RA = ft_plan_disk_analysis(N, M);
+        RS = ft_plan_disk_synthesis(N, M, FT_FFTW_FLAGS);
+        RA = ft_plan_disk_analysis(N, M, FT_FFTW_FLAGS);
 
         FT_TIME({ft_execute_disk2cxf('N', P, A, N, M); ft_execute_disk_synthesis('N', RS, A, N, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
@@ -294,8 +294,8 @@ int main(int argc, const char * argv[]) {
         A = rectdiskrand(N, M);
         B = copymat(A, N, M);
         P = ft_plan_rectdisk2cheb(N, beta);
-        SS = ft_plan_rectdisk_synthesis(N, M);
-        SA = ft_plan_rectdisk_analysis(N, M);
+        SS = ft_plan_rectdisk_synthesis(N, M, FT_FFTW_FLAGS);
+        SA = ft_plan_rectdisk_analysis(N, M, FT_FFTW_FLAGS);
 
         ft_execute_rectdisk2cheb('N', P, A, N, M);
         ft_execute_rectdisk_synthesis('N', SS, A, N, M);
@@ -330,8 +330,8 @@ int main(int argc, const char * argv[]) {
 
         A = rectdiskrand(N, M);
         P = ft_plan_rectdisk2cheb(N, beta);
-        SS = ft_plan_rectdisk_synthesis(N, M);
-        SA = ft_plan_rectdisk_analysis(N, M);
+        SS = ft_plan_rectdisk_synthesis(N, M, FT_FFTW_FLAGS);
+        SA = ft_plan_rectdisk_analysis(N, M, FT_FFTW_FLAGS);
 
         FT_TIME({ft_execute_rectdisk2cheb('N', P, A, N, M); ft_execute_rectdisk_synthesis('N', SS, A, N, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
@@ -356,8 +356,8 @@ int main(int argc, const char * argv[]) {
         A = tetrand(N, L, M);
         B = copymat(A, N, L*M);
         P = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
-        TS = ft_plan_tet_synthesis(N, L, M);
-        TA = ft_plan_tet_analysis(N, L, M);
+        TS = ft_plan_tet_synthesis(N, L, M, FT_FFTW_FLAGS);
+        TA = ft_plan_tet_analysis(N, L, M, FT_FFTW_FLAGS);
 
         ft_execute_tet2cheb('N', P, A, N, L, M);
         ft_execute_tet_synthesis('N', TS, A, N, L, M);
@@ -399,8 +399,8 @@ int main(int argc, const char * argv[]) {
 
         A = tetrand(N, L, M);
         P = ft_plan_tet2cheb(N, alpha, beta, gamma, delta);
-        TS = ft_plan_tet_synthesis(N, L, M);
-        TA = ft_plan_tet_analysis(N, L, M);
+        TS = ft_plan_tet_synthesis(N, L, M, FT_FFTW_FLAGS);
+        TA = ft_plan_tet_analysis(N, L, M, FT_FFTW_FLAGS);
 
         FT_TIME({ft_execute_tet2cheb('N', P, A, N, L, M); ft_execute_tet_synthesis('N', TS, A, N, L, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
@@ -429,8 +429,8 @@ int main(int argc, const char * argv[]) {
             B = (double *) BC;
 
             SP = ft_plan_spinsph2fourier(N, S);
-            US = ft_plan_spinsph_synthesis(N, M, S);
-            UA = ft_plan_spinsph_analysis(N, M, S);
+            US = ft_plan_spinsph_synthesis(N, M, S, FT_FFTW_FLAGS);
+            UA = ft_plan_spinsph_analysis(N, M, S, FT_FFTW_FLAGS);
 
             ft_execute_spinsph2fourier('N', SP, AC, N, M);
             ft_execute_spinsph_synthesis('N', US, AC, N, M);
@@ -467,8 +467,8 @@ int main(int argc, const char * argv[]) {
         for (int S = -2; S <= 2; S++) {
             ft_complex * AC = spinsphrand(N, M, S);
             SP = ft_plan_spinsph2fourier(N, S);
-            US = ft_plan_spinsph_synthesis(N, M, S);
-            UA = ft_plan_spinsph_analysis(N, M, S);
+            US = ft_plan_spinsph_synthesis(N, M, S, FT_FFTW_FLAGS);
+            UA = ft_plan_spinsph_analysis(N, M, S, FT_FFTW_FLAGS);
 
             FT_TIME({ft_execute_spinsph2fourier('N', SP, AC, N, M); ft_execute_spinsph_synthesis('N', US, AC, N, M);}, start, end, NTIMES)
             printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));

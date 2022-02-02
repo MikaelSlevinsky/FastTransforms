@@ -68,7 +68,7 @@ int main(void) {
     printf("\n");
 
     ft_spin_harmonic_plan * P = ft_plan_spinsph2fourier(N, 0);
-    ft_spinsphere_fftw_plan * PA = ft_plan_spinsph_analysis(N, M, 0);
+    ft_spinsphere_fftw_plan * PA = ft_plan_spinsph_analysis(N, M, 0, FT_FFTW_FLAGS);
 
     ft_execute_spinsph_analysis('N', PA, F, N, M);
     ft_execute_fourier2spinsph('N', P, F, N, M);
@@ -106,7 +106,7 @@ int main(void) {
     ft_destroy_spinsphere_fftw_plan(PA);
 
     P = ft_plan_spinsph2fourier(N, 1);
-    PA = ft_plan_spinsph_analysis(N, M, 1);
+    PA = ft_plan_spinsph_analysis(N, M, 1, FT_FFTW_FLAGS);
 
     ft_execute_spinsph_analysis('N', PA, F, N, M);
     ft_execute_fourier2spinsph('N', P, F, N, M);

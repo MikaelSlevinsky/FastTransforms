@@ -20,6 +20,9 @@ for (int ntimes = 0; ntimes < NTIMES; ntimes++)                                \
     BLOCK;                                                                     \
 gettimeofday(&END, NULL);
 
+// A bitwise OR ('|') of zero or more of the following: FFTW_ESTIMATE FFTW_MEASURE FFTW_PATIENT FFTW_EXHAUSTIVE FFTW_WISDOM_ONLY FFTW_DESTROY_INPUT FFTW_PRESERVE_INPUT FFTW_UNALIGNED
+#define FT_FFTW_FLAGS FFTW_MEASURE | FFTW_DESTROY_INPUT
+
 void printmat(char * MAT, char * FMT, double * A, int n, int m);
 void print_summary_size(size_t i);
 double * copymat(double * A, int n, int m);

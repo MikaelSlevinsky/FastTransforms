@@ -101,7 +101,7 @@ int main(void) {
     printf("\n");
 
     ft_harmonic_plan * P = ft_plan_sph2fourier(N);
-    ft_sphere_fftw_plan * PA = ft_plan_sph_analysis(N, M);
+    ft_sphere_fftw_plan * PA = ft_plan_sph_analysis(N, M, FT_FFTW_FLAGS);
 
     ft_execute_sph_analysis('N', PA, F, N, M);
     ft_execute_fourier2sph('N', P, F, N, M);
