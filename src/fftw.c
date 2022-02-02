@@ -99,16 +99,12 @@ ft_sphere_fftw_plan * ft_plan_sph_with_kind(const int N, const int M, const fftw
     idist = odist = 1;
     istride = ostride = N;
     howmany = N;
-    if (kind[2][0] == FFTW_HC2R) {
-        double * Z = fftw_malloc(N*M*sizeof(double));
+    double * Z = fftw_malloc(N*M*sizeof(double));
+    if (kind[2][0] == FFTW_HC2R)
         P->planphi = fftw_plan_many_dft_c2r(rank, n, howmany, (fftw_complex *) P->Y, inembed, istride, idist, Z, onembed, ostride, odist, FT_FFTW_FLAGS);
-        fftw_free(Z);
-    }
-    else if (kind[2][0] == FFTW_R2HC) {
-        double * Z = fftw_malloc(N*M*sizeof(double));
+    else if (kind[2][0] == FFTW_R2HC)
         P->planphi = fftw_plan_many_dft_r2c(rank, n, howmany, Z, inembed, istride, idist, (fftw_complex *) P->Y, onembed, ostride, odist, FT_FFTW_FLAGS);
-        fftw_free(Z);
-    }
+    fftw_free(Z);
     return P;
 }
 
@@ -442,16 +438,12 @@ ft_disk_fftw_plan * ft_plan_disk_with_kind(const int N, const int M, const fftw_
     idist = odist = 1;
     istride = ostride = N;
     howmany = N;
-    if (kind[2][0] == FFTW_HC2R) {
-        double * Z = fftw_malloc(N*M*sizeof(double));
+    double * Z = fftw_malloc(N*M*sizeof(double));
+    if (kind[2][0] == FFTW_HC2R)
         P->plantheta = fftw_plan_many_dft_c2r(rank, n, howmany, (fftw_complex *) P->Y, inembed, istride, idist, Z, onembed, ostride, odist, FT_FFTW_FLAGS);
-        fftw_free(Z);
-    }
-    else if (kind[2][0] == FFTW_R2HC) {
-        double * Z = fftw_malloc(N*M*sizeof(double));
+    else if (kind[2][0] == FFTW_R2HC)
         P->plantheta = fftw_plan_many_dft_r2c(rank, n, howmany, Z, inembed, istride, idist, (fftw_complex *) P->Y, onembed, ostride, odist, FT_FFTW_FLAGS);
-        fftw_free(Z);
-    }
+    fftw_free(Z);
     return P;
 }
 
