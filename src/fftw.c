@@ -72,7 +72,7 @@ void ft_destroy_sphere_fftw_plan(ft_sphere_fftw_plan * P) {
     free(P);
 }
 
-ft_sphere_fftw_plan * ft_plan_sph_with_kind(const int N, const int M, const fftw_r2r_kind kind[3][1]) {
+ft_sphere_fftw_plan * ft_plan_sph_with_kind(const int N, const int M, const fftw_r2r_kind kind[3][1], const unsigned flags) {
     int rank = 1; // not 2: we are computing 1d transforms //
     int n[] = {N}; // 1d transforms of length n //
     int idist = 4*N, odist = 4*N;
@@ -84,46 +84,48 @@ ft_sphere_fftw_plan * ft_plan_sph_with_kind(const int N, const int M, const fftw
     P->Y = fftw_malloc(N*2*(M/2+1)*sizeof(double));
 
     int howmany = (M+3)/4;
-    P->plantheta1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
+    P->plantheta1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], flags);
 
     howmany = (M+2)/4;
-    P->plantheta2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], FT_FFTW_FLAGS);
+    P->plantheta2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], flags);
 
     howmany = (M+1)/4;
-    P->plantheta3 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], FT_FFTW_FLAGS);
+    P->plantheta3 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], flags);
 
     howmany = M/4;
-    P->plantheta4 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
+    P->plantheta4 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], flags);
 
     n[0] = M;
     idist = odist = 1;
     istride = ostride = N;
     howmany = N;
+    double * Z = fftw_malloc(N*M*sizeof(double));
     if (kind[2][0] == FFTW_HC2R)
-        P->planphi = fftw_plan_many_dft_c2r(rank, n, howmany, (fftw_complex *) P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, FT_FFTW_FLAGS);
+        P->planphi = fftw_plan_many_dft_c2r(rank, n, howmany, (fftw_complex *) P->Y, inembed, istride, idist, Z, onembed, ostride, odist, flags);
     else if (kind[2][0] == FFTW_R2HC)
-        P->planphi = fftw_plan_many_dft_r2c(rank, n, howmany, P->Y, inembed, istride, idist, (fftw_complex *) P->Y, onembed, ostride, odist, FT_FFTW_FLAGS);
+        P->planphi = fftw_plan_many_dft_r2c(rank, n, howmany, Z, inembed, istride, idist, (fftw_complex *) P->Y, onembed, ostride, odist, flags);
+    fftw_free(Z);
     return P;
 }
 
-ft_sphere_fftw_plan * ft_plan_sph_synthesis(const int N, const int M) {
+ft_sphere_fftw_plan * ft_plan_sph_synthesis(const int N, const int M, const unsigned flags) {
     const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_RODFT01}, {FFTW_HC2R}};
-    return ft_plan_sph_with_kind(N, M, kind);
+    return ft_plan_sph_with_kind(N, M, kind, flags);
 }
 
-ft_sphere_fftw_plan * ft_plan_sph_analysis(const int N, const int M) {
+ft_sphere_fftw_plan * ft_plan_sph_analysis(const int N, const int M, const unsigned flags) {
     const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_RODFT10}, {FFTW_R2HC}};
-    return ft_plan_sph_with_kind(N, M, kind);
+    return ft_plan_sph_with_kind(N, M, kind, flags);
 }
 
-ft_sphere_fftw_plan * ft_plan_sphv_synthesis(const int N, const int M) {
+ft_sphere_fftw_plan * ft_plan_sphv_synthesis(const int N, const int M, const unsigned flags) {
     const fftw_r2r_kind kind[3][1] = {{FFTW_RODFT01}, {FFTW_REDFT01}, {FFTW_HC2R}};
-    return ft_plan_sph_with_kind(N, M, kind);
+    return ft_plan_sph_with_kind(N, M, kind, flags);
 }
 
-ft_sphere_fftw_plan * ft_plan_sphv_analysis(const int N, const int M) {
+ft_sphere_fftw_plan * ft_plan_sphv_analysis(const int N, const int M, const unsigned flags) {
     const fftw_r2r_kind kind[3][1] = {{FFTW_RODFT10}, {FFTW_REDFT10}, {FFTW_R2HC}};
-    return ft_plan_sph_with_kind(N, M, kind);
+    return ft_plan_sph_with_kind(N, M, kind, flags);
 }
 
 void ft_execute_sph_synthesis(const char TRANS, const ft_sphere_fftw_plan * P, double * X, const int N, const int M) {
@@ -276,16 +278,16 @@ void ft_destroy_triangle_fftw_plan(ft_triangle_fftw_plan * P) {
     free(P);
 }
 
-ft_triangle_fftw_plan * ft_plan_tri_with_kind(const int N, const int M, const fftw_r2r_kind kind0, const fftw_r2r_kind kind1) {
+ft_triangle_fftw_plan * ft_plan_tri_with_kind(const int N, const int M, const fftw_r2r_kind kind0, const fftw_r2r_kind kind1, const unsigned flags) {
     ft_triangle_fftw_plan * P = malloc(sizeof(ft_triangle_fftw_plan));
     double * X = fftw_malloc(N*M*sizeof(double));
-    P->planxy = fftw_plan_r2r_2d(N, M, X, X, kind0, kind1, FT_FFTW_FLAGS);
+    P->planxy = fftw_plan_r2r_2d(N, M, X, X, kind0, kind1, flags);
     fftw_free(X);
     return P;
 }
 
-ft_triangle_fftw_plan * ft_plan_tri_synthesis(const int N, const int M) {return ft_plan_tri_with_kind(N, M, FFTW_REDFT01, FFTW_REDFT01);}
-ft_triangle_fftw_plan * ft_plan_tri_analysis(const int N, const int M) {return ft_plan_tri_with_kind(N, M, FFTW_REDFT10, FFTW_REDFT10);}
+ft_triangle_fftw_plan * ft_plan_tri_synthesis(const int N, const int M, const unsigned flags) {return ft_plan_tri_with_kind(N, M, FFTW_REDFT01, FFTW_REDFT01, flags);}
+ft_triangle_fftw_plan * ft_plan_tri_analysis(const int N, const int M, const unsigned flags) {return ft_plan_tri_with_kind(N, M, FFTW_REDFT10, FFTW_REDFT10, flags);}
 
 void ft_execute_tri_synthesis(const char TRANS, const ft_triangle_fftw_plan * P, double * X, const int N, const int M) {
     if (TRANS == 'N') {
@@ -335,16 +337,16 @@ void ft_destroy_tetrahedron_fftw_plan(ft_tetrahedron_fftw_plan * P) {
     free(P);
 }
 
-ft_tetrahedron_fftw_plan * ft_plan_tet_with_kind(const int N, const int L, const int M, const fftw_r2r_kind kind0, const fftw_r2r_kind kind1, const fftw_r2r_kind kind2) {
+ft_tetrahedron_fftw_plan * ft_plan_tet_with_kind(const int N, const int L, const int M, const fftw_r2r_kind kind0, const fftw_r2r_kind kind1, const fftw_r2r_kind kind2, const unsigned flags) {
     ft_tetrahedron_fftw_plan * P = malloc(sizeof(ft_tetrahedron_fftw_plan));
     double * X = fftw_malloc(N*L*M*sizeof(double));
-    P->planxyz = fftw_plan_r2r_3d(N, L, M, X, X, kind0, kind1, kind2, FT_FFTW_FLAGS);
+    P->planxyz = fftw_plan_r2r_3d(N, L, M, X, X, kind0, kind1, kind2, flags);
     fftw_free(X);
     return P;
 }
 
-ft_tetrahedron_fftw_plan * ft_plan_tet_synthesis(const int N, const int L, const int M) {return ft_plan_tet_with_kind(N, L, M, FFTW_REDFT01, FFTW_REDFT01, FFTW_REDFT01);}
-ft_tetrahedron_fftw_plan * ft_plan_tet_analysis(const int N, const int L, const int M) {return ft_plan_tet_with_kind(N, L, M, FFTW_REDFT10, FFTW_REDFT10, FFTW_REDFT10);}
+ft_tetrahedron_fftw_plan * ft_plan_tet_synthesis(const int N, const int L, const int M, const unsigned flags) {return ft_plan_tet_with_kind(N, L, M, FFTW_REDFT01, FFTW_REDFT01, FFTW_REDFT01, flags);}
+ft_tetrahedron_fftw_plan * ft_plan_tet_analysis(const int N, const int L, const int M, const unsigned flags) {return ft_plan_tet_with_kind(N, L, M, FFTW_REDFT10, FFTW_REDFT10, FFTW_REDFT10, flags);}
 
 void ft_execute_tet_synthesis(const char TRANS, const ft_tetrahedron_fftw_plan * P, double * X, const int N, const int L, const int M) {
     if (TRANS == 'N') {
@@ -409,7 +411,7 @@ void ft_destroy_disk_fftw_plan(ft_disk_fftw_plan * P) {
     free(P);
 }
 
-ft_disk_fftw_plan * ft_plan_disk_with_kind(const int N, const int M, const fftw_r2r_kind kind[3][1]) {
+ft_disk_fftw_plan * ft_plan_disk_with_kind(const int N, const int M, const fftw_r2r_kind kind[3][1], const unsigned flags) {
     int rank = 1; // not 2: we are computing 1d transforms //
     int n[] = {N}; // 1d transforms of length n //
     int idist = 4*N, odist = 4*N;
@@ -421,36 +423,38 @@ ft_disk_fftw_plan * ft_plan_disk_with_kind(const int N, const int M, const fftw_
     P->Y = fftw_malloc(N*2*(M/2+1)*sizeof(double));
 
     int howmany = (M+3)/4;
-    P->planr1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
+    P->planr1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], flags);
 
     howmany = (M+2)/4;
-    P->planr2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], FT_FFTW_FLAGS);
+    P->planr2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], flags);
 
     howmany = (M+1)/4;
-    P->planr3 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], FT_FFTW_FLAGS);
+    P->planr3 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], flags);
 
     howmany = M/4;
-    P->planr4 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
+    P->planr4 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], flags);
 
     n[0] = M;
     idist = odist = 1;
     istride = ostride = N;
     howmany = N;
+    double * Z = fftw_malloc(N*M*sizeof(double));
     if (kind[2][0] == FFTW_HC2R)
-        P->plantheta = fftw_plan_many_dft_c2r(rank, n, howmany, (fftw_complex *) P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, FT_FFTW_FLAGS);
+        P->plantheta = fftw_plan_many_dft_c2r(rank, n, howmany, (fftw_complex *) P->Y, inembed, istride, idist, Z, onembed, ostride, odist, flags);
     else if (kind[2][0] == FFTW_R2HC)
-        P->plantheta = fftw_plan_many_dft_r2c(rank, n, howmany, P->Y, inembed, istride, idist, (fftw_complex *) P->Y, onembed, ostride, odist, FT_FFTW_FLAGS);
+        P->plantheta = fftw_plan_many_dft_r2c(rank, n, howmany, Z, inembed, istride, idist, (fftw_complex *) P->Y, onembed, ostride, odist, flags);
+    fftw_free(Z);
     return P;
 }
 
-ft_disk_fftw_plan * ft_plan_disk_synthesis(const int N, const int M) {
+ft_disk_fftw_plan * ft_plan_disk_synthesis(const int N, const int M, const unsigned flags) {
     const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_REDFT11}, {FFTW_HC2R}};
-    return ft_plan_disk_with_kind(N, M, kind);
+    return ft_plan_disk_with_kind(N, M, kind, flags);
 }
 
-ft_disk_fftw_plan * ft_plan_disk_analysis(const int N, const int M) {
+ft_disk_fftw_plan * ft_plan_disk_analysis(const int N, const int M, const unsigned flags) {
     const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_REDFT11}, {FFTW_R2HC}};
-    return ft_plan_disk_with_kind(N, M, kind);
+    return ft_plan_disk_with_kind(N, M, kind, flags);
 }
 
 void ft_execute_disk_synthesis(const char TRANS, const ft_disk_fftw_plan * P, double * X, const int N, const int M) {
@@ -524,7 +528,7 @@ void ft_destroy_rectdisk_fftw_plan(ft_rectdisk_fftw_plan * P) {
     free(P);
 }
 
-ft_rectdisk_fftw_plan * ft_plan_rectdisk_with_kind(const int N, const int M, const fftw_r2r_kind kind[3][1]) {
+ft_rectdisk_fftw_plan * ft_plan_rectdisk_with_kind(const int N, const int M, const fftw_r2r_kind kind[3][1], const unsigned flags) {
     int rank = 1; // not 2: we are computing 1d transforms //
     int n[] = {N}; // 1d transforms of length n //
     int idist = 2*N, odist = 2*N;
@@ -536,29 +540,29 @@ ft_rectdisk_fftw_plan * ft_plan_rectdisk_with_kind(const int N, const int M, con
     double * X = fftw_malloc(N*M*sizeof(double));
 
     int howmany = (M+1)/2;
-    P->planx1 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
+    P->planx1 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind[0], flags);
 
     howmany = M/2;
-    P->planx2 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind[1], FT_FFTW_FLAGS);
+    P->planx2 = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind[1], flags);
 
     n[0] = M;
     idist = odist = 1;
     istride = ostride = N;
     howmany = N;
-    P->plany = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind[2], FT_FFTW_FLAGS);
+    P->plany = fftw_plan_many_r2r(rank, n, howmany, X, inembed, istride, idist, X, onembed, ostride, odist, kind[2], flags);
     fftw_free(X);
 
     return P;
 }
 
-ft_rectdisk_fftw_plan * ft_plan_rectdisk_synthesis(const int N, const int M) {
+ft_rectdisk_fftw_plan * ft_plan_rectdisk_synthesis(const int N, const int M, const unsigned flags) {
     const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT01}, {FFTW_RODFT01}, {FFTW_REDFT01}};
-    return ft_plan_rectdisk_with_kind(N, M, kind);
+    return ft_plan_rectdisk_with_kind(N, M, kind, flags);
 }
 
-ft_rectdisk_fftw_plan * ft_plan_rectdisk_analysis(const int N, const int M) {
+ft_rectdisk_fftw_plan * ft_plan_rectdisk_analysis(const int N, const int M, const unsigned flags) {
     const fftw_r2r_kind kind[3][1] = {{FFTW_REDFT10}, {FFTW_RODFT10}, {FFTW_REDFT10}};
-    return ft_plan_rectdisk_with_kind(N, M, kind);
+    return ft_plan_rectdisk_with_kind(N, M, kind, flags);
 }
 
 void ft_execute_rectdisk_synthesis(const char TRANS, const ft_rectdisk_fftw_plan * P, double * X, const int N, const int M) {
@@ -619,7 +623,7 @@ void ft_destroy_spinsphere_fftw_plan(ft_spinsphere_fftw_plan * P) {
 
 int ft_get_spin_spinsphere_fftw_plan(const ft_spinsphere_fftw_plan * P) {return P->S;}
 
-ft_spinsphere_fftw_plan * ft_plan_spinsph_with_kind(const int N, const int M, const int S, const fftw_r2r_kind kind[2][1], const int sign) {
+ft_spinsphere_fftw_plan * ft_plan_spinsph_with_kind(const int N, const int M, const int S, const fftw_r2r_kind kind[2][1], const int sign, const unsigned flags) {
     int rank = 1; // not 2: we are computing 1d transforms //
     int n[] = {N}; // 1d transforms of length n //
     int idist = 8*N, odist = 8*N;
@@ -631,36 +635,38 @@ ft_spinsphere_fftw_plan * ft_plan_spinsph_with_kind(const int N, const int M, co
     P->Y = fftw_malloc(2*N*M*sizeof(double));
 
     int howmany = (M+3)/4;
-    P->plantheta1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
+    P->plantheta1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], flags);
 
     howmany = (M+2)/4;
-    P->plantheta2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], FT_FFTW_FLAGS);
+    P->plantheta2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], flags);
 
     howmany = (M+1)/4;
-    P->plantheta3 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], FT_FFTW_FLAGS);
+    P->plantheta3 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], flags);
 
     howmany = M/4;
-    P->plantheta4 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], FT_FFTW_FLAGS);
+    P->plantheta4 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], flags);
 
     n[0] = M;
     idist = odist = 1;
     istride = ostride = N;
     howmany = N;
-    P->planphi = fftw_plan_many_dft(rank, n, howmany, (fftw_complex *) P->Y, inembed, istride, idist, (fftw_complex *) P->Y, onembed, ostride, odist, sign, FT_FFTW_FLAGS);
+    fftw_complex * Z = fftw_malloc(N*M*sizeof(fftw_complex));
+    P->planphi = fftw_plan_many_dft(rank, n, howmany, (fftw_complex *) P->Y, inembed, istride, idist, Z, onembed, ostride, odist, sign, flags);
+    fftw_free(Z);
     P->S = S;
     return P;
 }
 
-ft_spinsphere_fftw_plan * ft_plan_spinsph_synthesis(const int N, const int M, const int S) {
+ft_spinsphere_fftw_plan * ft_plan_spinsph_synthesis(const int N, const int M, const int S, const unsigned flags) {
     const fftw_r2r_kind evenkind[2][1] = {{FFTW_REDFT01}, {FFTW_RODFT01}};
     const fftw_r2r_kind  oddkind[2][1] = {{FFTW_RODFT01}, {FFTW_REDFT01}};
-    return ft_plan_spinsph_with_kind(N, M, S, S%2 == 0 ? evenkind : oddkind, FFTW_BACKWARD);
+    return ft_plan_spinsph_with_kind(N, M, S, S%2 == 0 ? evenkind : oddkind, FFTW_BACKWARD, flags);
 }
 
-ft_spinsphere_fftw_plan * ft_plan_spinsph_analysis(const int N, const int M, const int S) {
+ft_spinsphere_fftw_plan * ft_plan_spinsph_analysis(const int N, const int M, const int S, const unsigned flags) {
     const fftw_r2r_kind evenkind[2][1] = {{FFTW_REDFT10}, {FFTW_RODFT10}};
     const fftw_r2r_kind  oddkind[2][1] = {{FFTW_RODFT10}, {FFTW_REDFT10}};
-    return ft_plan_spinsph_with_kind(N, M, S, S%2 == 0 ? evenkind : oddkind, FFTW_FORWARD);
+    return ft_plan_spinsph_with_kind(N, M, S, S%2 == 0 ? evenkind : oddkind, FFTW_FORWARD, flags);
 }
 
 void ft_execute_spinsph_synthesis(const char TRANS, const ft_spinsphere_fftw_plan * P, ft_complex * X, const int N, const int M) {

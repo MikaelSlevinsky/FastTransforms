@@ -86,7 +86,7 @@ int main(void) {
 
     double alpha = 0.0, beta = 0.0;
     ft_harmonic_plan * P = ft_plan_disk2cxf(N, alpha, beta);
-    ft_disk_fftw_plan * PA = ft_plan_disk_analysis(N, M);
+    ft_disk_fftw_plan * PA = ft_plan_disk_analysis(N, M, FT_FFTW_FLAGS);
 
     ft_execute_disk_analysis('N', PA, F, N, M);
     ft_execute_cxf2disk('N', P, F, N, M);
@@ -142,7 +142,7 @@ int main(void) {
     printf("\n");
 
     P = ft_plan_rectdisk2cheb(N, beta);
-    ft_rectdisk_fftw_plan * QA = ft_plan_rectdisk_analysis(N, M);
+    ft_rectdisk_fftw_plan * QA = ft_plan_rectdisk_analysis(N, M, FT_FFTW_FLAGS);
 
     ft_execute_rectdisk_analysis('N', QA, F, N, M);
     ft_execute_cheb2rectdisk('N', P, F, N, M);

@@ -57,7 +57,7 @@ int main(void) {
     P = ft_plan_tri2cheb(N, alpha, beta, gamma);
     Px = ft_plan_tri2cheb(N, alpha+1.0, beta, gamma+1.0);
     Py = ft_plan_tri2cheb(N, alpha, beta+1.0, gamma+1.0);
-    PA = ft_plan_tri_analysis(N, M);
+    PA = ft_plan_tri_analysis(N, M, FT_FFTW_FLAGS);
 
     double u[N], x[N], v[M], w[M], F[N*M], Fx[N*M], Fy[N*M], Gx[N*M], Gy[N*M];
 
