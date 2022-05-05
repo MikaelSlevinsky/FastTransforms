@@ -38,6 +38,7 @@ int main(void) {
     test_transforms(&checksum, n);
     printf("\n\tMulti-precision.\n\n");
     test_transforms_mpfr(&checksum, 256, 256, MPFR_RNDN);
+    /*
     n = 16;
     printf("\nTesting methods for modified classical orthogonal polynomial transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
@@ -198,7 +199,7 @@ int main(void) {
 
     free(DP9);
     free(IDP9);
-
+    */
     n = 128;
     printf("\nTesting methods for associated classical orthogonal polynomial transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
