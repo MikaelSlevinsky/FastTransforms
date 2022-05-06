@@ -35,7 +35,7 @@ static inline X(banded) * X(create_M_test)(const int m, const int n) {
 }
 
 void X(inner_test_banded)(int * checksum, int n) {
-    int m = n, NTIMES = 10;
+    int m = n+2, NTIMES = 10;
     FLT err;
     struct timeval start, end;
 
