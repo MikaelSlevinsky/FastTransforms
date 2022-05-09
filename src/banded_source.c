@@ -509,7 +509,7 @@ X(banded_qr) * X(banded_qrfact)(X(banded) * A) {
     u = R->u;
     int nu = l+u+1;
     for (int j = 0; j < MIN(m, n); j++) {
-        int lh = MIN(l+1, m-j+1);
+        int lh = MIN(l+1, m-j);
         FLT * v = D+u+j*nu;
         tau[j] = X(compute_reflector)(lh, v);
         for (int k = 1; k <= MIN(u, n-j-1); k++)
@@ -588,13 +588,13 @@ void X(bqmv)(char TRANS, struct X(banded_orthogonal_triangular) * F, FLT * x) {
         int nu = l+u+1;
         if (TRANS == 'N') {
             for (int j = MIN(m, n) - 1; j >= 0; j--) {
-                int lh = MIN(l+1, m-j+1);
+                int lh = MIN(l+1, m-j);
                 X(apply_reflector)(lh, D+u+j*nu, tau[j], x+j);
             }
         }
         else if (TRANS == 'T') {
             for (int j = 0; j < MIN(m, n); j++) {
-                int lh = MIN(l+1, m-j+1);
+                int lh = MIN(l+1, m-j);
                 X(apply_reflector)(lh, D+u+j*nu, tau[j], x+j);
             }
         }
