@@ -360,11 +360,11 @@ ft_modified_plan * ft_plan_modified_jacobi_to_jacobi(const int n, const double a
             ft_destroy_banded(V);
             //if (nv*nrm_Vn <= eps()*nrm_Vb) break;
             if (nv*nrm_Vn <= eps()*nrm_Vb) {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %17.16e ≤ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≤ %4.3e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
                 break;
             }
             else {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %17.16e ≰ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≰ %4.3e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
             }
             ft_destroy_banded_ql(F);
             N <<= 1;
@@ -464,11 +464,11 @@ ft_modified_plan * ft_plan_modified_laguerre_to_laguerre(const int n, const doub
             ft_destroy_banded(V);
             //if (nv*nrm_Vn <= eps()*nrm_Vb) break;
             if (nv*nrm_Vn <= eps()*nrm_Vb) {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %17.16e ≤ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≤ %4.3e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
                 break;
             }
             else {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %17.16e ≰ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≰ %4.3e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
             }
             ft_destroy_banded_ql(F);
             N <<= 1;
@@ -568,11 +568,11 @@ ft_modified_plan * ft_plan_modified_hermite_to_hermite(const int n, const int nu
             ft_destroy_banded(V);
             //if (nv*nrm_Vn <= eps()*nrm_Vb) break;
             if (nv*nrm_Vn <= eps()*nrm_Vb) {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %17.16e ≤ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≤ %4.3e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
                 break;
             }
             else {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %17.16e ≰ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≰ %4.3e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
             }
             ft_destroy_banded_ql(F);
             N <<= 1;
