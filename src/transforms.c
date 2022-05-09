@@ -301,7 +301,19 @@ void ft_mpsv(char TRANS, ft_modified_plan * P, double * x) {
     }
 }
 
-ft_modified_plan * ft_plan_modified_jacobi_to_jacobi(const int n, const double alpha, const double beta, const int nu, const double * u, const int nv, const double * v) {
+void ft_mpmm(char TRANS, ft_modified_plan * P, double * B, int LDB, int N) {
+    #pragma omp parallel for
+    for (int j = 0; j < N; j++)
+        ft_mpmv(TRANS, P, B+j*LDB);
+}
+
+void ft_mpsm(char TRANS, ft_modified_plan * P, double * B, int LDB, int N) {
+    #pragma omp parallel for
+    for (int j = 0; j < N; j++)
+        ft_mpsv(TRANS, P, B+j*LDB);
+}
+
+ft_modified_plan * ft_plan_modified_jacobi_to_jacobi(const int n, const double alpha, const double beta, const int nu, const double * u, const int nv, const double * v, const int verbose) {
     if (nv < 1) {
         // polynomial case
         ft_banded * U = ft_operator_normalized_jacobi_clenshaw(n, nu, u, 1, alpha, beta);
@@ -346,16 +358,14 @@ ft_modified_plan * ft_plan_modified_jacobi_to_jacobi(const int n, const double a
 
             free(Vb);
             ft_destroy_banded(V);
-            if (nv*nrm_Vn <= eps()*nrm_Vb) break;
-            /*
+            //if (nv*nrm_Vn <= eps()*nrm_Vb) break;
             if (nv*nrm_Vn <= eps()*nrm_Vb) {
-                printf("N = %i, and the bound on the relative 2-norm: %17.16e ≤ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %17.16e ≤ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
                 break;
             }
             else {
-                printf("N = %i, and the bound on the relative 2-norm: %17.16e ≰ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %17.16e ≰ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
             }
-            */
             ft_destroy_banded_ql(F);
             N <<= 1;
         }
@@ -407,7 +417,7 @@ ft_modified_plan * ft_plan_modified_jacobi_to_jacobi(const int n, const double a
     }
 }
 
-ft_modified_plan * ft_plan_modified_laguerre_to_laguerre(const int n, const double alpha, const int nu, const double * u, const int nv, const double * v) {
+ft_modified_plan * ft_plan_modified_laguerre_to_laguerre(const int n, const double alpha, const int nu, const double * u, const int nv, const double * v, const int verbose) {
     if (nv < 1) {
         // polynomial case
         ft_banded * U = ft_operator_normalized_laguerre_clenshaw(n, nu, u, 1, alpha);
@@ -452,16 +462,14 @@ ft_modified_plan * ft_plan_modified_laguerre_to_laguerre(const int n, const doub
 
             free(Vb);
             ft_destroy_banded(V);
-            if (nv*nrm_Vn <= eps()*nrm_Vb) break;
-            /*
+            //if (nv*nrm_Vn <= eps()*nrm_Vb) break;
             if (nv*nrm_Vn <= eps()*nrm_Vb) {
-                printf("N = %i, and the bound on the relative 2-norm: %17.16e ≤ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %17.16e ≤ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
                 break;
             }
             else {
-                printf("N = %i, and the bound on the relative 2-norm: %17.16e ≰ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %17.16e ≰ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
             }
-            */
             ft_destroy_banded_ql(F);
             N <<= 1;
         }
@@ -513,7 +521,7 @@ ft_modified_plan * ft_plan_modified_laguerre_to_laguerre(const int n, const doub
     }
 }
 
-ft_modified_plan * ft_plan_modified_hermite_to_hermite(const int n, const int nu, const double * u, const int nv, const double * v) {
+ft_modified_plan * ft_plan_modified_hermite_to_hermite(const int n, const int nu, const double * u, const int nv, const double * v, const int verbose) {
     if (nv < 1) {
         // polynomial case
         ft_banded * U = ft_operator_normalized_hermite_clenshaw(n, nu, u, 1);
@@ -558,16 +566,14 @@ ft_modified_plan * ft_plan_modified_hermite_to_hermite(const int n, const int nu
 
             free(Vb);
             ft_destroy_banded(V);
-            if (nv*nrm_Vn <= eps()*nrm_Vb) break;
-            /*
+            //if (nv*nrm_Vn <= eps()*nrm_Vb) break;
             if (nv*nrm_Vn <= eps()*nrm_Vb) {
-                printf("N = %i, and the bound on the relative 2-norm: %17.16e ≤ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %17.16e ≤ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
                 break;
             }
             else {
-                printf("N = %i, and the bound on the relative 2-norm: %17.16e ≰ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %17.16e ≰ %17.16e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
             }
-            */
             ft_destroy_banded_ql(F);
             N <<= 1;
         }

@@ -220,10 +220,12 @@ typedef struct {
 void ft_destroy_modified_plan(ft_modified_plan * P);
 void ft_mpmv(char TRANS, ft_modified_plan * P, double * x);
 void ft_mpsv(char TRANS, ft_modified_plan * P, double * x);
+void ft_mpmm(char TRANS, ft_modified_plan * P, double * B, int LDB, int N);
+void ft_mpsm(char TRANS, ft_modified_plan * P, double * B, int LDB, int N);
 
-ft_modified_plan * ft_plan_modified_jacobi_to_jacobi(const int n, const double alpha, const double beta, const int nu, const double * u, const int nv, const double * v);
-ft_modified_plan * ft_plan_modified_laguerre_to_laguerre(const int n, const double alpha, const int nu, const double * u, const int nv, const double * v);
-ft_modified_plan * ft_plan_modified_hermite_to_hermite(const int n, const int nu, const double * u, const int nv, const double * v);
+ft_modified_plan * ft_plan_modified_jacobi_to_jacobi(const int n, const double alpha, const double beta, const int nu, const double * u, const int nv, const double * v, const int verbose);
+ft_modified_plan * ft_plan_modified_laguerre_to_laguerre(const int n, const double alpha, const int nu, const double * u, const int nv, const double * v, const int verbose);
+ft_modified_plan * ft_plan_modified_hermite_to_hermite(const int n, const int nu, const double * u, const int nv, const double * v, const int verbose);
 
 #include <mpfr.h>
 

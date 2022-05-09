@@ -44,7 +44,7 @@ int main(void) {
     printf("---------------------------------------------------------|----------------------\n");
     double alpha = 0.0, beta = 0.0;
     double u1[] = {0.9428090415820636, -0.32659863237109055, -0.42163702135578396, 0.2138089935299396}; // u1(x) = (1-x)^2*(1+x)
-    ft_modified_plan * P = ft_plan_modified_jacobi_to_jacobi(n, alpha, beta, 4, u1, 0, NULL);
+    ft_modified_plan * P = ft_plan_modified_jacobi_to_jacobi(n, alpha, beta, 4, u1, 0, NULL, 0);
     double * DP1 = calloc(n*n, sizeof(double));
     double * IDP1 = calloc(n*n, sizeof(double));
     for (int j = 0; j < n; j++) {
@@ -56,14 +56,16 @@ int main(void) {
 
     double u2[] = {0.9428090415820636, -0.32659863237109055, -0.42163702135578396, 0.2138089935299396}; // u2(x) = (1-x)^2*(1+x)
     double v2[] = {1.4142135623730951};
-    P = ft_plan_modified_jacobi_to_jacobi(n, alpha, beta, 4, u2, 1, v2);
+    P = ft_plan_modified_jacobi_to_jacobi(n, alpha, beta, 4, u2, 1, v2, 0);
     double * DP2 = calloc(n*n, sizeof(double));
     double * IDP2 = calloc(n*n, sizeof(double));
     for (int j = 0; j < n; j++) {
         IDP2[j+j*n] = DP2[j+j*n] = 1;
-        ft_mpmv('N', P, DP2+j*n);
-        ft_mpsv('N', P, IDP2+j*n);
+        //ft_mpmv('N', P, DP2+j*n);
+        //ft_mpsv('N', P, IDP2+j*n);
     }
+    ft_mpmm('N', P, DP2, n, n);
+    ft_mpsm('N', P, IDP2, n, n);
     ft_destroy_modified_plan(P);
 
     double err = ft_norm_2arg(DP1, DP2, n*n)/ft_norm_1arg(DP1, n*n);
@@ -75,7 +77,7 @@ int main(void) {
 
     double u3[] = {-0.9428090415820636, 0.32659863237109055, 0.42163702135578396, -0.2138089935299396}; // u3(x) = -(1-x)^2*(1+x)
     double v3[] = {-5.185449728701348, 0.0, 0.42163702135578374}; // v3(x) = -(2-x)*(2+x)
-    P = ft_plan_modified_jacobi_to_jacobi(n, alpha, beta, 4, u3, 3, v3);
+    P = ft_plan_modified_jacobi_to_jacobi(n, alpha, beta, 4, u3, 3, v3, 0);
     double * DP3 = calloc(n*n, sizeof(double));
     double * IDP3 = calloc(n*n, sizeof(double));
     for (int j = 0; j < n; j++) {
@@ -89,7 +91,7 @@ int main(void) {
     beta = 1.0;
     double u4[] = {1.1547005383792517};
     double v4[] = {4.387862045841156, 0.1319657758147716, -0.20865621238292037}; // v4(x) = (2-x)*(2+x)
-    P = ft_plan_modified_jacobi_to_jacobi(n, alpha, beta, 1, u4, 3, v4);
+    P = ft_plan_modified_jacobi_to_jacobi(n, alpha, beta, 1, u4, 3, v4, 0);
     double * DP4 = calloc(n*n, sizeof(double));
     double * IDP4 = calloc(n*n, sizeof(double));
     for (int j = 0; j < n; j++) {
@@ -114,7 +116,7 @@ int main(void) {
 
     alpha = 0.0;
     double u5[] = {2.0, -4.0, 2.0}; // u5(x) = x^2
-    P = ft_plan_modified_laguerre_to_laguerre(n, alpha, 3, u5, 0, NULL);
+    P = ft_plan_modified_laguerre_to_laguerre(n, alpha, 3, u5, 0, NULL, 0);
     double * DP5 = calloc(n*n, sizeof(double));
     double * IDP5 = calloc(n*n, sizeof(double));
     for (int j = 0; j < n; j++) {
@@ -126,7 +128,7 @@ int main(void) {
 
     double u6[] = {2.0, -4.0, 2.0}; // u6(x) = x^2
     double v6[] = {1.0};
-    P = ft_plan_modified_laguerre_to_laguerre(n, alpha, 3, u6, 1, v6);
+    P = ft_plan_modified_laguerre_to_laguerre(n, alpha, 3, u6, 1, v6, 0);
     double * DP6 = calloc(n*n, sizeof(double));
     double * IDP6 = calloc(n*n, sizeof(double));
     for (int j = 0; j < n; j++) {
@@ -138,7 +140,7 @@ int main(void) {
 
     double u7[] = {2.0, -4.0, 2.0}; // u7(x) = x^2
     double v7[] = {7.0, -7.0, 2.0}; // v7(x) = (1+x)*(2+x)
-    P = ft_plan_modified_laguerre_to_laguerre(n, alpha, 3, u7, 3, v7);
+    P = ft_plan_modified_laguerre_to_laguerre(n, alpha, 3, u7, 3, v7, 0);
     double * DP7 = calloc(n*n, sizeof(double));
     double * IDP7 = calloc(n*n, sizeof(double));
     for (int j = 0; j < n; j++) {
@@ -151,7 +153,7 @@ int main(void) {
     alpha = 2.0;
     double u8[] = {sqrt(2.0)};
     double v8[] = {sqrt(1058.0), -sqrt(726.0), sqrt(48.0)}; // v8(x) = (1+x)*(2+x)
-    P = ft_plan_modified_laguerre_to_laguerre(n, alpha, 1, u8, 3, v8);
+    P = ft_plan_modified_laguerre_to_laguerre(n, alpha, 1, u8, 3, v8, 0);
     double * DP8 = calloc(n*n, sizeof(double));
     double * IDP8 = calloc(n*n, sizeof(double));
     for (int j = 0; j < n; j++) {
@@ -182,7 +184,7 @@ int main(void) {
 
     double u9[] = {2.995504568550877, 0.0, 3.7655850551068593, 0.0, 1.6305461589167827};
     double v9[] = {2.995504568550877, 0.0, 3.7655850551068593, 0.0, 1.6305461589167827};
-    P = ft_plan_modified_hermite_to_hermite(n, 5, u9, 5, v9);
+    P = ft_plan_modified_hermite_to_hermite(n, 5, u9, 5, v9, 0);
     double * DP9 = calloc(n*n, sizeof(double));
     double * IDP9 = calloc(n*n, sizeof(double));
     for (int j = 0; j < n; j++) {
