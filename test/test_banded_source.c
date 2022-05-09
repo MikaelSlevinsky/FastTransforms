@@ -103,7 +103,6 @@ void X(inner_test_banded)(int * checksum, int n) {
     printf("Numerical error of ||R⁻ᵀRᵀ - I||/||I|| \t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
     X(checktest)(err, n, checksum);
 
-    /*
     X(banded_ql) * QL = X(banded_qlfact)(M);
     FLT * DQL = calloc(m*n, sizeof(FLT));
     for (int j = 0; j < n; j++) {
@@ -195,7 +194,6 @@ void X(inner_test_banded)(int * checksum, int n) {
         X(destroy_banded)(M);
         X(destroy_banded)(X);
     }
-    */
 
     X(triangular_banded) * A = X(create_A_test)(n);
     X(triangular_banded) * B = X(create_B_test)(n);
@@ -383,11 +381,11 @@ void X(inner_test_banded)(int * checksum, int n) {
     X(checktest)(err, 1, checksum);
 
     X(destroy_banded)(M);
-    //X(destroy_banded_ql)(QL);
+    X(destroy_banded_ql)(QL);
     X(destroy_banded_qr)(QR);
     X(destroy_triangular_banded)(A);
     X(destroy_triangular_banded)(B);
-    //X(destroy_triangular_banded)(R);
+    X(destroy_triangular_banded)(R);
     X(destroy_tb_eigen_FMM)(F);
     free(BinvA);
     free(BinvAtrue);
@@ -395,13 +393,13 @@ void X(inner_test_banded)(int * checksum, int n) {
     free(BVL);
     free(D);
     free(DM);
-    //free(DQL);
+    free(DQL);
     free(DQR);
     free(Idm);
     free(Idn);
-    //free(LtL);
-    //free(LinvL);
-    //free(LtinvLt);
+    free(LtL);
+    free(LinvL);
+    free(LtinvLt);
     free(MtM);
     free(QtQ);
     free(RtR);
