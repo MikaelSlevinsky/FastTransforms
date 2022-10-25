@@ -59,6 +59,17 @@ void X(destroy_tb_eigen_ADI)(X(tb_eigen_ADI) * F) {
     free(F);
 }
 
+void X(destroy_modified_plan)(X(modified_plan) * P) {
+    if (P->nv < 1) {
+        X(destroy_triangular_banded)(P->R);
+    }
+    else {
+        X(destroy_triangular_banded)(P->K);
+        X(destroy_triangular_banded)(P->R);
+    }
+    free(P);
+}
+
 size_t X(summary_size_tb_eigen_FMM)(X(tb_eigen_FMM) * F) {
     size_t S = 0;
     if (F->n < TB_EIGEN_BLOCKSIZE)
@@ -313,7 +324,7 @@ void X(banded_add)(FLT alpha, X(banded) * A, FLT beta, X(banded) * B, X(banded) 
 void X(banded_uniform_scaling_add)(FLT alpha, X(banded) * A, FLT beta) {
     int m = A->m, n = A->n, l = A->l, u = A->u;
     if (m != n)
-        exit_failure("banded_uniform_scaling_add: A not square.");
+        exit_failure("banded_uniform_scaling_add: A is not square.");
     for (int j = 0; j < n; j++) {
         for (int i = MAX(0, j-u); i < j; i++)
             X(set_banded_index)(A, alpha*X(get_banded_index)(A, i, j), i, j);
@@ -440,7 +451,7 @@ void X(banded_lufact)(X(banded) * A) {
 static inline void X(compute_symmetric_elementary_transformation)(const int n, FLT * v) {
     for (int i = 1; i < n; i++)
         v[i] /= v[0];
-    if (v[0] < 0) exit_failure("banded_cholfact: A is not positive-definite.");
+    if (v[0] < 0) warning("banded_cholfact: A is not positive-definite.");
     v[0] = Y(sqrt)(v[0]);
 }
 
@@ -1379,6 +1390,204 @@ FLT X(normest_tb_eigen_ADI)(X(tb_eigen_ADI) * F) {
         return X(normest_dense)(F->V, n);
     else
         return MAX(X(normest_tb_eigen_ADI)(F->F1), X(normest_tb_eigen_ADI)(F->F2))*(1 + X(norm_lowrankmatrix)(F->F0));
+}
+
+void X(mpmv)(char TRANS, X(modified_plan) * P, FLT * x) {
+    if (P->nv < 1) {
+        X(tbsv)(TRANS, P->R, x);
+    }
+    else {
+        if (TRANS == 'N') {
+            X(tbsv)('N', P->K, x);
+            X(tbmv)('N', P->R, x);
+        }
+        else if (TRANS == 'T') {
+            X(tbmv)('T', P->R, x);
+            X(tbsv)('T', P->K, x);
+        }
+    }
+}
+
+void X(mpsv)(char TRANS, X(modified_plan) * P, FLT * x) {
+    if (P->nv < 1) {
+        X(tbmv)(TRANS, P->R, x);
+    }
+    else {
+        if (TRANS == 'N') {
+            X(tbsv)('N', P->R, x);
+            X(tbmv)('N', P->K, x);
+        }
+        else if (TRANS == 'T') {
+            X(tbmv)('T', P->K, x);
+            X(tbsv)('T', P->R, x);
+        }
+    }
+}
+
+void X(mpmm)(char TRANS, X(modified_plan) * P, FLT * B, int LDB, int N) {
+    #pragma omp parallel for
+    for (int j = 0; j < N; j++)
+        X(mpmv)(TRANS, P, B+j*LDB);
+}
+
+void X(mpsm)(char TRANS, X(modified_plan) * P, FLT * B, int LDB, int N) {
+    #pragma omp parallel for
+    for (int j = 0; j < N; j++)
+        X(mpsv)(TRANS, P, B+j*LDB);
+}
+
+X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const X(cop_params) params), const X(cop_params) params, const int nu, const FLT * u, const int nv, const FLT * v, const int verbose) {
+    if (nv < 1) {
+        // polynomial case
+        X(banded) * U = operator_clenshaw(n, nu, u, 1, params);
+        X(banded_cholfact)(U);
+        X(triangular_banded) * R = X(convert_banded_to_triangular_banded)(U);
+        X(modified_plan) * P = malloc(sizeof(X(modified_plan)));
+        P->R = R;
+        P->n = n;
+        P->nu = nu;
+        P->nv = nv;
+        return P;
+    }
+    else {
+        // rational case
+        X(banded_ql) * F;
+        int N = 2*n;
+        while (1) {
+            if (N > FT_MODIFIED_NMAX) {
+                warning("plan_modified: dimension of QL factorization, N, exceeds maximum allowable.");
+                break;
+            }
+            X(banded) * V = operator_clenshaw(N+nu+nv, nv, v, 1, params);
+
+            FLT nrm_Vb = 0;
+            FLT * Vb = calloc(N*(nv-1), sizeof(FLT));
+            for (int j = 0; j < nv-1; j++)
+                for (int i = N-nv+1+j; i < N; i++) {
+                    Vb[i+j*N] = X(get_banded_index)(V, i, j+N);
+                    nrm_Vb += Vb[i+j*N]*Vb[i+j*N];
+                }
+            nrm_Vb = Y(sqrt)(nrm_Vb);
+
+            // truncate it for QL
+            V->m = V->n = N;
+            F = X(banded_qlfact)(V);
+
+            for (int j = 0; j < nv-1; j++)
+                X(bqmv)('T', F, Vb+j*N);
+
+            FLT nrm_Vn = 0;
+            for (int j = 0; j < nv-1; j++)
+                for (int i = 0; i < n; i++)
+                    nrm_Vn += Vb[i+j*N]*Vb[i+j*N];
+            nrm_Vn = Y(sqrt)(nrm_Vn);
+
+            free(Vb);
+            X(destroy_banded)(V);
+            //if (nv*nrm_Vn <= Y(eps)()*nrm_Vb) break;
+            if (nv*nrm_Vn <= Y(eps)()*nrm_Vb) {
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≤ %4.3e\n", N, (double) nv*nrm_Vn, (double) Y(eps)()*nrm_Vb);
+                break;
+            }
+            else {
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≰ %4.3e\n", N, (double) nv*nrm_Vn, (double) Y(eps)()*nrm_Vb);
+            }
+            X(destroy_banded_ql)(F);
+            N <<= 1;
+        }
+        F->factors->m = F->factors->n = n+nu+nv;
+        X(banded) * U = operator_clenshaw(n+nu+nv, nu, u, 1, params);
+
+        X(banded) * Lt = X(calloc_banded)(n+nu+nv, n+nu+nv, 0, F->factors->l);
+        for (int j = 0; j < n+nu+nv; j++)
+            for (int i = j; i < MIN(n+nu+nv, j+F->factors->l+1); i++)
+                X(set_banded_index)(Lt, X(get_banded_index)(F->factors, i, j), j, i);
+
+        FLT * D = calloc(n+nu+nv, sizeof(FLT));
+        for (int j = 0; j < n+nu+nv; j++) {
+            D[j] = (Y(signbit)(X(get_banded_index)(Lt, j, j))) ? -1 : 1;
+            for (int i = j; i >= MAX(0, j-Lt->u); i--)
+                X(set_banded_index)(Lt, X(get_banded_index)(Lt, i, j)*D[j], i, j);
+        }
+
+        X(banded) * ULt = X(calloc_banded)(n+nu+nv, n+nu+nv, nu+nv-2, nu+2*nv-3);
+        X(gbmm)(1, U, Lt, 0, ULt);
+        // ULᵀ ← QᵀULᵀ
+        X(partial_bqmm)(F, nu, nv, ULt);
+
+        int b = nu+nv-2;
+        X(banded) * QtULt = X(calloc_banded)(n, n, b, b);
+        for (int i = 0; i < n; i++)
+            for (int j = MAX(i-b, 0); j < MIN(i+b+1, n); j++)
+                X(set_banded_index)(QtULt, D[i]*X(get_banded_index)(ULt, i, j), i, j);
+        X(banded_cholfact)(QtULt);
+        X(triangular_banded) * K = X(convert_banded_to_triangular_banded)(QtULt);
+
+        X(triangular_banded) * R = X(calloc_triangular_banded)(n, Lt->u);
+        for (int j = 0; j < n; j++)
+            for (int i = j; i >= MAX(0, j-Lt->u); i--)
+                X(set_triangular_banded_index)(R, X(get_banded_index)(Lt, i, j), i, j);
+
+        free(D);
+        X(destroy_banded)(U);
+        X(destroy_banded)(Lt);
+        X(destroy_banded)(ULt);
+        X(destroy_banded_ql)(F);
+        X(modified_plan) * P = malloc(sizeof(X(modified_plan)));
+        P->n = n;
+        P->nu = nu;
+        P->nv = nv;
+        P->K = K;
+        P->R = R;
+        return P;
+    }
+}
+
+void Y(execute_jacobi_similarity)(const X(modified_plan) * P, const X(symmetric_tridiagonal) * XP, X(symmetric_tridiagonal) * XQ) {
+    int n = MIN(XP->n, P->n);
+    FLT * ap = XP->a;
+    FLT * bp = XP->b;
+    FLT * aq = XQ->a;
+    FLT * bq = XQ->b;
+    if (P->nv < 1) {
+        // P = Q R => XQ = R XP R⁻¹, but we can calculate it only up to n-1.
+        X(triangular_banded) * R = P->R;
+        for (int i = 0; i < n-2; i++)
+            bq[i] = X(get_triangular_banded_index)(R, i+1, i+1)/X(get_triangular_banded_index)(R, i, i)*bp[i];
+        aq[0] = ap[0] + X(get_triangular_banded_index)(R, 0, 1)/X(get_triangular_banded_index)(R, 0, 0)*bp[0];
+        for (int i = 1; i < n-1; i++)
+            aq[i] = (X(get_triangular_banded_index)(R, i, i)*ap[i] + X(get_triangular_banded_index)(R, i, i+1)*bp[i] - X(get_triangular_banded_index)(R, i-1, i)*bq[i-1])/X(get_triangular_banded_index)(R, i, i);
+    }
+    else {
+        // P Lᵀ = Q K => XQ = R XP R⁻¹, where R = K L⁻ᵀ, but we can calculate it only up to n-1.
+        X(triangular_banded) * K = P->K;
+        X(triangular_banded) * Lt = P->R;
+        FLT Rip1ip1 = X(get_triangular_banded_index)(K, 0, 0)/X(get_triangular_banded_index)(Lt, 0, 0);
+        for (int i = 0; i < n-2; i++) {
+            FLT Rii = Rip1ip1;
+            Rip1ip1 = X(get_triangular_banded_index)(K, i+1, i+1)/X(get_triangular_banded_index)(Lt, i+1, i+1);
+            bq[i] = Rip1ip1/Rii*bp[i];
+        }
+        FLT Rii = X(get_triangular_banded_index)(K, 0, 0)/X(get_triangular_banded_index)(Lt, 0, 0);
+        FLT Riip1 = (X(get_triangular_banded_index)(K, 0, 1) - Rii*X(get_triangular_banded_index)(Lt, 0, 1))/X(get_triangular_banded_index)(Lt, 1, 1);
+        aq[0] = ap[0] + Riip1/Rii*bp[0];
+        for (int i = 1; i < n-1; i++) {
+            FLT Rim1i = Riip1;
+            Rii = X(get_triangular_banded_index)(K, i, i)/X(get_triangular_banded_index)(Lt, i, i);
+            Riip1 = (X(get_triangular_banded_index)(K, i, i+1) - Rii*X(get_triangular_banded_index)(Lt, i, i+1))/X(get_triangular_banded_index)(Lt, i+1, i+1);
+            aq[i] = (Rii*ap[i] + Riip1*bp[i] - Rim1i*bq[i-1])/Rii;
+        }
+    }
+}
+
+X(symmetric_tridiagonal) * X(execute_jacobi_similarity)(const X(modified_plan) * P, const X(symmetric_tridiagonal) * XP) {
+    int n = MIN(XP->n, P->n);
+    X(symmetric_tridiagonal) * XQ = malloc(sizeof(X(symmetric_tridiagonal)));
+    XQ->a = malloc((n-1)*sizeof(FLT));
+    XQ->b = malloc((n-2)*sizeof(FLT));
+    XQ->n = n-1;
+    Y(execute_jacobi_similarity)(P, XP, XQ);
+    return XQ;
 }
 
 
@@ -2564,7 +2773,9 @@ X(triangular_banded) * X(create_B_associated_hermite_to_hermite)(const int norm,
 
 X(triangular_banded) * X(create_C_associated_hermite_to_hermite)(const int n) {return X(create_I_triangular_banded)(n, 0);}
 
-X(banded) * X(operator_normalized_jacobi_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const FLT alpha, const FLT beta) {
+X(banded) * X(operator_normalized_jacobi_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const X(cop_params) params) {
+    FLT alpha = params.alpha;
+    FLT beta = params.beta;
     X(banded) * X = X(create_jacobi_multiplication)(1, n+nc, n+nc, alpha, beta);
     FLT * A = malloc(nc*sizeof(FLT));
     FLT * B = malloc(nc*sizeof(FLT));
@@ -2588,7 +2799,8 @@ X(banded) * X(operator_normalized_jacobi_clenshaw)(const int n, const int nc, co
     return M;
 }
 
-X(banded) * X(operator_normalized_laguerre_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const FLT alpha) {
+X(banded) * X(operator_normalized_laguerre_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const X(cop_params) params) {
+    FLT alpha = params.alpha;
     X(banded) * X = X(create_laguerre_multiplication)(1, n+nc, n+nc, alpha);
     FLT * A = malloc(nc*sizeof(FLT));
     FLT * B = malloc(nc*sizeof(FLT));
@@ -2612,7 +2824,7 @@ X(banded) * X(operator_normalized_laguerre_clenshaw)(const int n, const int nc, 
     return M;
 }
 
-X(banded) * X(operator_normalized_hermite_clenshaw)(const int n, const int nc, const FLT * c, const int incc) {
+X(banded) * X(operator_normalized_hermite_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const X(cop_params) params) {
     X(banded) * X = X(create_hermite_multiplication)(1, n+nc, n+nc);
     FLT * A = malloc(nc*sizeof(FLT));
     FLT * B = malloc(nc*sizeof(FLT));

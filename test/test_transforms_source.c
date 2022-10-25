@@ -345,3 +345,217 @@ void Y(test_transforms)(int * checksum, int N) {
         free(x);
     }
 }
+
+static inline X(symmetric_tridiagonal) * X(convert_banded_to_symmetric_tridiagonal)(X(banded) * A) {
+    X(symmetric_tridiagonal) * T = malloc(sizeof(X(symmetric_tridiagonal)));
+    int n = T->n = A->n;
+    T->a = malloc(n*sizeof(FLT));
+    T->b = malloc((n-1)*sizeof(FLT));
+    for (int i = 0; i < n; i++)
+        T->a[i] = X(get_banded_index)(A, i, i);
+    for (int i = 0; i < n-1; i++)
+        T->b[i] = X(get_banded_index)(A, i, i+1);
+    return T;
+}
+
+static inline FLT X(norm_2arg_banded_tridiagonal)(X(banded) * A, X(symmetric_tridiagonal) * T) {
+    int n = A->n;
+    FLT s = X(get_banded_index)(A, n-1, n-1) - T->a[n-1], t;
+    FLT ret = s*s;
+    for (int j = 0; j < n-1; j++) {
+        s = X(get_banded_index)(A, j, j) - T->a[j];
+        t = X(get_banded_index)(A, j, j+1) - T->b[j];
+        ret += s*s+2*t*t;
+    }
+    return Y(sqrt)(ret);
+}
+
+
+void Y(test_modified_transforms)(int * checksum, int N) {
+    FLT alpha, beta, err, u[5], v[5];
+    FLT * DP, * IDP, * Id;
+    X(modified_plan) * P;
+    X(banded) * XP, * XQ;
+    X(symmetric_tridiagonal) * JP, * JQ;
+
+    printf("\nTesting the accuracy of modified Jacobi--Jacobi transforms.\n\n");
+    printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int n = 16; n < N; n *= 2) {
+        Id = calloc(n*n, sizeof(FLT));
+        for (int j = 0; j < n; j++)
+            Id[j+j*n] = 1;
+        alpha = 0;
+        beta = 0;
+        // u(x) = (1-x)^2*(1+x), v(x) = 1
+        u[0] = 0.9428090415820636;
+        u[1] = -0.32659863237109055;
+        u[2] = -0.42163702135578396;
+        u[3] = 0.2138089935299396;
+        v[0] = 1.4142135623730951;
+        P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 4, u, 1, v, 0);
+        DP = calloc(n*n, sizeof(FLT));
+        IDP = calloc(n*n, sizeof(FLT));
+        for (int j = 0; j < n; j++) {
+            IDP[j+j*n] = DP[j+j*n] = 1;
+            X(mpmv)('N', P, DP+j*n);
+            X(mpsv)('N', P, IDP+j*n);
+        }
+        XP = X(create_jacobi_multiplication)(1, n, n, alpha, beta);
+        JP = X(convert_banded_to_symmetric_tridiagonal)(XP);
+        JQ = X(execute_jacobi_similarity)(P, JP);
+        XQ = X(create_jacobi_multiplication)(1, n-1, n-1, alpha+2, beta+1);
+        err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
+        printf("Jacobi matrix from trivial rational weight \t n = %3i |%20.2e ", n-1, err);
+        X(checktest)(err, Y(pow)(n+1, 2), checksum);
+        X(destroy_symmetric_tridiagonal)(JQ);
+        X(destroy_modified_plan)(P);
+        P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 4, u, 0, NULL, 0);
+        X(mpsm)('N', P, DP, n, n);
+        X(mpmm)('N', P, IDP, n, n);
+        err = X(norm_2arg)(DP, Id, n*n)/X(norm_1arg)(Id, n*n) + X(norm_2arg)(IDP, Id, n*n)/X(norm_1arg)(Id, n*n);
+        printf("Polynomial vs. trivial rational weight \t\t n = %3i |%20.2e ", n, (double) err);
+        X(checktest)(err, Y(pow)(n+1, 3), checksum);
+        JQ = X(execute_jacobi_similarity)(P, JP);
+        err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
+        printf("Jacobi matrix from polynomial modification \t n = %3i |%20.2e ", n-1, err);
+        X(checktest)(err, Y(pow)(n+1, 2), checksum);
+        X(destroy_banded)(XP);
+        X(destroy_banded)(XQ);
+        X(destroy_symmetric_tridiagonal)(JP);
+        X(destroy_symmetric_tridiagonal)(JQ);
+        X(mpsm)('N', P, IDP, n, n);
+        X(destroy_modified_plan)(P);
+        alpha = 2;
+        beta = 1;
+        // u(x) = 1, v(x) = (2-x)*(2+x)
+        u[0] = 1.1547005383792517;
+        v[0] = 4.387862045841156;
+        v[1] = 0.1319657758147716;
+        v[2] = -0.20865621238292037;
+        P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 1, u, 3, v, 0);
+        X(mpsm)('N', P, IDP, n, n); // Should be the equivalent of the raising to (1-x)^2*(1+x)/(2-x)/(2+x)
+        X(destroy_modified_plan)(P);
+        alpha = 0;
+        beta = 0;
+        // u(x) = -(1-x)^2*(1+x), v(x) = -(2-x)*(2+x)
+        u[0] = -0.9428090415820636;
+        u[1] = 0.32659863237109055;
+        u[2] = 0.42163702135578396;
+        u[3] = -0.2138089935299396;
+        v[0] = -5.185449728701348;
+        v[1] = 0;
+        v[2] = 0.42163702135578374;
+        P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 4, u, 3, v, 0);
+        X(mpmm)('N', P, DP, n, n);
+        X(destroy_modified_plan)(P);
+        X(trmm)('N', n, IDP, n, DP, n, n);
+        err = X(norm_2arg)(DP, Id, n*n)/X(norm_1arg)(Id, n*n);
+        printf("Rational vs. raised recip. polynomial weight \t n = %3i |%20.2e ", n, (double) err);
+        X(checktest)(err, Y(pow)(n+1, 3), checksum);
+        free(Id);
+        free(DP);
+        free(IDP);
+    }
+
+    printf("\nTesting the accuracy of modified Laguerre--Laguerre transforms.\n\n");
+    printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int n = 16; n < N; n *= 2) {
+        Id = calloc(n*n, sizeof(FLT));
+        for (int j = 0; j < n; j++)
+            Id[j+j*n] = 1;
+        alpha = 0;
+        // u(x) = x^2, v(x) = 1
+        u[0] = 2;
+        u[1] = -4;
+        u[2] = 2;
+        v[0] = 1;
+        P = X(plan_modified_laguerre_to_laguerre)(n, alpha, 3, u, 1, v, 0);
+        DP = calloc(n*n, sizeof(FLT));
+        IDP = calloc(n*n, sizeof(FLT));
+        for (int j = 0; j < n; j++) {
+            IDP[j+j*n] = DP[j+j*n] = 1;
+            X(mpmv)('N', P, DP+j*n);
+            X(mpsv)('N', P, IDP+j*n);
+        }
+        XP = X(create_laguerre_multiplication)(1, n, n, alpha);
+        JP = X(convert_banded_to_symmetric_tridiagonal)(XP);
+        JQ = X(execute_jacobi_similarity)(P, JP);
+        XQ = X(create_laguerre_multiplication)(1, n-1, n-1, alpha+2);
+        err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
+        printf("Jacobi matrix from trivial rational weight \t n = %3i |%20.2e ", n-1, err);
+        X(checktest)(err, Y(pow)(n+1, 2), checksum);
+        X(destroy_symmetric_tridiagonal)(JQ);
+        X(destroy_modified_plan)(P);
+        P = X(plan_modified_laguerre_to_laguerre)(n, alpha, 3, u, 0, NULL, 0);
+        X(mpsm)('N', P, DP, n, n);
+        X(mpmm)('N', P, IDP, n, n);
+        err = X(norm_2arg)(DP, Id, n*n)/X(norm_1arg)(Id, n*n) + X(norm_2arg)(IDP, Id, n*n)/X(norm_1arg)(Id, n*n);
+        printf("Polynomial vs. trivial rational weight \t\t n = %3i |%20.2e ", n, (double) err);
+        X(checktest)(err, Y(pow)(n+1, 3), checksum);
+        JQ = X(execute_jacobi_similarity)(P, JP);
+        err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
+        printf("Jacobi matrix from polynomial modification \t n = %3i |%20.2e ", n-1, err);
+        X(checktest)(err, Y(pow)(n+1, 2), checksum);
+        X(destroy_banded)(XP);
+        X(destroy_banded)(XQ);
+        X(destroy_symmetric_tridiagonal)(JP);
+        X(destroy_symmetric_tridiagonal)(JQ);
+        X(mpsm)('N', P, IDP, n, n);
+        X(destroy_modified_plan)(P);
+        alpha = 2;
+        // u(x) = 1, v(x) = (1+x)*(2+x)
+        u[0] = Y(sqrt)((FLT) 2);
+        v[0] = Y(sqrt)((FLT) 1058);
+        v[1] = -Y(sqrt)((FLT) 726);
+        v[2] = Y(sqrt)((FLT) 48);
+        P = X(plan_modified_laguerre_to_laguerre)(n, alpha, 1, u, 3, v, 0);
+        X(mpsm)('N', P, IDP, n, n); // Should be the equivalent of the raising to x^2/(1+x)/(2+x)
+        X(destroy_modified_plan)(P);
+        alpha = 0;
+        // u(x) = -x^2, v(x) = -(1+x)*(2+x)
+        u[0] = -2;
+        u[1] = 4;
+        u[2] = -2;
+        v[0] = -7;
+        v[1] = 7;
+        v[2] = -2;
+        P = X(plan_modified_laguerre_to_laguerre)(n, alpha, 3, u, 3, v, 0);
+        X(mpmm)('N', P, DP, n, n);
+        X(destroy_modified_plan)(P);
+        X(trmm)('N', n, IDP, n, DP, n, n);
+        err = X(norm_2arg)(DP, Id, n*n)/X(norm_1arg)(Id, n*n);
+        printf("Rational vs. raised recip. polynomial weight \t n = %3i |%20.2e ", n, (double) err);
+        X(checktest)(err, Y(pow)(n+1, 4), checksum);
+        free(Id);
+        free(DP);
+        free(IDP);
+    }
+
+    printf("\nTesting the accuracy of modified Hermite--Hermite transforms.\n\n");
+    printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int n = 16; n < N; n *= 2) {
+        // u(x) = v(x) = 1 + x^2 + x^4
+        u[0] = v[0] = 2.995504568550877;
+        u[1] = v[1] = 0;
+        u[2] = v[2] = 3.7655850551068593;
+        u[3] = v[3] = 0;
+        u[4] = v[4] = 1.6305461589167827;
+        P = X(plan_modified_hermite_to_hermite)(n, 5, u, 5, v, 0);
+        FLT * DP = calloc(n*n, sizeof(FLT));
+        FLT * IDP = calloc(n*n, sizeof(FLT));
+        for (int j = 0; j < n; j++) {
+            IDP[j+j*n] = DP[j+j*n] = 1;
+            X(mpmv)('N', P, DP+j*n);
+            X(mpsv)('N', P, IDP+j*n);
+        }
+        X(destroy_modified_plan)(P);
+        err = X(norm_2arg)(DP, IDP, n*n)/X(norm_1arg)(DP, n*n);
+        printf("Trivial weight r(x) = (1+x²+x⁴)/(1+x²+x⁴) \t n = %3i |%20.2e ", n, err);
+        X(checktest)(err, Y(pow)(n+1, 3), checksum);
+        free(DP);
+        free(IDP);
+    }
+}

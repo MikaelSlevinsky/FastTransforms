@@ -63,6 +63,19 @@ struct X(tbstruct_ADI) {
     int b;
 };
 
+typedef struct {
+    X(triangular_banded) * K;
+    X(triangular_banded) * R;
+    int n;
+    int nu;
+    int nv;
+} X(modified_plan);
+
+typedef struct {
+    FLT alpha;
+    FLT beta;
+} X(cop_params);
+
 void X(destroy_sparse)(X(sparse) * A);
 void X(destroy_banded)(X(banded) * A);
 void X(destroy_triangular_banded)(X(triangular_banded) * A);
@@ -70,6 +83,7 @@ void X(destroy_banded_qr)(X(banded_qr) * F);
 void X(destroy_banded_ql)(X(banded_ql) * F);
 void X(destroy_tb_eigen_FMM)(X(tb_eigen_FMM) * F);
 void X(destroy_tb_eigen_ADI)(X(tb_eigen_ADI) * F);
+void X(destroy_modified_plan)(X(modified_plan) * P);
 
 size_t X(summary_size_tb_eigen_FMM)(X(tb_eigen_FMM) * F);
 size_t X(summary_size_tb_eigen_ADI)(X(tb_eigen_ADI) * F);
@@ -151,6 +165,14 @@ void X(bfsm_ADI)(char TRANS, X(tb_eigen_ADI) * F, FLT * X, int LDX, int N);
 
 FLT X(normest_tb_eigen_ADI)(X(tb_eigen_ADI) * F);
 
+void X(mpmv)(char TRANS, X(modified_plan) * P, FLT * x);
+void X(mpsv)(char TRANS, X(modified_plan) * P, FLT * x);
+void X(mpmm)(char TRANS, X(modified_plan) * P, FLT * B, int LDB, int N);
+void X(mpsm)(char TRANS, X(modified_plan) * P, FLT * B, int LDB, int N);
+X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const X(cop_params) params), const X(cop_params) params, const int nu, const FLT * u, const int nv, const FLT * v, const int verbose);
+void Y(execute_jacobi_similarity)(const X(modified_plan) * P, const X(symmetric_tridiagonal) * XP, X(symmetric_tridiagonal) * XQ);
+X(symmetric_tridiagonal) * X(execute_jacobi_similarity)(const X(modified_plan) * P, const X(symmetric_tridiagonal) * XP);
+
 X(triangular_banded) * X(create_A_konoplev_to_jacobi)(const int n, const FLT alpha, const FLT beta);
 X(triangular_banded) * X(create_B_konoplev_to_jacobi)(const int n, const FLT alpha);
 
@@ -213,8 +235,8 @@ X(triangular_banded) * X(create_A_associated_hermite_to_hermite)(const int norm,
 X(triangular_banded) * X(create_B_associated_hermite_to_hermite)(const int norm, const int n);
 X(triangular_banded) * X(create_C_associated_hermite_to_hermite)(const int n);
 
-X(banded) * X(operator_normalized_jacobi_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const FLT alpha, const FLT beta);
-X(banded) * X(operator_normalized_laguerre_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const FLT alpha);
-X(banded) * X(operator_normalized_hermite_clenshaw)(const int n, const int nc, const FLT * c, const int incc);
+X(banded) * X(operator_normalized_jacobi_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const X(cop_params) params);
+X(banded) * X(operator_normalized_laguerre_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const X(cop_params) params);
+X(banded) * X(operator_normalized_hermite_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const X(cop_params) params);
 
 X(lowrankmatrix) * X(ddfadi)(const int m, const FLT * A, const int n, const FLT * B, const int b, const FLT * X, const FLT * Y);

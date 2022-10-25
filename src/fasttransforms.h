@@ -47,6 +47,8 @@ void ft_eigen_evall(const int n, const long double * c, const int incc, const lo
 #define FT_CN (1U << 1)
 #define FT_DN (1U << 2)
 
+#define FT_MODIFIED_NMAX 1000000
+
 #include "tdc.h"
 
 /*!
@@ -153,6 +155,31 @@ ft_btb_eigen_FMM * ft_plan_associated_jacobi_to_jacobi(const int norm1, const in
 ft_btb_eigen_FMM * ft_plan_associated_laguerre_to_laguerre(const int norm1, const int norm2, const int n, const int c, const double alpha, const double beta);
 ft_btb_eigen_FMM * ft_plan_associated_hermite_to_hermite(const int norm1, const int norm2, const int n, const int c);
 
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between modified Jacobi polynomials, orthonormal with respect to a rationally modified weight and orthonormal Jacobi polynomials. The rational function is expressed as a ratio of orthonormal Jacobi polynomial expansions:
+  \f[
+  r(x) = \frac{u(x)}{v(x)} = \frac{\sum_{k=0}^{n_u-1} u_k \tilde{P}_k^{(\alpha,\beta)}(x)}{\sum_{k=0}^{n_v-1} v_k \tilde{P}_k^{(\alpha,\beta)}(x)}.
+  \f]
+  If \f$n_v \le 1\f$, then \f$r(x)\f$ is polynomial and the algorithm is direct and faster. See also \ref ft_plan_modified_jacobi_to_jacobif and \ref ft_plan_modified_jacobi_to_jacobil.
+*/
+ft_modified_plan * ft_plan_modified_jacobi_to_jacobi(const int n, const double alpha, const double beta, const int nu, const double * u, const int nv, const double * v, const int verbose);
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between modified Laguerre polynomials, orthonormal with respect to a rationally modified weight and orthonormal Laguerre polynomials. The rational function is expressed as a ratio of orthonormal Laguerre polynomial expansions:
+  \f[
+  r(x) = \frac{u(x)}{v(x)} = \frac{\sum_{k=0}^{n_u-1} u_k \tilde{L}_k^{(\alpha)}(x)}{\sum_{k=0}^{n_v-1} v_k \tilde{L}_k^{(\alpha)}(x)}.
+  \f]
+  If \f$n_v \le 1\f$, then \f$r(x)\f$ is polynomial and the algorithm is direct and faster. See also \ref ft_plan_modified_laguerre_to_laguerref and \ref ft_plan_modified_laguerre_to_laguerrel.
+*/
+ft_modified_plan * ft_plan_modified_laguerre_to_laguerre(const int n, const double alpha, const int nu, const double * u, const int nv, const double * v, const int verbose);
+/*!
+  \brief Pre-compute a factorization of the connection coefficients between modified Hermite polynomials, orthonormal with respect to a rationally modified weight and orthonormal Hermite polynomials. The rational function is expressed as a ratio of orthonormal Hermite polynomial expansions:
+  \f[
+  r(x) = \frac{u(x)}{v(x)} = \frac{\sum_{k=0}^{n_u-1} u_k \tilde{H}_k(x)}{\sum_{k=0}^{n_v-1} v_k \tilde{H}_k(x)}.
+  \f]
+  If \f$n_v \le 1\f$, then \f$r(x)\f$ is polynomial and the algorithm is direct and faster. See also \ref ft_plan_modified_hermite_to_hermitef and \ref ft_plan_modified_hermite_to_hermitel.
+*/
+ft_modified_plan * ft_plan_modified_hermite_to_hermite(const int n, const int nu, const double * u, const int nv, const double * v, const int verbose);
+
 /// A single precision version of \ref ft_plan_legendre_to_chebyshev.
 ft_tb_eigen_FMMf * ft_plan_legendre_to_chebyshevf(const int normleg, const int normcheb, const int n);
 /// A single precision version of \ref ft_plan_chebyshev_to_legendre.
@@ -179,6 +206,13 @@ ft_tb_eigen_FMMf * ft_plan_chebyshev_to_ultrasphericalf(const int normcheb, cons
 ft_btb_eigen_FMMf * ft_plan_associated_jacobi_to_jacobif(const int norm1, const int norm2, const int n, const int c, const float alpha, const float beta, const float gamma, const float delta);
 ft_btb_eigen_FMMf * ft_plan_associated_laguerre_to_laguerref(const int norm1, const int norm2, const int n, const int c, const float alpha, const float beta);
 ft_btb_eigen_FMMf * ft_plan_associated_hermite_to_hermitef(const int norm1, const int norm2, const int n, const int c);
+
+/// A single precision version of \ref ft_plan_modified_jacobi_to_jacobi.
+ft_modified_planf * ft_plan_modified_jacobi_to_jacobif(const int n, const float alpha, const float beta, const int nu, const float * u, const int nv, const float * v, const int verbose);
+/// A single precision version of \ref ft_plan_modified_laguerre_to_laguerre.
+ft_modified_planf * ft_plan_modified_laguerre_to_laguerref(const int n, const float alpha, const int nu, const float * u, const int nv, const float * v, const int verbose);
+/// A single precision version of \ref ft_plan_modified_hermite_to_hermite.
+ft_modified_planf * ft_plan_modified_hermite_to_hermitef(const int n, const int nu, const float * u, const int nv, const float * v, const int verbose);
 
 /// A long double precision version of \ref ft_plan_legendre_to_chebyshev.
 ft_tb_eigen_FMMl * ft_plan_legendre_to_chebyshevl(const int normleg, const int normcheb, const int n);
@@ -207,25 +241,12 @@ ft_btb_eigen_FMMl * ft_plan_associated_jacobi_to_jacobil(const int norm1, const 
 ft_btb_eigen_FMMl * ft_plan_associated_laguerre_to_laguerrel(const int norm1, const int norm2, const int n, const int c, const long double alpha, const long double beta);
 ft_btb_eigen_FMMl * ft_plan_associated_hermite_to_hermitel(const int norm1, const int norm2, const int n, const int c);
 
-#define FT_MODIFIED_NMAX 1000000
-
-typedef struct {
-    ft_triangular_banded * K;
-    ft_triangular_banded * R;
-    int n;
-    int nu;
-    int nv;
-} ft_modified_plan;
-
-void ft_destroy_modified_plan(ft_modified_plan * P);
-void ft_mpmv(char TRANS, ft_modified_plan * P, double * x);
-void ft_mpsv(char TRANS, ft_modified_plan * P, double * x);
-void ft_mpmm(char TRANS, ft_modified_plan * P, double * B, int LDB, int N);
-void ft_mpsm(char TRANS, ft_modified_plan * P, double * B, int LDB, int N);
-
-ft_modified_plan * ft_plan_modified_jacobi_to_jacobi(const int n, const double alpha, const double beta, const int nu, const double * u, const int nv, const double * v, const int verbose);
-ft_modified_plan * ft_plan_modified_laguerre_to_laguerre(const int n, const double alpha, const int nu, const double * u, const int nv, const double * v, const int verbose);
-ft_modified_plan * ft_plan_modified_hermite_to_hermite(const int n, const int nu, const double * u, const int nv, const double * v, const int verbose);
+/// A long double precision version of \ref ft_plan_modified_jacobi_to_jacobi.
+ft_modified_planl * ft_plan_modified_jacobi_to_jacobil(const int n, const long double alpha, const long double beta, const int nu, const long double * u, const int nv, const long double * v, const int verbose);
+/// A long double precision version of \ref ft_plan_modified_laguerre_to_laguerre.
+ft_modified_planl * ft_plan_modified_laguerre_to_laguerrel(const int n, const long double alpha, const int nu, const long double * u, const int nv, const long double * v, const int verbose);
+/// A long double precision version of \ref ft_plan_modified_hermite_to_hermite.
+ft_modified_planl * ft_plan_modified_hermite_to_hermitel(const int n, const int nu, const long double * u, const int nv, const long double * v, const int verbose);
 
 #include <mpfr.h>
 

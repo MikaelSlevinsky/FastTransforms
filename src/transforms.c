@@ -8,12 +8,14 @@
     #define FLT2 quadruple
     #define X(name) FT_CONCAT(ft_, name, l)
     #define X2(name) FT_CONCAT(ft_, name, q)
+    #define Y(name) FT_CONCAT(, name, l)
     #define Y2(name) FT_CONCAT(, name, q)
     #include "transforms_source.c"
     #undef FLT
     #undef FLT2
     #undef X
     #undef X2
+    #undef Y
     #undef Y2
 #endif
 
@@ -21,24 +23,28 @@
 #define FLT2 long double
 #define X(name) FT_CONCAT(ft_, name, )
 #define X2(name) FT_CONCAT(ft_, name, l)
+#define Y(name) FT_CONCAT(, name, )
 #define Y2(name) FT_CONCAT(, name, l)
 #include "transforms_source.c"
 #undef FLT
 #undef FLT2
 #undef X
 #undef X2
+#undef Y
 #undef Y2
 
 #define FLT float
 #define FLT2 double
 #define X(name) FT_CONCAT(ft_, name, f)
 #define X2(name) FT_CONCAT(ft_, name, )
+#define Y(name) FT_CONCAT(, name, f)
 #define Y2(name) FT_CONCAT(, name, )
 #include "transforms_source.c"
 #undef FLT
 #undef FLT2
 #undef X
 #undef X2
+#undef Y
 #undef Y2
 
 double * plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n) {
@@ -256,373 +262,6 @@ double * plan_associated_hermite_to_hermite(const int norm1, const int norm2, co
     ft_destroy_triangular_bandedl(C);
     free(Vl);
     return V;
-}
-
-void ft_destroy_modified_plan(ft_modified_plan * P) {
-    if (P->nv < 1) {
-        ft_destroy_triangular_banded(P->R);
-    }
-    else {
-        ft_destroy_triangular_banded(P->K);
-        ft_destroy_triangular_banded(P->R);
-    }
-    free(P);
-}
-
-void ft_mpmv(char TRANS, ft_modified_plan * P, double * x) {
-    if (P->nv < 1) {
-        ft_tbsv(TRANS, P->R, x);
-    }
-    else {
-        if (TRANS == 'N') {
-            ft_tbsv('N', P->K, x);
-            ft_tbmv('N', P->R, x);
-        }
-        else if (TRANS == 'T') {
-            ft_tbmv('T', P->R, x);
-            ft_tbsv('T', P->K, x);
-        }
-    }
-}
-
-void ft_mpsv(char TRANS, ft_modified_plan * P, double * x) {
-    if (P->nv < 1) {
-        ft_tbmv(TRANS, P->R, x);
-    }
-    else {
-        if (TRANS == 'N') {
-            ft_tbsv('N', P->R, x);
-            ft_tbmv('N', P->K, x);
-        }
-        else if (TRANS == 'T') {
-            ft_tbmv('T', P->K, x);
-            ft_tbsv('T', P->R, x);
-        }
-    }
-}
-
-void ft_mpmm(char TRANS, ft_modified_plan * P, double * B, int LDB, int N) {
-    #pragma omp parallel for
-    for (int j = 0; j < N; j++)
-        ft_mpmv(TRANS, P, B+j*LDB);
-}
-
-void ft_mpsm(char TRANS, ft_modified_plan * P, double * B, int LDB, int N) {
-    #pragma omp parallel for
-    for (int j = 0; j < N; j++)
-        ft_mpsv(TRANS, P, B+j*LDB);
-}
-
-ft_modified_plan * ft_plan_modified_jacobi_to_jacobi(const int n, const double alpha, const double beta, const int nu, const double * u, const int nv, const double * v, const int verbose) {
-    if (nv < 1) {
-        // polynomial case
-        ft_banded * U = ft_operator_normalized_jacobi_clenshaw(n, nu, u, 1, alpha, beta);
-        ft_banded_cholfact(U);
-        ft_triangular_banded * R = ft_convert_banded_to_triangular_banded(U);
-        ft_modified_plan * P = malloc(sizeof(ft_modified_plan));
-        P->R = R;
-        P->n = n;
-        P->nu = nu;
-        P->nv = nv;
-        return P;
-    }
-    else {
-        // rational case
-        ft_banded_ql * F;
-        int N = 2*n;
-        while (1) {
-            if (N > FT_MODIFIED_NMAX) exit_failure("ft_plan_modified_jacobi_to_jacobi: dimension of QL factorization, N, exceeds maximum allowable.");
-            ft_banded * V = ft_operator_normalized_jacobi_clenshaw(N+nu+nv, nv, v, 1, alpha, beta);
-
-            double nrm_Vb = 0;
-            double * Vb = calloc(N*(nv-1), sizeof(double));
-            for (int j = 0; j < nv-1; j++)
-                for (int i = N-nv+1+j; i < N; i++) {
-                    Vb[i+j*N] = ft_get_banded_index(V, i, j+N);
-                    nrm_Vb += Vb[i+j*N]*Vb[i+j*N];
-                }
-            nrm_Vb = sqrt(nrm_Vb);
-
-            // truncate it for QL
-            V->m = V->n = N;
-            F = ft_banded_qlfact(V);
-
-            for (int j = 0; j < nv-1; j++)
-                ft_bqmv('T', F, Vb+j*N);
-
-            double nrm_Vn = 0;
-            for (int j = 0; j < nv-1; j++)
-                for (int i = 0; i < n; i++)
-                    nrm_Vn += Vb[i+j*N]*Vb[i+j*N];
-            nrm_Vn = sqrt(nrm_Vn);
-
-            free(Vb);
-            ft_destroy_banded(V);
-            //if (nv*nrm_Vn <= eps()*nrm_Vb) break;
-            if (nv*nrm_Vn <= eps()*nrm_Vb) {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≤ %4.3e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
-                break;
-            }
-            else {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≰ %4.3e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
-            }
-            ft_destroy_banded_ql(F);
-            N <<= 1;
-        }
-        F->factors->m = F->factors->n = n+nu+nv;
-        ft_banded * U = ft_operator_normalized_jacobi_clenshaw(n+nu+nv, nu, u, 1, alpha, beta);
-
-        ft_banded * Lt = ft_calloc_banded(n+nu+nv, n+nu+nv, 0, F->factors->l);
-        for (int j = 0; j < n+nu+nv; j++)
-            for (int i = j; i < MIN(n+nu+nv, j+F->factors->l+1); i++)
-                ft_set_banded_index(Lt, ft_get_banded_index(F->factors, i, j), j, i);
-
-        double * D = calloc(n+nu+nv, sizeof(double));
-        for (int j = 0; j < n+nu+nv; j++) {
-            D[j] = (signbit(ft_get_banded_index(Lt, j, j))) ? -1 : 1;
-            for (int i = j; i >= MAX(0, j-Lt->u); i--)
-                ft_set_banded_index(Lt, ft_get_banded_index(Lt, i, j)*D[j], i, j);
-        }
-
-        ft_banded * ULt = ft_calloc_banded(n+nu+nv, n+nu+nv, nu+nv-2, nu+2*nv-3);
-        ft_gbmm(1, U, Lt, 0, ULt);
-        // ULᵀ ← QᵀULᵀ
-        ft_partial_bqmm(F, nu, nv, ULt);
-
-        int b = nu+nv-2;
-        ft_banded * QtULt = ft_calloc_banded(n, n, b, b);
-        for (int i = 0; i < n; i++)
-            for (int j = MAX(i-b, 0); j < MIN(i+b+1, n); j++)
-                ft_set_banded_index(QtULt, D[i]*ft_get_banded_index(ULt, i, j), i, j);
-        ft_banded_cholfact(QtULt);
-        ft_triangular_banded * K = ft_convert_banded_to_triangular_banded(QtULt);
-
-        ft_triangular_banded * R = ft_calloc_triangular_banded(n, Lt->u);
-        for (int j = 0; j < n; j++)
-            for (int i = j; i >= MAX(0, j-Lt->u); i--)
-                ft_set_triangular_banded_index(R, ft_get_banded_index(Lt, i, j), i, j);
-
-        free(D);
-        ft_destroy_banded(U);
-        ft_destroy_banded(Lt);
-        ft_destroy_banded(ULt);
-        ft_destroy_banded_ql(F);
-        ft_modified_plan * P = malloc(sizeof(ft_modified_plan));
-        P->n = n;
-        P->nu = nu;
-        P->nv = nv;
-        P->K = K;
-        P->R = R;
-        return P;
-    }
-}
-
-ft_modified_plan * ft_plan_modified_laguerre_to_laguerre(const int n, const double alpha, const int nu, const double * u, const int nv, const double * v, const int verbose) {
-    if (nv < 1) {
-        // polynomial case
-        ft_banded * U = ft_operator_normalized_laguerre_clenshaw(n, nu, u, 1, alpha);
-        ft_banded_cholfact(U);
-        ft_triangular_banded * R = ft_convert_banded_to_triangular_banded(U);
-        ft_modified_plan * P = malloc(sizeof(ft_modified_plan));
-        P->R = R;
-        P->n = n;
-        P->nu = nu;
-        P->nv = nv;
-        return P;
-    }
-    else {
-        // rational case
-        ft_banded_ql * F;
-        int N = 2*n;
-        while (1) {
-            if (N > FT_MODIFIED_NMAX) exit_failure("ft_plan_modified_laguerre_to_laguerre: dimension of QL factorization, N, exceeds maximum allowable.");
-            ft_banded * V = ft_operator_normalized_laguerre_clenshaw(N+nu+nv, nv, v, 1, alpha);
-
-            double nrm_Vb = 0;
-            double * Vb = calloc(N*(nv-1), sizeof(double));
-            for (int j = 0; j < nv-1; j++)
-                for (int i = N-nv+1+j; i < N; i++) {
-                    Vb[i+j*N] = ft_get_banded_index(V, i, j+N);
-                    nrm_Vb += Vb[i+j*N]*Vb[i+j*N];
-                }
-            nrm_Vb = sqrt(nrm_Vb);
-
-            // truncate it for QL
-            V->m = V->n = N;
-            F = ft_banded_qlfact(V);
-
-            for (int j = 0; j < nv-1; j++)
-                ft_bqmv('T', F, Vb+j*N);
-
-            double nrm_Vn = 0;
-            for (int j = 0; j < nv-1; j++)
-                for (int i = 0; i < n; i++)
-                    nrm_Vn += Vb[i+j*N]*Vb[i+j*N];
-            nrm_Vn = sqrt(nrm_Vn);
-
-            free(Vb);
-            ft_destroy_banded(V);
-            //if (nv*nrm_Vn <= eps()*nrm_Vb) break;
-            if (nv*nrm_Vn <= eps()*nrm_Vb) {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≤ %4.3e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
-                break;
-            }
-            else {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≰ %4.3e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
-            }
-            ft_destroy_banded_ql(F);
-            N <<= 1;
-        }
-        F->factors->m = F->factors->n = n+nu+nv;
-        ft_banded * U = ft_operator_normalized_laguerre_clenshaw(n+nu+nv, nu, u, 1, alpha);
-
-        ft_banded * Lt = ft_calloc_banded(n+nu+nv, n+nu+nv, 0, F->factors->l);
-        for (int j = 0; j < n+nu+nv; j++)
-            for (int i = j; i < MIN(n+nu+nv, j+F->factors->l+1); i++)
-                ft_set_banded_index(Lt, ft_get_banded_index(F->factors, i, j), j, i);
-
-        double * D = calloc(n+nu+nv, sizeof(double));
-        for (int j = 0; j < n+nu+nv; j++) {
-            D[j] = (signbit(ft_get_banded_index(Lt, j, j))) ? -1 : 1;
-            for (int i = j; i >= MAX(0, j-Lt->u); i--)
-                ft_set_banded_index(Lt, ft_get_banded_index(Lt, i, j)*D[j], i, j);
-        }
-
-        ft_banded * ULt = ft_calloc_banded(n+nu+nv, n+nu+nv, nu+nv-2, nu+2*nv-3);
-        ft_gbmm(1, U, Lt, 0, ULt);
-        // ULᵀ ← QᵀULᵀ
-        ft_partial_bqmm(F, nu, nv, ULt);
-
-        int b = nu+nv-2;
-        ft_banded * QtULt = ft_calloc_banded(n, n, b, b);
-        for (int i = 0; i < n; i++)
-            for (int j = MAX(i-b, 0); j < MIN(i+b+1, n); j++)
-                ft_set_banded_index(QtULt, D[i]*ft_get_banded_index(ULt, i, j), i, j);
-        ft_banded_cholfact(QtULt);
-        ft_triangular_banded * K = ft_convert_banded_to_triangular_banded(QtULt);
-
-        ft_triangular_banded * R = ft_calloc_triangular_banded(n, Lt->u);
-        for (int j = 0; j < n; j++)
-            for (int i = j; i >= MAX(0, j-Lt->u); i--)
-                ft_set_triangular_banded_index(R, ft_get_banded_index(Lt, i, j), i, j);
-
-        free(D);
-        ft_destroy_banded(U);
-        ft_destroy_banded(Lt);
-        ft_destroy_banded(ULt);
-        ft_destroy_banded_ql(F);
-        ft_modified_plan * P = malloc(sizeof(ft_modified_plan));
-        P->n = n;
-        P->nu = nu;
-        P->nv = nv;
-        P->K = K;
-        P->R = R;
-        return P;
-    }
-}
-
-ft_modified_plan * ft_plan_modified_hermite_to_hermite(const int n, const int nu, const double * u, const int nv, const double * v, const int verbose) {
-    if (nv < 1) {
-        // polynomial case
-        ft_banded * U = ft_operator_normalized_hermite_clenshaw(n, nu, u, 1);
-        ft_banded_cholfact(U);
-        ft_triangular_banded * R = ft_convert_banded_to_triangular_banded(U);
-        ft_modified_plan * P = malloc(sizeof(ft_modified_plan));
-        P->R = R;
-        P->n = n;
-        P->nu = nu;
-        P->nv = nv;
-        return P;
-    }
-    else {
-        // rational case
-        ft_banded_ql * F;
-        int N = 2*n;
-        while (1) {
-            if (N > FT_MODIFIED_NMAX) exit_failure("ft_plan_modified_hermite_to_hermite: dimension of QL factorization, N, exceeds maximum allowable.");
-            ft_banded * V = ft_operator_normalized_hermite_clenshaw(N+nu+nv, nv, v, 1);
-
-            double nrm_Vb = 0;
-            double * Vb = calloc(N*(nv-1), sizeof(double));
-            for (int j = 0; j < nv-1; j++)
-                for (int i = N-nv+1+j; i < N; i++) {
-                    Vb[i+j*N] = ft_get_banded_index(V, i, j+N);
-                    nrm_Vb += Vb[i+j*N]*Vb[i+j*N];
-                }
-            nrm_Vb = sqrt(nrm_Vb);
-
-            // truncate it for QL
-            V->m = V->n = N;
-            F = ft_banded_qlfact(V);
-
-            for (int j = 0; j < nv-1; j++)
-                ft_bqmv('T', F, Vb+j*N);
-
-            double nrm_Vn = 0;
-            for (int j = 0; j < nv-1; j++)
-                for (int i = 0; i < n; i++)
-                    nrm_Vn += Vb[i+j*N]*Vb[i+j*N];
-            nrm_Vn = sqrt(nrm_Vn);
-
-            free(Vb);
-            ft_destroy_banded(V);
-            //if (nv*nrm_Vn <= eps()*nrm_Vb) break;
-            if (nv*nrm_Vn <= eps()*nrm_Vb) {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≤ %4.3e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
-                break;
-            }
-            else {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≰ %4.3e\n", N, nv*nrm_Vn, eps()*nrm_Vb);
-            }
-            ft_destroy_banded_ql(F);
-            N <<= 1;
-        }
-        F->factors->m = F->factors->n = n+nu+nv;
-        ft_banded * U = ft_operator_normalized_hermite_clenshaw(n+nu+nv, nu, u, 1);
-
-        ft_banded * Lt = ft_calloc_banded(n+nu+nv, n+nu+nv, 0, F->factors->l);
-        for (int j = 0; j < n+nu+nv; j++)
-            for (int i = j; i < MIN(n+nu+nv, j+F->factors->l+1); i++)
-                ft_set_banded_index(Lt, ft_get_banded_index(F->factors, i, j), j, i);
-
-        double * D = calloc(n+nu+nv, sizeof(double));
-        for (int j = 0; j < n+nu+nv; j++) {
-            D[j] = (signbit(ft_get_banded_index(Lt, j, j))) ? -1 : 1;
-            for (int i = j; i >= MAX(0, j-Lt->u); i--)
-                ft_set_banded_index(Lt, ft_get_banded_index(Lt, i, j)*D[j], i, j);
-        }
-
-        ft_banded * ULt = ft_calloc_banded(n+nu+nv, n+nu+nv, nu+nv-2, nu+2*nv-3);
-        ft_gbmm(1, U, Lt, 0, ULt);
-        // ULᵀ ← QᵀULᵀ
-        ft_partial_bqmm(F, nu, nv, ULt);
-
-        int b = nu+nv-2;
-        ft_banded * QtULt = ft_calloc_banded(n, n, b, b);
-        for (int i = 0; i < n; i++)
-            for (int j = MAX(i-b, 0); j < MIN(i+b+1, n); j++)
-                ft_set_banded_index(QtULt, D[i]*ft_get_banded_index(ULt, i, j), i, j);
-        ft_banded_cholfact(QtULt);
-        ft_triangular_banded * K = ft_convert_banded_to_triangular_banded(QtULt);
-
-        ft_triangular_banded * R = ft_calloc_triangular_banded(n, Lt->u);
-        for (int j = 0; j < n; j++)
-            for (int i = j; i >= MAX(0, j-Lt->u); i--)
-                ft_set_triangular_banded_index(R, ft_get_banded_index(Lt, i, j), i, j);
-
-        free(D);
-        ft_destroy_banded(U);
-        ft_destroy_banded(Lt);
-        ft_destroy_banded(ULt);
-        ft_destroy_banded_ql(F);
-        ft_modified_plan * P = malloc(sizeof(ft_modified_plan));
-        P->n = n;
-        P->nu = nu;
-        P->nv = nv;
-        P->K = K;
-        P->R = R;
-        return P;
-    }
 }
 
 #include "transforms_mpfr.c"

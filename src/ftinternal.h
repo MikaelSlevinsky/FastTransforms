@@ -43,6 +43,8 @@ static inline void exit_failure(char * msg) {
     exit(EXIT_FAILURE);
 }
 
+static inline void warning(char * msg) {printf("\x1b[1m\x1b[33mFastTransforms: \x1b[0m\x1b[33m%s\x1b[0m\n", msg);}
+
 #define M_SQRT_PI      1.772453850905516027   /* sqrt(pi)           */
 #define M_1_SQRT_PI    0.564189583547756287   /* 1/sqrt(pi)         */
 #define M_SQRT_PI_2    0.886226925452758014   /* sqrt(pi)/2         */
