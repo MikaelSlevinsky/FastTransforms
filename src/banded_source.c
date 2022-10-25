@@ -1454,10 +1454,6 @@ X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw
         X(banded_ql) * F;
         int N = 2*n;
         while (1) {
-            if (N > FT_MODIFIED_NMAX) {
-                warning("plan_modified: dimension of QL factorization, N, exceeds maximum allowable.");
-                break;
-            }
             X(banded) * V = operator_clenshaw(N+nu+nv, nv, v, 1, params);
 
             FLT nrm_Vb = 0;
@@ -1484,8 +1480,11 @@ X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw
 
             free(Vb);
             X(destroy_banded)(V);
-            //if (nv*nrm_Vn <= Y(eps)()*nrm_Vb) break;
-            if (nv*nrm_Vn <= Y(eps)()*nrm_Vb) {
+            if (N > FT_MODIFIED_NMAX) {
+                warning("plan_modified: dimension of QL factorization, N, exceeds maximum allowable.");
+                break;
+            }
+            else if (nv*nrm_Vn <= Y(eps)()*nrm_Vb) {
                 verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≤ %4.3e\n", N, (double) nv*nrm_Vn, (double) Y(eps)()*nrm_Vb);
                 break;
             }
