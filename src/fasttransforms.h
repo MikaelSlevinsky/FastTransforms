@@ -158,7 +158,7 @@ ft_btb_eigen_FMM * ft_plan_associated_hermite_to_hermite(const int norm1, const 
 /*!
   \brief Pre-compute a factorization of the connection coefficients between modified Jacobi polynomials, orthonormal with respect to a rationally modified weight and orthonormal Jacobi polynomials. The rational function is expressed as a ratio of orthonormal Jacobi polynomial expansions:
   \f[
-  r(x) = \frac{u(x)}{v(x)} = \frac{\sum_{k=0}^{n_u-1} u_k \tilde{P}_k^{(\alpha,\beta)}(x)}{\sum_{k=0}^{n_v-1} v_k \tilde{P}_k^{(\alpha,\beta)}(x)}.
+  r(x) = \frac{u(x)}{v(x)} = \frac{\displaystyle \sum_{k=0}^{n_u-1} u_k \tilde{P}_k^{(\alpha,\beta)}(x)}{\displaystyle \sum_{k=0}^{n_v-1} v_k \tilde{P}_k^{(\alpha,\beta)}(x)}.
   \f]
   If \f$n_v \le 1\f$, then \f$r(x)\f$ is polynomial and the algorithm is direct and faster. See also \ref ft_plan_modified_jacobi_to_jacobif and \ref ft_plan_modified_jacobi_to_jacobil.
 */
@@ -166,7 +166,7 @@ ft_modified_plan * ft_plan_modified_jacobi_to_jacobi(const int n, const double a
 /*!
   \brief Pre-compute a factorization of the connection coefficients between modified Laguerre polynomials, orthonormal with respect to a rationally modified weight and orthonormal Laguerre polynomials. The rational function is expressed as a ratio of orthonormal Laguerre polynomial expansions:
   \f[
-  r(x) = \frac{u(x)}{v(x)} = \frac{\sum_{k=0}^{n_u-1} u_k \tilde{L}_k^{(\alpha)}(x)}{\sum_{k=0}^{n_v-1} v_k \tilde{L}_k^{(\alpha)}(x)}.
+  r(x) = \frac{u(x)}{v(x)} = \frac{\displaystyle \sum_{k=0}^{n_u-1} u_k \tilde{L}_k^{(\alpha)}(x)}{\displaystyle \sum_{k=0}^{n_v-1} v_k \tilde{L}_k^{(\alpha)}(x)}.
   \f]
   If \f$n_v \le 1\f$, then \f$r(x)\f$ is polynomial and the algorithm is direct and faster. See also \ref ft_plan_modified_laguerre_to_laguerref and \ref ft_plan_modified_laguerre_to_laguerrel.
 */
@@ -174,7 +174,7 @@ ft_modified_plan * ft_plan_modified_laguerre_to_laguerre(const int n, const doub
 /*!
   \brief Pre-compute a factorization of the connection coefficients between modified Hermite polynomials, orthonormal with respect to a rationally modified weight and orthonormal Hermite polynomials. The rational function is expressed as a ratio of orthonormal Hermite polynomial expansions:
   \f[
-  r(x) = \frac{u(x)}{v(x)} = \frac{\sum_{k=0}^{n_u-1} u_k \tilde{H}_k(x)}{\sum_{k=0}^{n_v-1} v_k \tilde{H}_k(x)}.
+  r(x) = \frac{u(x)}{v(x)} = \frac{\displaystyle \sum_{k=0}^{n_u-1} u_k \tilde{H}_k(x)}{\displaystyle \sum_{k=0}^{n_v-1} v_k \tilde{H}_k(x)}.
   \f]
   If \f$n_v \le 1\f$, then \f$r(x)\f$ is polynomial and the algorithm is direct and faster. See also \ref ft_plan_modified_hermite_to_hermitef and \ref ft_plan_modified_hermite_to_hermitel.
 */
