@@ -28,7 +28,7 @@ jobs:
       CC: ${{ matrix.compiler }}
       LD_LIBRARY_PATH: $LD_LIBRARY_PATH:.
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install dependencies on ubuntu
         if: startsWith(matrix.os, 'ubuntu')
         run: |
@@ -60,7 +60,7 @@ jobs:
     name: Documentation
     runs-on: macOS-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Doxygen
         run: brew install doxygen
       - name: Build site
