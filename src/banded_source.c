@@ -1542,12 +1542,7 @@ X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw
     }
 }
 
-void Y(execute_jacobi_similarity)(const X(modified_plan) * P, const X(symmetric_tridiagonal) * XP, X(symmetric_tridiagonal) * XQ) {
-    int n = MIN(XP->n, P->n);
-    FLT * ap = XP->a;
-    FLT * bp = XP->b;
-    FLT * aq = XQ->a;
-    FLT * bq = XQ->b;
+void Y(execute_jacobi_similarity)(const int n, const X(modified_plan) * P, const FLT * ap, const FLT * bp, FLT * aq, FLT * bq) {
     if (P->nv < 1) {
         // P = Q R => XQ = R XP R⁻¹, but we can calculate it only up to n-1.
         X(triangular_banded) * R = P->R;
@@ -1585,7 +1580,7 @@ X(symmetric_tridiagonal) * X(execute_jacobi_similarity)(const X(modified_plan) *
     XQ->a = malloc((n-1)*sizeof(FLT));
     XQ->b = malloc((n-2)*sizeof(FLT));
     XQ->n = n-1;
-    Y(execute_jacobi_similarity)(P, XP, XQ);
+    Y(execute_jacobi_similarity)(P, n, XP->a, XP->b, XQ->a, XQ->b);
     return XQ;
 }
 
