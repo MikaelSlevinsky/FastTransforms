@@ -170,7 +170,7 @@ void X(mpsv)(char TRANS, X(modified_plan) * P, FLT * x);
 void X(mpmm)(char TRANS, X(modified_plan) * P, FLT * B, int LDB, int N);
 void X(mpsm)(char TRANS, X(modified_plan) * P, FLT * B, int LDB, int N);
 X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const X(cop_params) params), const X(cop_params) params, const int nu, const FLT * u, const int nv, const FLT * v, const int verbose);
-void Y(execute_jacobi_similarity)(const int n, const X(modified_plan) * P, const FLT * ap, const FLT * bp, FLT * aq, FLT * bq);
+void Y(execute_jacobi_similarity)(const X(modified_plan) * P, const int n, const FLT * ap, const FLT * bp, FLT * aq, FLT * bq);
 X(symmetric_tridiagonal) * X(execute_jacobi_similarity)(const X(modified_plan) * P, const X(symmetric_tridiagonal) * XP);
 
 X(triangular_banded) * X(create_A_konoplev_to_jacobi)(const int n, const FLT alpha, const FLT beta);

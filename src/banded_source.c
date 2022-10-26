@@ -1542,7 +1542,7 @@ X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw
     }
 }
 
-void Y(execute_jacobi_similarity)(const int n, const X(modified_plan) * P, const FLT * ap, const FLT * bp, FLT * aq, FLT * bq) {
+void Y(execute_jacobi_similarity)(const X(modified_plan) * P, const int n, const FLT * ap, const FLT * bp, FLT * aq, FLT * bq) {
     if (P->nv < 1) {
         // P = Q R => XQ = R XP R⁻¹, but we can calculate it only up to n-1.
         X(triangular_banded) * R = P->R;
