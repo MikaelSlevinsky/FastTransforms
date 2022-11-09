@@ -394,7 +394,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         JQ = X(execute_jacobi_similarity)(P, JP);
         XQ = X(create_jacobi_multiplication)(1, n-1, n-1, alpha+2, beta+1);
         err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
-        printf("Jacobi matrix from trivial rational weight \t n = %3i |%20.2e ", n-1, err);
+        printf("Jacobi matrix from trivial rational weight \t n = %3i |%20.2e ", n-1, (double) err);
         X(checktest)(err, Y(pow)(n+1, 2), checksum);
         X(destroy_symmetric_tridiagonal)(JQ);
         X(destroy_modified_plan)(P);
@@ -406,7 +406,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         X(checktest)(err, Y(pow)(n+1, 3), checksum);
         JQ = X(execute_jacobi_similarity)(P, JP);
         err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
-        printf("Jacobi matrix from polynomial modification \t n = %3i |%20.2e ", n-1, err);
+        printf("Jacobi matrix from polynomial modification \t n = %3i |%20.2e ", n-1, (double) err);
         X(checktest)(err, Y(pow)(n+1, 2), checksum);
         X(destroy_banded)(XQ);
         X(destroy_symmetric_tridiagonal)(JP);
@@ -471,7 +471,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         JQ = X(execute_jacobi_similarity)(P, JP);
         XQ = X(create_laguerre_multiplication)(1, n-1, n-1, alpha+2);
         err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
-        printf("Jacobi matrix from trivial rational weight \t n = %3i |%20.2e ", n-1, err);
+        printf("Jacobi matrix from trivial rational weight \t n = %3i |%20.2e ", n-1, (double) err);
         X(checktest)(err, Y(pow)(n+1, 2), checksum);
         X(destroy_symmetric_tridiagonal)(JQ);
         X(destroy_modified_plan)(P);
@@ -483,7 +483,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         X(checktest)(err, Y(pow)(n+1, 3), checksum);
         JQ = X(execute_jacobi_similarity)(P, JP);
         err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
-        printf("Jacobi matrix from polynomial modification \t n = %3i |%20.2e ", n-1, err);
+        printf("Jacobi matrix from polynomial modification \t n = %3i |%20.2e ", n-1, (double) err);
         X(checktest)(err, Y(pow)(n+1, 2), checksum);
         X(destroy_banded)(XQ);
         X(destroy_symmetric_tridiagonal)(JP);
@@ -539,7 +539,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         }
         X(destroy_modified_plan)(P);
         err = X(norm_2arg)(DP, IDP, n*n)/X(norm_1arg)(DP, n*n);
-        printf("Trivial weight r(x) = (1+x²+x⁴)/(1+x²+x⁴) \t n = %3i |%20.2e ", n, err);
+        printf("Trivial weight r(x) = (1+x²+x⁴)/(1+x²+x⁴) \t n = %3i |%20.2e ", n, (double) err);
         X(checktest)(err, Y(pow)(n+1, 3), checksum);
         free(DP);
         free(IDP);
