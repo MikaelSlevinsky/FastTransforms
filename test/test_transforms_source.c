@@ -419,7 +419,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         v[0] = 4.387862045841156;
         v[1] = 0.1319657758147716;
         v[2] = -0.20865621238292037;
-        P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 1, u, 3, v, 0);
+        P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 1, u, 3, v, 1);
         X(mpsm)('N', P, IDP, n, n); // Should be the equivalent of the raising to (1-x)^2*(1+x)/(2-x)/(2+x)
         X(destroy_modified_plan)(P);
         alpha = 0;
@@ -432,7 +432,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         v[0] = -5.185449728701348;
         v[1] = 0;
         v[2] = 0.42163702135578374;
-        P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 4, u, 3, v, 0);
+        P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 4, u, 3, v, 1);
         X(mpmm)('N', P, DP, n, n);
         X(destroy_modified_plan)(P);
         X(trmm)('N', n, IDP, n, DP, n, n);
