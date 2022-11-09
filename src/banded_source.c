@@ -1550,11 +1550,11 @@ X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw
                 break;
             }
             else if (nv*nrm_Vn <= Y(eps)()*nrm_Vb) {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≤ %4.3e\n", N, (double) nv*nrm_Vn, (double) Y(eps)()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≤ %4.3e\n", N, (double) (nv*nrm_Vn), (double) (Y(eps)()*nrm_Vb));
                 break;
             }
             else {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≰ %4.3e\n", N, (double) nv*nrm_Vn, (double) Y(eps)()*nrm_Vb);
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≰ %4.3e\n", N, (double) (nv*nrm_Vn), (double) (Y(eps)()*nrm_Vb));
             }
             X(destroy_banded_ql)(F);
             N <<= 1;
