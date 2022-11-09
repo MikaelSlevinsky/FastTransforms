@@ -443,7 +443,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         free(DP);
         free(IDP);
     }
-/*
+
     printf("\nTesting the accuracy of modified Laguerre--Laguerre transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
@@ -543,5 +543,4 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         free(DP);
         free(IDP);
     }
-*/
 }
