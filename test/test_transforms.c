@@ -38,7 +38,7 @@ int main(void) {
     test_transforms(&checksum, n);
     printf("\n\tMulti-precision.\n\n");
     test_transforms_mpfr(&checksum, 256, 256, MPFR_RNDN);
-    n = 128;
+    n = 32;
     printf("\nTesting methods for modified classical orthogonal polynomial transforms.\n");
     printf("\n\tSingle precision.\n\n");
     test_modified_transformsf(&checksum, n);
