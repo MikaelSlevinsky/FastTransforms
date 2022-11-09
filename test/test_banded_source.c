@@ -363,6 +363,27 @@ void X(inner_test_banded)(int * checksum, int n) {
     printf("Jacobi lowering*raising vs. 1-x^2 \t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
     X(checktest)(err, 8, checksum);
 
+    X(banded) * XP = X(create_jacobi_multiplication)(1, n, n, alpha, beta);
+    for (int i = 0; i < n-1; i++) {
+        X(set_banded_index)(XP, 1-X(get_banded_index)(XP, i, i), i, i);
+        X(set_banded_index)(XP, -X(get_banded_index)(XP, i, i+1), i, i+1);
+        X(set_banded_index)(XP, -X(get_banded_index)(XP, i+1, i), i+1, i);
+    }
+    X(set_banded_index)(XP, 1-X(get_banded_index)(XP, n-1, n-1), n-1, n-1);
+    X(symmetric_tridiagonal) * JP = X(convert_banded_to_symmetric_tridiagonal)(XP);
+    X(symmetric_tridiagonal_qr) * TQR = X(symmetric_tridiagonal_qrfact)(JP);
+    FLT * ts = malloc((n-1)*sizeof(FLT));
+    FLT * tc = malloc((n-1)*sizeof(FLT));
+    for (int i = 0; i < n-1; i++) {
+        ts[i] = Y(sqrt)(((i+1)*(i+beta+1))/((i+alpha+2)*(i+alpha+beta+2)));
+        tc[i] = Y(sqrt)(((alpha+1)*(2*i+alpha+beta+3))/((i+alpha+2)*(i+alpha+beta+2)));
+    }
+    err = X(norm_2arg)(TQR->s, ts, n-1)/X(norm_1arg)(ts, n-1) + X(norm_2arg)(TQR->c, tc, n-1)/X(norm_1arg)(tc, n-1);
+    X(destroy_symmetric_tridiagonal)(JP);
+    X(destroy_symmetric_tridiagonal_qr)(TQR);
+    printf("Tridiagonal I-X = QR vs. true Q \t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
+    X(checktest)(err, Y(pow)(n, 1.5), checksum);
+
     err = 0;
     alpha = 0.123;
     for (int norm = 0; norm < 2; norm++) {
@@ -380,9 +401,32 @@ void X(inner_test_banded)(int * checksum, int n) {
     printf("Laguerre lowering*raising vs. x \t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
     X(checktest)(err, 1, checksum);
 
+    XP = X(create_laguerre_multiplication)(1, n, n, alpha);
+    JP = X(convert_banded_to_symmetric_tridiagonal)(XP);
+    TQR = X(symmetric_tridiagonal_qrfact)(JP);
+    for (int i = 0; i < n-1; i++) {
+        ts[i] = Y(sqrt)((i+1)/(i+alpha+2));
+        tc[i] = Y(sqrt)((alpha+1)/(i+alpha+2));
+    }
+    X(banded) * R1 = X(create_laguerre_raising)(1, n, n, alpha);
+    X(banded) * R2 = X(create_laguerre_raising)(1, n, n, alpha+1);
+    X(banded) * R12 = X(calloc_banded)(n, n, 0, 2);
+    X(gbmm)(1, R2, R1, 0, R12);
+    err = X(norm_2arg)(TQR->s, ts, n-1)/X(norm_1arg)(ts, n-1) + X(norm_2arg)(TQR->c, tc, n-1)/X(norm_1arg)(tc, n-1);
+    printf("Tridiagonal   X = QR vs. true Q \t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
+    X(checktest)(err, Y(pow)(n, 1.5), checksum);
+    err = X(norm_2arg)(TQR->R->data, R12->data, 3*(n-1))/X(norm_1arg)(R12->data, 3*(n-1));
+    printf("Tridiagonal   X = QR vs. true R \t (%5i×%5i) \t |%20.2e ", n, n, (double) err);
+    X(checktest)(err, n, checksum);
+
     X(destroy_banded)(M);
+    X(destroy_banded)(R1);
+    X(destroy_banded)(R2);
+    X(destroy_banded)(R12);
     X(destroy_banded_ql)(QL);
     X(destroy_banded_qr)(QR);
+    X(destroy_symmetric_tridiagonal)(JP);
+    X(destroy_symmetric_tridiagonal_qr)(TQR);
     X(destroy_triangular_banded)(A);
     X(destroy_triangular_banded)(B);
     X(destroy_triangular_banded)(R);
@@ -407,6 +451,8 @@ void X(inner_test_banded)(int * checksum, int n) {
     free(RtinvRt);
     free(V);
     free(lambda);
+    free(ts);
+    free(tc);
     free(x);
     free(y);
     free(z);

@@ -231,18 +231,6 @@ void X(block_2x2_triangular_banded_eigenvectors)(X(block_2x2_triangular_banded) 
     }
 }
 
-static inline void X(compute_givens)(const FLT x, const FLT y, FLT * c, FLT * s, FLT * r) {
-    * r = Y(hypot)(x, y);
-    if (* r <= Y(floatmin)()/Y(eps)()) {
-        * c = 1;
-        * s = 0;
-    }
-    else {
-        * c = x / * r;
-        * s = y / * r;
-    }
-}
-
 // Apply Givens rotation [c s; -s c] or its TRANSpose to array A from the left or right SIDE.
 static inline void X(apply_givens)(char TRANS, char SIDE, const FLT c, const FLT s, FLT A[2][2]) {
     FLT t1, t2, t3, t4;

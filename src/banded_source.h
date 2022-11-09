@@ -64,6 +64,13 @@ struct X(tbstruct_ADI) {
 };
 
 typedef struct {
+    FLT * s;
+    FLT * c;
+    int n;
+    X(banded) * R;
+} X(symmetric_tridiagonal_qr);
+
+typedef struct {
     X(triangular_banded) * K;
     X(triangular_banded) * R;
     int n;
@@ -83,6 +90,7 @@ void X(destroy_banded_qr)(X(banded_qr) * F);
 void X(destroy_banded_ql)(X(banded_ql) * F);
 void X(destroy_tb_eigen_FMM)(X(tb_eigen_FMM) * F);
 void X(destroy_tb_eigen_ADI)(X(tb_eigen_ADI) * F);
+void X(destroy_symmetric_tridiagonal_qr)(X(symmetric_tridiagonal_qr) * F);
 void X(destroy_modified_plan)(X(modified_plan) * P);
 
 size_t X(summary_size_tb_eigen_FMM)(X(tb_eigen_FMM) * F);
@@ -102,6 +110,7 @@ X(triangular_banded) * X(view_triangular_banded)(const X(triangular_banded) * A,
 
 X(banded) * X(convert_triangular_banded_to_banded)(X(triangular_banded) * A);
 X(triangular_banded) * X(convert_banded_to_triangular_banded)(X(banded) * A);
+X(symmetric_tridiagonal) * X(convert_banded_to_symmetric_tridiagonal)(X(banded) * A);
 
 X(triangular_banded) * X(create_I_triangular_banded)(const int n, const int b);
 
@@ -164,6 +173,8 @@ void X(bfsm)(char TRANS, X(tb_eigen_FMM) * F, FLT * X, int LDX, int N);
 void X(bfsm_ADI)(char TRANS, X(tb_eigen_ADI) * F, FLT * X, int LDX, int N);
 
 FLT X(normest_tb_eigen_ADI)(X(tb_eigen_ADI) * F);
+
+X(symmetric_tridiagonal_qr) * X(symmetric_tridiagonal_qrfact)(X(symmetric_tridiagonal) * A);
 
 void X(mpmv)(char TRANS, X(modified_plan) * P, FLT * x);
 void X(mpsv)(char TRANS, X(modified_plan) * P, FLT * x);

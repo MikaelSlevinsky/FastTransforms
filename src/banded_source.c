@@ -59,6 +59,13 @@ void X(destroy_tb_eigen_ADI)(X(tb_eigen_ADI) * F) {
     free(F);
 }
 
+void X(destroy_symmetric_tridiagonal_qr)(X(symmetric_tridiagonal_qr) * F) {
+    free(F->s);
+    free(F->c);
+    free(F->R);
+    free(F);
+}
+
 void X(destroy_modified_plan)(X(modified_plan) * P) {
     if (P->nv < 1) {
         X(destroy_triangular_banded)(P->R);
@@ -213,6 +220,19 @@ X(triangular_banded) * X(convert_banded_to_triangular_banded)(X(banded) * A) {
         X(destroy_banded)(A);
         return B;
     }
+}
+
+X(symmetric_tridiagonal) * X(convert_banded_to_symmetric_tridiagonal)(X(banded) * A) {
+    X(symmetric_tridiagonal) * T = malloc(sizeof(X(symmetric_tridiagonal)));
+    int n = T->n = A->n;
+    T->a = malloc(n*sizeof(FLT));
+    T->b = malloc((n-1)*sizeof(FLT));
+    for (int i = 0; i < n; i++)
+        T->a[i] = X(get_banded_index)(A, i, i);
+    for (int i = 0; i < n-1; i++)
+        T->b[i] = X(get_banded_index)(A, i, i+1);
+    X(destroy_banded)(A);
+    return T;
 }
 
 X(triangular_banded) * X(create_I_triangular_banded)(const int n, const int b) {
@@ -1392,6 +1412,51 @@ FLT X(normest_tb_eigen_ADI)(X(tb_eigen_ADI) * F) {
         return MAX(X(normest_tb_eigen_ADI)(F->F1), X(normest_tb_eigen_ADI)(F->F2))*(1 + X(norm_lowrankmatrix)(F->F0));
 }
 
+static inline void X(compute_givens)(const FLT x, const FLT y, FLT * c, FLT * s, FLT * r) {
+    * r = Y(hypot)(x, y);
+    if (* r <= Y(floatmin)()/Y(eps)()) {
+        * c = 1;
+        * s = 0;
+    }
+    else {
+        * c = x / * r;
+        * s = y / * r;
+    }
+}
+
+// Computes a Givens rotation QR factorization of A.
+// Q = G[0]G[1]⋯G[n-2]
+X(symmetric_tridiagonal_qr) * X(symmetric_tridiagonal_qrfact)(X(symmetric_tridiagonal) * A) {
+    int n = A->n;
+    FLT * a = A->a;
+    FLT * b = A->b;
+    FLT r;
+    FLT aip1 = a[0];
+    FLT bip1r = b[0];
+    FLT * s = malloc((n-1)*sizeof(FLT));
+    FLT * c = malloc((n-1)*sizeof(FLT));
+    X(banded) * R = X(calloc_banded)(n, n, 0, 2);
+    for (int i = 0; i < n-2; i++) {
+        X(compute_givens)(aip1, -b[i], c+i, s+i, &r);
+        X(set_banded_index)(R, r, i, i);
+        X(set_banded_index)(R, c[i]*bip1r-s[i]*a[i+1], i, i+1);
+        X(set_banded_index)(R, -s[i]*b[i+1], i, i+2);
+        aip1 = c[i]*a[i+1]+s[i]*bip1r;
+        bip1r = c[i]*b[i+1];
+    }
+    X(compute_givens)(aip1, -b[n-2], c+n-2, s+n-2, &r);
+    X(set_banded_index)(R, r, n-2, n-2);
+    X(set_banded_index)(R, c[n-2]*bip1r-s[n-2]*a[n-1], n-2, n-1);
+    X(set_banded_index)(R, c[n-2]*a[n-1]+s[n-2]*bip1r, n-1, n-1);
+
+    X(symmetric_tridiagonal_qr) * F = malloc(sizeof(X(symmetric_tridiagonal_qr)));
+    F->s = s;
+    F->c = c;
+    F->n = n;
+    F->R = R;
+    return F;
+}
+
 void X(mpmv)(char TRANS, X(modified_plan) * P, FLT * x) {
     if (P->nv < 1) {
         X(tbsv)(TRANS, P->R, x);
@@ -1544,7 +1609,7 @@ X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw
 
 void Y(execute_jacobi_similarity)(const X(modified_plan) * P, const int n, const FLT * ap, const FLT * bp, FLT * aq, FLT * bq) {
     if (P->nv < 1) {
-        // P = Q R => XQ = R XP R⁻¹, but we can calculate it only up to n-1.
+        // P = Q R => XQ = R XP R⁻¹, but we can calculate it only up to n-1. R_{n-1,n-1} is unused.
         X(triangular_banded) * R = P->R;
         for (int i = 0; i < n-2; i++)
             bq[i] = X(get_triangular_banded_index)(R, i+1, i+1)/X(get_triangular_banded_index)(R, i, i)*bp[i];

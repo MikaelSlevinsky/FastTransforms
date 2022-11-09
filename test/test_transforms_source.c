@@ -346,18 +346,6 @@ void Y(test_transforms)(int * checksum, int N) {
     }
 }
 
-static inline X(symmetric_tridiagonal) * X(convert_banded_to_symmetric_tridiagonal)(X(banded) * A) {
-    X(symmetric_tridiagonal) * T = malloc(sizeof(X(symmetric_tridiagonal)));
-    int n = T->n = A->n;
-    T->a = malloc(n*sizeof(FLT));
-    T->b = malloc((n-1)*sizeof(FLT));
-    for (int i = 0; i < n; i++)
-        T->a[i] = X(get_banded_index)(A, i, i);
-    for (int i = 0; i < n-1; i++)
-        T->b[i] = X(get_banded_index)(A, i, i+1);
-    return T;
-}
-
 static inline FLT X(norm_2arg_banded_tridiagonal)(X(banded) * A, X(symmetric_tridiagonal) * T) {
     int n = A->n;
     FLT s = X(get_banded_index)(A, n-1, n-1) - T->a[n-1], t;
@@ -420,7 +408,6 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
         printf("Jacobi matrix from polynomial modification \t n = %3i |%20.2e ", n-1, err);
         X(checktest)(err, Y(pow)(n+1, 2), checksum);
-        X(destroy_banded)(XP);
         X(destroy_banded)(XQ);
         X(destroy_symmetric_tridiagonal)(JP);
         X(destroy_symmetric_tridiagonal)(JQ);
@@ -498,7 +485,6 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
         printf("Jacobi matrix from polynomial modification \t n = %3i |%20.2e ", n-1, err);
         X(checktest)(err, Y(pow)(n+1, 2), checksum);
-        X(destroy_banded)(XP);
         X(destroy_banded)(XQ);
         X(destroy_symmetric_tridiagonal)(JP);
         X(destroy_symmetric_tridiagonal)(JQ);
