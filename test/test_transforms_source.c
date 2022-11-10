@@ -397,6 +397,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         X(checktest)(err, Y(pow)(n+1, 2), checksum);
         X(destroy_symmetric_tridiagonal)(JQ);
         X(destroy_modified_plan)(P);
+        /*
         P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 4, u, 0, NULL, 0);
         X(mpsm)('N', P, DP, n, n);
         X(mpmm)('N', P, IDP, n, n);
@@ -412,7 +413,6 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         X(destroy_symmetric_tridiagonal)(JQ);
         X(mpsm)('N', P, IDP, n, n);
         X(destroy_modified_plan)(P);
-        /*
         alpha = 2;
         beta = 1;
         // u(x) = 1, v(x) = (2-x)*(2+x)
