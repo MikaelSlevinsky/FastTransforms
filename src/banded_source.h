@@ -67,7 +67,7 @@ typedef struct {
     FLT * s;
     FLT * c;
     int n;
-    X(banded) * R;
+    X(triangular_banded) * R;
 } X(symmetric_tridiagonal_qr);
 
 typedef struct {

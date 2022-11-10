@@ -62,7 +62,7 @@ void X(destroy_tb_eigen_ADI)(X(tb_eigen_ADI) * F) {
 void X(destroy_symmetric_tridiagonal_qr)(X(symmetric_tridiagonal_qr) * F) {
     free(F->s);
     free(F->c);
-    free(F->R);
+    X(destroy_triangular_banded)(F->R);
     free(F);
 }
 
@@ -1435,19 +1435,19 @@ X(symmetric_tridiagonal_qr) * X(symmetric_tridiagonal_qrfact)(X(symmetric_tridia
     FLT bip1r = b[0];
     FLT * s = malloc((n-1)*sizeof(FLT));
     FLT * c = malloc((n-1)*sizeof(FLT));
-    X(banded) * R = X(calloc_banded)(n, n, 0, 2);
+    X(triangular_banded) * R = X(calloc_triangular_banded)(n, 2);
     for (int i = 0; i < n-2; i++) {
         X(compute_givens)(aip1, -b[i], c+i, s+i, &r);
-        X(set_banded_index)(R, r, i, i);
-        X(set_banded_index)(R, c[i]*bip1r-s[i]*a[i+1], i, i+1);
-        X(set_banded_index)(R, -s[i]*b[i+1], i, i+2);
+        X(set_triangular_banded_index)(R, r, i, i);
+        X(set_triangular_banded_index)(R, c[i]*bip1r-s[i]*a[i+1], i, i+1);
+        X(set_triangular_banded_index)(R, -s[i]*b[i+1], i, i+2);
         aip1 = c[i]*a[i+1]+s[i]*bip1r;
         bip1r = c[i]*b[i+1];
     }
     X(compute_givens)(aip1, -b[n-2], c+n-2, s+n-2, &r);
-    X(set_banded_index)(R, r, n-2, n-2);
-    X(set_banded_index)(R, c[n-2]*bip1r-s[n-2]*a[n-1], n-2, n-1);
-    X(set_banded_index)(R, c[n-2]*a[n-1]+s[n-2]*bip1r, n-1, n-1);
+    X(set_triangular_banded_index)(R, r, n-2, n-2);
+    X(set_triangular_banded_index)(R, c[n-2]*bip1r-s[n-2]*a[n-1], n-2, n-1);
+    X(set_triangular_banded_index)(R, c[n-2]*a[n-1]+s[n-2]*bip1r, n-1, n-1);
 
     X(symmetric_tridiagonal_qr) * F = malloc(sizeof(X(symmetric_tridiagonal_qr)));
     F->s = s;
