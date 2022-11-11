@@ -167,8 +167,8 @@ void ft_kernel_tri_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2
     kernel_tri_lo2hi_default(RP, m1, m2, A, S);
 }
 
-#define sd(l,m) s[l+(m)*n-(m)/2*((m)+1)/2]
-#define cd(l,m) c[l+(m)*n-(m)/2*((m)+1)/2]
+#define sd(l,m) s[l+(m)*n-((m)/2)*(((m)+1)/2)]
+#define cd(l,m) c[l+(m)*n-((m)/2)*(((m)+1)/2)]
 
 ft_rotation_plan * ft_plan_rotdisk(const int n, const double alpha, const double beta) {
     double * s = malloc(n*n * sizeof(double));
@@ -182,6 +182,73 @@ ft_rotation_plan * ft_plan_rotdisk(const int n, const double alpha, const double
             sd(l, m) = -sqrt(nums/den);
             cd(l, m) = sqrt(numc/den);
         }
+    ft_rotation_plan * RP = malloc(sizeof(ft_rotation_plan));
+    RP->s = s;
+    RP->c = c;
+    RP->n = n;
+    return RP;
+}
+
+// Orthonormal semi-classical Jacobi hierarchy with respect to w(x) = (1-x)^β (1+x)^α (t+x)^(γ+m).
+// If t = 1, then the sines and cosines should match (1-x)^β (1+x)^(α+γ+m), which is the rotdisk with (α+γ, β).
+ft_rotation_plan * ft_plan_rotannulus(const int n, const double alpha, const double beta, const double gamma, const double t) {
+    double * s = malloc(n*n * sizeof(double));
+    double * c = malloc(n*n * sizeof(double));
+    double nums, numc, den;
+    if (gamma == 0.0) {
+        ft_modified_plan * P = malloc(sizeof(ft_modified_plan));
+        P->nu = 1;
+        P->nv = 0;
+        ft_banded * XP = ft_create_jacobi_multiplication(1, n+1, n+1, beta, alpha);
+        ft_symmetric_tridiagonal * JP = ft_convert_banded_to_symmetric_tridiagonal(XP);
+        for (int i = 0; i < n+1; i++)
+            JP->a[i] += t;
+        for (int m = 0; m < 2*n-1; m += 2) {
+            ft_symmetric_tridiagonal_qr * QR = ft_symmetric_tridiagonal_qrfact(JP);
+            for (int l = 0; l < n-(m+1)/2; l++) {
+                sd(l, m) = QR->s[l];
+                cd(l, m) = QR->c[l];
+            }
+            P->R = QR->R;
+            P->n = QR->n;
+            ft_symmetric_tridiagonal * JP2 = ft_execute_jacobi_similarity(P, JP);
+            ft_destroy_symmetric_tridiagonal(JP);
+            JP = JP2;
+            ft_destroy_symmetric_tridiagonal_qr(QR);
+        }
+        XP = ft_create_jacobi_multiplication(1, n+1, n+1, beta, alpha);
+        JP = ft_convert_banded_to_symmetric_tridiagonal(XP);
+        for (int i = 0; i < n+1; i++)
+            JP->a[i] += t;
+        XP = ft_create_jacobi_multiplication(1, n+1, n+1, beta, alpha);
+        for (int i = 0; i < n+1; i++)
+            ft_set_banded_index(XP, t + ft_get_banded_index(XP, i, i), i, i);
+        ft_banded_cholfact(XP);
+        P->R = ft_convert_banded_to_triangular_banded(XP);
+        P->n = XP->n;
+        ft_symmetric_tridiagonal * JP1 = ft_execute_jacobi_similarity(P, JP);
+        ft_destroy_symmetric_tridiagonal(JP);
+        ft_destroy_triangular_banded(P->R);
+        JP = JP1;
+        for (int m = 1; m < 2*n-1; m += 2) {
+            ft_symmetric_tridiagonal_qr * QR = ft_symmetric_tridiagonal_qrfact(JP);
+            for (int l = 0; l < n-(m+1)/2; l++) {
+                sd(l, m) = QR->s[l];
+                cd(l, m) = QR->c[l];
+            }
+            P->R = QR->R;
+            P->n = QR->n;
+            ft_symmetric_tridiagonal * JP2 = ft_execute_jacobi_similarity(P, JP);
+            ft_destroy_symmetric_tridiagonal(JP);
+            JP = JP2;
+            ft_destroy_symmetric_tridiagonal_qr(QR);
+        }
+        free(P);
+        ft_destroy_symmetric_tridiagonal(JP);
+    }
+    else {
+        warning("Not implemented.");
+    }
     ft_rotation_plan * RP = malloc(sizeof(ft_rotation_plan));
     RP->s = s;
     RP->c = c;

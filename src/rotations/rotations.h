@@ -6,8 +6,8 @@
 #define s(l,m) s[l+(m)*(2*n+1-(m))/2]
 #define c(l,m) c[l+(m)*(2*n+1-(m))/2]
 
-#define sd(l,m) s[l+(m)*n-(m)/2*((m)+1)/2]
-#define cd(l,m) c[l+(m)*n-(m)/2*((m)+1)/2]
+#define sd(l,m) s[l+(m)*n-((m)/2)*(((m)+1)/2)]
+#define cd(l,m) c[l+(m)*n-((m)/2)*(((m)+1)/2)]
 
 #define s1(l,m) s1[l+(m)*n]
 #define c1(l,m) c1[l+(m)*n]

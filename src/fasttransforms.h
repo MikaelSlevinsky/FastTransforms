@@ -315,6 +315,7 @@ void ft_kernel_tri_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2
 void ft_kernel_tri_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
 ft_rotation_plan * ft_plan_rotdisk(const int n, const double alpha, const double beta);
+ft_rotation_plan * ft_plan_rotannulus(const int n, const double alpha, const double beta, const double gamma, const double t);
 
 /// Convert a single vector of disk harmonic coefficients in A with stride S from order m2 down to order m1.
 void ft_kernel_disk_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);

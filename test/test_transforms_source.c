@@ -397,7 +397,6 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         X(checktest)(err, Y(pow)(n+1, 2), checksum);
         X(destroy_symmetric_tridiagonal)(JQ);
         X(destroy_modified_plan)(P);
-        /*
         P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 4, u, 0, NULL, 0);
         X(mpsm)('N', P, DP, n, n);
         X(mpmm)('N', P, IDP, n, n);
@@ -440,7 +439,6 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         err = X(norm_2arg)(DP, Id, n*n)/X(norm_1arg)(Id, n*n);
         printf("Rational vs. raised recip. polynomial weight \t n = %3i |%20.2e ", n, (double) err);
         X(checktest)(err, Y(pow)(n+1, 3), checksum);
-        */
         free(Id);
         free(DP);
         free(IDP);
