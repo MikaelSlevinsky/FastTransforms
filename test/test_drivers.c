@@ -993,7 +993,7 @@ int main(int argc, const char * argv[]) {
         Ac = aligned_copymat(A, N, M);
         B = copymat(A, N, M);
 
-        RP = ft_plan_rotannulus(N, alpha, beta, 0.0, 1.0);
+        RP = ft_plan_rotannulus(N, alpha, beta, 0.0, 0.0);
         RP1 = ft_plan_rotdisk(N, alpha, beta);
 
         err = hypot(ft_norm_2arg(RP->s, RP1->s, N*N), ft_norm_2arg(RP->c, RP1->c, N*N))/hypot(ft_norm_1arg(RP1->s, N*N), ft_norm_1arg(RP1->c, N*N));
@@ -1005,7 +1005,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_rotation_plan(RP);
         ft_destroy_rotation_plan(RP1);
 
-        RP = ft_plan_rotannulus(N, alpha, beta, 0.0, 2.0);
+        RP = ft_plan_rotannulus(N, alpha, beta, 0.0, sqrt(1.0/3.0));
 
         execute_disk_hi2lo_default(RP, A, M);
         execute_disk_lo2hi_default(RP, A, M);

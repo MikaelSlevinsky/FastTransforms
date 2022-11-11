@@ -397,6 +397,21 @@ where the \f$Y_\ell^m(\theta,\varphi)\f$ are \ref sh "spherical harmonics", and 
 f_{n-1}(r,\theta,\varphi) = \sum_{k=0}^{n-1}\sum_{\ell=0}^k\sum_{m=-\ell}^{+\ell}f_{k,\ell}^m \psi_{k,\ell,m}(r,\theta,\varphi).
 \f]
 
+
+\subsection ann2cxf
+
+Consider \f$P_n^{t,(\alpha,\beta,\gamma)}(x)\f$ to be orthogonal polynomials in \f$L^2([-1,1], (1-x)^\alpha(1+x)^\beta(t+x)^\gamma\ud x)\f$, for parameter values \f$\{t>1, \alpha,\beta>-1, \gamma\in\mathbb{R}\}\cup\{t=1, \alpha,\beta+\gamma>-1\}\f$.
+
+Real orthonormal annulus polynomials in \f$L^2(\{(r,\theta) : \rho < r < 1, 0 < \theta < 2\pi\}, r^{2\gamma+1}(r^2-\rho^2)^\alpha(1-r^2)^\beta\ud r\ud\theta)\f$ are:
+\f[
+Z_{\ell,m}^{\rho,(\alpha,\beta,\gamma)}(r,\theta) = \sqrt{2} \left(\frac{2}{1-\rho^2}\right)^{\frac{\abs{m}+\alpha+\beta+\gamma+1}{2}} r^{\abs{m}}\tilde{P}_{\frac{\ell-\abs{m}}{2}}^{\frac{1+\rho^2}{1-\rho^2},(\beta,\alpha,\abs{m}+\gamma)}\left(\frac{2r^2-1-\rho^2}{1-\rho^2}\right) \sqrt{\frac{2-\delta_{m,0}}{2\pi}} \left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0,\end{array}\right.
+\f]
+where the tilde implies that \f$\tilde{P}_n^{t,(\alpha,\beta,\gamma)}(x)\f$ are orthonormal. In the limit as \f$\rho\to0\f$, the annulus polynomials converge to the Zernike polynomials, \f$Z_{\ell,m}^{0,(\alpha,\beta,\gamma)}(r, \theta) = Z_{\ell,m}^{(\alpha+\gamma,\beta)}(r, \theta)\f$. A degree-\f$(2n-2)\f$ expansion in annulus polynomials is given by:
+\f[
+f_{2n-2}(r,\theta) = \sum_{\ell=0}^{2n-2}\sum_{m=-\ell,2}^{+\ell} f_\ell^m Z_{\ell,m}^{\rho,(\alpha,\beta,\gamma)}(r,\theta),
+\f]
+where the \f$,2\f$ in the inner summation index implies that the inner summation runs from \f$m=-\ell\f$ in steps of \f$2\f$ up to \f$+\ell\f$.
+
 */
 
 /*!
