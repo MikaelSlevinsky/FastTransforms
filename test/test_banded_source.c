@@ -549,7 +549,7 @@ void Y(test_banded)(int * checksum) {
         X(inner_test_banded)(checksum, n);
     if (sizeof(FLT) == sizeof(double)) {
         printf("\n\n");
-        for (int n = 1024; n < 131072; n *= 2) {
+        for (int n = 1024; n < 32768; n *= 2) {
             X(inner_timing_test_banded_FMM)(checksum, n);
             X(inner_timing_test_banded_ADI)(checksum, n);
         }
