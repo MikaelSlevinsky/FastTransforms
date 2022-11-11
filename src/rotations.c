@@ -167,8 +167,8 @@ void ft_kernel_tri_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2
     kernel_tri_lo2hi_default(RP, m1, m2, A, S);
 }
 
-#define sd(l,m) s[l+(m)*n-(m)/2*((m)+1)/2]
-#define cd(l,m) c[l+(m)*n-(m)/2*((m)+1)/2]
+#define sd(l,m) s[l+(m)*n-((m)/2)*(((m)+1)/2)]
+#define cd(l,m) c[l+(m)*n-((m)/2)*(((m)+1)/2)]
 
 ft_rotation_plan * ft_plan_rotdisk(const int n, const double alpha, const double beta) {
     double * s = malloc(n*n * sizeof(double));
@@ -188,11 +188,6 @@ ft_rotation_plan * ft_plan_rotdisk(const int n, const double alpha, const double
     RP->n = n;
     return RP;
 }
-
-#undef sd
-#undef cd
-#define sd(l,m) s[l+(m)*n-((m)/2)*(((m)+1)/2)]
-#define cd(l,m) c[l+(m)*n-((m)/2)*(((m)+1)/2)]
 
 // Orthonormal semi-classical Jacobi hierarchy with respect to w(x) = (1-x)^β (1+x)^α (t+x)^(γ+m).
 // If t = 1, then the sines and cosines should match (1-x)^β (1+x)^(α+γ+m), which is the rotdisk with (α+γ, β).
