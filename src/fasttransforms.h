@@ -547,6 +547,27 @@ void ft_execute_disk_synthesis(const char TRANS, const ft_disk_fftw_plan * P, do
 void ft_execute_disk_analysis(const char TRANS, const ft_disk_fftw_plan * P, double * X, const int N, const int M);
 
 typedef struct {
+    fftw_plan planr;
+    fftw_plan plantheta;
+    double * w;
+    double * Y;
+} ft_annulus_fftw_plan;
+
+/// Destroy a \ref ft_annulus_fftw_plan.
+void ft_destroy_annulus_fftw_plan(ft_annulus_fftw_plan * P);
+
+ft_annulus_fftw_plan * ft_plan_annulus_with_kind(const int N, const int M, const double rho, const fftw_r2r_kind kind[3][1], const unsigned flags);
+/// Plan FFTW synthesis on the annulus.
+ft_annulus_fftw_plan * ft_plan_annulus_synthesis(const int N, const int M, const double rho, const unsigned flags);
+/// Plan FFTW analysis on the annulus.
+ft_annulus_fftw_plan * ft_plan_annulus_analysis(const int N, const int M, const double rho, const unsigned flags);
+
+/// Execute FFTW synthesis on the annulus.
+void ft_execute_annulus_synthesis(const char TRANS, const ft_annulus_fftw_plan * P, double * X, const int N, const int M);
+/// Execute FFTW analysis on the annulus.
+void ft_execute_annulus_analysis(const char TRANS, const ft_annulus_fftw_plan * P, double * X, const int N, const int M);
+
+typedef struct {
     fftw_plan planx1;
     fftw_plan planx2;
     fftw_plan plany;

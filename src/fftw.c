@@ -521,6 +521,132 @@ void ft_execute_disk_analysis(const char TRANS, const ft_disk_fftw_plan * P, dou
     }
 }
 
+void ft_destroy_annulus_fftw_plan(ft_annulus_fftw_plan * P) {
+    fftw_destroy_plan(P->planr);
+    fftw_destroy_plan(P->plantheta);
+    free(P->w);
+    fftw_free(P->Y);
+    free(P);
+}
+
+ft_annulus_fftw_plan * ft_plan_annulus_with_kind(const int N, const int M, const double rho, const fftw_r2r_kind kind[2][1], const unsigned flags) {
+    int rank = 1; // not 2: we are computing 1d transforms //
+    int n[] = {N}; // 1d transforms of length n //
+    int idist = N, odist = N;
+    int istride = 1, ostride = 1; // distance between two elements in the same column //
+    int * inembed = n, * onembed = n;
+
+    ft_annulus_fftw_plan * P = malloc(sizeof(ft_annulus_fftw_plan));
+
+    // θ = (2n+1)/(2N)π
+    // (2r^2-1-ρ^2)/(1-ρ^2) == cosθ
+    // w = sqrt(2/(1-ρ^2))*r
+    P->w = malloc(N*sizeof(double));
+    for (int n = 0; n < N; n++) {
+        double theta2 = (n+0.5)/(2.0*N);
+        double ct2 = cos(M_PI*theta2);
+        double st2 = sin(M_PI*theta2);
+        P->w[n] = sqrt(2.0*(ct2*ct2+rho*rho*st2*st2)/(1.0-rho*rho));
+    }
+
+    P->Y = fftw_malloc(N*2*(M/2+1)*sizeof(double));
+
+    int howmany = M;
+    P->planr = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], flags);
+
+    n[0] = M;
+    idist = odist = 1;
+    istride = ostride = N;
+    howmany = N;
+    double * Z = fftw_malloc(N*M*sizeof(double));
+    if (kind[1][0] == FFTW_HC2R)
+        P->plantheta = fftw_plan_many_dft_c2r(rank, n, howmany, (fftw_complex *) P->Y, inembed, istride, idist, Z, onembed, ostride, odist, flags);
+    else if (kind[1][0] == FFTW_R2HC)
+        P->plantheta = fftw_plan_many_dft_r2c(rank, n, howmany, Z, inembed, istride, idist, (fftw_complex *) P->Y, onembed, ostride, odist, flags);
+    fftw_free(Z);
+    return P;
+}
+
+ft_annulus_fftw_plan * ft_plan_annulus_synthesis(const int N, const int M, const double rho, const unsigned flags) {
+    const fftw_r2r_kind kind[2][1] = {{FFTW_REDFT01}, {FFTW_HC2R}};
+    return ft_plan_annulus_with_kind(N, M, rho, kind, flags);
+}
+
+ft_annulus_fftw_plan * ft_plan_annulus_analysis(const int N, const int M, const double rho, const unsigned flags) {
+    const fftw_r2r_kind kind[2][1] = {{FFTW_REDFT10}, {FFTW_R2HC}};
+    return ft_plan_annulus_with_kind(N, M, rho, kind, flags);
+}
+
+void ft_execute_annulus_synthesis(const char TRANS, const ft_annulus_fftw_plan * P, double * X, const int N, const int M) {
+    if (TRANS == 'N') {
+        for (int j = 0; j < M; j++)
+            X[j*N] *= 2.0;
+        fftw_execute_r2r(P->planr, X, X);
+        double * w = P->w;
+        for (int j = 1; j < M; j += 4)
+            for (int i = 0; i < N; i++)
+                X[i+j*N] *= w[i];
+        for (int j = 2; j < M; j += 4)
+            for (int i = 0; i < N; i++)
+                X[i+j*N] *= w[i];
+        for (int i = 0; i < N*M; i++)
+            X[i] *= M_1_4_SQRT_PI;
+        for (int i = 0; i < N; i++)
+            X[i] *= M_SQRT2;
+        data_r2c(X, P->Y, N, M);
+        fftw_execute_dft_c2r(P->plantheta, (fftw_complex *) P->Y, X);
+    }
+    else if (TRANS == 'T') {
+        /*
+        fftw_execute_dft_r2c(P->plantheta, X, (fftw_complex *) P->Y);
+        data_c2r(X, P->Y, N, M);
+        for (int i = 0; i < N*M; i++)
+            X[i] *= M_1_2_SQRT_PI;
+        for (int i = 0; i < N; i++)
+            X[i] *= M_SQRT1_2;
+        fftw_execute_r2r(P->planr1, X, X);
+        fftw_execute_r2r(P->planr2, X+N, X+N);
+        fftw_execute_r2r(P->planr3, X+2*N, X+2*N);
+        fftw_execute_r2r(P->planr4, X+3*N, X+3*N);
+        */
+    }
+}
+
+void ft_execute_annulus_analysis(const char TRANS, const ft_annulus_fftw_plan * P, double * X, const int N, const int M) {
+    if (TRANS == 'N') {
+        fftw_execute_dft_r2c(P->plantheta, X, (fftw_complex *) P->Y);
+        data_c2r(X, P->Y, N, M);
+        for (int i = 0; i < N*M; i++)
+            X[i] *= M_4_SQRT_PI/(2*N*M);
+        for (int i = 0; i < N; i++)
+            X[i] *= M_SQRT1_2;
+        double * w = P->w;
+        for (int j = 1; j < M; j += 4)
+            for (int i = 0; i < N; i++)
+                X[i+j*N] /= w[i];
+        for (int j = 2; j < M; j += 4)
+            for (int i = 0; i < N; i++)
+                X[i+j*N] /= w[i];
+        fftw_execute_r2r(P->planr, X, X);
+        for (int j = 0; j < M; j++)
+            X[j*N] *= 0.5;
+    }
+    else if (TRANS == 'T') {
+        /*
+        fftw_execute_r2r(P->planr1, X, X);
+        fftw_execute_r2r(P->planr2, X+N, X+N);
+        fftw_execute_r2r(P->planr3, X+2*N, X+2*N);
+        fftw_execute_r2r(P->planr4, X+3*N, X+3*N);
+        for (int i = 0; i < N*M; i++)
+            X[i] *= M_2_SQRT_PI/(2*N*M);
+        for (int i = 0; i < N; i++)
+            X[i] *= M_SQRT2;
+        data_r2c(X, P->Y, N, M);
+        fftw_execute_dft_c2r(P->plantheta, (fftw_complex *) P->Y, X);
+        */
+    }
+}
+
 void ft_destroy_rectdisk_fftw_plan(ft_rectdisk_fftw_plan * P) {
     fftw_destroy_plan(P->planx1);
     fftw_destroy_plan(P->planx2);

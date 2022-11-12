@@ -476,6 +476,14 @@ r_n & = \cos\left(\frac{2n+1}{4N}\pi\right) = \sin\left(\frac{2N-2n-1}{4N}\pi\ri
 \theta_m & = \frac{2m}{M}\pi,\quad {\rm for} \quad 0 \le m < M.
 \f}
 
+\subsection ft_fftw_annulus_plan
+
+On the annulus, the \f$N\times M\f$ radial--azimuthal grids are:
+\f{align*}
+r_n & = \sqrt{\cos^2\left(\frac{2n+1}{4N}\pi\right) + \rho^2\sin^2\left(\frac{2n+1}{4N}\pi\right)},\quad {\rm for} \quad 0 \le n < N,\\
+\theta_m & = \frac{2m}{M}\pi,\quad {\rm for} \quad 0 \le m < M.
+\f}
+
 \subsection ft_fftw_rectdisk_plan
 
 On the rectangularized disk, the \f$N\times M\f$ mapped tensor product grids are:
