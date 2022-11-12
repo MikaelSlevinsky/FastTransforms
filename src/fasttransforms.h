@@ -370,6 +370,7 @@ void ft_execute_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, ft_complex * A,
 /// Data structure to store \ref ft_rotation_plan "ft_rotation_plan"s, arrays to represent 1D orthogonal polynomial transforms and their inverses, and Greek parameters.
 typedef struct {
     ft_rotation_plan ** RP;
+    ft_modified_plan ** MP;
     double * B;
     double ** P;
     double ** Pinv;
@@ -377,7 +378,9 @@ typedef struct {
     double beta;
     double gamma;
     double delta;
+    double rho;
     int NRP;
+    int NMP;
     int NP;
 } ft_harmonic_plan;
 
@@ -410,6 +413,14 @@ ft_harmonic_plan * ft_plan_disk2cxf(const int n, const double alpha, const doubl
 void ft_execute_disk2cxf(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
 /// Transform a Chebyshev--Fourier series to a disk harmonic expansion.
 void ft_execute_cxf2disk(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
+
+/// Plan an annulus harmonic transform.
+ft_harmonic_plan * ft_plan_ann2cxf(const int n, const double alpha, const double beta, const double gamma, const double rho);
+
+/// Transform an annulus harmonic expansion to a Chebyshev--Fourier series.
+void ft_execute_ann2cxf(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
+/// Transform a Chebyshev--Fourier series to an annulus harmonic expansion.
+void ft_execute_cxf2ann(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
 
 /// Plan a rectangularized disk harmonic transform.
 ft_harmonic_plan * ft_plan_rectdisk2cheb(const int n, const double beta);

@@ -247,7 +247,7 @@ ft_rotation_plan * ft_plan_rotannulus(const int n, const double alpha, const dou
         ft_destroy_symmetric_tridiagonal(JP);
     }
     else {
-        warning("Not implemented.");
+        warning("plan_rotannulus: γ≠0 not implemented.");
     }
     ft_rotation_plan * RP = malloc(sizeof(ft_rotation_plan));
     RP->s = s;

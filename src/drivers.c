@@ -791,16 +791,25 @@ void execute_spinsph_lo2hi_NEON(const ft_spin_rotation_plan * SRP, ft_complex * 
 }
 
 void ft_destroy_harmonic_plan(ft_harmonic_plan * P) {
-    for (int i = 0; i < P->NRP; i++)
-        ft_destroy_rotation_plan(P->RP[i]);
-    free(P->RP);
-    VFREE(P->B);
-    for (int i = 0; i < P->NP; i++) {
-        free(P->P[i]);
-        free(P->Pinv[i]);
+    if (P->NRP > 0) {
+        for (int i = 0; i < P->NRP; i++)
+            ft_destroy_rotation_plan(P->RP[i]);
+        free(P->RP);
     }
-    free(P->P);
-    free(P->Pinv);
+    if (P->NMP > 0) {
+        for (int i = 0; i < P->NMP; i++)
+            ft_destroy_modified_plan(P->MP[i]);
+        free(P->MP);
+    }
+    VFREE(P->B);
+    if (P->NP > 0) {
+        for (int i = 0; i < P->NP; i++) {
+            free(P->P[i]);
+            free(P->Pinv[i]);
+        }
+        free(P->P);
+        free(P->Pinv);
+    }
     free(P);
 }
 
@@ -816,6 +825,7 @@ ft_harmonic_plan * ft_plan_sph2fourier(const int n) {
     P->Pinv[0] = plan_chebyshev_to_legendre(0, 1, n);
     P->Pinv[1] = plan_ultraspherical_to_ultraspherical(0, 1, n, 1.0, 1.5);
     P->NRP = 1;
+    P->NMP = 0;
     P->NP = 2;
     return P;
 }
@@ -903,6 +913,7 @@ ft_harmonic_plan * ft_plan_tri2cheb(const int n, const double alpha, const doubl
     P->beta = beta;
     P->gamma = gamma;
     P->NRP = 1;
+    P->NMP = 0;
     P->NP = 2;
     return P;
 }
@@ -970,6 +981,7 @@ ft_harmonic_plan * ft_plan_disk2cxf(const int n, const double alpha, const doubl
     P->alpha = alpha;
     P->beta = beta;
     P->NRP = 1;
+    P->NMP = 0;
     P->NP = 2;
     return P;
 }
@@ -1008,6 +1020,105 @@ void ft_execute_cxf2disk(const char TRANS, const ft_harmonic_plan * P, double * 
     }
 }
 
+ft_harmonic_plan * ft_plan_ann2cxf(const int n, const double alpha, const double beta, const double gamma, const double rho) {
+    ft_harmonic_plan * P = malloc(sizeof(ft_harmonic_plan));
+    P->RP = malloc(sizeof(ft_rotation_plan *));
+    P->RP[0] = ft_plan_rotannulus(n, alpha, beta, gamma, rho);
+    if (gamma == 0.0) {
+        // For even m, it is the identity.
+        P->MP = malloc(2 * sizeof(ft_modified_plan *));
+        P->MP[0] = malloc(sizeof(ft_modified_plan));
+        P->MP[0]->R = ft_create_I_triangular_banded(n, 0);
+        P->MP[0]->n = n;
+        P->MP[0]->nu = 0;
+        P->MP[0]->nv = 0;
+        // For odd m, we must convert from P^{(1-ρ^2)/(1+ρ^2), (β,α,1)}(x) ↘ P^{(β,α)}(x) which is the Cholesky factor of (tI+X_{β,α})
+        double t = 1.0 + 2.0*rho*rho/(1.0-rho*rho);
+        ft_banded * U = ft_create_jacobi_multiplication(1, n, n, beta, alpha);
+        for (int i = 0; i < n; i++)
+            ft_set_banded_index(U, t + ft_get_banded_index(U, i, i), i, i);
+        ft_banded_cholfact(U);
+        P->MP[1] = malloc(sizeof(ft_modified_plan));
+        P->MP[1]->R = ft_convert_banded_to_triangular_banded(U);
+        P->MP[1]->n = n;
+        P->MP[1]->nu = 1;
+        P->MP[1]->nv = 0;
+    }
+    else {
+        warning("plan_ann2cxf: γ≠0 not implemented.");
+    }
+    P->B = VMALLOC(VALIGN(n) * (4*n-3) * sizeof(double));
+    P->P = malloc(sizeof(double *));
+    P->P[0] = plan_jacobi_to_chebyshev(1, 0, n, beta, alpha);
+    P->Pinv = malloc(sizeof(double *));
+    P->Pinv[0] = plan_chebyshev_to_jacobi(0, 1, n, beta, alpha);
+    double cst = sqrt(2.0)*pow(2.0/(1.0-rho*rho), 0.5*(alpha+beta+gamma+1.0));
+    double cstinv = 1.0/cst;
+    for (int j = 0; j < n; j++)
+        for (int i = 0; i <= j; i++) {
+            P->P[0][i+j*n] *= cst;
+            P->Pinv[0][i+j*n] *= cstinv;
+        }
+    P->alpha = alpha;
+    P->beta = beta;
+    P->gamma = gamma;
+    P->rho = rho;
+    P->NRP = 1;
+    P->NMP = 2;
+    P->NP = 1;
+    return P;
+}
+
+void ft_execute_ann2cxf(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    if (TRANS == 'N') {
+        // Hi 2 lo
+        ft_execute_disk_hi2lo(P->RP[0], A, P->B, M);
+        // Semi-classical to classical
+        ft_mpmm('N', P->MP[0], A, 4*N, (M+3)/4);
+        ft_mpmm('N', P->MP[1], A+N, 4*N, (M+2)/4);
+        ft_mpmm('N', P->MP[1], A+2*N, 4*N, (M+1)/4);
+        ft_mpmm('N', P->MP[0], A+3*N, 4*N, M/4);
+        // Classical to Chebyshev
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->P[0], N, A, N);
+    }
+    else if (TRANS == 'T') {
+        // Chebyshev to classical
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->P[0], N, A, N);
+        // Classical to semi-classical
+        ft_mpmm('T', P->MP[0], A, 4*N, (M+3)/4);
+        ft_mpmm('T', P->MP[1], A+N, 4*N, (M+2)/4);
+        ft_mpmm('T', P->MP[1], A+2*N, 4*N, (M+1)/4);
+        ft_mpmm('T', P->MP[0], A+3*N, 4*N, M/4);
+        // Lo 2 hi
+        ft_execute_disk_lo2hi(P->RP[0], A, P->B, M);
+    }
+}
+
+void ft_execute_cxf2ann(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M) {
+    if (TRANS == 'N') {
+        // Chebyshev to classical
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, M, 1.0, P->Pinv[0], N, A, N);
+        // Classical to semi-classical
+        ft_mpsm('N', P->MP[0], A, 4*N, (M+3)/4);
+        ft_mpsm('N', P->MP[1], A+N, 4*N, (M+2)/4);
+        ft_mpsm('N', P->MP[1], A+2*N, 4*N, (M+1)/4);
+        ft_mpsm('N', P->MP[0], A+3*N, 4*N, M/4);
+        // Lo 2 hi
+        ft_execute_disk_lo2hi(P->RP[0], A, P->B, M);
+    }
+    else if (TRANS == 'T') {
+        // Hi 2 lo
+        ft_execute_disk_hi2lo(P->RP[0], A, P->B, M);
+        // Semi-classical to classical
+        ft_mpsm('T', P->MP[0], A, 4*N, (M+3)/4);
+        ft_mpsm('T', P->MP[1], A+N, 4*N, (M+2)/4);
+        ft_mpsm('T', P->MP[1], A+2*N, 4*N, (M+1)/4);
+        ft_mpsm('T', P->MP[0], A+3*N, 4*N, M/4);
+        // Classical to Chebyshev
+        cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, M, 1.0, P->Pinv[0], N, A, N);
+    }
+}
+
 ft_harmonic_plan * ft_plan_rectdisk2cheb(const int n, const double beta) {
     ft_harmonic_plan * P = malloc(sizeof(ft_harmonic_plan));
     P->RP = malloc(sizeof(ft_rotation_plan *));
@@ -1023,6 +1134,7 @@ ft_harmonic_plan * ft_plan_rectdisk2cheb(const int n, const double beta) {
     P->Pinv[2] = plan_chebyshev_to_ultraspherical(0, 1, n, beta + 0.5);
     P->beta = beta;
     P->NRP = 1;
+    P->NMP = 0;
     P->NP = 3;
     return P;
 }
@@ -1076,6 +1188,7 @@ ft_harmonic_plan * ft_plan_tet2cheb(const int n, const double alpha, const doubl
     P->gamma = gamma;
     P->delta = delta;
     P->NRP = 2;
+    P->NMP = 0;
     P->NP = 3;
     return P;
 }

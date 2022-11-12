@@ -410,7 +410,32 @@ where the tilde implies that \f$\tilde{P}_n^{t,(\alpha,\beta,\gamma)}(x)\f$ are 
 \f[
 f_{2n-2}(r,\theta) = \sum_{\ell=0}^{2n-2}\sum_{m=-\ell,2}^{+\ell} f_\ell^m Z_{\ell,m}^{\rho,(\alpha,\beta,\gamma)}(r,\theta),
 \f]
-where the \f$,2\f$ in the inner summation index implies that the inner summation runs from \f$m=-\ell\f$ in steps of \f$2\f$ up to \f$+\ell\f$.
+where the \f$,2\f$ in the inner summation index implies that the inner summation runs from \f$m=-\ell\f$ in steps of \f$2\f$ up to \f$+\ell\f$. If annulus polynomial expansion coefficients are organized into the array:
+\f[
+F = \begin{pmatrix}
+f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_{2n-2}^{2-2n} & f_{2n-2}^{2n-2}\\
+f_2^0 & f_3^{-1} & f_3^1 & f_4^{-2} & f_4^2 & \cdots & 0 & 0\\
+\vdots & \vdots & \vdots &  \vdots &  \vdots & \ddots & \vdots & \vdots\\
+f_{2n-6}^0 & f_{2n-5}^{-1} & f_{2n-5}^1 & f_{2n-4}^{-2} & f_{2n-4}^2 &  & \vdots & \vdots\\
+f_{2n-4}^0 & f_{2n-3}^{-1} & f_{2n-3}^1 & f_{2n-2}^{-2} & f_{2n-2}^2 & \cdots & 0 & 0\\
+f_{2n-2}^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+\end{pmatrix},
+\f]
+then \ref ft_plan_ann2cxf creates the appropriate \ref ft_harmonic_plan, and \ref ft_execute_ann2cxf returns the even Chebyshev--Fourier coefficients:
+\f[
+G = \begin{pmatrix}
+g_0^0 & g_0^{-1} & g_0^1 & g_0^{-2} & g_0^2 & \cdots & g_0^{2-2n} & g_0^{2n-2}\\
+g_2^0 & g_2^{-1} & g_2^1 & g_2^{-2} & g_2^2 & \cdots & g_2^{2-2n} & g_2^{2n-2}\\
+\vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots\\
+g_{2n-4}^0 & g_{2n-4}^{-1} & g_{2n-4}^1 & g_{2n-4}^{-2} & g_{2n-4}^2 & \cdots & g_{2n-4}^{2-2n} & g_{2n-4}^{2n-2}\\
+g_{2n-2}^0 & 0 & 0 & g_{2n-2}^{-2} & g_{2n-2}^2 & \cdots & g_{2n-2}^{2-2n} & g_{2n-2}^{2n-2}\\
+\end{pmatrix}.
+\f]
+That is:
+\f[
+f_{2n-2}(r,\theta) = \sum_{\ell=0}^{n-1}\sum_{m=2-2n}^{2n-2} g_{2\ell}^m \left\{\begin{array}{ccc} T_{\ell}\left(\frac{2r^2-1-\rho^2}{1-\rho^2}\right) & {\rm for} & m~{\rm even},\\ \sqrt{\frac{2}{1-\rho^2}}rT_{\ell}\left(\frac{2r^2-1-\rho^2}{1-\rho^2}\right) & {\rm for} & m~{\rm odd},\end{array}\right\} \sqrt{\frac{2-\delta_{m,0}}{2\pi}}\left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0,\end{array}\right.
+\f]
+and \ref ft_execute_cxf2ann converts them back.
 
 */
 

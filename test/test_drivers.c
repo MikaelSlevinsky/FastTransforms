@@ -1125,6 +1125,57 @@ int main(int argc, const char * argv[]) {
         ft_destroy_rotation_plan(RP);
     }
 
+    printf("\nTesting the accuracy of annulus transforms.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 64*pow(2, i)+J;
+        M = 4*N-3;
+
+        A = diskrand(N, M);
+        B = copymat(A, N, M);
+        P = ft_plan_ann2cxf(N, alpha, beta, 0.0, sqrt(1.0/3.0));
+
+        ft_execute_ann2cxf('N', P, A, N, M);
+        ft_execute_cxf2ann('N', P, A, N, M);
+
+        ft_execute_ann2cxf('T', P, A, N, M);
+        ft_execute_cxf2ann('T', P, A, N, M);
+
+        err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+        printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 12*sqrt(N), &checksum);
+        err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+        printf("ϵ_∞ \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 6*N, &checksum);
+
+        free(A);
+        free(B);
+        ft_destroy_harmonic_plan(P);
+    }
+
+    printf("\nTiming annulus transforms.\n\n");
+    printf("t9 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 64*pow(2, i)+J;
+        M = 4*N-3;
+        NTIMES = 1 + pow(2048/N, 2);
+
+        A = diskrand(N, M);
+        P = ft_plan_ann2cxf(N, alpha, beta, 0.0, sqrt(1.0/3.0));
+
+        FT_TIME(ft_execute_ann2cxf('N', P, A, N, M), start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
+
+        FT_TIME(ft_execute_cxf2ann('N', P, A, N, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
+
+        printf("\n");
+        free(A);
+        ft_destroy_harmonic_plan(P);
+    }
+    printf("];\n");
+
     printf("\nTesting the accuracy of Dunkl-Xu drivers.\n\n");
     printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
@@ -1154,7 +1205,7 @@ int main(int argc, const char * argv[]) {
     }
 
     printf("\nTiming Dunkl-Xu drivers.\n\n");
-    printf("t9 = [\n");
+    printf("t10 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = N;
@@ -1207,7 +1258,7 @@ int main(int argc, const char * argv[]) {
     }
 
     printf("\nTiming Dunkl-Xu transforms.\n\n");
-    printf("t10 = [\n");
+    printf("t11 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = N;
@@ -1320,7 +1371,7 @@ int main(int argc, const char * argv[]) {
     }
 
     printf("\nTiming Proriol³ drivers.\n\n");
-    printf("t11 = [\n");
+    printf("t12 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 16*pow(2, i)+J;
         L = M = N;
@@ -1401,7 +1452,7 @@ int main(int argc, const char * argv[]) {
     }
 
     printf("\nTiming Proriol³ transforms.\n\n");
-    printf("t12 = [\n");
+    printf("t13 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 16*pow(2, i)+J;
         L = M = N;
@@ -1538,7 +1589,7 @@ int main(int argc, const char * argv[]) {
     }
 
     printf("\nTiming spin-weighted spherical harmonic drivers.\n\n");
-    printf("t13 = [\n");
+    printf("t14 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
@@ -1626,7 +1677,7 @@ int main(int argc, const char * argv[]) {
     }
 
     printf("\nTiming spin-weighted spherical harmonic transforms.\n\n");
-    printf("t14 = [\n");
+    printf("t15 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
