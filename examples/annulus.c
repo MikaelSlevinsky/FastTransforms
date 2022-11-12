@@ -41,7 +41,6 @@ int main(void) {
 
     int N = 30;
     int M = 4*N-3;
-    int j = 3;
 
     printf("\n\n"MAGENTA("N = %i")", and "MAGENTA("M = %i")"\n\n", N, M);
 
