@@ -37,7 +37,7 @@ int main(void) {
     printf("N.B. for the storage pattern of the printed arrays, please consult the\n");
     printf("documentation. (Arrays are stored in column-major ordering.)\n");
 
-    char * FMT = "%1.16f";
+    char * FMT = "%1.3f";
 
     int N = 30;
     int M = 4*N-3;
