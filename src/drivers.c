@@ -1023,8 +1023,7 @@ void ft_execute_cxf2disk(const char TRANS, const ft_harmonic_plan * P, double * 
 ft_harmonic_plan * ft_plan_ann2cxf(const int n, const double alpha, const double beta, const double gamma, const double rho) {
     ft_harmonic_plan * P = malloc(sizeof(ft_harmonic_plan));
     P->RP = malloc(sizeof(ft_rotation_plan *));
-    P->RP[0] = ft_plan_rotdisk(n, alpha, beta);
-    //P->RP[0] = ft_plan_rotannulus(n, alpha, beta, gamma, rho);
+    P->RP[0] = ft_plan_rotannulus(n, alpha, beta, gamma, rho);
     if (gamma == 0.0) {
         // For even m, it is the identity.
         P->MP = malloc(2 * sizeof(ft_modified_plan *));

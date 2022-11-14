@@ -981,7 +981,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_harmonic_plan(P);
     }
     printf("];\n");
-    /*
+
     printf("\nTesting the accuracy of annulus drivers.\n\n");
     printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
@@ -1175,7 +1175,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_harmonic_plan(P);
     }
     printf("];\n");
-    */
+
     printf("\nTesting the accuracy of Dunkl-Xu drivers.\n\n");
     printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");

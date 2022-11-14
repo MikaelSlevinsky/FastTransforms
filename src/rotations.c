@@ -226,8 +226,8 @@ ft_rotation_plan * ft_plan_rotannulus(const int n, const double alpha, const dou
         for (int i = 0; i < n+1; i++)
             ft_set_banded_index(XP, t + ft_get_banded_index(XP, i, i), i, i);
         ft_banded_cholfact(XP);
-        P->R = ft_convert_banded_to_triangular_banded(XP);
         P->n = XP->n;
+        P->R = ft_convert_banded_to_triangular_banded(XP);
         ft_symmetric_tridiagonal * JP1 = ft_execute_jacobi_similarity(P, JP);
         ft_destroy_symmetric_tridiagonal(JP);
         ft_destroy_triangular_banded(P->R);
@@ -246,8 +246,8 @@ ft_rotation_plan * ft_plan_rotannulus(const int n, const double alpha, const dou
             QR->R = P->R;
             ft_destroy_symmetric_tridiagonal_qr(QR);
         }
-        free(P);
         ft_destroy_symmetric_tridiagonal(JP);
+        free(P);
     }
     else {
         warning("plan_rotannulus: γ≠0 not implemented.");
