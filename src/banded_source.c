@@ -1505,7 +1505,7 @@ X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw
     if (nv < 1) {
         // polynomial case
         X(banded) * U = operator_clenshaw(n, nu, u, 1, params);
-        X(banded_cholfact)(U);
+        //X(banded_cholfact)(U);
         X(triangular_banded) * R = X(convert_banded_to_triangular_banded)(U);
         X(modified_plan) * P = malloc(sizeof(X(modified_plan)));
         P->R = R;

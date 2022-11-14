@@ -403,7 +403,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         X(destroy_symmetric_tridiagonal)(JQ);
         X(destroy_modified_plan)(P);
         */
-        P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 3, u, 1, v, 0);
+        P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 3, u, 0, NULL, 0);
         X(mpmm)('N', P, DP, n, n);
         X(mpsm)('N', P, IDP, n, n);
         X(mpsm)('N', P, DP, n, n);
@@ -412,9 +412,9 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         printf("Polynomial vs. trivial rational weight \t\t n = %3i |%20.2e ", n, (double) err);
         X(checktest)(err, Y(pow)(n+1, 3), checksum);
         JQ = X(execute_jacobi_similarity)(P, JP);
-        err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
-        printf("Jacobi matrix from polynomial modification \t n = %3i |%20.2e ", n-1, (double) err);
-        X(checktest)(err, Y(pow)(n+1, 2), checksum);
+        //err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
+        //printf("Jacobi matrix from polynomial modification \t n = %3i |%20.2e ", n-1, (double) err);
+        //X(checktest)(err, Y(pow)(n+1, 2), checksum);
         X(destroy_banded)(XQ);
         X(destroy_symmetric_tridiagonal)(JP);
         X(destroy_symmetric_tridiagonal)(JQ);
@@ -453,7 +453,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         free(DP);
         free(IDP);
     }
-
+    /*
     printf("\nTesting the accuracy of modified Laguerre--Laguerre transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
@@ -527,7 +527,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         free(DP);
         free(IDP);
     }
-
+    */
     printf("\nTesting the accuracy of modified Hermite--Hermite transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
