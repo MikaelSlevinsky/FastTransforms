@@ -368,7 +368,6 @@ void Y(test_modified_transforms)(int * checksum, int N) {
     printf("\nTesting the accuracy of modified Jacobi--Jacobi transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
-    /*
     for (int n = 16; n < N; n *= 2) {
         Id = calloc(n*n, sizeof(FLT));
         for (int j = 0; j < n; j++)
@@ -381,24 +380,28 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         u[2] = -0.42163702135578396;
         u[3] = 0.2138089935299396;
         v[0] = 1.4142135623730951;
-        P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 4, u, 1, v, 0);
+        //P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 4, u, 1, v, 0);
         DP = calloc(n*n, sizeof(FLT));
         IDP = calloc(n*n, sizeof(FLT));
         for (int j = 0; j < n; j++) {
             IDP[j+j*n] = DP[j+j*n] = 1;
-            X(mpmv)('N', P, DP+j*n);
-            X(mpsv)('N', P, IDP+j*n);
+            //X(mpmv)('N', P, DP+j*n);
+            //X(mpsv)('N', P, IDP+j*n);
         }
         XP = X(create_jacobi_multiplication)(1, n, n, alpha, beta);
         JP = X(convert_banded_to_symmetric_tridiagonal)(XP);
-        JQ = X(execute_jacobi_similarity)(P, JP);
+        //JQ = X(execute_jacobi_similarity)(P, JP);
         XQ = X(create_jacobi_multiplication)(1, n-1, n-1, alpha+2, beta+1);
+        /*
         err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
         printf("Jacobi matrix from trivial rational weight \t n = %3i |%20.2e ", n-1, (double) err);
         X(checktest)(err, Y(pow)(n+1, 2), checksum);
         X(destroy_symmetric_tridiagonal)(JQ);
         X(destroy_modified_plan)(P);
+        */
         P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 4, u, 0, NULL, 0);
+        X(mpmm)('N', P, DP, n, n);
+        X(mpsm)('N', P, IDP, n, n);
         X(mpsm)('N', P, DP, n, n);
         X(mpmm)('N', P, IDP, n, n);
         err = X(norm_2arg)(DP, Id, n*n)/X(norm_1arg)(Id, n*n) + X(norm_2arg)(IDP, Id, n*n)/X(norm_1arg)(Id, n*n);
@@ -413,6 +416,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         X(destroy_symmetric_tridiagonal)(JQ);
         X(mpsm)('N', P, IDP, n, n);
         X(destroy_modified_plan)(P);
+        /*
         alpha = 2;
         beta = 1;
         // u(x) = 1, v(x) = (2-x)*(2+x)
@@ -440,11 +444,11 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         err = X(norm_2arg)(DP, Id, n*n)/X(norm_1arg)(Id, n*n);
         printf("Rational vs. raised recip. polynomial weight \t n = %3i |%20.2e ", n, (double) err);
         X(checktest)(err, Y(pow)(n+1, 3), checksum);
+        */
         free(Id);
         free(DP);
         free(IDP);
     }
-    */
 
     printf("\nTesting the accuracy of modified Laguerre--Laguerre transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
