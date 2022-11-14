@@ -368,6 +368,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
     printf("\nTesting the accuracy of modified Jacobi--Jacobi transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
+    /*
     for (int n = 16; n < N; n *= 2) {
         Id = calloc(n*n, sizeof(FLT));
         for (int j = 0; j < n; j++)
@@ -412,7 +413,6 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         X(destroy_symmetric_tridiagonal)(JQ);
         X(mpsm)('N', P, IDP, n, n);
         X(destroy_modified_plan)(P);
-        /*
         alpha = 2;
         beta = 1;
         // u(x) = 1, v(x) = (2-x)*(2+x)
@@ -440,11 +440,11 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         err = X(norm_2arg)(DP, Id, n*n)/X(norm_1arg)(Id, n*n);
         printf("Rational vs. raised recip. polynomial weight \t n = %3i |%20.2e ", n, (double) err);
         X(checktest)(err, Y(pow)(n+1, 3), checksum);
-        */
         free(Id);
         free(DP);
         free(IDP);
     }
+    */
 
     printf("\nTesting the accuracy of modified Laguerre--Laguerre transforms.\n\n");
     printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
