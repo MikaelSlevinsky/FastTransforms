@@ -379,6 +379,10 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         u[1] = -0.32659863237109055;
         u[2] = -0.42163702135578396;
         u[3] = 0.2138089935299396;
+        // u(x) = (1-x)*(1+x), v(x) = 1
+        u[0] = 0.9428090415820634;
+        u[1] = 0.0;
+        u[2] = -0.4216370213557839;
         v[0] = 1.4142135623730951;
         //P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 4, u, 1, v, 0);
         DP = calloc(n*n, sizeof(FLT));
@@ -391,7 +395,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         XP = X(create_jacobi_multiplication)(1, n, n, alpha, beta);
         JP = X(convert_banded_to_symmetric_tridiagonal)(XP);
         //JQ = X(execute_jacobi_similarity)(P, JP);
-        XQ = X(create_jacobi_multiplication)(1, n-1, n-1, alpha+2, beta+1);
+        XQ = X(create_jacobi_multiplication)(1, n-1, n-1, alpha+1, beta+1);
         /*
         err = X(norm_2arg_banded_tridiagonal)(XQ, JQ)/X(norm_1arg)(XQ->data, 3*(n-1));
         printf("Jacobi matrix from trivial rational weight \t n = %3i |%20.2e ", n-1, (double) err);
@@ -399,7 +403,7 @@ void Y(test_modified_transforms)(int * checksum, int N) {
         X(destroy_symmetric_tridiagonal)(JQ);
         X(destroy_modified_plan)(P);
         */
-        P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 4, u, 0, NULL, 0);
+        P = X(plan_modified_jacobi_to_jacobi)(n, alpha, beta, 3, u, 0, NULL, 0);
         X(mpmm)('N', P, DP, n, n);
         X(mpsm)('N', P, IDP, n, n);
         X(mpsm)('N', P, DP, n, n);
