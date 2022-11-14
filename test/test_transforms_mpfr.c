@@ -52,7 +52,7 @@ void ft_mpfr_checktest(mpfr_t * err, double cst, int * checksum, mpfr_prec_t pre
 }
 
 void test_transforms_mpfr(int * checksum, int N, mpfr_prec_t prec, mpfr_rnd_t rnd) {
-    mpfr_t err, t1, t2, t3;
+    mpfr_t err, t1, t2;
     mpfr_init2(err, prec);
     mpfr_init2(t1, prec);
     mpfr_init2(t2, prec);

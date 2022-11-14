@@ -429,7 +429,6 @@ int main(void) {
             float * x = malloc(m*sizeof(float));
             float * phi0 = malloc(m*sizeof(float));
             float * f = malloc(m*sizeof(float));
-            float err = 0.0f;
             for (int k = 0; k < n; k++) {
                 c[k] = 1.0f/(k+1.0f);
                 A[k] = (2*k+1.0f)/(k+1.0f);
@@ -545,7 +544,6 @@ int main(void) {
             double * x = malloc(m*sizeof(double));
             double * phi0 = malloc(m*sizeof(double));
             double * f = malloc(m*sizeof(double));
-            double err = 0.0;
             for (int k = 0; k < n; k++) {
                 c[k] = 1.0/(k+1.0);
                 A[k] = (2*k+1.0)/(k+1.0);
