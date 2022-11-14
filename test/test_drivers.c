@@ -17,8 +17,8 @@ int main(int argc, const char * argv[]) {
     ft_spin_rotation_plan * SRP;
     ft_harmonic_plan * P;
     ft_spin_harmonic_plan * SP;
-    //double alpha = -0.5, beta = -0.5, gamma = -0.5, delta = -0.5; // best case scenario
-    double alpha = 0.0, beta = 0.0, gamma = 0.0, delta = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
+    //double alpha = -0.5, beta = -0.5, gamma = -0.5, delta = -0.5, rho = sqrt(1.0/3.0); // best case scenario
+    double alpha = 0.0, beta = 0.0, gamma = 0.0, delta = 0.0, rho = sqrt(1.0/3.0); // not as good. perhaps better to transform to second kind Chebyshev
 
     int IERR, ITIME, J, N, L, M, NTIMES;
 
@@ -1005,7 +1005,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_rotation_plan(RP);
         ft_destroy_rotation_plan(RP1);
 
-        RP = ft_plan_rotannulus(N, alpha, beta, 0.0, sqrt(1.0/3.0));
+        RP = ft_plan_rotannulus(N, alpha, beta, 0.0, rho);
 
         execute_disk_hi2lo_default(RP, A, M);
         execute_disk_lo2hi_default(RP, A, M);
@@ -1134,7 +1134,7 @@ int main(int argc, const char * argv[]) {
 
         A = diskrand(N, M);
         B = copymat(A, N, M);
-        P = ft_plan_ann2cxf(N, alpha, beta, 0.0, sqrt(1.0/3.0));
+        P = ft_plan_ann2cxf(N, alpha, beta, 0.0, rho);
 
         ft_execute_ann2cxf('N', P, A, N, M);
         ft_execute_cxf2ann('N', P, A, N, M);
@@ -1162,7 +1162,7 @@ int main(int argc, const char * argv[]) {
         NTIMES = 1 + pow(2048/N, 2);
 
         A = diskrand(N, M);
-        P = ft_plan_ann2cxf(N, alpha, beta, 0.0, sqrt(1.0/3.0));
+        P = ft_plan_ann2cxf(N, alpha, beta, 0.0, rho);
 
         FT_TIME(ft_execute_ann2cxf('N', P, A, N, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));

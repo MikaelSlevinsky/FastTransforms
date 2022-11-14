@@ -53,7 +53,7 @@ jobs:
       - name: Build examples
         run: make examples
       - name: Run tests
-        run: make runtests FT_NUM_THREADS=1
+        run: make runtests FT_NUM_THREADS=2
       - name: Run examples
         run: make runexamples
   docs:

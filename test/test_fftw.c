@@ -13,11 +13,12 @@ int main(int argc, const char * argv[]) {
     ft_sphere_fftw_plan * PS, * PA;
     ft_triangle_fftw_plan * QS, * QA;
     ft_disk_fftw_plan * RS, * RA;
+    ft_annulus_fftw_plan * RS1, * RA1;
     ft_rectdisk_fftw_plan * SS, * SA;
     ft_tetrahedron_fftw_plan * TS, * TA;
     ft_spinsphere_fftw_plan * US, * UA;
-    //double alpha = -0.5, beta = -0.5, gamma = -0.5, delta = -0.5; // best case scenario
-    double alpha = 0.0, beta = 0.0, gamma = 0.0, delta = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
+    //double alpha = -0.5, beta = -0.5, gamma = -0.5, delta = -0.5, rho = sqrt(1.0/3.0); // best case scenario
+    double alpha = 0.0, beta = 0.0, gamma = 0.0, delta = 0.0, rho = sqrt(1.0/3.0); // not as good. perhaps better to transform to second kind Chebyshev
 
     int IERR, ITIME, J, N, L, M, NTIMES;
 
@@ -281,6 +282,68 @@ int main(int argc, const char * argv[]) {
         ft_destroy_harmonic_plan(P);
         ft_destroy_disk_fftw_plan(RS);
         ft_destroy_disk_fftw_plan(RA);
+    }
+    printf("];\n");
+
+    printf("\nTesting the accuracy of annulus transforms + FFTW synthesis and analysis.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 64*pow(2, i)+J;
+        M = 4*N-3;
+
+        A = diskrand(N, M);
+        B = copymat(A, N, M);
+        P = ft_plan_ann2cxf(N, alpha, beta, 0.0, rho);
+        RS1 = ft_plan_annulus_synthesis(N, M, rho, FT_FFTW_FLAGS);
+        RA1 = ft_plan_annulus_analysis(N, M, rho, FT_FFTW_FLAGS);
+
+        ft_execute_ann2cxf('N', P, A, N, M);
+        ft_execute_annulus_synthesis('N', RS1, A, N, M);
+        ft_execute_annulus_analysis('N', RA1, A, N, M);
+        ft_execute_cxf2ann('N', P, A, N, M);
+
+        ft_execute_ann2cxf('T', P, A, N, M);
+        ft_execute_annulus_synthesis('T', RA1, A, N, M);
+        ft_execute_annulus_analysis('T', RS1, A, N, M);
+        ft_execute_cxf2ann('T', P, A, N, M);
+
+        err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+        printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 8*sqrt(N), &checksum);
+        err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+        printf("ϵ_∞ \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 4*N, &checksum);
+
+        free(A);
+        free(B);
+        ft_destroy_harmonic_plan(P);
+        ft_destroy_annulus_fftw_plan(RS1);
+        ft_destroy_annulus_fftw_plan(RA1);
+    }
+
+    printf("\nTiming annulus transforms + FFTW synthesis and analysis.\n\n");
+    printf("t4 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 64*pow(2, i)+J;
+        M = 4*N-3;
+        NTIMES = 1 + pow(2048/N, 2);
+
+        A = diskrand(N, M);
+        P = ft_plan_ann2cxf(N, alpha, beta, 0.0, rho);
+        RS1 = ft_plan_annulus_synthesis(N, M, rho, FT_FFTW_FLAGS);
+        RA1 = ft_plan_annulus_analysis(N, M, rho, FT_FFTW_FLAGS);
+
+        FT_TIME({ft_execute_ann2cxf('N', P, A, N, M); ft_execute_annulus_synthesis('N', RS1, A, N, M);}, start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
+
+        FT_TIME({ft_execute_annulus_analysis('N', RA1, A, N, M); ft_execute_cxf2ann('N', P, A, N, M);}, start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
+
+        free(A);
+        ft_destroy_harmonic_plan(P);
+        ft_destroy_annulus_fftw_plan(RS1);
+        ft_destroy_annulus_fftw_plan(RA1);
     }
     printf("];\n");
 
