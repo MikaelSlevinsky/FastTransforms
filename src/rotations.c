@@ -214,8 +214,10 @@ ft_rotation_plan * ft_plan_rotannulus(const int n, const double alpha, const dou
             ft_symmetric_tridiagonal * JP2 = ft_execute_jacobi_similarity(P, JP);
             ft_destroy_symmetric_tridiagonal(JP);
             JP = JP2;
+            QR->R = P->R;
             ft_destroy_symmetric_tridiagonal_qr(QR);
         }
+        ft_destroy_symmetric_tridiagonal(JP);
         XP = ft_create_jacobi_multiplication(1, n+1, n+1, beta, alpha);
         JP = ft_convert_banded_to_symmetric_tridiagonal(XP);
         for (int i = 0; i < n+1; i++)
@@ -241,6 +243,7 @@ ft_rotation_plan * ft_plan_rotannulus(const int n, const double alpha, const dou
             ft_symmetric_tridiagonal * JP2 = ft_execute_jacobi_similarity(P, JP);
             ft_destroy_symmetric_tridiagonal(JP);
             JP = JP2;
+            QR->R = P->R;
             ft_destroy_symmetric_tridiagonal_qr(QR);
         }
         free(P);

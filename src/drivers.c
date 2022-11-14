@@ -1043,8 +1043,10 @@ ft_harmonic_plan * ft_plan_ann2cxf(const int n, const double alpha, const double
         P->MP[1]->n = n;
         P->MP[1]->nu = 1;
         P->MP[1]->nv = 0;
+        P->NMP = 2;
     }
     else {
+        P->NMP = 0;
         warning("plan_ann2cxf: γ≠0 not implemented.");
     }
     P->B = VMALLOC(VALIGN(n) * (4*n-3) * sizeof(double));
@@ -1064,7 +1066,6 @@ ft_harmonic_plan * ft_plan_ann2cxf(const int n, const double alpha, const double
     P->gamma = gamma;
     P->rho = rho;
     P->NRP = 1;
-    P->NMP = 2;
     P->NP = 1;
     return P;
 }
