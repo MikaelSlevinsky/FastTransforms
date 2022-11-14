@@ -246,6 +246,46 @@ f_{2n-2}(r,\theta) = \sum_{\ell=0}^{n-1}\sum_{m=2-2n}^{2n-2} g_{2\ell}^m \left\{
 and \ref ft_execute_cxf2disk converts them back.
 
 
+\subsection ann2cxf
+
+Consider \f$P_n^{t,(\alpha,\beta,\gamma)}(x)\f$ to be orthogonal polynomials in \f$L^2([-1,1], (1-x)^\alpha(1+x)^\beta(t+x)^\gamma\ud x)\f$, for parameter values \f$\{t>1, \alpha,\beta>-1, \gamma\in\mathbb{R}\}\cup\{t=1, \alpha,\beta+\gamma>-1\}\f$.
+
+Real orthonormal annulus polynomials in \f$L^2(\{(r,\theta) : \rho < r < 1, 0 < \theta < 2\pi\}, r^{2\gamma+1}(r^2-\rho^2)^\alpha(1-r^2)^\beta\ud r\ud\theta)\f$ are:
+\f[
+Z_{\ell,m}^{\rho,(\alpha,\beta,\gamma)}(r,\theta) = \sqrt{2} \left(\frac{2}{1-\rho^2}\right)^{\frac{\abs{m}+\alpha+\beta+\gamma+1}{2}} r^{\abs{m}}\tilde{P}_{\frac{\ell-\abs{m}}{2}}^{\frac{1+\rho^2}{1-\rho^2},(\beta,\alpha,\abs{m}+\gamma)}\left(\frac{2r^2-1-\rho^2}{1-\rho^2}\right) \sqrt{\frac{2-\delta_{m,0}}{2\pi}} \left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0,\end{array}\right.
+\f]
+where the tilde implies that \f$\tilde{P}_n^{t,(\alpha,\beta,\gamma)}(x)\f$ are orthonormal. In the limit as \f$\rho\to0\f$, the annulus polynomials converge to the Zernike polynomials, \f$Z_{\ell,m}^{0,(\alpha,\beta,\gamma)}(r, \theta) = Z_{\ell,m}^{(\alpha+\gamma,\beta)}(r, \theta)\f$. A degree-\f$(2n-2)\f$ expansion in annulus polynomials is given by:
+\f[
+f_{2n-2}(r,\theta) = \sum_{\ell=0}^{2n-2}\sum_{m=-\ell,2}^{+\ell} f_\ell^m Z_{\ell,m}^{\rho,(\alpha,\beta,\gamma)}(r,\theta),
+\f]
+where the \f$,2\f$ in the inner summation index implies that the inner summation runs from \f$m=-\ell\f$ in steps of \f$2\f$ up to \f$+\ell\f$. If annulus polynomial expansion coefficients are organized into the array:
+\f[
+F = \begin{pmatrix}
+f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_{2n-2}^{2-2n} & f_{2n-2}^{2n-2}\\
+f_2^0 & f_3^{-1} & f_3^1 & f_4^{-2} & f_4^2 & \cdots & 0 & 0\\
+\vdots & \vdots & \vdots &  \vdots &  \vdots & \ddots & \vdots & \vdots\\
+f_{2n-6}^0 & f_{2n-5}^{-1} & f_{2n-5}^1 & f_{2n-4}^{-2} & f_{2n-4}^2 &  & \vdots & \vdots\\
+f_{2n-4}^0 & f_{2n-3}^{-1} & f_{2n-3}^1 & f_{2n-2}^{-2} & f_{2n-2}^2 & \cdots & 0 & 0\\
+f_{2n-2}^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+\end{pmatrix},
+\f]
+then \ref ft_plan_ann2cxf creates the appropriate \ref ft_harmonic_plan, and \ref ft_execute_ann2cxf returns the even Chebyshev--Fourier coefficients:
+\f[
+G = \begin{pmatrix}
+g_0^0 & g_0^{-1} & g_0^1 & g_0^{-2} & g_0^2 & \cdots & g_0^{2-2n} & g_0^{2n-2}\\
+g_2^0 & g_2^{-1} & g_2^1 & g_2^{-2} & g_2^2 & \cdots & g_2^{2-2n} & g_2^{2n-2}\\
+\vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots\\
+g_{2n-4}^0 & g_{2n-4}^{-1} & g_{2n-4}^1 & g_{2n-4}^{-2} & g_{2n-4}^2 & \cdots & g_{2n-4}^{2-2n} & g_{2n-4}^{2n-2}\\
+g_{2n-2}^0 & 0 & 0 & g_{2n-2}^{-2} & g_{2n-2}^2 & \cdots & g_{2n-2}^{2-2n} & g_{2n-2}^{2n-2}\\
+\end{pmatrix}.
+\f]
+That is:
+\f[
+f_{2n-2}(r,\theta) = \sum_{\ell=0}^{n-1}\sum_{m=2-2n}^{2n-2} g_{2\ell}^m \left\{\begin{array}{ccc} T_{\ell}\left(\frac{2r^2-1-\rho^2}{1-\rho^2}\right) & {\rm for} & m~{\rm even},\\ \sqrt{\frac{2}{1-\rho^2}}rT_{\ell}\left(\frac{2r^2-1-\rho^2}{1-\rho^2}\right) & {\rm for} & m~{\rm odd},\end{array}\right\} \sqrt{\frac{2-\delta_{m,0}}{2\pi}}\left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0,\end{array}\right.
+\f]
+and \ref ft_execute_cxf2ann converts them back.
+
+
 \subsection rectdisk2cheb
 
 Real orthonormal Dunkl--Xu polynomials in \f$L^2(\mathbb{D}^2, (1-x^2-y^2)^\beta\ud x\ud y)\f$ are:
@@ -397,46 +437,6 @@ where the \f$Y_\ell^m(\theta,\varphi)\f$ are \ref sh "spherical harmonics", and 
 f_{n-1}(r,\theta,\varphi) = \sum_{k=0}^{n-1}\sum_{\ell=0}^k\sum_{m=-\ell}^{+\ell}f_{k,\ell}^m \psi_{k,\ell,m}(r,\theta,\varphi).
 \f]
 
-
-\subsection ann2cxf
-
-Consider \f$P_n^{t,(\alpha,\beta,\gamma)}(x)\f$ to be orthogonal polynomials in \f$L^2([-1,1], (1-x)^\alpha(1+x)^\beta(t+x)^\gamma\ud x)\f$, for parameter values \f$\{t>1, \alpha,\beta>-1, \gamma\in\mathbb{R}\}\cup\{t=1, \alpha,\beta+\gamma>-1\}\f$.
-
-Real orthonormal annulus polynomials in \f$L^2(\{(r,\theta) : \rho < r < 1, 0 < \theta < 2\pi\}, r^{2\gamma+1}(r^2-\rho^2)^\alpha(1-r^2)^\beta\ud r\ud\theta)\f$ are:
-\f[
-Z_{\ell,m}^{\rho,(\alpha,\beta,\gamma)}(r,\theta) = \sqrt{2} \left(\frac{2}{1-\rho^2}\right)^{\frac{\abs{m}+\alpha+\beta+\gamma+1}{2}} r^{\abs{m}}\tilde{P}_{\frac{\ell-\abs{m}}{2}}^{\frac{1+\rho^2}{1-\rho^2},(\beta,\alpha,\abs{m}+\gamma)}\left(\frac{2r^2-1-\rho^2}{1-\rho^2}\right) \sqrt{\frac{2-\delta_{m,0}}{2\pi}} \left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0,\end{array}\right.
-\f]
-where the tilde implies that \f$\tilde{P}_n^{t,(\alpha,\beta,\gamma)}(x)\f$ are orthonormal. In the limit as \f$\rho\to0\f$, the annulus polynomials converge to the Zernike polynomials, \f$Z_{\ell,m}^{0,(\alpha,\beta,\gamma)}(r, \theta) = Z_{\ell,m}^{(\alpha+\gamma,\beta)}(r, \theta)\f$. A degree-\f$(2n-2)\f$ expansion in annulus polynomials is given by:
-\f[
-f_{2n-2}(r,\theta) = \sum_{\ell=0}^{2n-2}\sum_{m=-\ell,2}^{+\ell} f_\ell^m Z_{\ell,m}^{\rho,(\alpha,\beta,\gamma)}(r,\theta),
-\f]
-where the \f$,2\f$ in the inner summation index implies that the inner summation runs from \f$m=-\ell\f$ in steps of \f$2\f$ up to \f$+\ell\f$. If annulus polynomial expansion coefficients are organized into the array:
-\f[
-F = \begin{pmatrix}
-f_0^0 & f_1^{-1} & f_1^1 & f_2^{-2} & f_2^2 & \cdots & f_{2n-2}^{2-2n} & f_{2n-2}^{2n-2}\\
-f_2^0 & f_3^{-1} & f_3^1 & f_4^{-2} & f_4^2 & \cdots & 0 & 0\\
-\vdots & \vdots & \vdots &  \vdots &  \vdots & \ddots & \vdots & \vdots\\
-f_{2n-6}^0 & f_{2n-5}^{-1} & f_{2n-5}^1 & f_{2n-4}^{-2} & f_{2n-4}^2 &  & \vdots & \vdots\\
-f_{2n-4}^0 & f_{2n-3}^{-1} & f_{2n-3}^1 & f_{2n-2}^{-2} & f_{2n-2}^2 & \cdots & 0 & 0\\
-f_{2n-2}^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
-\end{pmatrix},
-\f]
-then \ref ft_plan_ann2cxf creates the appropriate \ref ft_harmonic_plan, and \ref ft_execute_ann2cxf returns the even Chebyshev--Fourier coefficients:
-\f[
-G = \begin{pmatrix}
-g_0^0 & g_0^{-1} & g_0^1 & g_0^{-2} & g_0^2 & \cdots & g_0^{2-2n} & g_0^{2n-2}\\
-g_2^0 & g_2^{-1} & g_2^1 & g_2^{-2} & g_2^2 & \cdots & g_2^{2-2n} & g_2^{2n-2}\\
-\vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots\\
-g_{2n-4}^0 & g_{2n-4}^{-1} & g_{2n-4}^1 & g_{2n-4}^{-2} & g_{2n-4}^2 & \cdots & g_{2n-4}^{2-2n} & g_{2n-4}^{2n-2}\\
-g_{2n-2}^0 & 0 & 0 & g_{2n-2}^{-2} & g_{2n-2}^2 & \cdots & g_{2n-2}^{2-2n} & g_{2n-2}^{2n-2}\\
-\end{pmatrix}.
-\f]
-That is:
-\f[
-f_{2n-2}(r,\theta) = \sum_{\ell=0}^{n-1}\sum_{m=2-2n}^{2n-2} g_{2\ell}^m \left\{\begin{array}{ccc} T_{\ell}\left(\frac{2r^2-1-\rho^2}{1-\rho^2}\right) & {\rm for} & m~{\rm even},\\ \sqrt{\frac{2}{1-\rho^2}}rT_{\ell}\left(\frac{2r^2-1-\rho^2}{1-\rho^2}\right) & {\rm for} & m~{\rm odd},\end{array}\right\} \sqrt{\frac{2-\delta_{m,0}}{2\pi}}\left\{\begin{array}{ccc} \cos(m\theta) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\theta) & {\rm for} & m < 0,\end{array}\right.
-\f]
-and \ref ft_execute_cxf2ann converts them back.
-
 */
 
 /*!
@@ -480,7 +480,8 @@ r_n & = \cos\left(\frac{2n+1}{4N}\pi\right) = \sin\left(\frac{2N-2n-1}{4N}\pi\ri
 
 On the annulus, the \f$N\times M\f$ radial--azimuthal grids are:
 \f{align*}
-r_n & = \sqrt{\cos^2\left(\frac{2n+1}{4N}\pi\right) + \rho^2\sin^2\left(\frac{2n+1}{4N}\pi\right)},\quad {\rm for} \quad 0 \le n < N,\\
+r_n & = \sqrt{\cos^2\left(\frac{2n+1}{4N}\pi\right) + \rho^2\sin^2\left(\frac{2n+1}{4N}\pi\right)},\\
+& = \sqrt{\sin^2\left(\frac{2N-2n-1}{4N}\pi\right) + \rho^2\cos^2\left(\frac{2N-2n-1}{4N}\pi\right)},\quad {\rm for} \quad 0 \le n < N,\\
 \theta_m & = \frac{2m}{M}\pi,\quad {\rm for} \quad 0 \le m < M.
 \f}
 

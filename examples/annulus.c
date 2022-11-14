@@ -17,13 +17,13 @@ double f(double x, double y) {return (pow(x, 3))/(x*x+y*y-0.25);};
 */
 int main(void) {
     printf("In this example, we explore square integration of a function over \n");
-    printf("the annulus with parameter ρ = 2/3. We analyze the function:\n");
+    printf("the annulus with parameter "MAGENTA("ρ = 2/3")". We analyze the function:\n");
     printf("\n");
-    printf("\t"MAGENTA("f(x,y) = (xʲ)/(x²-y²-1/4)")",\n");
+    printf("\t"MAGENTA("f(x,y) = x³/(x²-y²-1/4)")",\n");
     printf("\n");
     printf("on an "MAGENTA("N×M")" tensor product grid defined by:\n");
     printf("\n");
-    printf("\t"MAGENTA("rₙ = √cos²[(n+1/2)π/4N] + ρ^2sin²[(n+1/2)π/4N]")", for "MAGENTA("0 ≤ n < N")",\n");
+    printf("\t"MAGENTA("rₙ = √{cos²[(n+1/2)π/4N] + ρ²sin²[(n+1/2)π/4N]}")", for "MAGENTA("0 ≤ n < N")",\n");
     printf("\n");
     printf("and\n");
     printf("\n");
@@ -39,7 +39,7 @@ int main(void) {
 
     char * FMT = "%1.3f";
 
-    int N = 30;
+    int N = 8;
     int M = 4*N-3;
 
     printf("\n\n"MAGENTA("N = %i")", and "MAGENTA("M = %i")"\n\n", N, M);
@@ -48,9 +48,9 @@ int main(void) {
     double r[N], theta[M], F[4*N*N];
 
     for (int n = 0; n < N; n++) {
-        double theta2 = (n+0.5)/(2.0*N);
-        double ct2 = cos(M_PI*theta2);
-        double st2 = sin(M_PI*theta2);
+        double t = (N-n-0.5)*M_PI/(2*N);
+        double ct2 = sin(t);
+        double st2 = cos(t);
         r[n] = sqrt(ct2*ct2+rho*rho*st2*st2);
     }
     for (int m = 0; m < M; m++)
@@ -85,11 +85,15 @@ int main(void) {
     printf("The annulus polynomial coefficients are useful for integration.\n");
     printf("The integral of "MAGENTA("[f(x,y)]^2")" over the annulus is\n");
     printf("approximately the square of the 2-norm of the coefficients, \n\t");
-    printf(FMT, pow(ft_norm_1arg(F, N*M), 2));
+    double val = pow(ft_norm_1arg(F, N*M), 2);
+    printf("%1.16f", val);
     printf(".\n");
     printf("This compares favourably to the exact result, \n\t");
-    printf(FMT, 5.0*M_PI/8.0*(1675.0/4536.0+9.0*log(3.0)/32.0-3*log(7.0)/32.0));
-    printf(".\n\n");
+    double tval = 5.0*M_PI/8.0*(1675.0/4536.0+9.0*log(3.0)/32.0-3.0*log(7.0)/32.0);
+    printf("%1.16f", tval);
+    printf(".\n");
+    printf("The relative error in the integral is %4.2e.\n", fabs(val-tval)/fabs(tval));
+    printf("This error can be improved upon by increasing "MAGENTA("N")" and "MAGENTA("M")".\n");
 
     ft_destroy_harmonic_plan(P);
     ft_destroy_annulus_fftw_plan(PA);
