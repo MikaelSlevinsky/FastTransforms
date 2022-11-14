@@ -284,7 +284,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_disk_fftw_plan(RA);
     }
     printf("];\n");
-
+    /*
     printf("\nTesting the accuracy of annulus transforms + FFTW synthesis and analysis.\n\n");
     printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
@@ -346,7 +346,7 @@ int main(int argc, const char * argv[]) {
         ft_destroy_annulus_fftw_plan(RA1);
     }
     printf("];\n");
-
+    */
     printf("\nTesting the accuracy of Dunkl-Xu transforms + FFTW synthesis and analysis.\n\n");
     printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
