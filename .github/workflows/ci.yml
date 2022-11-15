@@ -33,7 +33,7 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
-          sudo apt-get install libomp-11-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
+          sudo apt-get install libomp-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
       - name: Install dependencies on macOS
         if: startsWith(matrix.os, 'macOS')
         run: |
