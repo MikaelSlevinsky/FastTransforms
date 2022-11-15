@@ -549,12 +549,15 @@ void ft_execute_disk_analysis(const char TRANS, const ft_disk_fftw_plan * P, dou
 typedef struct {
     fftw_plan planr;
     fftw_plan plantheta;
+    double rho;
     double * w;
     double * Y;
 } ft_annulus_fftw_plan;
 
 /// Destroy a \ref ft_annulus_fftw_plan.
 void ft_destroy_annulus_fftw_plan(ft_annulus_fftw_plan * P);
+
+double ft_get_rho_annulus_fftw_plan(ft_annulus_fftw_plan * P);
 
 ft_annulus_fftw_plan * ft_plan_annulus_with_kind(const int N, const int M, const double rho, const fftw_r2r_kind kind[3][1], const unsigned flags);
 /// Plan FFTW synthesis on the annulus.

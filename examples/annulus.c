@@ -49,9 +49,9 @@ int main(void) {
 
     for (int n = 0; n < N; n++) {
         double t = (N-n-0.5)*M_PI/(2*N);
-        double ct2 = sin(t);
-        double st2 = cos(t);
-        r[n] = sqrt(ct2*ct2+rho*rho*st2*st2);
+        double ct = sin(t);
+        double st = cos(t);
+        r[n] = sqrt(ct*ct+rho*rho*st*st);
     }
     for (int m = 0; m < M; m++)
         theta[m] = 2.0*M_PI*m/M;

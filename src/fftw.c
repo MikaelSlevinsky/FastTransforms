@@ -529,6 +529,8 @@ void ft_destroy_annulus_fftw_plan(ft_annulus_fftw_plan * P) {
     free(P);
 }
 
+double ft_get_rho_annulus_fftw_plan(ft_annulus_fftw_plan * P) {return P->rho;}
+
 ft_annulus_fftw_plan * ft_plan_annulus_with_kind(const int N, const int M, const double rho, const fftw_r2r_kind kind[2][1], const unsigned flags) {
     int rank = 1; // not 2: we are computing 1d transforms //
     int n[] = {N}; // 1d transforms of length n //
@@ -537,16 +539,17 @@ ft_annulus_fftw_plan * ft_plan_annulus_with_kind(const int N, const int M, const
     int * inembed = n, * onembed = n;
 
     ft_annulus_fftw_plan * P = malloc(sizeof(ft_annulus_fftw_plan));
+    P->rho = rho;
 
     // θ = (2n+1)/(2N)π
     // (2r^2-1-ρ^2)/(1-ρ^2) == cosθ
     // w = sqrt(2/(1-ρ^2))*r
     P->w = malloc(N*sizeof(double));
     for (int n = 0; n < N; n++) {
-        double theta2 = (n+0.5)/(2.0*N);
-        double ct2 = cos(M_PI*theta2);
-        double st2 = sin(M_PI*theta2);
-        P->w[n] = sqrt(2.0*(ct2*ct2+rho*rho*st2*st2)/(1.0-rho*rho));
+        double t = (N-n-0.5)*M_PI/(2.0*N);
+        double ct = sin(t);
+        double st = cos(t);
+        P->w[n] = sqrt(2.0*(ct*ct+rho*rho*st*st)/(1.0-rho*rho));
     }
 
     P->Y = fftw_malloc(N*2*(M/2+1)*sizeof(double));
