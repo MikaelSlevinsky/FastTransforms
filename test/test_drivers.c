@@ -17,8 +17,8 @@ int main(int argc, const char * argv[]) {
     ft_spin_rotation_plan * SRP;
     ft_harmonic_plan * P;
     ft_spin_harmonic_plan * SP;
-    //double alpha = -0.5, beta = -0.5, gamma = -0.5, delta = -0.5; // best case scenario
-    double alpha = 0.0, beta = 0.0, gamma = 0.0, delta = 0.0; // not as good. perhaps better to transform to second kind Chebyshev
+    //double alpha = -0.5, beta = -0.5, gamma = -0.5, delta = -0.5, rho = sqrt(1.0/3.0); // best case scenario
+    double alpha = 0.0, beta = 0.0, gamma = 0.0, delta = 0.0, rho = sqrt(1.0/3.0); // not as good. perhaps better to transform to second kind Chebyshev
 
     int IERR, ITIME, J, N, L, M, NTIMES;
 
@@ -982,6 +982,200 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
+    printf("\nTesting the accuracy of annulus drivers.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 64*pow(2, i)+J;
+        M = 4*N-3;
+
+        A = diskones(N, M);
+        Ac = aligned_copymat(A, N, M);
+        B = copymat(A, N, M);
+
+        RP = ft_plan_rotannulus(N, alpha, beta, 0.0, 0.0);
+        RP1 = ft_plan_rotdisk(N, alpha, beta);
+
+        err = hypot(ft_norm_2arg(RP->s, RP1->s, N*N), ft_norm_2arg(RP->c, RP1->c, N*N))/hypot(ft_norm_1arg(RP1->s, N*N), ft_norm_1arg(RP1->c, N*N));
+        printf("ϵ_2 Givens rotations \t (N×N) = (%5ix%5i): \t |%20.2e ", N, N, err);
+        ft_checktest(err, 6*sqrt(N), &checksum);
+        err = MAX(ft_normInf_2arg(RP->s, RP1->s, N*N), ft_normInf_2arg(RP->c, RP1->c, N*N))/MAX(ft_normInf_1arg(RP1->s, N*N), ft_normInf_1arg(RP1->c, N*N));
+        printf("ϵ_∞ Givens rotations \t (N×N) = (%5ix%5i): \t |%20.2e ", N, N, err);
+        ft_checktest(err, 5*N, &checksum);
+        ft_destroy_rotation_plan(RP);
+        ft_destroy_rotation_plan(RP1);
+
+        RP = ft_plan_rotannulus(N, alpha, beta, 0.0, rho);
+
+        execute_disk_hi2lo_default(RP, A, M);
+        execute_disk_lo2hi_default(RP, A, M);
+
+        err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+        printf("ϵ_2 default-default \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 6*sqrt(N), &checksum);
+        err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+        printf("ϵ_∞ default-default \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 3*N, &checksum);
+
+        #if defined(__i386__) || defined(__x86_64__)
+            execute_disk_hi2lo_SSE2(RP, A, Ac, M);
+            execute_disk_lo2hi_default(RP, A, M);
+
+            err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+            printf("ϵ_2 SSE2-default \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 6*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+            printf("ϵ_∞ SSE2-default \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 3*N, &checksum);
+
+            execute_disk_hi2lo_default(RP, A, M);
+            execute_disk_lo2hi_SSE2(RP, A, Ac, M);
+
+            err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+            printf("ϵ_2 default-SSE2 \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 6*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+            printf("ϵ_∞ default-SSE2 \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 3*N, &checksum);
+
+            execute_disk_hi2lo_AVX(RP, A, Ac, M);
+            execute_disk_lo2hi_SSE2(RP, A, Ac, M);
+
+            err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+            printf("ϵ_2 AVX-SSE2 \t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 6*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+            printf("ϵ_∞ AVX-SSE2 \t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 3*N, &checksum);
+
+            execute_disk_hi2lo_SSE2(RP, A, Ac, M);
+            execute_disk_lo2hi_AVX(RP, A, Ac, M);
+
+            err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+            printf("ϵ_2 SSE2-AVX \t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 6*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+            printf("ϵ_∞ SSE2-AVX \t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 3*N, &checksum);
+
+            execute_disk_hi2lo_AVX_FMA(RP, A, Ac, M);
+            execute_disk_lo2hi_AVX(RP, A, Ac, M);
+
+            err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+            printf("ϵ_2 AVX_FMA-AVX \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 6*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+            printf("ϵ_∞ AVX_FMA-AVX \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 3*N, &checksum);
+
+            execute_disk_hi2lo_AVX(RP, A, Ac, M);
+            execute_disk_lo2hi_AVX_FMA(RP, A, Ac, M);
+
+            err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+            printf("ϵ_2 AVX-AVX_FMA \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 6*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+            printf("ϵ_∞ AVX-AVX_FMA \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 3*N, &checksum);
+
+            execute_disk_hi2lo_AVX512F(RP, A, Ac, M);
+            execute_disk_lo2hi_AVX_FMA(RP, A, Ac, M);
+
+            err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+            printf("ϵ_2 AVX512F-AVX_FMA \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 6*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+            printf("ϵ_∞ AVX512F-AVX_FMA \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 3*N, &checksum);
+
+            execute_disk_hi2lo_AVX_FMA(RP, A, Ac, M);
+            execute_disk_lo2hi_AVX512F(RP, A, Ac, M);
+
+            err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+            printf("ϵ_2 AVX_FMA-AVX512F \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 6*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+            printf("ϵ_∞ AVX_FMA-AVX512F \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 3*N, &checksum);
+        #elif defined(__aarch64__)
+            execute_disk_hi2lo_NEON(RP, A, Ac, M);
+            execute_disk_lo2hi_default(RP, A, M);
+
+            err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+            printf("ϵ_2 NEON-default \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 6*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+            printf("ϵ_∞ NEON-default \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 3*N, &checksum);
+
+            execute_disk_hi2lo_default(RP, A, M);
+            execute_disk_lo2hi_NEON(RP, A, Ac, M);
+
+            err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+            printf("ϵ_2 default-NEON \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 6*sqrt(N), &checksum);
+            err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+            printf("ϵ_∞ default-NEON \t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+            ft_checktest(err, 3*N, &checksum);
+        #endif
+
+        free(A);
+        VFREE(Ac);
+        free(B);
+        ft_destroy_rotation_plan(RP);
+    }
+
+    printf("\nTesting the accuracy of annulus transforms.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 64*pow(2, i)+J;
+        M = 4*N-3;
+
+        A = diskrand(N, M);
+        B = copymat(A, N, M);
+        P = ft_plan_ann2cxf(N, alpha, beta, 0.0, rho);
+
+        ft_execute_ann2cxf('N', P, A, N, M);
+        ft_execute_cxf2ann('N', P, A, N, M);
+
+        ft_execute_ann2cxf('T', P, A, N, M);
+        ft_execute_cxf2ann('T', P, A, N, M);
+
+        err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
+        printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 12*sqrt(N), &checksum);
+        err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
+        printf("ϵ_∞ \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
+        ft_checktest(err, 6*N, &checksum);
+
+        free(A);
+        free(B);
+        ft_destroy_harmonic_plan(P);
+    }
+
+    printf("\nTiming annulus transforms.\n\n");
+    printf("t9 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 64*pow(2, i)+J;
+        M = 4*N-3;
+        NTIMES = 1 + pow(2048/N, 2);
+
+        A = diskrand(N, M);
+        P = ft_plan_ann2cxf(N, alpha, beta, 0.0, rho);
+
+        FT_TIME(ft_execute_ann2cxf('N', P, A, N, M), start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
+
+        FT_TIME(ft_execute_cxf2ann('N', P, A, N, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
+
+        printf("\n");
+        free(A);
+        ft_destroy_harmonic_plan(P);
+    }
+    printf("];\n");
+
     printf("\nTesting the accuracy of Dunkl-Xu drivers.\n\n");
     printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
     printf("---------------------------------------------------------|----------------------\n");
@@ -1011,7 +1205,7 @@ int main(int argc, const char * argv[]) {
     }
 
     printf("\nTiming Dunkl-Xu drivers.\n\n");
-    printf("t9 = [\n");
+    printf("t10 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = N;
@@ -1064,7 +1258,7 @@ int main(int argc, const char * argv[]) {
     }
 
     printf("\nTiming Dunkl-Xu transforms.\n\n");
-    printf("t10 = [\n");
+    printf("t11 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = N;
@@ -1177,7 +1371,7 @@ int main(int argc, const char * argv[]) {
     }
 
     printf("\nTiming Proriol³ drivers.\n\n");
-    printf("t11 = [\n");
+    printf("t12 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 16*pow(2, i)+J;
         L = M = N;
@@ -1258,7 +1452,7 @@ int main(int argc, const char * argv[]) {
     }
 
     printf("\nTiming Proriol³ transforms.\n\n");
-    printf("t12 = [\n");
+    printf("t13 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 16*pow(2, i)+J;
         L = M = N;
@@ -1395,7 +1589,7 @@ int main(int argc, const char * argv[]) {
     }
 
     printf("\nTiming spin-weighted spherical harmonic drivers.\n\n");
-    printf("t13 = [\n");
+    printf("t14 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;
@@ -1483,7 +1677,7 @@ int main(int argc, const char * argv[]) {
     }
 
     printf("\nTiming spin-weighted spherical harmonic transforms.\n\n");
-    printf("t14 = [\n");
+    printf("t15 = [\n");
     for (int i = 0; i < ITIME; i++) {
         N = 64*pow(2, i)+J;
         M = 2*N-1;

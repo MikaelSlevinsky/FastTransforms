@@ -3,7 +3,6 @@ void Y(test_tdc)(int * checksum) {
     printf("---------------------------------------------------------|----------------------\n");
 
     int n = 256;
-    struct timeval start, end;
 
     int mu = n/2;
     int m = 0;

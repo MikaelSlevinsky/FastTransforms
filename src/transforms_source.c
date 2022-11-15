@@ -212,13 +212,13 @@ X(btb_eigen_FMM) * X(plan_associated_hermite_to_hermite)(const int norm1, const 
 }
 
 X(modified_plan) * X(plan_modified_jacobi_to_jacobi)(const int n, const FLT alpha, const FLT beta, const int nu, const FLT * u, const int nv, const FLT * v, const int verbose) {
-    X(plan_modified)(n, X(operator_normalized_jacobi_clenshaw), (X(cop_params)) {alpha, beta}, nu, u, nv, v, verbose);
+    return X(plan_modified)(n, X(operator_normalized_jacobi_clenshaw), (X(cop_params)) {alpha, beta}, nu, u, nv, v, verbose);
 }
 
 X(modified_plan) * X(plan_modified_laguerre_to_laguerre)(const int n, const FLT alpha, const int nu, const FLT * u, const int nv, const FLT * v, const int verbose) {
-    X(plan_modified)(n, X(operator_normalized_laguerre_clenshaw), (X(cop_params)) {alpha, 0}, nu, u, nv, v, verbose);
+    return X(plan_modified)(n, X(operator_normalized_laguerre_clenshaw), (X(cop_params)) {alpha, 0}, nu, u, nv, v, verbose);
 }
 
 X(modified_plan) * X(plan_modified_hermite_to_hermite)(const int n, const int nu, const FLT * u, const int nv, const FLT * v, const int verbose) {
-    X(plan_modified)(n, X(operator_normalized_hermite_clenshaw), (X(cop_params)) {0, 0}, nu, u, nv, v, verbose);
+    return X(plan_modified)(n, X(operator_normalized_hermite_clenshaw), (X(cop_params)) {0, 0}, nu, u, nv, v, verbose);
 }

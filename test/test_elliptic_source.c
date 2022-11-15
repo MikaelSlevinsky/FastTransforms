@@ -70,7 +70,6 @@ void Y(test_elliptic)(int * checksum) {
     FLT y = 2.0;
     FLT sny, cny, dny;
     X(jacobian_elliptic_functions)(y, k, &sny, &cny, &dny, FT_SN | FT_CN | FT_DN);
-    FLT xy = x+y;
     FLT snxy, cnxy, dnxy;
     X(jacobian_elliptic_functions)(x+y, k, &snxy, &cnxy, &dnxy, FT_SN | FT_CN | FT_DN);
     err = Y(fabs)(snxy-(snx*cny*dny+sny*cnx*dnx)/(1-k*k*snx*snx*sny*sny))/Y(fabs)(snxy);

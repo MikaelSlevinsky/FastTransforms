@@ -7,10 +7,6 @@ void X(inner_test_tdc_drop_precision)(int * checksum, int n) {
     int mu = n/2;
     int m = 0;
     char PARITY = 'E';
-    int shft;
-    if (PARITY == 'E') shft = 0;
-    else if (PARITY == 'O') shft = 1;
-    else shft = -1;
     X(symmetric_tridiagonal) * T = X(create_A_shtsdtev)(n, mu, m, PARITY);
     X(symmetric_tridiagonal) * S = X(create_B_shtsdtev)(n, m, PARITY);
     X2(symmetric_tridiagonal) * T2 = X2(create_A_shtsdtev)(n, mu, m, PARITY);

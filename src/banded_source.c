@@ -1502,17 +1502,13 @@ void X(mpsm)(char TRANS, X(modified_plan) * P, FLT * B, int LDB, int N) {
 }
 
 X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const X(cop_params) params), const X(cop_params) params, const int nu, const FLT * u, const int nv, const FLT * v, const int verbose) {
+    X(modified_plan) * P = malloc(sizeof(X(modified_plan)));
     if (nv < 1) {
         // polynomial case
         X(banded) * U = operator_clenshaw(n, nu, u, 1, params);
         X(banded_cholfact)(U);
         X(triangular_banded) * R = X(convert_banded_to_triangular_banded)(U);
-        X(modified_plan) * P = malloc(sizeof(X(modified_plan)));
         P->R = R;
-        P->n = n;
-        P->nu = nu;
-        P->nv = nv;
-        return P;
     }
     else {
         // rational case
@@ -1597,14 +1593,13 @@ X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw
         X(destroy_banded)(Lt);
         X(destroy_banded)(ULt);
         X(destroy_banded_ql)(F);
-        X(modified_plan) * P = malloc(sizeof(X(modified_plan)));
-        P->n = n;
-        P->nu = nu;
-        P->nv = nv;
         P->K = K;
         P->R = R;
-        return P;
     }
+    P->n = n;
+    P->nu = nu;
+    P->nv = nv;
+    return P;
 }
 
 void Y(execute_jacobi_similarity)(const X(modified_plan) * P, const int n, const FLT * ap, const FLT * bp, FLT * aq, FLT * bq) {

@@ -315,6 +315,7 @@ void ft_kernel_tri_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2
 void ft_kernel_tri_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
 ft_rotation_plan * ft_plan_rotdisk(const int n, const double alpha, const double beta);
+ft_rotation_plan * ft_plan_rotannulus(const int n, const double alpha, const double beta, const double gamma, const double rho);
 
 /// Convert a single vector of disk harmonic coefficients in A with stride S from order m2 down to order m1.
 void ft_kernel_disk_hi2lo(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
@@ -369,6 +370,7 @@ void ft_execute_spinsph_lo2hi(const ft_spin_rotation_plan * SRP, ft_complex * A,
 /// Data structure to store \ref ft_rotation_plan "ft_rotation_plan"s, arrays to represent 1D orthogonal polynomial transforms and their inverses, and Greek parameters.
 typedef struct {
     ft_rotation_plan ** RP;
+    ft_modified_plan ** MP;
     double * B;
     double ** P;
     double ** Pinv;
@@ -376,7 +378,9 @@ typedef struct {
     double beta;
     double gamma;
     double delta;
+    double rho;
     int NRP;
+    int NMP;
     int NP;
 } ft_harmonic_plan;
 
@@ -409,6 +413,14 @@ ft_harmonic_plan * ft_plan_disk2cxf(const int n, const double alpha, const doubl
 void ft_execute_disk2cxf(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
 /// Transform a Chebyshev--Fourier series to a disk harmonic expansion.
 void ft_execute_cxf2disk(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
+
+/// Plan an annulus harmonic transform.
+ft_harmonic_plan * ft_plan_ann2cxf(const int n, const double alpha, const double beta, const double gamma, const double rho);
+
+/// Transform an annulus harmonic expansion to a Chebyshev--Fourier series.
+void ft_execute_ann2cxf(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
+/// Transform a Chebyshev--Fourier series to an annulus harmonic expansion.
+void ft_execute_cxf2ann(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int M);
 
 /// Plan a rectangularized disk harmonic transform.
 ft_harmonic_plan * ft_plan_rectdisk2cheb(const int n, const double beta);
@@ -533,6 +545,27 @@ ft_disk_fftw_plan * ft_plan_disk_analysis(const int N, const int M, const unsign
 void ft_execute_disk_synthesis(const char TRANS, const ft_disk_fftw_plan * P, double * X, const int N, const int M);
 /// Execute FFTW analysis on the disk.
 void ft_execute_disk_analysis(const char TRANS, const ft_disk_fftw_plan * P, double * X, const int N, const int M);
+
+typedef struct {
+    fftw_plan planr;
+    fftw_plan plantheta;
+    double * w;
+    double * Y;
+} ft_annulus_fftw_plan;
+
+/// Destroy a \ref ft_annulus_fftw_plan.
+void ft_destroy_annulus_fftw_plan(ft_annulus_fftw_plan * P);
+
+ft_annulus_fftw_plan * ft_plan_annulus_with_kind(const int N, const int M, const double rho, const fftw_r2r_kind kind[3][1], const unsigned flags);
+/// Plan FFTW synthesis on the annulus.
+ft_annulus_fftw_plan * ft_plan_annulus_synthesis(const int N, const int M, const double rho, const unsigned flags);
+/// Plan FFTW analysis on the annulus.
+ft_annulus_fftw_plan * ft_plan_annulus_analysis(const int N, const int M, const double rho, const unsigned flags);
+
+/// Execute FFTW synthesis on the annulus.
+void ft_execute_annulus_synthesis(const char TRANS, const ft_annulus_fftw_plan * P, double * X, const int N, const int M);
+/// Execute FFTW analysis on the annulus.
+void ft_execute_annulus_analysis(const char TRANS, const ft_annulus_fftw_plan * P, double * X, const int N, const int M);
 
 typedef struct {
     fftw_plan planx1;

@@ -64,7 +64,6 @@ void Y(test_dprk)(int * checksum) {
     printf("---------------------------------------------------------|----------------------\n");
 
     int n = 256;
-    struct timeval start, end;
 
     X(test_permute)(checksum);
 
