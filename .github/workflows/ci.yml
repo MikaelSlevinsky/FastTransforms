@@ -29,11 +29,16 @@ jobs:
       LD_LIBRARY_PATH: $LD_LIBRARY_PATH:.
     steps:
       - uses: actions/checkout@v3
-      - name: Install dependencies on ubuntu
-        if: startsWith(matrix.os, 'ubuntu')
+      - name: Install dependencies on ubuntu gcc
+        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.compiler, 'gcc')
         run: |
           sudo apt-get update
           sudo apt-get install libomp-11-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
+      - name: Install dependencies on ubuntu clang
+        if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.compiler, 'clang')
+        run: |
+          sudo apt-get update
+          sudo apt-get install libomp-14-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
       - name: Install dependencies on macOS
         if: startsWith(matrix.os, 'macOS')
         run: |
