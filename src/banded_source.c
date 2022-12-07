@@ -1514,6 +1514,10 @@ X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw
         // rational case
         X(banded_ql) * F;
         int N = 2*n;
+        FLT nrm_v = 0;
+        for (int j = 0; j < nv; j++)
+            nrm_v += v[j]*v[j];
+        nrm_v = Y(sqrt)(nrm_v);
         while (1) {
             X(banded) * V = operator_clenshaw(N+nu+nv, nv, v, 1, params);
 
@@ -1545,12 +1549,12 @@ X(modified_plan) * X(plan_modified)(const int n, X(banded) * (*operator_clenshaw
                 warning("plan_modified: dimension of QL factorization, N, exceeds maximum allowable.");
                 break;
             }
-            else if (nv*nrm_Vn <= Y(eps)()*nrm_Vb) {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≤ %4.3e\n", N, (double) (nv*nrm_Vn), (double) (Y(eps)()*nrm_Vb));
+            else if (nv*nrm_Vn <= Y(eps)()*MIN(nrm_Vb, nrm_v)) {
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≤ %4.3e\n", N, (double) (nv*nrm_Vn), (double) (Y(eps)()*MIN(nrm_Vb, nrm_v)));
                 break;
             }
             else {
-                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≰ %4.3e\n", N, (double) (nv*nrm_Vn), (double) (Y(eps)()*nrm_Vb));
+                verbose && printf("N = %i, and the bound on the relative 2-norm: %4.3e ≰ %4.3e\n", N, (double) (nv*nrm_Vn), (double) (Y(eps)()*MIN(nrm_Vb, nrm_v)));
             }
             X(destroy_banded_ql)(F);
             N <<= 1;

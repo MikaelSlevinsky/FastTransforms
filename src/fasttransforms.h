@@ -47,7 +47,7 @@ void ft_eigen_evall(const int n, const long double * c, const int incc, const lo
 #define FT_CN (1U << 1)
 #define FT_DN (1U << 2)
 
-#define FT_MODIFIED_NMAX 1000000
+#define FT_MODIFIED_NMAX (1U << 30)
 
 #include "tdc.h"
 
