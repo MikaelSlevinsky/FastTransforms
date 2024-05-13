@@ -84,7 +84,7 @@ ASM = src/recurrence/recurrence_default.s \
       src/rotations/rotations_AVX512F.s \
       src/rotations/rotations_NEON.s
 
-SRC = src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c src/isometries.c src/helmholtzhodge.c
+SRC = src/fmm.c src/recurrence.c src/transforms.c src/rotations.c src/permute.c src/tdc.c src/drivers.c src/fftw.c src/isometries.c src/helmholtzhodge.c
 
 machine := $(shell $(CC) -dumpmachine | cut -d'-' -f1)
 
@@ -120,23 +120,28 @@ ifdef FT_PREFIX
     endif
 else
     ifeq ($(UNAME), Darwin)
-        CFLAGS += -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
-        LDFLAGS += -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
-        ifeq ($(FT_USE_APPLEBLAS), 1)
-            CFLAGS += -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
-            LDFLAGS += -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A
+        ifeq (,$(shell which conda))
+            CFLAGS += -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+            LDFLAGS += -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+            ifeq ($(FT_USE_APPLEBLAS), 1)
+                CFLAGS += -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
+                LDFLAGS += -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A
+            else
+                CFLAGS += -I/usr/local/opt/openblas/include
+                LDFLAGS += -L/usr/local/opt/openblas/lib
+            endif
+            CFLAGS += -I/usr/local/opt/libomp/include
+            LDFLAGS += -L/usr/local/opt/libomp/lib
+            CFLAGS += -I/usr/local/opt/fftw/include
+            LDFLAGS += -L/usr/local/opt/fftw/lib
+            CFLAGS += -I/usr/local/opt/mpfr/include
+            LDFLAGS += -L/usr/local/opt/mpfr/lib
+            CFLAGS += -I/usr/local/opt/gmp/include
+            LDFLAGS += -L/usr/local/opt/gmp/lib
         else
-            CFLAGS += -I/usr/local/opt/openblas/include
-            LDFLAGS += -L/usr/local/opt/openblas/lib
+            CFLAGS += -I$(CONDA_PREFIX)/include
+            LDFLAGS += -L$(CONDA_PREFIX)/lib
         endif
-        CFLAGS += -I/usr/local/opt/libomp/include
-        LDFLAGS += -L/usr/local/opt/libomp/lib
-        CFLAGS += -I/usr/local/opt/fftw/include
-        LDFLAGS += -L/usr/local/opt/fftw/lib
-        CFLAGS += -I/usr/local/opt/mpfr/include
-        LDFLAGS += -L/usr/local/opt/mpfr/lib
-        CFLAGS += -I/usr/local/opt/gmp/include
-        LDFLAGS += -L/usr/local/opt/gmp/lib
     else ifeq ($(UNAME), Windows)
         CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include\openblas
         CFLAGS += -Ic:\tools\vcpkg\installed\x64-windows\include
@@ -164,7 +169,7 @@ ifndef FT_OPENMP
     endif
 endif
 
-LDLIBS += $(FT_OPENMP) -lm -lmpfr -l$(FT_BLAS) -lfftw3
+LDLIBS += $(FT_OPENMP) -lm -lmpfr -l$(FT_BLAS) -lfftw3 -lfftw3f
 
 ifdef FT_QUADMATH
     AFLAGS += -DFT_QUADMATH
@@ -174,5 +179,5 @@ ifdef FT_QUADMATH
 endif
 
 ifneq ($(FT_FFTW_WITH_COMBINED_THREADS), 1)
-    LDLIBS += -lfftw3_threads
+    LDLIBS += -lfftw3_threads -lfftw3f_threads
 endif

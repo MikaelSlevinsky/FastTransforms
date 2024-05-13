@@ -33,6 +33,7 @@ lib:
 	$(CC) $(CFLAGS) $(LIBFLAGS) $(ASM) $(SRC) $(LDFLAGS) $(LDLIBS) -o lib$(LIB).$(SLIB)
 
 tests:
+	$(CC) src/ftutilities.c test/test_fmm.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_fmm
 	$(CC) src/ftutilities.c test/test_recurrence.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_recurrence
 	$(CC) src/ftutilities.c test/test_transforms.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_transforms
 	$(CC) src/ftutilities.c test/test_permute.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o test_permute
