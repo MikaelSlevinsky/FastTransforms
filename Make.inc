@@ -127,17 +127,17 @@ else
                 CFLAGS += -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
                 LDFLAGS += -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A
             else
-                CFLAGS += -I/usr/local/opt/openblas/include
-                LDFLAGS += -L/usr/local/opt/openblas/lib
+                CFLAGS += -I/opt/homebrew/opt/openblas/include
+                LDFLAGS += -L/opt/homebrew/opt/openblas/lib
             endif
-            CFLAGS += -I/usr/local/opt/libomp/include
-            LDFLAGS += -L/usr/local/opt/libomp/lib
-            CFLAGS += -I/usr/local/opt/fftw/include
-            LDFLAGS += -L/usr/local/opt/fftw/lib
-            CFLAGS += -I/usr/local/opt/mpfr/include
-            LDFLAGS += -L/usr/local/opt/mpfr/lib
-            CFLAGS += -I/usr/local/opt/gmp/include
-            LDFLAGS += -L/usr/local/opt/gmp/lib
+            CFLAGS += -I/opt/homebrew/opt/libomp/include
+            LDFLAGS += -L/opt/homebrew/opt/libomp/lib
+            CFLAGS += -I/opt/homebrew/opt/fftw/include
+            LDFLAGS += -L/opt/homebrew/opt/fftw/lib
+            CFLAGS += -I/opt/homebrew/opt/mpfr/include
+            LDFLAGS += -L/opt/homebrew/opt/mpfr/lib
+            CFLAGS += -I/opt/homebrew/opt/gmp/include
+            LDFLAGS += -L/opt/homebrew/opt/gmp/lib
         else
             CFLAGS += -I$(CONDA_PREFIX)/include
             LDFLAGS += -L$(CONDA_PREFIX)/lib
