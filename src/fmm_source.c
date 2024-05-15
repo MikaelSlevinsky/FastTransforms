@@ -1075,7 +1075,6 @@ size_t X(direct)(const FLT *u, FLT *b, X(direct_plan) * dplan, size_t direction,
     flops += N;
     fftw_free(vn);
   }
-
   return flops;
 }
 
