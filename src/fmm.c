@@ -54,7 +54,6 @@ void get_ij(size_t *ij, const size_t level, const size_t block, const size_t s, 
 #define X(name) FT_CONCAT(ft_, name, )
 #define FT_USE_DOUBLE
 #include "fmm_source.c"
-
 #undef FLT
 #undef X
 #undef FT_USE_DOUBLE
