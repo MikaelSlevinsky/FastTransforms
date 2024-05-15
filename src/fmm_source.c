@@ -1031,7 +1031,7 @@ size_t X(direct)(const FLT *u, FLT *b, X(direct_plan) * dplan, size_t direction,
   const FLT sqrt_pi = 1.77245385090551602e0;
   const size_t N = dplan->N;
   for (size_t i = 0; i < N; i++)
-    b[i] = 0.0;
+    b[i * strides] = 0.0;
   flops += N;
   if (direction == L2C)
   {
@@ -1039,11 +1039,11 @@ size_t X(direct)(const FLT *u, FLT *b, X(direct_plan) * dplan, size_t direction,
     for (size_t n = 0; n < N; n = n + 2)
     {
       const FLT *ap = &a[n / 2];
-      const FLT *cp = &u[n];
+      const FLT *cp = &u[n * strides];
       const FLT a0 = ap[0] * M_2_PI;
       for (size_t i = 0; i < N - n; i++)
       {
-        b[i * strides] += a0 * ap[i] * cp[i];
+        b[i * strides] += a0 * ap[i] * cp[i * strides];
       }
       flops += 3 * (N - n);
     }

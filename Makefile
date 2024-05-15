@@ -59,6 +59,7 @@ examples:
 	$(CC) src/ftutilities.c examples/subspaceangles.c $(CFLAGS) -L$(LIBDIR) -l$(LIB) $(LDFLAGS) $(LDLIBS) -o subspaceangles
 
 runtests:
+	./test_fmm
 	./test_recurrence
 	./test_transforms
 	./test_permute
