@@ -8,13 +8,13 @@ void Y(test_fmm)(size_t N, size_t maxs, size_t M, FLT m, size_t random, size_t l
   FLT *input_array = (FLT *)calloc(N, sizeof(FLT));
   FLT *output_array = (FLT *)calloc(N, sizeof(FLT));
 
-  // srand48((unsigned int)time(NULL));
-  srand48(1);
+  // srand((unsigned) time(&t));
+  srand(1);
   // Initialize some input array
   if (random == 1)
   {
     for (size_t i = 0; i < N; i++)
-      input_array[i] = (2 * drand48() - 1) / pow(i + 1, m);
+      input_array[i] = (2.0*(((double) rand())/RAND_MAX)-1.0) / pow(i + 1, m);
   }
   else
   {
@@ -117,12 +117,12 @@ void Y(test_fmm_transforms)(int *checksum, int N)
     FLT *input_array = (FLT *)calloc(n, sizeof(FLT));
     FLT *output_array = (FLT *)calloc(n, sizeof(FLT));
     FLT *ia = (FLT *)calloc(n, sizeof(FLT));
-    srand48(1);
+    srand(1);
     FLT e0 = 0;
     for (int i = 0; i < n; i++)
     {
       // input_array[i] = 1;
-      input_array[i] = (2 * drand48() - 1) / pow(i + 1, m);
+      input_array[i] = (2.0*(((double) rand())/RAND_MAX)-1.0) / pow(i + 1, m);
       e0 = MAX(e0, Y(fabs)(input_array[i]));
     }
 
