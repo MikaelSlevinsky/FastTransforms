@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdint.h>
 #include <time.h>
 
 enum { L2C = 0, C2L = 1, BOTH = 2 };
