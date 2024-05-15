@@ -10,7 +10,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macOS-latest
+          - macOS-13
         compiler:
           - gcc
           - clang
@@ -19,9 +19,9 @@ jobs:
           - x64
           - aarch64
         exclude:
-          - os: macOS-latest
+          - os: macOS-13
             arch: x86
-          - os: macOS-latest
+          - os: macOS-13
             arch: aarch64
       fail-fast: false
     env:
