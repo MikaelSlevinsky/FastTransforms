@@ -362,6 +362,10 @@ double * plan_chebyshev_to_ultraspherical(const int normcheb, const int normultr
 double * plan_associated_jacobi_to_jacobi(const int norm1, const int norm2, const int n, const int c, const double alpha, const double beta, const double gamma, const double delta);
 double * plan_associated_laguerre_to_laguerre(const int norm1, const int norm2, const int n, const int c, const double alpha, const double beta);
 double * plan_associated_hermite_to_hermite(const int norm1, const int norm2, const int n, const int c);
+double * plan_half_chebyshev_to_chebyshev(const int n);
+float * plan_half_chebyshev_to_chebyshevf(const int n);
+double * plan_chebyshev_to_half_chebyshev(const int n);
+float * plan_chebyshev_to_half_chebyshevf(const int n);
 
 typedef struct ft_rotation_plan_s {
     double * s;

@@ -218,6 +218,8 @@ void X(create_laguerre_to_laguerre_diagonal_connection_coefficient)(const int no
 void X(create_associated_jacobi_to_jacobi_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT c, const FLT alpha, const FLT beta, const FLT gamma, const FLT delta, FLT * D, const int INCD);
 void X(create_associated_laguerre_to_laguerre_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT c, const FLT alpha, const FLT beta, FLT * D, const int INCD);
 void X(create_associated_hermite_to_hermite_diagonal_connection_coefficient)(const int norm1, const int norm2, const int n, const FLT c, FLT * D, const int INCD);
+void X(create_half_chebyshev_to_chebyshev_diagonal_connection_coefficient)(const int n, FLT * D, const int INCD);
+void X(create_chebyshev_to_half_chebyshev_diagonal_connection_coefficient)(const int n, FLT * D, const int INCD);
 
 X(triangular_banded) * X(create_A_legendre_to_chebyshev)(const int norm, const int n);
 X(triangular_banded) * X(create_B_legendre_to_chebyshev)(const int norm, const int n);
@@ -245,6 +247,12 @@ X(triangular_banded) * X(create_C_associated_laguerre_to_laguerre)(const int nor
 X(triangular_banded) * X(create_A_associated_hermite_to_hermite)(const int norm, const int n, const int c);
 X(triangular_banded) * X(create_B_associated_hermite_to_hermite)(const int norm, const int n);
 X(triangular_banded) * X(create_C_associated_hermite_to_hermite)(const int n);
+
+X(triangular_banded) * X(create_A_half_chebyshev_to_chebyshev)(const int n);
+X(triangular_banded) * X(create_B_half_chebyshev_to_chebyshev)(const int n);
+
+X(triangular_banded) * X(create_A_chebyshev_to_half_chebyshev)(const int n);
+X(triangular_banded) * X(create_B_chebyshev_to_half_chebyshev)(const int n);
 
 X(banded) * X(operator_normalized_jacobi_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const X(cop_params) params);
 X(banded) * X(operator_normalized_laguerre_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const X(cop_params) params);

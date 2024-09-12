@@ -264,4 +264,64 @@ double * plan_associated_hermite_to_hermite(const int norm1, const int norm2, co
     return V;
 }
 
+double * plan_half_chebyshev_to_chebyshev(const int n) {
+    ft_triangular_bandedl * A = ft_create_A_half_chebyshev_to_chebyshevl(n);
+    ft_triangular_bandedl * B = ft_create_B_half_chebyshev_to_chebyshevl(n);
+    long double * Vl = calloc(n*n, sizeof(long double));
+    ft_create_half_chebyshev_to_chebyshev_diagonal_connection_coefficientl(n, Vl, n+1);
+    ft_triangular_banded_eigenvectorsl(A, B, Vl);
+    double * V = malloc(n*n*sizeof(double));
+    for (int i = 0; i < n*n; i++)
+        V[i] = Vl[i];
+    ft_destroy_triangular_bandedl(A);
+    ft_destroy_triangular_bandedl(B);
+    free(Vl);
+    return V;
+}
+
+float * plan_half_chebyshev_to_chebyshevf(const int n) {
+    ft_triangular_banded * A = ft_create_A_half_chebyshev_to_chebyshev(n);
+    ft_triangular_banded * B = ft_create_B_half_chebyshev_to_chebyshev(n);
+    double * Vd = calloc(n*n, sizeof(double));
+    ft_create_half_chebyshev_to_chebyshev_diagonal_connection_coefficient(n, Vd, n+1);
+    ft_triangular_banded_eigenvectors(A, B, Vd);
+    float * V = malloc(n*n*sizeof(float));
+    for (int i = 0; i < n*n; i++)
+        V[i] = Vd[i];
+    ft_destroy_triangular_banded(A);
+    ft_destroy_triangular_banded(B);
+    free(Vd);
+    return V;
+}
+
+double * plan_chebyshev_to_half_chebyshev(const int n) {
+    ft_triangular_bandedl * A = ft_create_A_chebyshev_to_half_chebyshevl(n);
+    ft_triangular_bandedl * B = ft_create_B_chebyshev_to_half_chebyshevl(n);
+    long double * Vl = calloc(n*n, sizeof(long double));
+    ft_create_chebyshev_to_half_chebyshev_diagonal_connection_coefficientl(n, Vl, n+1);
+    ft_triangular_banded_eigenvectorsl(A, B, Vl);
+    double * V = malloc(n*n*sizeof(double));
+    for (int i = 0; i < n*n; i++)
+        V[i] = Vl[i];
+    ft_destroy_triangular_bandedl(A);
+    ft_destroy_triangular_bandedl(B);
+    free(Vl);
+    return V;
+}
+
+float * plan_chebyshev_to_half_chebyshevf(const int n) {
+    ft_triangular_banded * A = ft_create_A_chebyshev_to_half_chebyshev(n);
+    ft_triangular_banded * B = ft_create_B_chebyshev_to_half_chebyshev(n);
+    double * Vd = calloc(n*n, sizeof(double));
+    ft_create_chebyshev_to_half_chebyshev_diagonal_connection_coefficient(n, Vd, n+1);
+    ft_triangular_banded_eigenvectors(A, B, Vd);
+    float * V = malloc(n*n*sizeof(float));
+    for (int i = 0; i < n*n; i++)
+        V[i] = Vd[i];
+    ft_destroy_triangular_banded(A);
+    ft_destroy_triangular_banded(B);
+    free(Vd);
+    return V;
+}
+
 #include "transforms_mpfr.c"

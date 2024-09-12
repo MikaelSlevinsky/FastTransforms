@@ -2297,6 +2297,21 @@ void X(create_associated_hermite_to_hermite_diagonal_connection_coefficient)(con
     }
 }
 
+void X(create_half_chebyshev_to_chebyshev_diagonal_connection_coefficient)(const int n, FLT * D, const int INCD) {
+    FLT v = ONE(FLT);
+    for (int i = 0; i < n; i++) {
+        D[i*INCD] = v;
+        v /= TWO(FLT);
+    }
+}
+
+void X(create_chebyshev_to_half_chebyshev_diagonal_connection_coefficient)(const int n, FLT * D, const int INCD) {
+    FLT v = ONE(FLT);
+    for (int i = 0; i < n; i++) {
+        D[i*INCD] = v;
+        v *= TWO(FLT);
+    }
+}
 
 X(triangular_banded) * X(create_A_legendre_to_chebyshev)(const int norm, const int n) {
     X(triangular_banded) * A = X(calloc_triangular_banded)(n, 2);
@@ -2830,6 +2845,163 @@ X(triangular_banded) * X(create_B_associated_hermite_to_hermite)(const int norm,
 }
 
 X(triangular_banded) * X(create_C_associated_hermite_to_hermite)(const int n) {return X(create_I_triangular_banded)(n, 0);}
+
+// [(X2+3I)*(X2-I)*D12 + (X2+I)*R12]*DTU
+X(triangular_banded) * X(create_A_half_chebyshev_to_chebyshev)(const int n) {
+    X(banded) * A = X(calloc_banded)(n, n, 0, 4);
+
+    X(banded) * DTU = X(malloc_banded)(n, n, -1, 1);
+    for (int i = 1; i < n; i++)
+        X(set_banded_index)(DTU, i, i-1, i);
+    X(banded) * D12 = X(malloc_banded)(n, n, -1, 1);
+    for (int i = 1; i < n; i++)
+        X(set_banded_index)(D12, 2, i-1, i);
+    X(banded) * R12 = X(calloc_banded)(n, n, 0, 2);
+    if (n > 0)
+        X(set_banded_index)(R12, 1, 0, 0);
+    if (n > 1)
+        X(set_banded_index)(R12, ONE(FLT)/2, 1, 1);
+    for (int i = 2; i < n; i++) {
+        X(set_banded_index)(R12, -ONE(FLT)/(i+1), i-2, i);
+        X(set_banded_index)(R12, ONE(FLT)/(i+1), i, i);
+    }
+    X(banded) * X2 = X(calloc_banded)(n, n, 1, 1);
+    for (int i = 0; i < n; i++) {
+        FLT v = (i+((FLT) 3))/(2*i+4);
+        X(set_banded_index)(X2, v, i-1, i);
+        v = (i+ONE(FLT))/(2*i+4);
+        X(set_banded_index)(X2, v, i+1, i);
+    }
+
+    // A2 = (X2+3I)*(X2-I)*D12*DTU
+    X(banded) * A2 = X(calloc_banded)(n, n, 0, 4);
+    X(banded) * A2a = X(calloc_banded)(n, n, 0, 2);
+    for (int i = 0; i < n; i++)
+        X(set_banded_index)(X2, -1, i, i);
+    X(gbmm)(1, X2, D12, 0, A2a);
+    X(banded) * A2b = X(calloc_banded)(n, n, 1, 3);
+    for (int i = 0; i < n; i++)
+        X(set_banded_index)(X2, 3, i, i);
+    X(gbmm)(1, X2, A2a, 0, A2b);
+    X(gbmm)(1, A2b, DTU, 0, A2);
+
+    // A1 = (X2+I)*R12*DTU
+    X(banded) * A1 = X(calloc_banded)(n, n, 0, 4);
+    X(banded) * A1a = X(calloc_banded)(n, n, 1, 3);
+    for (int i = 0; i < n; i++)
+        X(set_banded_index)(X2, 1, i, i);
+    X(gbmm)(1, X2, R12, 0, A1a);
+    X(gbmm)(1, A1a, DTU, 0, A1);
+
+    X(banded_add)(1, A1, 1, A2, A);
+
+    X(destroy_banded)(DTU);
+    X(destroy_banded)(D12);
+    X(destroy_banded)(R12);
+    X(destroy_banded)(X2);
+
+    X(destroy_banded)(A2a);
+    X(destroy_banded)(A2b);
+    X(destroy_banded)(A2);
+    X(destroy_banded)(A1a);
+    X(destroy_banded)(A1);
+
+    return X(convert_banded_to_triangular_banded)(A);
+}
+
+// R12*RTU
+X(triangular_banded) * X(create_B_half_chebyshev_to_chebyshev)(const int n) {
+    X(banded) * B = X(calloc_banded)(n, n, 0, 4);
+
+    X(banded) * RTU = X(calloc_banded)(n, n, 0, 2);
+    if (n > 0)
+        X(set_banded_index)(RTU, 1, 0, 0);
+    if (n > 1)
+        X(set_banded_index)(RTU, ONE(FLT)/2, 1, 1);
+    for (int i = 2; i < n; i++) {
+        X(set_banded_index)(RTU, -ONE(FLT)/2, i-2, i);
+        X(set_banded_index)(RTU, ONE(FLT)/2, i, i);
+    }
+    X(banded) * R12 = X(calloc_banded)(n, n, 0, 2);
+    if (n > 0)
+        X(set_banded_index)(R12, 1, 0, 0);
+    if (n > 1)
+        X(set_banded_index)(R12, ONE(FLT)/2, 1, 1);
+    for (int i = 2; i < n; i++) {
+        X(set_banded_index)(R12, -ONE(FLT)/(i+1), i-2, i);
+        X(set_banded_index)(R12, ONE(FLT)/(i+1), i, i);
+    }
+
+    X(gbmm)(1, R12, RTU, 0, B);
+
+    X(destroy_banded)(RTU);
+    X(destroy_banded)(R12);
+
+    return X(convert_banded_to_triangular_banded)(B);
+}
+
+// [(X2-I)*X2*D12 + (X2-0.5I)*R12]*DTU
+X(triangular_banded) * X(create_A_chebyshev_to_half_chebyshev)(const int n) {
+    X(banded) * A = X(calloc_banded)(n, n, 0, 4);
+
+    X(banded) * DTU = X(malloc_banded)(n, n, -1, 1);
+    for (int i = 1; i < n; i++)
+        X(set_banded_index)(DTU, i, i-1, i);
+    X(banded) * D12 = X(malloc_banded)(n, n, -1, 1);
+    for (int i = 1; i < n; i++)
+        X(set_banded_index)(D12, 2, i-1, i);
+    X(banded) * R12 = X(calloc_banded)(n, n, 0, 2);
+    if (n > 0)
+        X(set_banded_index)(R12, 1, 0, 0);
+    if (n > 1)
+        X(set_banded_index)(R12, ONE(FLT)/2, 1, 1);
+    for (int i = 2; i < n; i++) {
+        X(set_banded_index)(R12, -ONE(FLT)/(i+1), i-2, i);
+        X(set_banded_index)(R12, ONE(FLT)/(i+1), i, i);
+    }
+    X(banded) * X2 = X(calloc_banded)(n, n, 1, 1);
+    for (int i = 0; i < n; i++) {
+        FLT v = (i+((FLT) 3))/(2*i+4);
+        X(set_banded_index)(X2, v, i-1, i);
+        v = (i+ONE(FLT))/(2*i+4);
+        X(set_banded_index)(X2, v, i+1, i);
+    }
+
+    // A2 = (X2-I)*X2*D12*DTU
+    X(banded) * A2 = X(calloc_banded)(n, n, 0, 4);
+    X(banded) * A2a = X(calloc_banded)(n, n, 0, 2);
+    X(gbmm)(1, X2, D12, 0, A2a);
+    X(banded) * A2b = X(calloc_banded)(n, n, 1, 3);
+    for (int i = 0; i < n; i++)
+        X(set_banded_index)(X2, -1, i, i);
+    X(gbmm)(1, X2, A2a, 0, A2b);
+    X(gbmm)(1, A2b, DTU, 0, A2);
+
+    // A1 = (X2-0.5I)*R12*DTU
+    X(banded) * A1 = X(calloc_banded)(n, n, 0, 4);
+    X(banded) * A1a = X(calloc_banded)(n, n, 1, 3);
+    for (int i = 0; i < n; i++)
+        X(set_banded_index)(X2, -ONE(FLT)/2, i, i);
+    X(gbmm)(1, X2, R12, 0, A1a);
+    X(gbmm)(1, A1a, DTU, 0, A1);
+
+    X(banded_add)(1, A1, 1, A2, A);
+
+    X(destroy_banded)(DTU);
+    X(destroy_banded)(D12);
+    X(destroy_banded)(R12);
+    X(destroy_banded)(X2);
+
+    X(destroy_banded)(A2a);
+    X(destroy_banded)(A2b);
+    X(destroy_banded)(A2);
+    X(destroy_banded)(A1a);
+    X(destroy_banded)(A1);
+
+    return X(convert_banded_to_triangular_banded)(A);
+}
+
+X(triangular_banded) * X(create_B_chebyshev_to_half_chebyshev)(const int n) {return X(create_B_half_chebyshev_to_chebyshev)(n);}
 
 X(banded) * X(operator_normalized_jacobi_clenshaw)(const int n, const int nc, const FLT * c, const int incc, const X(cop_params) params) {
     FLT alpha = params.alpha;

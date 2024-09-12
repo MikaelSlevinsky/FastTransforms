@@ -130,5 +130,36 @@ int main(void) {
         free(colsum);
     }
     printf("\n");
+    printf("\nTesting methods for half-to-full Chebyshev polynomial transforms.\n\n");
+    printf("\t\t\t Test \t\t\t\t | 2-norm Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int n = 8; n < 24; n += 2) {
+        double err = 0;
+        double * V = plan_half_chebyshev_to_chebyshev(n);
+        double * iV = plan_chebyshev_to_half_chebyshev(n);
+        double * Id = calloc(n*n, sizeof(double));
+        for (int i = 0; i < n; i++)
+            Id[i+i*n] = 1.0;
+        ft_trmm('N', n, iV, n, V, n, n);
+        err = ft_norm_2arg(V, Id, n*n)/ft_norm_1arg(Id, n*n);
+        printf("V⁻¹V ≈ I \t\t\t\t n = %3i \t |%20.2e ", n, err);
+        ft_checktest(err, n*n, &checksum);
+        free(V);
+        V = plan_half_chebyshev_to_chebyshev(n);
+        ft_trmm('N', n, V, n, iV, n, n);
+        err = ft_norm_2arg(iV, Id, n*n)/ft_norm_1arg(Id, n*n);
+        printf("V V⁻¹ ≈ I \t\t\t\t n = %3i \t |%20.2e ", n, err);
+        ft_checktest(err, n*n*n*n, &checksum);
+        free(iV);
+        iV = plan_chebyshev_to_half_chebyshev(n);
+        ft_trsm('N', n, V, n, Id, n, n);
+        err = ft_norm_2arg(Id, iV, n*n)/ft_norm_1arg(iV, n*n);
+        printf("V\\I ≈ V⁻¹ \t\t\t\t n = %3i \t |%20.2e ", n, err);
+        ft_checktest(err, n*n, &checksum);
+        free(V);
+        free(iV);
+        free(Id);
+    }
+    printf("\n");
     return checksum;
 }
