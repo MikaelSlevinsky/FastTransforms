@@ -344,66 +344,119 @@ void ft_mpfr_trsm_ptr(char TRANS, int n, mpfr_t * A, int LDA, mpfr_t ** B, int L
 
 /*!
   \brief A multi-precision version of \ref ft_plan_legendre_to_chebyshev that returns a dense array of connection coefficients.
+  \param normleg The normalization of the Legendre polynomials: standard (`0`) or orthonormalized (`1`).
+  \param normcheb The normalization of the Chebyshev polynomials: standard (`0`) or orthonormalized (`1`).
+  \param n The number of coefficients in each expansion, so that the polynomial degree is at most \f$n-1\f$.
   \param prec The precision of the connection coefficients, in bits.
   \param rnd The MPFR rounding mode.
 */
 mpfr_t * ft_mpfr_plan_legendre_to_chebyshev(const int normleg, const int normcheb, const int n, mpfr_prec_t prec, mpfr_rnd_t rnd);
 /*!
   \brief A multi-precision version of \ref ft_plan_chebyshev_to_legendre that returns a dense array of connection coefficients.
+  \param normcheb The normalization of the Chebyshev polynomials: standard (`0`) or orthonormalized (`1`).
+  \param normleg The normalization of the Legendre polynomials: standard (`0`) or orthonormalized (`1`).
+  \param n The number of coefficients in each expansion, so that the polynomial degree is at most \f$n-1\f$.
   \param prec The precision of the connection coefficients, in bits.
   \param rnd The MPFR rounding mode.
 */
 mpfr_t * ft_mpfr_plan_chebyshev_to_legendre(const int normcheb, const int normleg, const int n, mpfr_prec_t prec, mpfr_rnd_t rnd);
 /*!
   \brief A multi-precision version of \ref ft_plan_ultraspherical_to_ultraspherical that returns a dense array of connection coefficients.
+  \param norm1 The normalization of the source ultraspherical polynomials: standard (`0`) or orthonormalized (`1`).
+  \param norm2 The normalization of the target ultraspherical polynomials: standard (`0`) or orthonormalized (`1`).
+  \param n The number of coefficients in each expansion, so that the polynomial degree is at most \f$n-1\f$.
+  \param lambda The parameter \f$\lambda\f$ of the source ultraspherical polynomials.
+  \param mu The parameter \f$\mu\f$ of the target ultraspherical polynomials.
   \param prec The precision of the connection coefficients, in bits.
   \param rnd The MPFR rounding mode.
 */
 mpfr_t * ft_mpfr_plan_ultraspherical_to_ultraspherical(const int norm1, const int norm2, const int n, mpfr_srcptr lambda, mpfr_srcptr mu, mpfr_prec_t prec, mpfr_rnd_t rnd);
 /*!
   \brief A multi-precision version of \ref ft_plan_jacobi_to_jacobi that returns a dense array of connection coefficients.
+  \param norm1 The normalization of the source Jacobi polynomials: standard (`0`) or orthonormalized (`1`).
+  \param norm2 The normalization of the target Jacobi polynomials: standard (`0`) or orthonormalized (`1`).
+  \param n The number of coefficients in each expansion, so that the polynomial degree is at most \f$n-1\f$.
+  \param alpha The parameter \f$\alpha\f$ of the source Jacobi polynomials.
+  \param beta The parameter \f$\beta\f$ of the source Jacobi polynomials.
+  \param gamma The parameter \f$\gamma\f$ of the target Jacobi polynomials, in the place of \f$\alpha\f$.
+  \param delta The parameter \f$\delta\f$ of the target Jacobi polynomials, in the place of \f$\beta\f$.
   \param prec The precision of the connection coefficients, in bits.
   \param rnd The MPFR rounding mode.
 */
 mpfr_t * ft_mpfr_plan_jacobi_to_jacobi(const int norm1, const int norm2, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_srcptr gamma, mpfr_srcptr delta, mpfr_prec_t prec, mpfr_rnd_t rnd);
 /*!
   \brief A multi-precision version of \ref ft_plan_laguerre_to_laguerre that returns a dense array of connection coefficients.
+  \param norm1 The normalization of the source Laguerre polynomials: standard (`0`) or orthonormalized (`1`).
+  \param norm2 The normalization of the target Laguerre polynomials: standard (`0`) or orthonormalized (`1`).
+  \param n The number of coefficients in each expansion, so that the polynomial degree is at most \f$n-1\f$.
+  \param alpha The parameter \f$\alpha\f$ of the source Laguerre polynomials.
+  \param beta The parameter \f$\beta\f$ of the target Laguerre polynomials, in the place of \f$\alpha\f$.
   \param prec The precision of the connection coefficients, in bits.
   \param rnd The MPFR rounding mode.
 */
 mpfr_t * ft_mpfr_plan_laguerre_to_laguerre(const int norm1, const int norm2, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_prec_t prec, mpfr_rnd_t rnd);
 /*!
   \brief A multi-precision version of \ref ft_plan_jacobi_to_ultraspherical that returns a dense array of connection coefficients.
+  \param normjac The normalization of the Jacobi polynomials: standard (`0`) or orthonormalized (`1`).
+  \param normultra The normalization of the ultraspherical polynomials: standard (`0`) or orthonormalized (`1`).
+  \param n The number of coefficients in each expansion, so that the polynomial degree is at most \f$n-1\f$.
+  \param alpha The parameter \f$\alpha\f$ of the Jacobi polynomials.
+  \param beta The parameter \f$\beta\f$ of the Jacobi polynomials.
+  \param lambda The parameter \f$\lambda\f$ of the ultraspherical polynomials.
   \param prec The precision of the connection coefficients, in bits.
   \param rnd The MPFR rounding mode.
 */
 mpfr_t * ft_mpfr_plan_jacobi_to_ultraspherical(const int normjac, const int normultra, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_srcptr lambda, mpfr_prec_t prec, mpfr_rnd_t rnd);
 /*!
   \brief A multi-precision version of \ref ft_plan_ultraspherical_to_jacobi that returns a dense array of connection coefficients.
+  \param normultra The normalization of the ultraspherical polynomials: standard (`0`) or orthonormalized (`1`).
+  \param normjac The normalization of the Jacobi polynomials: standard (`0`) or orthonormalized (`1`).
+  \param n The number of coefficients in each expansion, so that the polynomial degree is at most \f$n-1\f$.
+  \param lambda The parameter \f$\lambda\f$ of the ultraspherical polynomials.
+  \param alpha The parameter \f$\alpha\f$ of the Jacobi polynomials.
+  \param beta The parameter \f$\beta\f$ of the Jacobi polynomials.
   \param prec The precision of the connection coefficients, in bits.
   \param rnd The MPFR rounding mode.
 */
 mpfr_t * ft_mpfr_plan_ultraspherical_to_jacobi(const int normultra, const int normjac, const int n, mpfr_srcptr lambda, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_prec_t prec, mpfr_rnd_t rnd);
 /*!
   \brief A multi-precision version of \ref ft_plan_jacobi_to_chebyshev that returns a dense array of connection coefficients.
+  \param normjac The normalization of the Jacobi polynomials: standard (`0`) or orthonormalized (`1`).
+  \param normcheb The normalization of the Chebyshev polynomials: standard (`0`) or orthonormalized (`1`).
+  \param n The number of coefficients in each expansion, so that the polynomial degree is at most \f$n-1\f$.
+  \param alpha The parameter \f$\alpha\f$ of the Jacobi polynomials.
+  \param beta The parameter \f$\beta\f$ of the Jacobi polynomials.
   \param prec The precision of the connection coefficients, in bits.
   \param rnd The MPFR rounding mode.
 */
 mpfr_t * ft_mpfr_plan_jacobi_to_chebyshev(const int normjac, const int normcheb, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_prec_t prec, mpfr_rnd_t rnd);
 /*!
   \brief A multi-precision version of \ref ft_plan_chebyshev_to_jacobi that returns a dense array of connection coefficients.
+  \param normcheb The normalization of the Chebyshev polynomials: standard (`0`) or orthonormalized (`1`).
+  \param normjac The normalization of the Jacobi polynomials: standard (`0`) or orthonormalized (`1`).
+  \param n The number of coefficients in each expansion, so that the polynomial degree is at most \f$n-1\f$.
+  \param alpha The parameter \f$\alpha\f$ of the Jacobi polynomials.
+  \param beta The parameter \f$\beta\f$ of the Jacobi polynomials.
   \param prec The precision of the connection coefficients, in bits.
   \param rnd The MPFR rounding mode.
 */
 mpfr_t * ft_mpfr_plan_chebyshev_to_jacobi(const int normcheb, const int normjac, const int n, mpfr_srcptr alpha, mpfr_srcptr beta, mpfr_prec_t prec, mpfr_rnd_t rnd);
 /*!
   \brief A multi-precision version of \ref ft_plan_ultraspherical_to_chebyshev that returns a dense array of connection coefficients.
+  \param normultra The normalization of the ultraspherical polynomials: standard (`0`) or orthonormalized (`1`).
+  \param normcheb The normalization of the Chebyshev polynomials: standard (`0`) or orthonormalized (`1`).
+  \param n The number of coefficients in each expansion, so that the polynomial degree is at most \f$n-1\f$.
+  \param lambda The parameter \f$\lambda\f$ of the ultraspherical polynomials.
   \param prec The precision of the connection coefficients, in bits.
   \param rnd The MPFR rounding mode.
 */
 mpfr_t * ft_mpfr_plan_ultraspherical_to_chebyshev(const int normultra, const int normcheb, const int n, mpfr_srcptr lambda, mpfr_prec_t prec, mpfr_rnd_t rnd);
 /*!
   \brief A multi-precision version of \ref ft_plan_chebyshev_to_ultraspherical that returns a dense array of connection coefficients.
+  \param normcheb The normalization of the Chebyshev polynomials: standard (`0`) or orthonormalized (`1`).
+  \param normultra The normalization of the ultraspherical polynomials: standard (`0`) or orthonormalized (`1`).
+  \param n The number of coefficients in each expansion, so that the polynomial degree is at most \f$n-1\f$.
+  \param lambda The parameter \f$\lambda\f$ of the ultraspherical polynomials.
   \param prec The precision of the connection coefficients, in bits.
   \param rnd The MPFR rounding mode.
 */
