@@ -159,7 +159,7 @@ For every subsection below, the title of the subsection, of the form <tt>a2b</tt
 - <tt>ft_kernel_a_hi2lo</tt>, is an orthonormal conversion from high to low order,
 - <tt>ft_kernel_a_lo2hi</tt>, is an orthonormal conversion from low to high order.
 
-The <tt>ft_execute_*</tt> functions are drivers that perform transforms as defined below. They are composed of computational kernels, of the form <tt>ft_kernel_*</tt>, that are designed to be sufficiently generic to be assembled for different parallelism and compute paradigms. For good use of SIMD, the computational kernels rely on row-major ordering of the coefficients, and for trivial shared memory parallelism, the driver routines rely on column-major ordering of the coefficients. Local permutations are utilized to balance the use of SIMD and OpenMP multithreading. Generally, the pre-computations construct a \ref ft_harmonic_plan, which may be destroyed by a call to \ref ft_destroy_harmonic_plan.
+The <tt>ft_execute_*</tt> functions are drivers that perform transforms as defined below. They are composed of computational kernels, of the form <tt>ft_kernel_*</tt>, that are designed to be sufficiently generic to be assembled for different parallelism and compute paradigms. For good use of SIMD, the computational kernels rely on row-major ordering of the coefficients, and for trivial shared memory parallelism, the driver routines rely on column-major ordering of the coefficients. Local permutations are utilized to balance the use of SIMD and OpenMP multithreading. Generally, the pre-computations construct a \ref ft_harmonic_plan, which may be destroyed by a call to \ref ft_destroy_harmonic_plan. The arguments of all of these functions are explained in \ref FTARGS.
 
 \subsection sph2fourier
 
@@ -424,6 +424,67 @@ This convention has positive real phase, which implies identities such as:
 \overline{Y}_{\ell,m}^s(\theta,\varphi) = Y_{\ell,-m}^{-s}(\theta,\varphi).
 \f]
 
+\section FTARGS Function arguments
+
+The functions above share a small set of arguments, and their names are used consistently throughout \ref fasttransforms.h.
+
+\subsection FTARGS1 Arguments of the plans
+
+The pre-computations, <tt>ft_plan_a2b</tt>, take the size of the problem followed by the parameters of the orthogonal polynomials:
+
+- <tt>n</tt> is the \f$n\f$ in the formulas above: the number of rows in the arrays of coefficients \f$F\f$ and \f$G\f$. On the sphere, triangle, rectangularized disk, and tetrahedron, a plan with <tt>n</tt> transforms expansions of degree at most \f$n-1\f$. On the disk and the annulus, it transforms expansions of degree at most \f$2n-2\f$.
+- <tt>alpha</tt>, <tt>beta</tt>, <tt>gamma</tt>, and <tt>delta</tt> are the parameters \f$\alpha\f$, \f$\beta\f$, \f$\gamma\f$, and \f$\delta\f$ in the superscripts of the polynomials above. They are the powers that appear in the weight of orthogonality, listed in the table below.
+- <tt>rho</tt> is the inner radius of the annulus, \f$0 < \rho < 1\f$.
+- <tt>s</tt> is the integer spin of the spin-weighted spherical harmonics.
+
+Plan                           | Domain                                      | Weight
+------------------------------ | ------------------------------------------- | ------
+\ref ft_plan_sph2fourier       | the unit sphere                             | \f$1\f$
+\ref ft_plan_spinsph2fourier   | the unit sphere                             | \f$1\f$
+\ref ft_plan_disk2cxf          | the unit disk, \f$0\le r<1\f$               | \f$r^{2\alpha+1}(1-r^2)^\beta\f$ in polar coordinates
+\ref ft_plan_ann2cxf           | the annulus, \f$\rho<r<1\f$                 | \f$r^{2\gamma+1}(r^2-\rho^2)^\alpha(1-r^2)^\beta\f$ in polar coordinates
+\ref ft_plan_rectdisk2cheb     | the unit disk, \f$x^2+y^2<1\f$              | \f$(1-x^2-y^2)^\beta\f$
+\ref ft_plan_tri2cheb          | the triangle, \f$x,y>0\f$ and \f$x+y<1\f$   | \f$x^\alpha y^\beta(1-x-y)^\gamma\f$
+\ref ft_plan_tet2cheb          | the tetrahedron, \f$x,y,z>0\f$ and \f$x+y+z<1\f$ | \f$x^\alpha y^\beta z^\gamma(1-x-y-z)^\delta\f$
+
+\subsection FTARGS2 Arguments of the executions
+
+The drivers, <tt>ft_execute_a2b</tt> and <tt>ft_execute_b2a</tt>, all have the form <tt>(TRANS, P, A, N, M)</tt>, with an additional <tt>L</tt> on the tetrahedron:
+
+- <tt>TRANS</tt> is a character that selects the operation: <tt>'N'</tt> applies the transform as it is defined above, and <tt>'T'</tt> applies its transpose.
+- <tt>P</tt> is the plan that is returned by the corresponding <tt>ft_plan_a2b</tt>. A plan may be reused for any number of executions.
+- <tt>A</tt> is the array of coefficients. It is overwritten by the result: on entry to <tt>ft_execute_a2b</tt>, it stores \f$F\f$, zeros included, and on exit it stores \f$G\f$, and vice versa for <tt>ft_execute_b2a</tt>. The array is stored in column-major ordering, so that the entry in row \f$i\f$ and column \f$j\f$, counting from zero, is <tt>A[i+N*j]</tt>. On the tetrahedron, the entry in row \f$i\f$, column \f$j\f$, and slice \f$k\f$ is <tt>A[i+N*(j+L*k)]</tt>.
+- <tt>N</tt> is the number of rows of <tt>A</tt>. It must be equal to the <tt>n</tt> that created the plan.
+- <tt>M</tt> is the number of columns of <tt>A</tt>. The arrays \f$F\f$ and \f$G\f$ above are shown with all of their columns, and this number depends on the transform, as in the table below.
+- <tt>L</tt> appears only on the tetrahedron, where <tt>A</tt> is an \f$N\times L\times M\f$ array: <tt>L</tt> is the number of columns and <tt>M</tt> is the number of slices.
+
+Transform                                      | Size of <tt>A</tt> for a plan with <tt>n</tt>
+---------------------------------------------- | ---------------------------------------------
+\ref sph2fourier "sph2fourier" and \ref spinsph2fourier "spinsph2fourier" | \f$N\times M = n\times(2n-1)\f$
+\ref disk2cxf "disk2cxf" and \ref ann2cxf "ann2cxf" | \f$N\times M = n\times(4n-3)\f$
+\ref rectdisk2cheb "rectdisk2cheb" and \ref tri2cheb "tri2cheb" | \f$N\times M = n\times n\f$
+\ref tet2cheb "tet2cheb" | \f$N\times L\times M = n\times n\times n\f$
+
+For the spin-weighted spherical harmonics, the coefficients are complex and <tt>A</tt> is an array of <tt>ft_complex</tt>.
+
+\subsection FTARGS3 Arguments of the conversions and the kernels
+
+The conversions to and from a tensor-product basis, <tt>ft_execute_a_hi2lo</tt> and <tt>ft_execute_a_lo2hi</tt>, have the form <tt>(RP, A, B, M)</tt>:
+
+- <tt>RP</tt> is a \ref ft_rotation_plan that stores the sines and the cosines of the Givens rotations, such as the one returned by <tt>ft_plan_rotsphere</tt>. For the spin-weighted spherical harmonics, it is a \ref ft_spin_rotation_plan called <tt>SRP</tt>. A \ref ft_harmonic_plan stores its own rotation plans.
+- <tt>A</tt> and <tt>M</tt> are the array of coefficients and its number of columns, as above. The number of rows is the <tt>n</tt> that created the rotation plan.
+- <tt>B</tt> is a work array of the same size as <tt>A</tt>. Its contents on entry are ignored.
+
+On the tetrahedron, the form is <tt>(RP1, RP2, A, L, M)</tt>, with two rotation plans, no work array, and <tt>L</tt> and <tt>M</tt> as above.
+
+The computational kernels, <tt>ft_kernel_a_hi2lo</tt> and <tt>ft_kernel_a_lo2hi</tt>, have the form <tt>(RP, m1, m2, A, S)</tt> and act on a single column of coefficients:
+
+- <tt>m1</tt> and <tt>m2</tt> are the low and the high orders, <tt>m1</tt> \f$\le\f$ <tt>m2</tt>, where the order is the index \f$m\f$ in the formulas above. The kernel <tt>hi2lo</tt> converts coefficients from order <tt>m2</tt> down to order <tt>m1</tt> and <tt>lo2hi</tt> converts them back. On the sphere, the disk, and the rectangularized disk, a conversion preserves the parity of the order, so that <tt>m2</tt> \f$-\f$ <tt>m1</tt> is even.
+- <tt>A</tt> points to the first coefficient in the column.
+- <tt>S</tt> is the stride: consecutive coefficients are stored in <tt>A[0]</tt>, <tt>A[S]</tt>, <tt>A[2*S]</tt>, and so on. A stride of <tt>1</tt> acts on one column of a column-major array.
+
+For the spin-weighted spherical harmonics, the form is <tt>(SRP, m, A, S)</tt>, and the kernels convert between order <tt>m</tt> and order <tt>m%2</tt>.
+
 \section FT2 Under construction
 
 \subsection sgl2cxf
@@ -459,6 +520,18 @@ f_{n-1}(r,\theta,\varphi) = \sum_{k=0}^{n-1}\sum_{\ell=0}^k\sum_{m=-\ell}^{+\ell
 FastTransforms provides templates for FFTW synthesis and analysis on the sphere, disk, and triangle. Data structures within the \c ft_* namespace are provided, along with destructors. Convenience methods are provided to plan and execute the transforms at particular points.
 
 \section SA1 FFTW Synthesis and Analysis
+
+\subsection SAARGS Function arguments
+
+For every domain, the functions <tt>ft_plan_*_synthesis</tt> and <tt>ft_plan_*_analysis</tt> are pre-computations and the functions <tt>ft_execute_*_synthesis</tt> and <tt>ft_execute_*_analysis</tt> execute them. Synthesis converts coefficients to function values on the grid, and analysis converts function values on the grid to coefficients. The arguments are:
+
+- <tt>N</tt> and <tt>M</tt> are the numbers of points in the \f$N\times M\f$ grids below, which are also the numbers of rows and columns of the array <tt>X</tt>. On the tetrahedron, there is a third dimension, <tt>L</tt>, and the array is \f$N\times L\times M\f$.
+- <tt>rho</tt> is the inner radius of the annulus, \f$0<\rho<1\f$.
+- <tt>S</tt> is the integer spin of the spin-weighted spherical harmonics.
+- <tt>flags</tt> are the <a href="https://www.fftw.org/fftw3_doc/Planner-Flags.html">FFTW planner flags</a>, such as <tt>FFTW_ESTIMATE</tt> or <tt>FFTW_MEASURE</tt>. They are passed to FFTW without modification.
+- <tt>TRANS</tt> is a character that selects the operation: <tt>'N'</tt> applies the synthesis or the analysis, and <tt>'T'</tt> applies its transpose.
+- <tt>P</tt> is the plan that is returned by the corresponding pre-computation.
+- <tt>X</tt> is an \f$N\times M\f$ array in column-major ordering that is overwritten by the result. For synthesis, it stores the coefficients \f$G\f$ that are described in \ref transforms on entry, and the function values on exit. For analysis, it is the other way around. The function value at the grid point with indices \f$n\f$ and \f$m\f$ below is stored in <tt>X[n+N*m]</tt>. On the sphere with spin, <tt>X</tt> is an array of <tt>ft_complex</tt>.
 
 \subsection SA11 ft_fftw_sphere_plan & ft_fftw_spinsphere_plan
 
