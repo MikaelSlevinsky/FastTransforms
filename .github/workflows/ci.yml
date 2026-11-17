@@ -10,7 +10,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macOS-13
+          - macos-15-intel
         compiler:
           - gcc
           - clang
@@ -19,9 +19,9 @@ jobs:
           - x64
           - aarch64
         exclude:
-          - os: macOS-13
+          - os: macos-15-intel
             arch: x86
-          - os: macOS-13
+          - os: macos-15-intel
             arch: aarch64
       fail-fast: false
     env:
@@ -33,14 +33,14 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.compiler, 'gcc')
         run: |
           sudo apt-get update
-          sudo apt-get install libomp-11-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
+          sudo apt-get install libblas-dev libopenblas-dev libfftw3-dev libmpfr-dev
       - name: Install dependencies on ubuntu clang
         if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.compiler, 'clang')
         run: |
           sudo apt-get update
-          sudo apt-get install libomp-14-dev libblas-dev libopenblas-base libfftw3-dev libmpfr-dev
+          sudo apt-get install libomp-dev libblas-dev libopenblas-dev libfftw3-dev libmpfr-dev
       - name: Install dependencies on macOS
-        if: startsWith(matrix.os, 'macOS')
+        if: startsWith(matrix.os, 'macos')
         run: |
           brew update
           brew install libomp openblas fftw mpfr
