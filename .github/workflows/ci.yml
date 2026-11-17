@@ -39,11 +39,21 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libomp-dev libblas-dev libopenblas-dev libfftw3-dev libmpfr-dev
+      # Homebrew no longer ships Intel macOS bottles for these, so it would
+      # build them (and gcc) from source; conda-forge still has osx-64 builds.
+      - name: Set up conda on macOS
+        if: startsWith(matrix.os, 'macos')
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          activate-environment: ft
       - name: Install dependencies on macOS
         if: startsWith(matrix.os, 'macos')
+        shell: bash -el {0}
         run: |
-          brew update
-          brew install libomp openblas fftw mpfr
+          conda install -y openblas libblas fftw mpfr llvm-openmp
+          echo "FT_PREFIX=$CONDA_PREFIX" >> $GITHUB_ENV
+          echo "LDFLAGS=-Wl,-rpath,$CONDA_PREFIX/lib" >> $GITHUB_ENV
       - name: Compiler version
         run: ${CC} --version
       - name: Configure environment for quadmath
