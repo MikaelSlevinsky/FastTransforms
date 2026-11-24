@@ -736,28 +736,28 @@ void ft_execute_cheb2tet(const char TRANS, const ft_harmonic_plan * P, double * 
   \param alpha The parameter \f$\alpha\f$ in the weight \f$r^{2\alpha}(1-r^2)^\beta\f$, where \f$\alpha>-\frac{3}{2}\f$.
   \param beta The parameter \f$\beta\f$ in the weight \f$r^{2\alpha}(1-r^2)^\beta\f$, where \f$\beta>-1\f$.
 */
-ft_harmonic_plan * ft_plan_ball2xcf(const int n, const double alpha, const double beta);
+ft_harmonic_plan * ft_plan_ball2cxf(const int n, const double alpha, const double beta);
 
 /*!
   \brief Transform a generalized Zernike expansion on the ball to a Chebyshev--Fourier--Fourier series.
   \param TRANS `'N'` to apply the transform or `'T'` to apply its transpose.
-  \param P The plan that is returned by \ref ft_plan_ball2xcf.
-  \param A The \f$N\times L\times M\f$ array of coefficients in column-major ordering, as in \ref ball2xcf "ball2xcf". It is overwritten by the result.
+  \param P The plan that is returned by \ref ft_plan_ball2cxf.
+  \param A The \f$N\times L\times M\f$ array of coefficients in column-major ordering, as in \ref ball2cxf "ball2cxf". It is overwritten by the result.
   \param N The number of radial coefficients, equal to the `n` that created the plan.
   \param L The number of rows of each spherical harmonic slice, which is \f$2N-1\f$.
   \param M The number of columns of each spherical harmonic slice, which is \f$4N-3\f$ for an expansion of degree \f$2N-2\f$.
 */
-void ft_execute_ball2xcf(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M);
+void ft_execute_ball2cxf(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M);
 /*!
   \brief Transform a Chebyshev--Fourier--Fourier series to a generalized Zernike expansion on the ball.
   \param TRANS `'N'` to apply the transform or `'T'` to apply its transpose.
-  \param P The plan that is returned by \ref ft_plan_ball2xcf.
-  \param A The \f$N\times L\times M\f$ array of coefficients in column-major ordering, as in \ref ball2xcf "ball2xcf". It is overwritten by the result.
+  \param P The plan that is returned by \ref ft_plan_ball2cxf.
+  \param A The \f$N\times L\times M\f$ array of coefficients in column-major ordering, as in \ref ball2cxf "ball2cxf". It is overwritten by the result.
   \param N The number of radial coefficients, equal to the `n` that created the plan.
   \param L The number of rows of each spherical harmonic slice, which is \f$2N-1\f$.
   \param M The number of columns of each spherical harmonic slice, which is \f$4N-3\f$ for an expansion of degree \f$2N-2\f$.
 */
-void ft_execute_xcf2ball(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M);
+void ft_execute_cxf2ball(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M);
 
 /// Data structure to store a \ref ft_spin_rotation_plan, and various arrays to represent 1D orthogonal polynomial transforms.
 typedef struct {

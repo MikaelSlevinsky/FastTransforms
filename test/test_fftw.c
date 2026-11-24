@@ -568,10 +568,10 @@ int main(int argc, const char * argv[]) {
                         for (int l = 0; l < L-(j+1)/2; l++)
                             for (int k = 0; k < N-(l+(j+1)/2+1)/2; k++)
                                 B[s+N*(q+L*p)] += A[k+N*(l+L*j)]*zernike3(k, l+(j+1)/2, j%2 ? -(j+1)/2 : j/2, a, b, sin((2*N-2*s-1)*M_PI/(4*N)), (2*q+1)*M_PI/(2*L), 2*M_PI*p/M);
-        P = ft_plan_ball2xcf(N, a, b);
+        P = ft_plan_ball2cxf(N, a, b);
         BS = ft_plan_ball_synthesis(N, L, M, FT_FFTW_FLAGS);
 
-        ft_execute_ball2xcf('N', P, A, N, L, M);
+        ft_execute_ball2cxf('N', P, A, N, L, M);
         ft_execute_ball_synthesis('N', BS, A, N, L, M);
 
         err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
@@ -597,19 +597,19 @@ int main(int argc, const char * argv[]) {
 
         A = ballrand(N, L, M);
         B = copymat(A, N, L*M);
-        P = ft_plan_ball2xcf(N, alpha, beta);
+        P = ft_plan_ball2cxf(N, alpha, beta);
         BS = ft_plan_ball_synthesis(N, L, M, FT_FFTW_FLAGS);
         BA = ft_plan_ball_analysis(N, L, M, FT_FFTW_FLAGS);
 
-        ft_execute_ball2xcf('N', P, A, N, L, M);
+        ft_execute_ball2cxf('N', P, A, N, L, M);
         ft_execute_ball_synthesis('N', BS, A, N, L, M);
         ft_execute_ball_analysis('N', BA, A, N, L, M);
-        ft_execute_xcf2ball('N', P, A, N, L, M);
+        ft_execute_cxf2ball('N', P, A, N, L, M);
 
-        ft_execute_ball2xcf('T', P, A, N, L, M);
+        ft_execute_ball2cxf('T', P, A, N, L, M);
         ft_execute_ball_synthesis('T', BA, A, N, L, M);
         ft_execute_ball_analysis('T', BS, A, N, L, M);
-        ft_execute_xcf2ball('T', P, A, N, L, M);
+        ft_execute_cxf2ball('T', P, A, N, L, M);
 
         err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
         printf("ϵ_2 \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
@@ -634,14 +634,14 @@ int main(int argc, const char * argv[]) {
         NTIMES = 1 + pow(64/N, 2);
 
         A = ballrand(N, L, M);
-        P = ft_plan_ball2xcf(N, alpha, beta);
+        P = ft_plan_ball2cxf(N, alpha, beta);
         BS = ft_plan_ball_synthesis(N, L, M, FT_FFTW_FLAGS);
         BA = ft_plan_ball_analysis(N, L, M, FT_FFTW_FLAGS);
 
-        FT_TIME({ft_execute_ball2xcf('N', P, A, N, L, M); ft_execute_ball_synthesis('N', BS, A, N, L, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_ball2cxf('N', P, A, N, L, M); ft_execute_ball_synthesis('N', BS, A, N, L, M);}, start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME({ft_execute_ball_analysis('N', BA, A, N, L, M); ft_execute_xcf2ball('N', P, A, N, L, M);}, start, end, NTIMES)
+        FT_TIME({ft_execute_ball_analysis('N', BA, A, N, L, M); ft_execute_cxf2ball('N', P, A, N, L, M);}, start, end, NTIMES)
         printf("  %.6f\n", elapsed(&start, &end, NTIMES));
 
         free(A);
@@ -671,7 +671,7 @@ static double jacobi_orthonormal(const int n, const double a, const double b, co
     return p*exp(-0.5*logh);
 }
 
-// Real orthonormal generalized Zernike polynomial on the ball, as defined in the documentation of ball2xcf.
+// Real orthonormal generalized Zernike polynomial on the ball, as defined in the documentation of ball2cxf.
 static double zernike3(const int k, const int l, const int m, const double alpha, const double beta, const double r, const double theta, const double phi) {
     int am = abs(m);
     double radial = pow(2.0, 0.5*(l+alpha+beta+2.5))*pow(r, l)*jacobi_orthonormal(k, beta, l+alpha+0.5, 2.0*r*r-1.0);

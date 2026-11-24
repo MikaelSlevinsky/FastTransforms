@@ -1710,10 +1710,10 @@ int main(int argc, const char * argv[]) {
 
         A = ballrand(N, L, M);
         B = copymat(A, N, L*M);
-        P = ft_plan_ball2xcf(N, alpha, beta);
+        P = ft_plan_ball2cxf(N, alpha, beta);
 
-        ft_execute_ball2xcf('N', P, A, N, L, M);
-        ft_execute_xcf2ball('N', P, A, N, L, M);
+        ft_execute_ball2cxf('N', P, A, N, L, M);
+        ft_execute_cxf2ball('N', P, A, N, L, M);
 
         err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
         printf("ϵ_2 \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
@@ -1722,8 +1722,8 @@ int main(int argc, const char * argv[]) {
         printf("ϵ_∞ \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
         ft_checktest(err, 4*N, &checksum);
 
-        ft_execute_ball2xcf('T', P, A, N, L, M);
-        ft_execute_xcf2ball('T', P, A, N, L, M);
+        ft_execute_ball2cxf('T', P, A, N, L, M);
+        ft_execute_cxf2ball('T', P, A, N, L, M);
 
         err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
         printf("ϵ_2 transposed \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
@@ -1746,12 +1746,12 @@ int main(int argc, const char * argv[]) {
         NTIMES = 1 + pow(64/N, 2);
 
         A = ballrand(N, L, M);
-        P = ft_plan_ball2xcf(N, alpha, beta);
+        P = ft_plan_ball2cxf(N, alpha, beta);
 
-        FT_TIME(ft_execute_ball2xcf('N', P, A, N, L, M), start, end, NTIMES)
+        FT_TIME(ft_execute_ball2cxf('N', P, A, N, L, M), start, end, NTIMES)
         printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
 
-        FT_TIME(ft_execute_xcf2ball('N', P, A, N, L, M), start, end, NTIMES)
+        FT_TIME(ft_execute_cxf2ball('N', P, A, N, L, M), start, end, NTIMES)
         printf("  %.6f", elapsed(&start, &end, NTIMES));
 
         printf("\n");

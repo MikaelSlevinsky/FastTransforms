@@ -1326,7 +1326,7 @@ static void execute_ball_angular_trmm(const char TRANS, const double * P0, const
     }
 }
 
-ft_harmonic_plan * ft_plan_ball2xcf(const int n, const double alpha, const double beta) {
+ft_harmonic_plan * ft_plan_ball2cxf(const int n, const double alpha, const double beta) {
     int l = 2*n-1;
     ft_harmonic_plan * P = malloc(sizeof(ft_harmonic_plan));
     P->RP = malloc(2 * sizeof(ft_rotation_plan *));
@@ -1363,7 +1363,7 @@ ft_harmonic_plan * ft_plan_ball2xcf(const int n, const double alpha, const doubl
     return P;
 }
 
-void ft_execute_ball2xcf(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M) {
+void ft_execute_ball2cxf(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M) {
     if (TRANS == 'N') {
         execute_ball_radial_hi2lo(P->RP[0], A, N, L, M);
         execute_ball_radial_trmm('N', P->P[0], P->P[1], A, N, L, M);
@@ -1378,7 +1378,7 @@ void ft_execute_ball2xcf(const char TRANS, const ft_harmonic_plan * P, double * 
     }
 }
 
-void ft_execute_xcf2ball(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M) {
+void ft_execute_cxf2ball(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M) {
     if (TRANS == 'N') {
         execute_ball_angular_trmm('N', P->Pinv[2], P->Pinv[3], A, N, L, M);
         execute_ball_angular_lo2hi(P->RP[1], A, N, L, M);
