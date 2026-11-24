@@ -1,30 +1,37 @@
 #include "fasttransforms.h"
 #include "ftutilities.h"
 
+// The single-precision plans are computed in double, which always has extra precision.
 #define FLT float
 #define X(name) FT_CONCAT(ft_, name, f)
 #define Y(name) FT_CONCAT(, name, f)
+#define PLAN_TOL(n) 1
 #include "test_transforms_source.c"
 #undef FLT
 #undef X
 #undef Y
+#undef PLAN_TOL
 
 #define FLT double
 #define X(name) FT_CONCAT(ft_, name, )
 #define Y(name) FT_CONCAT(, name, )
+#define PLAN_TOL(n) FT_PLAN_TOL(n)
 #include "test_transforms_source.c"
 #undef FLT
 #undef X
 #undef Y
+#undef PLAN_TOL
 
 #if defined(FT_QUADMATH)
     #define FLT long double
     #define X(name) FT_CONCAT(ft_, name, l)
     #define Y(name) FT_CONCAT(, name, l)
+    #define PLAN_TOL(n) 1
     #include "test_transforms_source.c"
     #undef FLT
     #undef X
     #undef Y
+    #undef PLAN_TOL
 #endif
 
 #include "test_transforms_mpfr.c"
@@ -67,7 +74,7 @@ int main(void) {
             }
         }
         printf("Associated Jacobi recurrence \t (n, c) = (%3i, %i) \t |%20.2e ", n, c, err);
-        ft_checktest(err, n*n, &checksum);
+        ft_checktest(err, n*n*FT_PLAN_TOL(n), &checksum);
     }
     for (int c = 1; c < 9; c++) {
         double alpha = 0.123, beta = 0.456, err = 0;
@@ -88,7 +95,7 @@ int main(void) {
             }
         }
         printf("Associated Laguerre recurrence \t (n, c) = (%3i, %i) \t |%20.2e ", n, c, err);
-        ft_checktest(err, n*n, &checksum);
+        ft_checktest(err, n*n*FT_PLAN_TOL(n), &checksum);
     }
     for (int c = 1; c < 9; c++) {
         double err = 0;
@@ -124,7 +131,8 @@ int main(void) {
                 colsum[j] += V[i+j*n];
         double err = ft_norm_2arg(Pnc1, colsum, n)/ft_norm_1arg(Pnc1, n);
         printf("Error in evaluating P_n(1; %i) \t\t\t\t |%20.2e ", c, err);
-        ft_checktest(err, 4, &checksum);
+        // Without extra precision, each column sum accumulates the rounding errors of n coefficients.
+        ft_checktest(err, FT_LDBL_IS_DBL ? 4*n*n : 4, &checksum);
         free(V);
         free(Pnc1);
         free(colsum);
@@ -135,6 +143,8 @@ int main(void) {
     printf("---------------------------------------------------------|----------------------\n");
     // The connection coefficients grow exponentially and are only exactly
     // representable in double for n ≤ 20; beyond that V⁻¹V loses accuracy.
+    // They are exact only if they are computed with extra precision, so the
+    // checks of V⁻¹V and V V⁻¹ are skipped where long double is double.
     for (int n = 8; n <= 20; n += 2) {
         double err = 0;
         double * V = plan_half_chebyshev_to_chebyshev(n);
@@ -145,19 +155,21 @@ int main(void) {
         ft_trmm('N', n, iV, n, V, n, n);
         err = ft_norm_2arg(V, Id, n*n)/ft_norm_1arg(Id, n*n);
         printf("V⁻¹V ≈ I \t\t\t\t n = %3i \t |%20.2e ", n, err);
-        ft_checktest(err, n*n, &checksum);
+        if (FT_LDBL_IS_DBL) printf(YELLOW("skipped")"\n");
+        else ft_checktest(err, n*n, &checksum);
         free(V);
         V = plan_half_chebyshev_to_chebyshev(n);
         ft_trmm('N', n, V, n, iV, n, n);
         err = ft_norm_2arg(iV, Id, n*n)/ft_norm_1arg(Id, n*n);
         printf("V V⁻¹ ≈ I \t\t\t\t n = %3i \t |%20.2e ", n, err);
-        ft_checktest(err, n*n*n*n, &checksum);
+        if (FT_LDBL_IS_DBL) printf(YELLOW("skipped")"\n");
+        else ft_checktest(err, n*n*n*n, &checksum);
         free(iV);
         iV = plan_chebyshev_to_half_chebyshev(n);
         ft_trsm('N', n, V, n, Id, n, n);
         err = ft_norm_2arg(Id, iV, n*n)/ft_norm_1arg(iV, n*n);
         printf("V\\I ≈ V⁻¹ \t\t\t\t n = %3i \t |%20.2e ", n, err);
-        ft_checktest(err, n*n, &checksum);
+        ft_checktest(err, n*n*FT_PLAN_TOL(n), &checksum);
         free(V);
         free(iV);
         free(Id);

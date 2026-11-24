@@ -26,7 +26,7 @@ void Y(test_transforms)(int * checksum, int N) {
             }
         }
         printf("(n×n) = (%4ix%4i): \t\t\t\t\t |%20.2e ", n, n, (double) err);
-        X(checktest)(err, 2*Y(sqrt)(n), checksum);
+        X(checktest)(err, 2*Y(sqrt)(n)*PLAN_TOL(n), checksum);
         free(Id);
         free(B);
     }
@@ -78,7 +78,7 @@ void Y(test_transforms)(int * checksum, int N) {
                 }
             }
             printf("(n×n) = (%4ix%4i), (%+1.2f) → (%+1.2f): \t\t |%20.2e ", n, n, (double) lambda, (double) mu, (double) err);
-            X(checktest)(err, 4*Y(pow)(n, Y(fabs)(mu-lambda)), checksum);
+            X(checktest)(err, 4*Y(pow)(n, Y(fabs)(mu-lambda))*PLAN_TOL(n), checksum);
         }
         free(Id);
         free(B);
@@ -163,7 +163,7 @@ void Y(test_transforms)(int * checksum, int N) {
                 }
             }
             printf("(n×n) = (%4ix%4i), (%+1.2f, %+1.2f) → (%+1.2f, %+1.2f): \t |%20.2e ", n, n, (double) alpha, (double) beta, (double) gamma, (double) delta, (double) err);
-            X(checktest)(err, 32*Y(pow)(n, MAX(Y(fabs)(gamma-alpha), Y(fabs)(delta-beta))), checksum);
+            X(checktest)(err, 32*Y(pow)(n, MAX(Y(fabs)(gamma-alpha), Y(fabs)(delta-beta)))*PLAN_TOL(n), checksum);
         }
         free(Id);
         free(B);
@@ -214,7 +214,7 @@ void Y(test_transforms)(int * checksum, int N) {
                 }
             }
             printf("(n×n) = (%4ix%4i), (%+1.2f) → (%+1.2f): \t\t |%20.2e ", n, n, (double) alpha, (double) beta, (double) err);
-            X(checktest)(err, 4*Y(pow)(n, Y(fabs)(alpha-beta)), checksum);
+            X(checktest)(err, 4*Y(pow)(n, Y(fabs)(alpha-beta))*PLAN_TOL(n), checksum);
         }
         free(Id);
         free(B);
@@ -259,7 +259,7 @@ void Y(test_transforms)(int * checksum, int N) {
             }
         }
         printf("(n×n) = (%4ix%4i): \t\t\t\t\t |%20.2e ", n, n, (double) err);
-        X(checktest)(err, n, checksum);
+        X(checktest)(err, n*PLAN_TOL(n), checksum);
         free(Id);
         free(B);
     }
@@ -338,7 +338,7 @@ void Y(test_transforms)(int * checksum, int N) {
                     }
                 }
                 printf("(n, c) = (%4i, %i), (%+1.2f, %+1.2f) → (%+1.2f, %+1.2f): \t |%20.2e ", n, c, (double) alpha, (double) beta, (double) gamma, (double) delta, (double) err);
-                X(checktest)(err, ((FLT) n)*n*n, checksum);
+                X(checktest)(err, ((FLT) n)*n*n*PLAN_TOL(n), checksum);
             }
         }
         free(B);
