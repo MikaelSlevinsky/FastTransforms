@@ -730,6 +730,35 @@ void ft_execute_tet2cheb(const char TRANS, const ft_harmonic_plan * P, double * 
 */
 void ft_execute_cheb2tet(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M);
 
+/*!
+  \brief Plan a generalized Zernike polynomial transform on the ball.
+  \param n The number of radial coefficients in the array, so that the polynomial degree is at most \f$2n-2\f$.
+  \param alpha The parameter \f$\alpha\f$ in the weight \f$r^{2\alpha}(1-r^2)^\beta\f$, where \f$\alpha>-\frac{3}{2}\f$.
+  \param beta The parameter \f$\beta\f$ in the weight \f$r^{2\alpha}(1-r^2)^\beta\f$, where \f$\beta>-1\f$.
+*/
+ft_harmonic_plan * ft_plan_ball2xcf(const int n, const double alpha, const double beta);
+
+/*!
+  \brief Transform a generalized Zernike expansion on the ball to a Chebyshev--Fourier--Fourier series.
+  \param TRANS `'N'` to apply the transform or `'T'` to apply its transpose.
+  \param P The plan that is returned by \ref ft_plan_ball2xcf.
+  \param A The \f$N\times L\times M\f$ array of coefficients in column-major ordering, as in \ref ball2xcf "ball2xcf". It is overwritten by the result.
+  \param N The number of radial coefficients, equal to the `n` that created the plan.
+  \param L The number of rows of each spherical harmonic slice, which is \f$2N-1\f$.
+  \param M The number of columns of each spherical harmonic slice, which is \f$4N-3\f$ for an expansion of degree \f$2N-2\f$.
+*/
+void ft_execute_ball2xcf(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M);
+/*!
+  \brief Transform a Chebyshev--Fourier--Fourier series to a generalized Zernike expansion on the ball.
+  \param TRANS `'N'` to apply the transform or `'T'` to apply its transpose.
+  \param P The plan that is returned by \ref ft_plan_ball2xcf.
+  \param A The \f$N\times L\times M\f$ array of coefficients in column-major ordering, as in \ref ball2xcf "ball2xcf". It is overwritten by the result.
+  \param N The number of radial coefficients, equal to the `n` that created the plan.
+  \param L The number of rows of each spherical harmonic slice, which is \f$2N-1\f$.
+  \param M The number of columns of each spherical harmonic slice, which is \f$4N-3\f$ for an expansion of degree \f$2N-2\f$.
+*/
+void ft_execute_xcf2ball(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M);
+
 /// Data structure to store a \ref ft_spin_rotation_plan, and various arrays to represent 1D orthogonal polynomial transforms.
 typedef struct {
     ft_spin_rotation_plan * SRP;
@@ -1073,6 +1102,59 @@ void ft_execute_spinsph_synthesis(const char TRANS, const ft_spinsphere_fftw_pla
   \param M The number of columns of `X`.
 */
 void ft_execute_spinsph_analysis(const char TRANS, const ft_spinsphere_fftw_plan * P, ft_complex * X, const int N, const int M);
+
+typedef struct {
+    fftw_plan planr1;
+    fftw_plan planr2;
+    fftw_plan planr3;
+    fftw_plan planr4;
+    fftw_plan plantheta1;
+    fftw_plan plantheta2;
+    fftw_plan planphi;
+    double * Y;
+} ft_ball_fftw_plan;
+
+/// Destroy a \ref ft_ball_fftw_plan.
+void ft_destroy_ball_fftw_plan(ft_ball_fftw_plan * P);
+
+ft_ball_fftw_plan * ft_plan_ball_with_kind(const int N, const int L, const int M, const fftw_r2r_kind kind[5][1], const unsigned flags);
+/*!
+  \brief Plan FFTW synthesis on the ball.
+  \param N The number of radial points of the \f$N\times L\times M\f$ grid, see \ref synthesisanalysis.
+  \param L The number of polar points of the \f$N\times L\times M\f$ grid.
+  \param M The number of azimuthal points of the \f$N\times L\times M\f$ grid.
+  \param flags The FFTW planner flags, such as `FFTW_ESTIMATE` or `FFTW_MEASURE`.
+*/
+ft_ball_fftw_plan * ft_plan_ball_synthesis(const int N, const int L, const int M, const unsigned flags);
+/*!
+  \brief Plan FFTW analysis on the ball.
+  \param N The number of radial points of the \f$N\times L\times M\f$ grid, see \ref synthesisanalysis.
+  \param L The number of polar points of the \f$N\times L\times M\f$ grid.
+  \param M The number of azimuthal points of the \f$N\times L\times M\f$ grid.
+  \param flags The FFTW planner flags, such as `FFTW_ESTIMATE` or `FFTW_MEASURE`.
+*/
+ft_ball_fftw_plan * ft_plan_ball_analysis(const int N, const int L, const int M, const unsigned flags);
+
+/*!
+  \brief Execute FFTW synthesis on the ball.
+  \param TRANS `'N'` to apply the synthesis or `'T'` to apply its transpose.
+  \param P The plan that is returned by \ref ft_plan_ball_synthesis if `TRANS` is `'N'`, or by \ref ft_plan_ball_analysis if `TRANS` is `'T'`.
+  \param X The \f$N\times L\times M\f$ array in column-major ordering that stores the coefficients on entry and the function values on the grid on exit.
+  \param N The number of radial points.
+  \param L The number of polar points.
+  \param M The number of azimuthal points.
+*/
+void ft_execute_ball_synthesis(const char TRANS, const ft_ball_fftw_plan * P, double * X, const int N, const int L, const int M);
+/*!
+  \brief Execute FFTW analysis on the ball.
+  \param TRANS `'N'` to apply the analysis or `'T'` to apply its transpose.
+  \param P The plan that is returned by \ref ft_plan_ball_analysis if `TRANS` is `'N'`, or by \ref ft_plan_ball_synthesis if `TRANS` is `'T'`.
+  \param X The \f$N\times L\times M\f$ array in column-major ordering that stores the function values on the grid on entry and the coefficients on exit.
+  \param N The number of radial points.
+  \param L The number of polar points.
+  \param M The number of azimuthal points.
+*/
+void ft_execute_ball_analysis(const char TRANS, const ft_ball_fftw_plan * P, double * X, const int N, const int L, const int M);
 
 typedef struct {
     ft_banded ** B;

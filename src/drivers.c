@@ -1256,6 +1256,143 @@ void ft_execute_cheb2tet(const char TRANS, const ft_harmonic_plan * P, double * 
     }
 }
 
+// On the ball, the N×L×M array A[k+N*(i+L*j)] has the radial index k, the spherical harmonic
+// row index i = ℓ-|m|, and the column index j of the order m = 0, -1, 1, -2, 2, …, as in sph2fourier.
+
+#define FT_BALL_BLOCK_SIZE 64
+
+// Convert the radial coefficients in every (ℓ,m) column from order ℓ down to order ℓ mod 2.
+static void execute_ball_radial_hi2lo(const ft_rotation_plan * RP, double * A, const int N, const int L, const int M) {
+    #pragma omp parallel
+    for (int j = FT_GET_THREAD_NUM(); j < M; j += FT_GET_NUM_THREADS()) {
+        int am = (j+1)/2;
+        for (int i = 0; i < L-am; i++)
+            kernel_disk_hi2lo_default(RP, (i+am)%2, i+am, A+N*(i+L*j), 1);
+    }
+}
+
+static void execute_ball_radial_lo2hi(const ft_rotation_plan * RP, double * A, const int N, const int L, const int M) {
+    #pragma omp parallel
+    for (int j = FT_GET_THREAD_NUM(); j < M; j += FT_GET_NUM_THREADS()) {
+        int am = (j+1)/2;
+        for (int i = 0; i < L-am; i++)
+            kernel_disk_lo2hi_default(RP, (i+am)%2, i+am, A+N*(i+L*j), 1);
+    }
+}
+
+// Convert the spherical harmonic coefficients of every radial index from order |m| down to order |m| mod 2.
+static void execute_ball_angular_hi2lo(const ft_rotation_plan * RP, double * A, const int N, const int L, const int M) {
+    #pragma omp parallel
+    for (int j = 3+FT_GET_THREAD_NUM(); j < M; j += FT_GET_NUM_THREADS()) {
+        int am = (j+1)/2;
+        for (int k = 0; k < N; k += FT_BALL_BLOCK_SIZE)
+            kernel_sph_hi2lo_block(RP, am%2, am, A+k+N*L*j, MIN(FT_BALL_BLOCK_SIZE, N-k), N);
+    }
+}
+
+static void execute_ball_angular_lo2hi(const ft_rotation_plan * RP, double * A, const int N, const int L, const int M) {
+    #pragma omp parallel
+    for (int j = 3+FT_GET_THREAD_NUM(); j < M; j += FT_GET_NUM_THREADS()) {
+        int am = (j+1)/2;
+        for (int k = 0; k < N; k += FT_BALL_BLOCK_SIZE)
+            kernel_sph_lo2hi_block(RP, am%2, am, A+k+N*L*j, MIN(FT_BALL_BLOCK_SIZE, N-k), N);
+    }
+}
+
+// Multiply the radial coefficients by P0 where ℓ is even and by P1 where ℓ is odd.
+static void execute_ball_radial_trmm(const char TRANS, const double * P0, const double * P1, double * A, const int N, const int L, const int M) {
+    for (int j = 0; j < M; j++) {
+        // The rows i of column j with ℓ = i+|m| even start at i = |m| mod 2.
+        int p = ((j+1)/2)%2;
+        if (TRANS == 'N') {
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (L+1-p)/2, 1.0, P0, N, A+N*(p+L*j), 2*N);
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, N, (L+p)/2, 1.0, P1, N, A+N*(1-p+L*j), 2*N);
+        }
+        else if (TRANS == 'T') {
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (L+1-p)/2, 1.0, P0, N, A+N*(p+L*j), 2*N);
+            cblas_dtrmm(CblasColMajor, CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, N, (L+p)/2, 1.0, P1, N, A+N*(1-p+L*j), 2*N);
+        }
+    }
+}
+
+// Multiply the spherical harmonic coefficients by P0 where m is even and by P1 where m is odd.
+static void execute_ball_angular_trmm(const char TRANS, const double * P0, const double * P1, double * A, const int N, const int L, const int M) {
+    for (int j = 0; j < M; j++) {
+        const double * P = ((j+1)/2)%2 == 0 ? P0 : P1;
+        if (TRANS == 'N')
+            cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasTrans, CblasNonUnit, N, L, 1.0, P, L, A+N*L*j, N);
+        else if (TRANS == 'T')
+            cblas_dtrmm(CblasColMajor, CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, N, L, 1.0, P, L, A+N*L*j, N);
+    }
+}
+
+ft_harmonic_plan * ft_plan_ball2xcf(const int n, const double alpha, const double beta) {
+    int l = 2*n-1;
+    ft_harmonic_plan * P = malloc(sizeof(ft_harmonic_plan));
+    P->RP = malloc(2 * sizeof(ft_rotation_plan *));
+    // The radial parts are disk polynomials with α ↦ α+½ and the order m ↦ ℓ.
+    P->RP[0] = ft_plan_rotdisk(n, alpha + 0.5, beta);
+    P->RP[1] = ft_plan_rotsphere(l);
+    P->B = NULL;
+    P->P = malloc(4 * sizeof(double *));
+    P->P[0] = plan_jacobi_to_chebyshev(1, 0, n, beta, alpha + 0.5);
+    P->P[1] = plan_jacobi_to_jacobi(1, 1, n, beta, alpha + 1.5, -0.5, 0.5);
+    P->P[2] = plan_legendre_to_chebyshev(1, 0, l);
+    P->P[3] = plan_ultraspherical_to_ultraspherical(1, 0, l, 1.5, 1.0);
+    P->Pinv = malloc(4 * sizeof(double *));
+    P->Pinv[0] = plan_chebyshev_to_jacobi(0, 1, n, beta, alpha + 0.5);
+    P->Pinv[1] = plan_jacobi_to_jacobi(1, 1, n, -0.5, 0.5, beta, alpha + 1.5);
+    P->Pinv[2] = plan_chebyshev_to_legendre(0, 1, l);
+    P->Pinv[3] = plan_ultraspherical_to_ultraspherical(0, 1, l, 1.0, 1.5);
+    double cst0 = pow(2.0, 0.5*(alpha+beta+2.5));
+    double cst1 = cst0*M_2_PI_POW_0P5;
+    double cst0inv = pow(2.0, -0.5*(alpha+beta+2.5));
+    double cst1inv = cst0inv*M_PI_2_POW_0P5;
+    for (int j = 0; j < n; j++)
+        for (int i = 0; i <= j; i++) {
+            P->P[0][i+j*n] *= cst0;
+            P->P[1][i+j*n] *= cst1;
+            P->Pinv[0][i+j*n] *= cst0inv;
+            P->Pinv[1][i+j*n] *= cst1inv;
+        }
+    P->alpha = alpha;
+    P->beta = beta;
+    P->NRP = 2;
+    P->NMP = 0;
+    P->NP = 4;
+    return P;
+}
+
+void ft_execute_ball2xcf(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M) {
+    if (TRANS == 'N') {
+        execute_ball_radial_hi2lo(P->RP[0], A, N, L, M);
+        execute_ball_radial_trmm('N', P->P[0], P->P[1], A, N, L, M);
+        execute_ball_angular_hi2lo(P->RP[1], A, N, L, M);
+        execute_ball_angular_trmm('N', P->P[2], P->P[3], A, N, L, M);
+    }
+    else if (TRANS == 'T') {
+        execute_ball_angular_trmm('T', P->P[2], P->P[3], A, N, L, M);
+        execute_ball_angular_lo2hi(P->RP[1], A, N, L, M);
+        execute_ball_radial_trmm('T', P->P[0], P->P[1], A, N, L, M);
+        execute_ball_radial_lo2hi(P->RP[0], A, N, L, M);
+    }
+}
+
+void ft_execute_xcf2ball(const char TRANS, const ft_harmonic_plan * P, double * A, const int N, const int L, const int M) {
+    if (TRANS == 'N') {
+        execute_ball_angular_trmm('N', P->Pinv[2], P->Pinv[3], A, N, L, M);
+        execute_ball_angular_lo2hi(P->RP[1], A, N, L, M);
+        execute_ball_radial_trmm('N', P->Pinv[0], P->Pinv[1], A, N, L, M);
+        execute_ball_radial_lo2hi(P->RP[0], A, N, L, M);
+    }
+    else if (TRANS == 'T') {
+        execute_ball_radial_hi2lo(P->RP[0], A, N, L, M);
+        execute_ball_radial_trmm('T', P->Pinv[0], P->Pinv[1], A, N, L, M);
+        execute_ball_angular_hi2lo(P->RP[1], A, N, L, M);
+        execute_ball_angular_trmm('T', P->Pinv[2], P->Pinv[3], A, N, L, M);
+    }
+}
+
 void ft_destroy_spin_harmonic_plan(ft_spin_harmonic_plan * P) {
     ft_destroy_spin_rotation_plan(P->SRP);
     VFREE(P->B);

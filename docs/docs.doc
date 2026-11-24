@@ -384,6 +384,32 @@ then \ref ft_plan_tet2cheb creates the appropriate \ref ft_tetrahedral_harmonic_
 f_{n-1}(x,y,z) = \sum_{k=0}^{n-1}\sum_{\ell=0}^{n-1}\sum_{m=0}^{n-1} g_{k,\ell}^m T_k(2x-1) T_\ell\left(\frac{2y}{1-x}-1\right) T_m\left(\frac{2z}{1-x-y}-1\right).
 \f]
 
+\subsection ball2xcf
+
+Real orthonormal generalized Zernike polynomials in \f$L^2(\mathbb{B}^3, r^{2\alpha+2}(1-r^2)^\beta\ud r\sin\theta\ud\theta\ud\varphi)\f$ are:
+\f[
+Z_{k,\ell,m}^{(\alpha,\beta)}(r,\theta,\varphi) = 2^{\frac{\ell+\alpha+\beta+\frac{5}{2}}{2}} r^\ell\tilde{P}_k^{(\beta,\ell+\alpha+\frac{1}{2})}(2r^2-1) Y_\ell^m(\theta,\varphi),
+\f]
+where the \f$Y_\ell^m(\theta,\varphi)\f$ are the real orthonormal \ref sh "spherical harmonics" and the tilde implies that the univariate Jacobi polynomials are orthonormal. The polynomial \f$Z_{k,\ell,m}^{(\alpha,\beta)}\f$ has degree \f$2k+\ell\f$, and a degree-\f$(2n-2)\f$ expansion in generalized Zernike polynomials is given by:
+\f[
+f_{2n-2}(r,\theta,\varphi) = \sum_{\ell=0}^{2n-2}\sum_{m=-\ell}^{+\ell}\sum_{k=0}^{n-1-\lceil\ell/2\rceil} f_{k,\ell}^m Z_{k,\ell,m}^{(\alpha,\beta)}(r,\theta,\varphi).
+\f]
+If generalized Zernike expansion coefficients are organized into the rank-\f$3\f$ array whose \f$k^{\rm th}\f$ slice, for \f$0\le k<n\f$, is:
+\f[
+F[k,:,:] = \begin{pmatrix}
+f_{k,0}^0 & f_{k,1}^{-1} & f_{k,1}^1 & f_{k,2}^{-2} & f_{k,2}^2 & \cdots & f_{k,2n-2}^{2-2n} & f_{k,2n-2}^{2n-2}\\
+f_{k,1}^0 & f_{k,2}^{-1} & f_{k,2}^1 & f_{k,3}^{-2} & f_{k,3}^2 & \cdots & 0 & 0\\
+\vdots & \vdots & \vdots &  \vdots &  \vdots & \ddots & \vdots & \vdots\\
+f_{k,2n-3}^0 & f_{k,2n-2}^{-1} & f_{k,2n-2}^1 & 0 & 0 & \cdots & 0 & 0\\
+f_{k,2n-2}^0 & 0 & 0 & 0 & 0 & \cdots & 0 & 0\\
+\end{pmatrix},
+\f]
+where \f$f_{k,\ell}^m = 0\f$ whenever \f$2k+\ell>2n-2\f$, then \ref ft_plan_ball2xcf creates the appropriate \ref ft_harmonic_plan, and \ref ft_execute_ball2xcf returns the Chebyshev--Fourier--Fourier coefficients stored in the rank-\f$3\f$ array \f$G\f$. Each slice \f$F[k,:,:]\f$ is organized as the spherical harmonic coefficients in \ref sph2fourier "sph2fourier", and each slice \f$G[k,:,:]\f$ is organized as the bivariate Fourier coefficients in \ref sph2fourier "sph2fourier". That is:
+\f[
+f_{2n-2}(r,\theta,\varphi) = \sum_{k=0}^{n-1}\sum_{\ell=0}^{2n-2}\sum_{m=2-2n}^{2n-2} g_{k,\ell}^m \left\{\begin{array}{ccc} T_{2k}(r) & {\rm for} & \ell+m~{\rm even},\\ T_{2k+1}(r) & {\rm for} & \ell+m~{\rm odd},\end{array}\right\} \left\{\begin{array}{ccc} \cos(\ell\theta) & {\rm for} & m~{\rm even},\\ \sin((\ell+1)\theta) & {\rm for} & m~{\rm odd},\end{array}\right\} \sqrt{\frac{2-\delta_{m,0}}{2\pi}}\left\{\begin{array}{ccc} \cos(m\varphi) & {\rm for} & m \ge 0,\\ \sin(\abs{m}\varphi) & {\rm for} & m < 0,\end{array}\right.
+\f]
+and \ref ft_execute_xcf2ball converts them back. The parity of the radial Chebyshev polynomial is the parity of the degrees of the spherical harmonics that contribute to \f$g_{k,\ell}^m\f$.
+
 \subsection spinsph2fourier
 
 Complex-valued orthonormal spin-weighted spherical harmonics in \f$L^2(\mathbb{S}^2)\f$ are:
@@ -432,7 +458,7 @@ The functions above share a small set of arguments, and their names are used con
 
 The pre-computations, <tt>ft_plan_a2b</tt>, take the size of the problem followed by the parameters of the orthogonal polynomials:
 
-- <tt>n</tt> is the \f$n\f$ in the formulas above: the number of rows in the arrays of coefficients \f$F\f$ and \f$G\f$. On the sphere, triangle, rectangularized disk, and tetrahedron, a plan with <tt>n</tt> transforms expansions of degree at most \f$n-1\f$. On the disk and the annulus, it transforms expansions of degree at most \f$2n-2\f$.
+- <tt>n</tt> is the \f$n\f$ in the formulas above: the number of rows in the arrays of coefficients \f$F\f$ and \f$G\f$. On the sphere, triangle, rectangularized disk, and tetrahedron, a plan with <tt>n</tt> transforms expansions of degree at most \f$n-1\f$. On the disk, the annulus, and the ball, it transforms expansions of degree at most \f$2n-2\f$.
 - <tt>alpha</tt>, <tt>beta</tt>, <tt>gamma</tt>, and <tt>delta</tt> are the parameters \f$\alpha\f$, \f$\beta\f$, \f$\gamma\f$, and \f$\delta\f$ in the superscripts of the polynomials above. They are the powers that appear in the weight of orthogonality, listed in the table below.
 - <tt>rho</tt> is the inner radius of the annulus, \f$0 < \rho < 1\f$.
 - <tt>s</tt> is the integer spin of the spin-weighted spherical harmonics.
@@ -446,17 +472,18 @@ Plan                           | Domain                                      | W
 \ref ft_plan_rectdisk2cheb     | the unit disk, \f$x^2+y^2<1\f$              | \f$(1-x^2-y^2)^\beta\f$
 \ref ft_plan_tri2cheb          | the triangle, \f$x,y>0\f$ and \f$x+y<1\f$   | \f$x^\alpha y^\beta(1-x-y)^\gamma\f$
 \ref ft_plan_tet2cheb          | the tetrahedron, \f$x,y,z>0\f$ and \f$x+y+z<1\f$ | \f$x^\alpha y^\beta z^\gamma(1-x-y-z)^\delta\f$
+\ref ft_plan_ball2xcf          | the unit ball, \f$0\le r<1\f$               | \f$r^{2\alpha+2}(1-r^2)^\beta\sin\theta\f$ in spherical coordinates
 
 \subsection FTARGS2 Arguments of the executions
 
-The drivers, <tt>ft_execute_a2b</tt> and <tt>ft_execute_b2a</tt>, all have the form <tt>(TRANS, P, A, N, M)</tt>, with an additional <tt>L</tt> on the tetrahedron:
+The drivers, <tt>ft_execute_a2b</tt> and <tt>ft_execute_b2a</tt>, all have the form <tt>(TRANS, P, A, N, M)</tt>, with an additional <tt>L</tt> on the tetrahedron and the ball:
 
 - <tt>TRANS</tt> is a character that selects the operation: <tt>'N'</tt> applies the transform as it is defined above, and <tt>'T'</tt> applies its transpose.
 - <tt>P</tt> is the plan that is returned by the corresponding <tt>ft_plan_a2b</tt>. A plan may be reused for any number of executions.
-- <tt>A</tt> is the array of coefficients. It is overwritten by the result: on entry to <tt>ft_execute_a2b</tt>, it stores \f$F\f$, zeros included, and on exit it stores \f$G\f$, and vice versa for <tt>ft_execute_b2a</tt>. The array is stored in column-major ordering, so that the entry in row \f$i\f$ and column \f$j\f$, counting from zero, is <tt>A[i+N*j]</tt>. On the tetrahedron, the entry in row \f$i\f$, column \f$j\f$, and slice \f$k\f$ is <tt>A[i+N*(j+L*k)]</tt>.
+- <tt>A</tt> is the array of coefficients. It is overwritten by the result: on entry to <tt>ft_execute_a2b</tt>, it stores \f$F\f$, zeros included, and on exit it stores \f$G\f$, and vice versa for <tt>ft_execute_b2a</tt>. The array is stored in column-major ordering, so that the entry in row \f$i\f$ and column \f$j\f$, counting from zero, is <tt>A[i+N*j]</tt>. On the tetrahedron and the ball, the entry in row \f$i\f$, column \f$j\f$, and slice \f$k\f$ is <tt>A[i+N*(j+L*k)]</tt>. On the ball, the row is the radial index, so that the entry in row \f$i\f$ and column \f$j\f$ of the slice \f$F[k,:,:]\f$ or \f$G[k,:,:]\f$ above is <tt>A[k+N*(i+L*j)]</tt>.
 - <tt>N</tt> is the number of rows of <tt>A</tt>. It must be equal to the <tt>n</tt> that created the plan.
 - <tt>M</tt> is the number of columns of <tt>A</tt>. The arrays \f$F\f$ and \f$G\f$ above are shown with all of their columns, and this number depends on the transform, as in the table below.
-- <tt>L</tt> appears only on the tetrahedron, where <tt>A</tt> is an \f$N\times L\times M\f$ array: <tt>L</tt> is the number of columns and <tt>M</tt> is the number of slices.
+- <tt>L</tt> appears only on the tetrahedron and the ball, where <tt>A</tt> is an \f$N\times L\times M\f$ array: <tt>L</tt> is the number of columns and <tt>M</tt> is the number of slices.
 
 Transform                                      | Size of <tt>A</tt> for a plan with <tt>n</tt>
 ---------------------------------------------- | ---------------------------------------------
@@ -464,6 +491,7 @@ Transform                                      | Size of <tt>A</tt> for a plan w
 \ref disk2cxf "disk2cxf" and \ref ann2cxf "ann2cxf" | \f$N\times M = n\times(4n-3)\f$
 \ref rectdisk2cheb "rectdisk2cheb" and \ref tri2cheb "tri2cheb" | \f$N\times M = n\times n\f$
 \ref tet2cheb "tet2cheb" | \f$N\times L\times M = n\times n\times n\f$
+\ref ball2xcf "ball2xcf" | \f$N\times L\times M = n\times(2n-1)\times(4n-3)\f$
 
 For the spin-weighted spherical harmonics, the coefficients are complex and <tt>A</tt> is an array of <tt>ft_complex</tt>.
 
@@ -525,13 +553,13 @@ FastTransforms provides templates for FFTW synthesis and analysis on the sphere,
 
 For every domain, the functions <tt>ft_plan_*_synthesis</tt> and <tt>ft_plan_*_analysis</tt> are pre-computations and the functions <tt>ft_execute_*_synthesis</tt> and <tt>ft_execute_*_analysis</tt> execute them. Synthesis converts coefficients to function values on the grid, and analysis converts function values on the grid to coefficients. The arguments are:
 
-- <tt>N</tt> and <tt>M</tt> are the numbers of points in the \f$N\times M\f$ grids below, which are also the numbers of rows and columns of the array <tt>X</tt>. On the tetrahedron, there is a third dimension, <tt>L</tt>, and the array is \f$N\times L\times M\f$.
+- <tt>N</tt> and <tt>M</tt> are the numbers of points in the \f$N\times M\f$ grids below, which are also the numbers of rows and columns of the array <tt>X</tt>. On the tetrahedron and the ball, there is a third dimension, <tt>L</tt>, and the array is \f$N\times L\times M\f$.
 - <tt>rho</tt> is the inner radius of the annulus, \f$0<\rho<1\f$.
 - <tt>S</tt> is the integer spin of the spin-weighted spherical harmonics.
 - <tt>flags</tt> are the <a href="https://www.fftw.org/fftw3_doc/Planner-Flags.html">FFTW planner flags</a>, such as <tt>FFTW_ESTIMATE</tt> or <tt>FFTW_MEASURE</tt>. They are passed to FFTW without modification.
 - <tt>TRANS</tt> is a character that selects the operation: <tt>'N'</tt> applies the synthesis or the analysis, and <tt>'T'</tt> applies its transpose.
 - <tt>P</tt> is the plan that is returned by the corresponding pre-computation.
-- <tt>X</tt> is an \f$N\times M\f$ array in column-major ordering that is overwritten by the result. For synthesis, it stores the coefficients \f$G\f$ that are described in \ref transforms on entry, and the function values on exit. For analysis, it is the other way around. The function value at the grid point with indices \f$n\f$ and \f$m\f$ below is stored in <tt>X[n+N*m]</tt>. On the sphere with spin, <tt>X</tt> is an array of <tt>ft_complex</tt>.
+- <tt>X</tt> is an \f$N\times M\f$ array in column-major ordering that is overwritten by the result. For synthesis, it stores the coefficients \f$G\f$ that are described in \ref transforms on entry, and the function values on exit. For analysis, it is the other way around. The function value at the grid point with indices \f$n\f$ and \f$m\f$ below is stored in <tt>X[n+N*m]</tt>, and on the ball, the function value at the grid point with indices \f$n\f$, \f$j\f$, and \f$m\f$ is stored in <tt>X[n+N*(j+L*m)]</tt>. On the sphere with spin, <tt>X</tt> is an array of <tt>ft_complex</tt>.
 
 \subsection SA11 ft_fftw_sphere_plan & ft_fftw_spinsphere_plan
 
@@ -587,5 +615,15 @@ x_n & = \left[\sin\left(\frac{2N-2n-1}{4N}\pi\right)\right]^2,\quad {\rm for} \q
 w_m & = \left[\sin\left(\frac{2M-2m-1}{4M}\pi\right)\right]^2,\quad {\rm for} \quad 0 \le m < M,\\
 y_{n,m} & = x_{N-1-n}w_m.
 \f}
+
+\subsection ft_fftw_ball_plan
+
+On the ball, the \f$N\times L\times M\f$ radial--polar--azimuthal grids are:
+\f{align*}
+r_n & = \cos\left(\frac{2n+1}{4N}\pi\right) = \sin\left(\frac{2N-2n-1}{4N}\pi\right),\quad {\rm for} \quad 0 \le n < N,\\
+\theta_j & = \frac{2j+1}{2L}\pi,\quad {\rm for} \quad 0 \le j < L,\\
+\varphi_m & = \frac{2m}{M}\pi,\quad {\rm for} \quad 0 \le m < M.
+\f}
+To use them with \ref ball2xcf "ball2xcf", take \f$L=2N-1\f$ and \f$M=4N-3\f$, so that the grid has the same size as the array of coefficients.
 
 */

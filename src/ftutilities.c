@@ -146,6 +146,25 @@ double * tetrand(int n, int l, int m) {
     return A;
 }
 
+// The coefficient f_{k,ℓ}^m of a degree-(2n-2) expansion on the ball is stored in A[k+n*(ℓ-|m|+l*j)], and it is zero if 2k+ℓ > 2n-2.
+double * ballones(int n, int l, int m) {
+    double * A = calloc(n * l * m, sizeof(double));
+    for (int j = 0; j < m; j++)
+        for (int i = 0; i < l-(j+1)/2; i++)
+            for (int k = 0; k < n-(i+(j+1)/2+1)/2; k++)
+                A[k+n*(i+l*j)] = 1.0;
+    return A;
+}
+
+double * ballrand(int n, int l, int m) {
+    double * A = calloc(n * l * m, sizeof(double));
+    for (int j = 0; j < m; j++)
+        for (int i = 0; i < l-(j+1)/2; i++)
+            for (int k = 0; k < n-(i+(j+1)/2+1)/2; k++)
+                A[k+n*(i+l*j)] = 2.0*(((double) rand())/RAND_MAX)-1.0;
+    return A;
+}
+
 ft_complex * spinsphones(int n, int m, int s) {
     ft_complex * A = calloc(n * m, sizeof(ft_complex));
     for (int i = 0; i < n-abs(s); i++)

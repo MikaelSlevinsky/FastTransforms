@@ -386,6 +386,9 @@ void kernel_sph_lo2hi_AVX512F(const ft_rotation_plan * RP, const int m1, const i
 void kernel_sph_hi2lo_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_sph_lo2hi_NEON(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 
+void kernel_sph_hi2lo_block(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int NB, const int S);
+void kernel_sph_lo2hi_block(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int NB, const int S);
+
 void kernel_tri_hi2lo_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_tri_lo2hi_default(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
 void kernel_tri_hi2lo_SSE2(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int S);
