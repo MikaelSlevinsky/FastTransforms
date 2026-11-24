@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <float.h>
 #if defined(__i386__) || defined(__x86_64__)
     #include <immintrin.h>
     #include <cpuid.h>
@@ -60,7 +61,11 @@ static inline void warning(char * msg) {printf("\x1b[1m\x1b[33mFastTransforms: \
 #define M_2_PI_POW_1P5 0.507949087473927758   /* pow(2/pi, 1.5)     */
 #define M_EPSf         0x1p-23f               /* powf(2.0f, -23)    */
 #define M_EPS          0x1p-52                /* pow(2.0, -52)      */
+#if LDBL_MANT_DIG == 53 // long double is double, as on Apple silicon
+#define M_EPSl         0x1p-52l               /* powl(2.0l, -52)    */
+#else
 #define M_EPSl         0x1p-64l               /* powl(2.0l, -64)    */
+#endif
 #define M_FLT_MINf     0x1p-126f              /* powf(2.0f, -126)   */
 #define M_FLT_MIN      0x1p-1022              /* pow(2.0, -1022)    */
 #if defined(__i386__) || defined(__x86_64__)

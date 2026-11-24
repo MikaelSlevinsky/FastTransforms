@@ -11,6 +11,7 @@ jobs:
         os:
           - ubuntu-latest
           - macos-15-intel
+          - macos-latest
         compiler:
           - gcc
           - clang
@@ -23,6 +24,10 @@ jobs:
             arch: x86
           - os: macos-15-intel
             arch: aarch64
+          - os: macos-latest
+            arch: x86
+          - os: macos-latest
+            arch: x64
       fail-fast: false
     env:
       CC: ${{ matrix.compiler }}
@@ -40,7 +45,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install libomp-dev libblas-dev libopenblas-dev libfftw3-dev libmpfr-dev
       # Homebrew no longer ships Intel macOS bottles for these, so it would
-      # build them (and gcc) from source; conda-forge still has osx-64 builds.
+      # build them (and gcc) from source; conda-forge has osx-64 and osx-arm64 builds.
       - name: Set up conda on macOS
         if: startsWith(matrix.os, 'macos')
         uses: conda-incubator/setup-miniconda@v3

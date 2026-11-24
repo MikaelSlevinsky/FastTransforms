@@ -23,6 +23,18 @@ gettimeofday(&END, NULL);
 // A bitwise OR ('|') of zero or more of the following: FFTW_ESTIMATE FFTW_MEASURE FFTW_PATIENT FFTW_EXHAUSTIVE FFTW_WISDOM_ONLY FFTW_DESTROY_INPUT FFTW_PRESERVE_INPUT FFTW_UNALIGNED
 #define FT_FFTW_FLAGS FFTW_MEASURE | FFTW_DESTROY_INPUT
 
+// The double-precision plans are computed in long double and rounded to double.
+// Where long double is double, as on Apple silicon, there is no extra precision,
+// so the plans carry rounding errors that grow with n, and FT_PLAN_TOL(n) is the
+// factor by which the tolerances of the double-precision tests of plans are relaxed.
+#if LDBL_MANT_DIG == 53
+    #define FT_LDBL_IS_DBL 1
+    #define FT_PLAN_TOL(n) (16*sqrt(n))
+#else
+    #define FT_LDBL_IS_DBL 0
+    #define FT_PLAN_TOL(n) 1
+#endif
+
 void printmat(char * MAT, char * FMT, double * A, int n, int m);
 void print_summary_size(size_t i);
 double * copymat(double * A, int n, int m);

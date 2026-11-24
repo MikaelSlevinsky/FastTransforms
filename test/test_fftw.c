@@ -186,10 +186,10 @@ int main(int argc, const char * argv[]) {
 
         err = ft_norm_2arg(A, B, N*M)/ft_norm_1arg(B, N*M);
         printf("ϵ_2 \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
-        ft_checktest(err, 32*sqrt(N), &checksum);
+        ft_checktest(err, 32*sqrt(N)*FT_PLAN_TOL(N), &checksum);
         err = ft_normInf_2arg(A, B, N*M)/ft_normInf_1arg(B, N*M);
         printf("ϵ_∞ \t\t\t (N×M) = (%5ix%5i): \t |%20.2e ", N, M, err);
-        ft_checktest(err, 8*N, &checksum);
+        ft_checktest(err, 8*N*FT_PLAN_TOL(N), &checksum);
 
         free(A);
         free(B);
