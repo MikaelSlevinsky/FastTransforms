@@ -935,3 +935,155 @@ void ft_execute_spinsph_analysis(const char TRANS, const ft_spinsphere_fftw_plan
         fftw_execute_dft(P->planphi, (fftw_complex *) P->Y, (fftw_complex *) X);
     }
 }
+
+void ft_destroy_ball_fftw_plan(ft_ball_fftw_plan * P) {
+    fftw_destroy_plan(P->planr1);
+    fftw_destroy_plan(P->planr2);
+    fftw_destroy_plan(P->planr3);
+    fftw_destroy_plan(P->planr4);
+    fftw_destroy_plan(P->plantheta1);
+    fftw_destroy_plan(P->plantheta2);
+    fftw_destroy_plan(P->planphi);
+    fftw_free(P->Y);
+    free(P);
+}
+
+ft_ball_fftw_plan * ft_plan_ball_with_kind(const int N, const int L, const int M, const fftw_r2r_kind kind[5][1], const unsigned flags) {
+    int rank = 1; // not 3: we are computing 1d transforms //
+    int n[] = {N}; // 1d transforms of length n //
+    int idist = 2*N, odist = 2*N;
+    int istride = 1, ostride = 1; // distance between two elements in the same column //
+    int * inembed = n, * onembed = n;
+
+    ft_ball_fftw_plan * P = malloc(sizeof(ft_ball_fftw_plan));
+
+    P->Y = fftw_malloc(N*L*2*(M/2+1)*sizeof(double));
+
+    // The radial transforms are executed on every other row of a column, starting from either the first or the second row.
+    int howmany = (L+1)/2;
+    P->planr1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], flags | FFTW_UNALIGNED);
+
+    howmany = L/2;
+    P->planr2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[0], flags | FFTW_UNALIGNED);
+
+    howmany = (L+1)/2;
+    P->planr3 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], flags | FFTW_UNALIGNED);
+
+    howmany = L/2;
+    P->planr4 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[1], flags | FFTW_UNALIGNED);
+
+    // The polar transforms are executed on every radial index of a column.
+    n[0] = L;
+    idist = odist = 1;
+    istride = ostride = N;
+    howmany = N;
+    P->plantheta1 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[2], flags | FFTW_UNALIGNED);
+    P->plantheta2 = fftw_plan_many_r2r(rank, n, howmany, P->Y, inembed, istride, idist, P->Y, onembed, ostride, odist, kind[3], flags | FFTW_UNALIGNED);
+
+    // The azimuthal transforms are executed on every radial and polar index.
+    n[0] = M;
+    idist = odist = 1;
+    istride = ostride = N*L;
+    howmany = N*L;
+    double * Z = fftw_malloc(N*L*M*sizeof(double));
+    if (kind[4][0] == FFTW_HC2R)
+        P->planphi = fftw_plan_many_dft_c2r(rank, n, howmany, (fftw_complex *) P->Y, inembed, istride, idist, Z, onembed, ostride, odist, flags);
+    else if (kind[4][0] == FFTW_R2HC)
+        P->planphi = fftw_plan_many_dft_r2c(rank, n, howmany, Z, inembed, istride, idist, (fftw_complex *) P->Y, onembed, ostride, odist, flags);
+    fftw_free(Z);
+    return P;
+}
+
+ft_ball_fftw_plan * ft_plan_ball_synthesis(const int N, const int L, const int M, const unsigned flags) {
+    const fftw_r2r_kind kind[5][1] = {{FFTW_REDFT01}, {FFTW_REDFT11}, {FFTW_REDFT01}, {FFTW_RODFT01}, {FFTW_HC2R}};
+    return ft_plan_ball_with_kind(N, L, M, kind, flags);
+}
+
+ft_ball_fftw_plan * ft_plan_ball_analysis(const int N, const int L, const int M, const unsigned flags) {
+    const fftw_r2r_kind kind[5][1] = {{FFTW_REDFT10}, {FFTW_REDFT11}, {FFTW_REDFT10}, {FFTW_RODFT10}, {FFTW_R2HC}};
+    return ft_plan_ball_with_kind(N, L, M, kind, flags);
+}
+
+// In the column j of order m, the row i has the radial polynomials T_{2k}(r) if i+|m| is even and T_{2k+1}(r) otherwise.
+static inline void execute_ball_radial(const ft_ball_fftw_plan * P, double * X, const int N, const int L, const int M) {
+    for (int j = 0; j < M; j++) {
+        if (((j+1)/2)%2 == 0) {
+            fftw_execute_r2r(P->planr1, X+N*L*j, X+N*L*j);
+            fftw_execute_r2r(P->planr4, X+N*(1+L*j), X+N*(1+L*j));
+        }
+        else {
+            fftw_execute_r2r(P->planr3, X+N*L*j, X+N*L*j);
+            fftw_execute_r2r(P->planr2, X+N*(1+L*j), X+N*(1+L*j));
+        }
+    }
+}
+
+// In the column j of order m, the row i has cos(iθ) if m is even and sin((i+1)θ) if m is odd.
+static inline void execute_ball_polar(const ft_ball_fftw_plan * P, double * X, const int N, const int L, const int M) {
+    for (int j = 0; j < M; j++) {
+        if (((j+1)/2)%2 == 0)
+            fftw_execute_r2r(P->plantheta1, X+N*L*j, X+N*L*j);
+        else
+            fftw_execute_r2r(P->plantheta2, X+N*L*j, X+N*L*j);
+    }
+}
+
+// Scale the first (last) row of every column of even (odd) order and the first radial coefficient of every T_{2k}(r) series by s.
+static inline void scale_ball_boundaries(double * X, const int N, const int L, const int M, const double s) {
+    for (int j = 0; j < M; j++) {
+        int p = ((j+1)/2)%2;
+        for (int i = p; i < L; i += 2)
+            X[N*(i+L*j)] *= s;
+        double * Xj = p == 0 ? X+N*L*j : X+N*(L-1+L*j);
+        for (int k = 0; k < N; k++)
+            Xj[k] *= s;
+    }
+}
+
+void ft_execute_ball_synthesis(const char TRANS, const ft_ball_fftw_plan * P, double * X, const int N, const int L, const int M) {
+    if (TRANS == 'N') {
+        scale_ball_boundaries(X, N, L, M, 2.0);
+        execute_ball_radial(P, X, N, L, M);
+        execute_ball_polar(P, X, N, L, M);
+        for (int i = 0; i < N*L*M; i++)
+            X[i] *= 0.5*M_1_4_SQRT_PI;
+        for (int i = 0; i < N*L; i++)
+            X[i] *= M_SQRT2;
+        data_r2c(X, P->Y, N*L, M);
+        fftw_execute_dft_c2r(P->planphi, (fftw_complex *) P->Y, X);
+    }
+    else if (TRANS == 'T') {
+        fftw_execute_dft_r2c(P->planphi, X, (fftw_complex *) P->Y);
+        data_c2r(X, P->Y, N*L, M);
+        for (int i = 0; i < N*L*M; i++)
+            X[i] *= M_1_4_SQRT_PI;
+        for (int i = 0; i < N*L; i++)
+            X[i] *= M_SQRT1_2;
+        execute_ball_polar(P, X, N, L, M);
+        execute_ball_radial(P, X, N, L, M);
+    }
+}
+
+void ft_execute_ball_analysis(const char TRANS, const ft_ball_fftw_plan * P, double * X, const int N, const int L, const int M) {
+    if (TRANS == 'N') {
+        fftw_execute_dft_r2c(P->planphi, X, (fftw_complex *) P->Y);
+        data_c2r(X, P->Y, N*L, M);
+        for (int i = 0; i < N*L*M; i++)
+            X[i] *= M_2_SQRT_PI/(N*L*M);
+        for (int i = 0; i < N*L; i++)
+            X[i] *= M_SQRT1_2;
+        execute_ball_polar(P, X, N, L, M);
+        execute_ball_radial(P, X, N, L, M);
+        scale_ball_boundaries(X, N, L, M, 0.5);
+    }
+    else if (TRANS == 'T') {
+        execute_ball_radial(P, X, N, L, M);
+        execute_ball_polar(P, X, N, L, M);
+        for (int i = 0; i < N*L*M; i++)
+            X[i] *= M_2_SQRT_PI/(2*N*L*M);
+        for (int i = 0; i < N*L; i++)
+            X[i] *= M_SQRT2;
+        data_r2c(X, P->Y, N*L, M);
+        fftw_execute_dft_c2r(P->planphi, (fftw_complex *) P->Y, X);
+    }
+}

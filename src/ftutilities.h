@@ -36,6 +36,8 @@ double * rectdiskones(int n, int m);
 double * rectdiskrand(int n, int m);
 double * tetones(int n, int l, int m);
 double * tetrand(int n, int l, int m);
+double * ballones(int n, int l, int m);
+double * ballrand(int n, int l, int m);
 ft_complex * spinsphones(int n, int m, int s);
 ft_complex * spinsphrand(int n, int m, int s);
 double elapsed(struct timeval * start, struct timeval * end, int N);

@@ -140,6 +140,42 @@ void ft_kernel_sph_lo2hi(const ft_rotation_plan * RP, const int m1, const int m2
     kernel_sph_lo2hi_default(RP, m1, m2, A, S);
 }
 
+// Apply a Givens rotation to NB contiguous pairs. The loops vectorize because X and Y do not overlap.
+static inline void apply_givens_block(const double S, const double C, double * restrict X, double * restrict Y, const int NB) {
+    for (int i = 0; i < NB; i++) {
+        double x = C*X[i] + S*Y[i];
+        double y = C*Y[i] - S*X[i];
+        X[i] = x;
+        Y[i] = y;
+    }
+}
+
+static inline void apply_givens_t_block(const double S, const double C, double * restrict X, double * restrict Y, const int NB) {
+    for (int i = 0; i < NB; i++) {
+        double x = C*X[i] - S*Y[i];
+        double y = C*Y[i] + S*X[i];
+        X[i] = x;
+        Y[i] = y;
+    }
+}
+
+// Convert NB vectors of spherical harmonic coefficients from order m2 down to order m1.
+// The k-th coefficient of the i-th vector is stored in A[i+k*S], for 0 ≤ i < NB ≤ S.
+void kernel_sph_hi2lo_block(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int NB, const int S) {
+    int n = RP->n;
+    for (int j = m2-2; j >= m1; j -= 2)
+        for (int k = n-3-j; k >= 0; k--)
+            apply_givens_block(RP->s(k, j), RP->c(k, j), A+k*S, A+(k+2)*S, NB);
+}
+
+// Convert NB contiguous vectors of spherical harmonic coefficients from order m1 up to order m2.
+void kernel_sph_lo2hi_block(const ft_rotation_plan * RP, const int m1, const int m2, double * A, const int NB, const int S) {
+    int n = RP->n;
+    for (int j = m1; j < m2; j += 2)
+        for (int k = 0; k <= n-3-j; k++)
+            apply_givens_t_block(RP->s(k, j), RP->c(k, j), A+k*S, A+(k+2)*S, NB);
+}
+
 ft_rotation_plan * ft_plan_rottriangle(const int n, const double alpha, const double beta, const double gamma) {
     double * s = malloc(n*(n+1)/2 * sizeof(double));
     double * c = malloc(n*(n+1)/2 * sizeof(double));

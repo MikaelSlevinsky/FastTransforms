@@ -1,6 +1,8 @@
 #include "fasttransforms.h"
 #include "ftutilities.h"
 
+static double zernike3(const int k, const int l, const int m, const double alpha, const double beta, const double r, const double theta, const double phi);
+
 int main(int argc, const char * argv[]) {
     int checksum = 0;
     double err = 0.0;
@@ -17,6 +19,7 @@ int main(int argc, const char * argv[]) {
     ft_rectdisk_fftw_plan * SS, * SA;
     ft_tetrahedron_fftw_plan * TS, * TA;
     ft_spinsphere_fftw_plan * US, * UA;
+    ft_ball_fftw_plan * BS, * BA;
     //double alpha = -0.5, beta = -0.5, gamma = -0.5, delta = -0.5, rho = sqrt(1.0/3.0); // best case scenario
     double alpha = 0.0, beta = 0.0, gamma = 0.0, delta = 0.0, rho = sqrt(1.0/3.0); // not as good. perhaps better to transform to second kind Chebyshev
 
@@ -547,5 +550,132 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
+    printf("\nTesting 3D Zernike transforms + FFTW synthesis against direct evaluation.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int i = 0; i < 2; i++) {
+        double a = i == 0 ? alpha : 0.3, b = i == 0 ? beta : -0.2;
+        N = 6+J;
+        L = 2*N-1;
+        M = 4*N-3;
+
+        A = ballrand(N, L, M);
+        B = calloc(N*L*M, sizeof(double));
+        for (int p = 0; p < M; p++)
+            for (int q = 0; q < L; q++)
+                for (int s = 0; s < N; s++)
+                    for (int j = 0; j < M; j++)
+                        for (int l = 0; l < L-(j+1)/2; l++)
+                            for (int k = 0; k < N-(l+(j+1)/2+1)/2; k++)
+                                B[s+N*(q+L*p)] += A[k+N*(l+L*j)]*zernike3(k, l+(j+1)/2, j%2 ? -(j+1)/2 : j/2, a, b, sin((2*N-2*s-1)*M_PI/(4*N)), (2*q+1)*M_PI/(2*L), 2*M_PI*p/M);
+        P = ft_plan_ball2cxf(N, a, b);
+        BS = ft_plan_ball_synthesis(N, L, M, FT_FFTW_FLAGS);
+
+        ft_execute_ball2cxf('N', P, A, N, L, M);
+        ft_execute_ball_synthesis('N', BS, A, N, L, M);
+
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 (α,β) = (%4.1f,%4.1f)\t (N×L×M) = (%3ix%3i×%3i): |%20.2e ", a, b, N, L, M, err);
+        ft_checktest(err, 16*N, &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ (α,β) = (%4.1f,%4.1f)\t (N×L×M) = (%3ix%3i×%3i): |%20.2e ", a, b, N, L, M, err);
+        ft_checktest(err, 32*N, &checksum);
+
+        free(A);
+        free(B);
+        ft_destroy_harmonic_plan(P);
+        ft_destroy_ball_fftw_plan(BS);
+    }
+
+    printf("\nTesting the accuracy of 3D Zernike transforms + FFTW synthesis and analysis.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 16*pow(2, i)+J;
+        L = 2*N-1;
+        M = 4*N-3;
+
+        A = ballrand(N, L, M);
+        B = copymat(A, N, L*M);
+        P = ft_plan_ball2cxf(N, alpha, beta);
+        BS = ft_plan_ball_synthesis(N, L, M, FT_FFTW_FLAGS);
+        BA = ft_plan_ball_analysis(N, L, M, FT_FFTW_FLAGS);
+
+        ft_execute_ball2cxf('N', P, A, N, L, M);
+        ft_execute_ball_synthesis('N', BS, A, N, L, M);
+        ft_execute_ball_analysis('N', BA, A, N, L, M);
+        ft_execute_cxf2ball('N', P, A, N, L, M);
+
+        ft_execute_ball2cxf('T', P, A, N, L, M);
+        ft_execute_ball_synthesis('T', BA, A, N, L, M);
+        ft_execute_ball_analysis('T', BS, A, N, L, M);
+        ft_execute_cxf2ball('T', P, A, N, L, M);
+
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 8*N, &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, N*N, &checksum);
+
+        free(A);
+        free(B);
+        ft_destroy_harmonic_plan(P);
+        ft_destroy_ball_fftw_plan(BS);
+        ft_destroy_ball_fftw_plan(BA);
+    }
+
+    printf("\nTiming 3D Zernike transforms + FFTW synthesis and analysis.\n\n");
+    printf("t8 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 16*pow(2, i)+J;
+        L = 2*N-1;
+        M = 4*N-3;
+        NTIMES = 1 + pow(64/N, 2);
+
+        A = ballrand(N, L, M);
+        P = ft_plan_ball2cxf(N, alpha, beta);
+        BS = ft_plan_ball_synthesis(N, L, M, FT_FFTW_FLAGS);
+        BA = ft_plan_ball_analysis(N, L, M, FT_FFTW_FLAGS);
+
+        FT_TIME({ft_execute_ball2cxf('N', P, A, N, L, M); ft_execute_ball_synthesis('N', BS, A, N, L, M);}, start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
+
+        FT_TIME({ft_execute_ball_analysis('N', BA, A, N, L, M); ft_execute_cxf2ball('N', P, A, N, L, M);}, start, end, NTIMES)
+        printf("  %.6f\n", elapsed(&start, &end, NTIMES));
+
+        free(A);
+        ft_destroy_harmonic_plan(P);
+        ft_destroy_ball_fftw_plan(BS);
+        ft_destroy_ball_fftw_plan(BA);
+    }
+    printf("];\n");
+
     return checksum;
+}
+
+// Orthonormal Jacobi polynomial with respect to (1-x)^a (1+x)^b on [-1,1].
+static double jacobi_orthonormal(const int n, const double a, const double b, const double x) {
+    double p0 = 1.0, p1 = (a+1.0) + (a+b+2.0)*(x-1.0)/2.0, p = n == 0 ? p0 : p1;
+    for (int k = 2; k <= n; k++) {
+        double c = 2.0*k+a+b;
+        p = ((c-1.0)*(c*(c-2.0)*x+a*a-b*b)*p1 - 2.0*(k+a-1.0)*(k+b-1.0)*c*p0)/(2.0*k*(k+a+b)*(c-2.0));
+        p0 = p1;
+        p1 = p;
+    }
+    double logh = (a+b+1.0)*log(2.0) + lgamma(n+a+1.0) + lgamma(n+b+1.0) - lgamma(n+1.0);
+    if (n == 0)
+        logh -= lgamma(a+b+2.0);
+    else
+        logh -= log(2.0*n+a+b+1.0) + lgamma(n+a+b+1.0);
+    return p*exp(-0.5*logh);
+}
+
+// Real orthonormal generalized Zernike polynomial on the ball, as defined in the documentation of ball2cxf.
+static double zernike3(const int k, const int l, const int m, const double alpha, const double beta, const double r, const double theta, const double phi) {
+    int am = abs(m);
+    double radial = pow(2.0, 0.5*(l+alpha+beta+2.5))*pow(r, l)*jacobi_orthonormal(k, beta, l+alpha+0.5, 2.0*r*r-1.0);
+    double polar = pow(sin(theta), am)*jacobi_orthonormal(l-am, am, am, cos(theta));
+    double azimuthal = sqrt((2.0-(m == 0))/(2.0*M_PI))*(m >= 0 ? cos(m*phi) : sin(am*phi));
+    return radial*polar*azimuthal;
 }

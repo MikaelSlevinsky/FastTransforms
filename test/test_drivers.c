@@ -1700,6 +1700,66 @@ int main(int argc, const char * argv[]) {
     }
     printf("];\n");
 
+    printf("\nTesting the accuracy of 3D Zernike transforms.\n\n");
+    printf("\t\t\t Test \t\t\t\t |        Relative Error\n");
+    printf("---------------------------------------------------------|----------------------\n");
+    for (int i = 0; i < IERR; i++) {
+        N = 16*pow(2, i)+J;
+        L = 2*N-1;
+        M = 4*N-3;
+
+        A = ballrand(N, L, M);
+        B = copymat(A, N, L*M);
+        P = ft_plan_ball2cxf(N, alpha, beta);
+
+        ft_execute_ball2cxf('N', P, A, N, L, M);
+        ft_execute_cxf2ball('N', P, A, N, L, M);
+
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 8*sqrt(N), &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ \t\t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 4*N, &checksum);
+
+        ft_execute_ball2cxf('T', P, A, N, L, M);
+        ft_execute_cxf2ball('T', P, A, N, L, M);
+
+        err = ft_norm_2arg(A, B, N*L*M)/ft_norm_1arg(B, N*L*M);
+        printf("ϵ_2 transposed \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, 8*N, &checksum);
+        err = ft_normInf_2arg(A, B, N*L*M)/ft_normInf_1arg(B, N*L*M);
+        printf("ϵ_∞ transposed \t (N×L×M) = (%5ix%5i×%5i): \t |%20.2e ", N, L, M, err);
+        ft_checktest(err, N*N, &checksum);
+
+        free(A);
+        free(B);
+        ft_destroy_harmonic_plan(P);
+    }
+
+    printf("\nTiming 3D Zernike transforms.\n\n");
+    printf("t16 = [\n");
+    for (int i = 0; i < ITIME; i++) {
+        N = 16*pow(2, i)+J;
+        L = 2*N-1;
+        M = 4*N-3;
+        NTIMES = 1 + pow(64/N, 2);
+
+        A = ballrand(N, L, M);
+        P = ft_plan_ball2cxf(N, alpha, beta);
+
+        FT_TIME(ft_execute_ball2cxf('N', P, A, N, L, M), start, end, NTIMES)
+        printf("%d  %.6f", N, elapsed(&start, &end, NTIMES));
+
+        FT_TIME(ft_execute_cxf2ball('N', P, A, N, L, M), start, end, NTIMES)
+        printf("  %.6f", elapsed(&start, &end, NTIMES));
+
+        printf("\n");
+        free(A);
+        ft_destroy_harmonic_plan(P);
+    }
+    printf("];\n");
+
     return checksum;
 }
 
